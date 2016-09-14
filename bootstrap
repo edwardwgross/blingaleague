@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if [ ! -d "environ" ]; then
+    virtualenv environ
+fi
+
+ln -sf environ/bin/activate
+
+. ./activate
+
+pip install --upgrade setuptools
+pip install --upgrade -r requirements.pip
