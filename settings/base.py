@@ -3,6 +3,8 @@ SECRET_KEY = 's4nders0n'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+ROOT_URLCONF = 'blingaleague.urls'
+
 INSTALLED_APPS = (
     'blingaleague',
 )
