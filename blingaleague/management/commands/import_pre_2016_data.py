@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from blingaleague.models import Game
+from blingaleague.models import Game, Season
 
 
 RAW_NAME_TO_ID = {
@@ -13,14 +13,14 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         Game.objects.filter(year__lte=2015).delete()
 
-        filename = '/data/blingaleague/data/initial_data.csv'
+        games_filename = '/data/blingaleague/data/initial_data.csv'
 
-        fh = open(filename, 'r')
+        games_fh = open(games_filename, 'r')
 
-        lines = fh.readlines()
+        lines = games_fh.readlines()
 
         for line in lines:
-            year, week, winner, winner_score, loser, loser_score, notes = line.split(',')
+            year, week, winner, winner_score, loser, loser_score, notes = line.strip().split(',')
 
             game_kwargs = {
                 'year': year,
@@ -31,8 +31,33 @@ class Command(BaseCommand):
                 'loser_score': loser_score,
             }
 
-            if notes.strip():
-                game_kwargs['notes'] = notes.strip()
+            if notes:
+                game_kwargs['notes'] = notes
 
             game = Game(**game_kwargs)
             game.save()
+
+
+        Season.objects.all().delete()
+
+        seasons_filename = '/data/blingaleague/data/initial_finishes.csv'
+
+        seasons_fh = open(seasons_filename, 'r')
+
+        lines = seasons_fh.readlines()
+
+        season_kwargs = {}
+        for line in lines:
+            year, member, place = line.strip().split(',')
+
+            if int(place) <= 6:
+                season_kwargs['year'] = year
+                season_kwargs["place_%s_id" % place] = RAW_NAME_TO_ID[member]
+            elif season_kwargs:
+                season = Season(**season_kwargs)
+                season.save()
+                season_kwargs = {}
+
+        season = Season(year=2016)
+        season.save()
+

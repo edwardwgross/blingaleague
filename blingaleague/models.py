@@ -23,3 +23,14 @@ class Game(models.Model):
     loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
     notes = models.TextField(blank=True, null=True)
 
+
+class Season(models.Model):
+    year = models.IntegerField(primary_key=True)
+    place_1 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='first_place_finishes')
+    place_2 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='second_place_finishes')
+    place_3 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='third_place_finishes')
+    place_4 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='fourth_place_finishes')
+    place_5 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='fifth_place_finishes')
+    place_6 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='sixth_place_finishes')
+
+
