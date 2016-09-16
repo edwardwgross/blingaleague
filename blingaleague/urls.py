@@ -1,8 +1,8 @@
 from django.conf.urls import patterns, url
 
-from .views import Home, Standings
+from .views import HomeView, StandingsView
 
 urlpatterns = patterns('',
-    url(r'^$', Home.as_view(), name='blingaleague.home'),
-    url(r'^standings/(?P<year>)\d+/$', Standings.as_view(), name='blingaleague.standings'),
+    url(r'^$', HomeView.as_view(), name='blingaleague.home'),
+    url(r'^standings/(?P<year>[0-9]+)/$', StandingsView.as_view(), name='blingaleague.standings'),
 )

@@ -1,20 +1,18 @@
-from django.views.generic import View, TemplateView
+from django.views.generic import TemplateView
 
 from .models import Standings
 
-class Home(TemplateView):
+class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
 
 
-class Standings(TemplateView):
+class StandingsView(TemplateView):
     template_name = 'blingaleague/standings.html'
 
-    def get(self, request, year):
-        standings = Standings(year)
-
+    def get(self, request, year, **kwargs):
+        year = int(year)
         context = {
             'year': year,
-            'standings': Standings,
+            'standings': Standings(year),
         }
-
         return self.render_to_response(context)
