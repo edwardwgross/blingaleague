@@ -1,3 +1,10 @@
+{% extends "blingaleague/base.html" %}
+
+{% load humanize %}
+
+{% block title %}{{ year }} standings{% endblock %}
+
+{% block content %}
 <div>{{year}} standings</div>
 
 <table>
@@ -8,7 +15,8 @@
         <td>{{ row.member }}</td>
         <td>{{ row.wins }}</td>
         <td>{{ row.losses }}</td>
-        <td>{{ row.points }}</td>
+        <td>{{ row.points|intcomma }}</td>
       </tr>
   {% endfor %}
 </table>
+{% endblock %}

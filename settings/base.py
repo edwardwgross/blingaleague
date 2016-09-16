@@ -1,3 +1,5 @@
+import os
+
 SECRET_KEY = 's4nders0n'
 
 DEBUG = True
@@ -6,7 +8,14 @@ TEMPLATE_DEBUG = DEBUG
 ROOT_URLCONF = 'blingaleague.urls'
 APPEND_SLASH = False
 
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static/'
+
 INSTALLED_APPS = (
+    'django.contrib.humanize',
+    'django.contrib.staticfiles',
     'blingaleague',
 )
 
