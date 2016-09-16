@@ -1,3 +1,4 @@
 Django==1.7
 MySQL-python>=1.2.2
 flup==1.0.2
+cached_property==1.2.0

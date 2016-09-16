@@ -1,1 +1,14 @@
-<div>Standings</div>
+<div>{{year}} standings</div>
+
+<table>
+  <tr><th/><th/><th>W</th><th>L</th><th>Points</th></tr>
+  {% for row in standings.table %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ row.member }}</td>
+        <td>{{ row.wins }}</td>
+        <td>{{ row.losses }}</td>
+        <td>{{ row.points }}</td>
+      </tr>
+  {% endfor %}
+</table>
