@@ -31,8 +31,8 @@ class Command(BaseCommand):
                 'loser_score': loser_score,
             }
 
-            if notes:
-                game_kwargs['notes'] = notes
+            if notes.strip():
+                game_kwargs['notes'] = notes.strip()
 
             game = Game(**game_kwargs)
             game.save()

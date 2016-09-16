@@ -4,6 +4,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ROOT_URLCONF = 'blingaleague.urls'
+APPEND_SLASH = False
 
 INSTALLED_APPS = (
     'blingaleague',

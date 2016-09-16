@@ -15,11 +15,11 @@ class Member(models.Model):
 
 
 class Game(models.Model):
-    year = models.IntegerField()
-    week = models.IntegerField()
-    winner = models.ForeignKey(Member, related_name='games_won')
-    loser = models.ForeignKey(Member, related_name='games_lost')
-    winner_score = models.DecimalField(max_digits=6, decimal_places=2)
-    loser_score = models.DecimalField(max_digits=6, decimal_places=2)
+    year = models.IntegerField(db_index=True)
+    week = models.IntegerField(db_index=True)
+    winner = models.ForeignKey(Member, db_index=True, related_name='games_won')
+    loser = models.ForeignKey(Member, db_index=True, related_name='games_lost')
+    winner_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
+    loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
     notes = models.TextField(blank=True, null=True)
 
