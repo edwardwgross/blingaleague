@@ -6,7 +6,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ROOT_URLCONF = 'blingaleague.urls'
-APPEND_SLASH = False
+#APPEND_SLASH = False
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 

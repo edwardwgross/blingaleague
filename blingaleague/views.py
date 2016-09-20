@@ -9,10 +9,17 @@ class HomeView(TemplateView):
 class StandingsView(TemplateView):
     template_name = 'blingaleague/standings.html'
 
-    def get(self, request, year, **kwargs):
-        year = int(year)
-        context = {
-            'year': year,
-            'standings': Standings(year=year),
-        }
+    def get(self, request):
+        standings_kwargs = {}
+
+        if 'year' in request.GET:
+            standings_kwargs['year'] = int(request.GET['year'])
+
+        for kwarg in ('all_time', 'include_playoffs'):
+            if kwarg in request.GET:
+                standings_kwargs[kwarg] = True
+
+        context = {'standings': Standings(**standings_kwargs)}
+
         return self.render_to_response(context)
+

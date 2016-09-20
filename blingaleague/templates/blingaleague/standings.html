@@ -2,12 +2,12 @@
 
 {% load humanize %}
 
-{% block title %}{{ year }} standings{% endblock %}
+{% block title %}{{ standings.headline }}{% endblock %}
 
 {% block content %}
-<div>{{year}} standings</div>
+<div>{{ standings }}</div>
 
-<div>{{ standings.headline }}</div>
+{% if standings.headline %}<div>{{ standings.headline }}</div>{% endif %}
 
 <table>
   <tr><th/><th/><th>W</th><th>L</th><th>Points</th><th></th></tr>

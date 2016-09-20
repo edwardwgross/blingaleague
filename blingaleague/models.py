@@ -103,14 +103,19 @@ class MemberSeason(object):
 
 
 class Standings(object):
-    def __init__(self, year=None, include_playoffs=False):
+    def __init__(self, year=None, all_time=False, include_playoffs=False):
         self.year = year
         self.include_playoffs = include_playoffs
 
-        if year is None:
+        if all_time:
+            self.year = None
             self.season = None
-            self.headline = 'All-time'
+            self.headline = None
         else:
+            if self.year is None:
+                # if we didn't specify all_time, that means we need a current year
+                self.year = Game.objects.all().order_by('-year').values_list('year', flat=True)[0]
+
             self.season = Season.objects.get(year=self.year)
             self.headline = "Blingabowl %s: %s def. %s" % (self.season.blingabowl, self.season.place_1, self.season.place_2)
 
@@ -152,7 +157,10 @@ class Standings(object):
         return table
 
     def __str__(self):
-        return "%s: %s" % (self.year, ' def. '.join(map(lambda x: str(x['member']), self.table[:2])))
+        if self.year:
+            return "%s standings" % self.year
+        else:
+            return 'All-time standings'
 
     def __repr__(self):
         return str(self)

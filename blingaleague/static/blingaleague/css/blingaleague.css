@@ -5,11 +5,31 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
 
 nav {
     background-color: #a4c2f4;
+    border: none !important;
+    border-radius: 0 !important;
 }
 
 .navbar-brand {
     padding: 5px;
 }
+
+nav .icon-bar {
+    background-color: red;
+}
+
+.nav li > a, nav li > a:visited {
+    color: red;
+}
+
+.nav li > a:hover {
+    color: #a4c2f4;
+    background-color: red;
+}
+
+.nav a.navbar-brand:hover {
+    background-color: inherit;
+}
+
 
 #main_outer {
 }
