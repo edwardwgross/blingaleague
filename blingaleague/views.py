@@ -13,6 +13,6 @@ class StandingsView(TemplateView):
         year = int(year)
         context = {
             'year': year,
-            'standings': Standings(year),
+            'standings': Standings(year=year),
         }
         return self.render_to_response(context)

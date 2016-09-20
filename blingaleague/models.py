@@ -4,6 +4,12 @@ from django.db import models
 
 from cached_property import cached_property
 
+from .utils import int_to_roman
+
+
+REGULAR_SEASON_WEEKS = 13
+FIRST_SEASON = 2008
+
 
 class Member(models.Model):
     first_name = models.CharField(max_length=50)
@@ -60,6 +66,10 @@ class Season(models.Model):
             self.place_6,
         )
 
+    @cached_property
+    def blingabowl(self):
+        return int_to_roman(self.year + 1 - FIRST_SEASON)
+
     def __str__(self):
         return self.year
 
@@ -75,11 +85,11 @@ class MemberSeason(object):
 
     @cached_property
     def wins(self):
-        return list(self.member.games_won.filter(year=self.year, week__lte=13))
+        return list(self.member.games_won.filter(year=self.year, week__lte=REGULAR_SEASON_WEEKS))
 
     @cached_property
     def losses(self):
-        return list(self.member.games_lost.filter(year=self.year, week__lte=13))
+        return list(self.member.games_lost.filter(year=self.year, week__lte=REGULAR_SEASON_WEEKS))
 
     @cached_property
     def points(self):
@@ -93,12 +103,28 @@ class MemberSeason(object):
 
 
 class Standings(object):
-    def __init__(self, year):
+    def __init__(self, year=None, include_playoffs=False):
         self.year = year
+        self.include_playoffs = include_playoffs
+
+        if year is None:
+            self.season = None
+            self.headline = 'All-time'
+        else:
+            self.season = Season.objects.get(year=self.year)
+            self.headline = "Blingabowl %s: %s def. %s" % (self.season.blingabowl, self.season.place_1, self.season.place_2)
 
     @cached_property
     def games(self):
-        return Game.objects.filter(year=self.year, week__lte=13)
+        games = Game.objects.all()
+
+        if self.year is not None:
+            games = games.filter(year=self.year)
+
+        if not self.include_playoffs:
+            games = games.filter(week__lte=REGULAR_SEASON_WEEKS)
+
+        return games
 
     @cached_property
     def table(self):
@@ -109,6 +135,11 @@ class Standings(object):
             results_by_member[game.winner]['points'] += game.winner_score
             results_by_member[game.loser]['losses'] += 1
             results_by_member[game.loser]['points'] += game.loser_score
+
+        if self.year is not None:
+            results_by_member[self.season.place_1]['notes'] = "Blingabowl %s Champion" % self.season.blingabowl
+            results_by_member[self.season.place_2]['notes'] = 'Runner-up'
+            results_by_member[self.season.place_3]['notes'] = 'Third place'
 
         members_ordered = sorted(results_by_member.items(), key=lambda x: (x[1]['wins'], x[1]['points']), reverse=True)
 
