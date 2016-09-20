@@ -134,7 +134,7 @@ class Season(models.Model):
         return robscores
 
     def __str__(self):
-        return self.year
+        return str(self.year)
 
 
 class MemberRecord(object):
@@ -145,7 +145,10 @@ class MemberRecord(object):
 
         self.season = None
         if len(self.years) == 1:
-            self.season = Season.objects.get(year=list(self.years)[0])
+            try:
+                self.season = Season.objects.get(year=list(self.years)[0])
+            except Season.DoesNotExist:
+                pass # this is ok, it's the current season
 
     @cached_property
     def games(self):
@@ -183,7 +186,7 @@ class MemberRecord(object):
 
     @cached_property
     def playoff_finish(self):
-        if len(self.years) != 1:
+        if len(self.years) != 1 or self.season is None:
             return ''
 
         if self.member == self.season.place_1:
@@ -231,17 +234,23 @@ class Standings(object):
         self.all_time = all_time
         self.include_playoffs = include_playoffs
 
+        self.season = None
+        self.headline = None
+
         if self.all_time:
             self.year = None
-            self.season = None
-            self.headline = None
         else:
             if self.year is None:
                 # if we didn't specify all_time, that means we need a current year
                 self.year = Game.objects.all().order_by('-year').values_list('year', flat=True)[0]
+                self.headline = 'Current season'
 
-            self.season = Season.objects.get(year=self.year)
-            self.headline = "Blingabowl %s: %s def. %s" % (self.season.blingabowl, self.season.place_1, self.season.place_2)
+            try:
+                self.season = Season.objects.get(year=self.year)
+                if self.season.place_1:
+                    self.headline = "Blingabowl %s: %s def. %s" % (self.season.blingabowl, self.season.place_1, self.season.place_2)
+            except Season.DoesNotExist:
+                pass  # won't exist for the current season
 
     @cached_property
     def games(self):
