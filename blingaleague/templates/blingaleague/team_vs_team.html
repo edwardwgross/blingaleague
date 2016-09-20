@@ -3,13 +3,13 @@
 {% block title %}Team vs. Team{% endblock %}
 
 {% block content %}
-<div>Team vs. Team</div>
+<h1>Team vs. Team</h1>
 
 <table id="team_vs_team_grid">
   {% for row in grid %}
-    <tr {% if not forloop.counter0 %}style="font-weight:bold"{% endif %}>
+    <tr class="{% if not forloop.counter0 %}team_name {% endif %}">
       {% for col in row %}
-        <td {% if not forloop.counter0 %}style="font-weight:bold"{% endif %}>
+        <td class="{% if not forloop.counter0 %}team_name {% endif %}{% if not col %}empty {% endif %}">
           {{ col }}
         </td>
       {% endfor %}

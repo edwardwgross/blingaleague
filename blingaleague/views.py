@@ -1,11 +1,20 @@
 from collections import defaultdict
 
+from django.core import urlresolvers
 from django.views.generic import TemplateView
+from django.views.generic.edit import CreateView
 
 from .models import Standings, Game
 
 class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
+
+    def get(self, request):
+        standings = Standings()
+
+        context = {'standings': standings}
+
+        return self.render_to_response(context)
 
 
 class StandingsView(TemplateView):
@@ -83,3 +92,7 @@ class TeamVsTeamView(TemplateView):
         return self.render_to_response(context)
 
 
+class AddGameResultView(CreateView):
+    model = Game
+    fields = ['year', 'week', 'winner', 'winner_score', 'loser', 'loser_score']
+    success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')

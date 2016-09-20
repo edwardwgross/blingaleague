@@ -2,6 +2,7 @@ import decimal
 
 from collections import defaultdict
 
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
 from cached_property import cached_property
@@ -41,6 +42,44 @@ class Game(models.Model):
     loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
     notes = models.TextField(blank=True, null=True)
 
+    @classmethod
+    def expected_wins(cls, game_scores):
+        all_scores = []
+        for winner_score, loser_score in Game.objects.all().values_list('winner_score', 'loser_score'):
+            all_scores.extend([winner_score, loser_score])
+
+        def _win_expectancy(score):
+            win_count = len(filter(lambda x: x < score, all_scores))
+            return decimal.Decimal(win_count) / decimal.Decimal(len(all_scores))
+
+        return sum(_win_expectancy(score) for score in game_scores)
+
+    def validate_unique(self, **kwargs):
+        errors = {}
+
+        other_weekly_games = Game.objects.filter(year=self.year, week=self.week)
+
+        if (self.year < 2012 and other_weekly_games.count() >= 6) or other_weekly_games.count() >= 7:
+            errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Too many games', code='too_many_games'))
+
+        for game in other_weekly_games:
+            if set([self.winner, self.loser]) & set([game.winner, game.loser]):
+                errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Duplicate team', code='duplicate_team'))
+
+        if self.winner_score < self.loser_score:
+            errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Loser score greater than winner score', code='loser_gt_winner'))
+
+        if self.week > 1 and self.week <= 13:
+            previous_week_games = Game.objects.filter(year=self.year, week=self.week-1)
+            if (self.year >= 2012 and previous_week_games.count() < 7) or previous_week_games.count() < 6:
+                errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Previous week isn\'t done', code='previous_not_done'))
+
+        if errors:
+            raise ValidationError(errors)
+
+        # don't neglect the default validation
+        super(Game, self).validate_unique(**kwargs)
+
     def __str__(self):
         return "%s, week %s: %s def. %s" % (self.year, self.week, self.winner, self.loser)
 
@@ -72,6 +111,28 @@ class Season(models.Model):
     def blingabowl(self):
         return int_to_roman(self.year + 1 - FIRST_SEASON)
 
+    @cached_property
+    def robscores(self):
+        robscores = defaultdict(lambda: 0)
+
+        for place, member in enumerate(self.playoff_results):
+            robscores[member] += 1 # all playoff teams get one
+
+            # there are bonuses for finishing in the top three
+            if member == self.place_1:
+                robscores[member] += 1.0
+            elif member == self.place_2:
+                robscores[member] += 0.5
+            elif member == self.place_3:
+                robscores[member] += 0.25
+
+        # regular-season winner and runner-up also get something
+        standings = Standings(year=self.year)
+        robscores[standings.table[0].member] += 0.5
+        robscores[standings.table[1].member] += 0.25
+
+        return robscores
+
     def __str__(self):
         return self.year
 
@@ -81,6 +142,10 @@ class MemberRecord(object):
         self.years = set(years)
         self.member = Member.objects.get(pk=member_id)
         self.include_playoffs = include_playoffs
+
+        self.season = None
+        if len(self.years) == 1:
+            self.season = Season.objects.get(year=list(self.years)[0])
 
     @cached_property
     def games(self):
@@ -110,7 +175,7 @@ class MemberRecord(object):
 
     @cached_property
     def win_pct(self):
-        return decimal.Decimal(self.win_count) / decimal.Decimal(self.win_count + self.loss_count)
+        return decimal.Decimal(self.win_count) / decimal.Decimal(len(self.games))
 
     @cached_property
     def points(self):
@@ -121,18 +186,34 @@ class MemberRecord(object):
         if len(self.years) != 1:
             return ''
 
-        season = Season.objects.get(year=self.years.pop())
+        if self.member == self.season.place_1:
+            return "Blingabowl %s champion" % self.season.blingabowl
 
-        if self.member == season.place_1:
-            return "Blingabowl %s champion" % season.blingabowl
+        if self.member == self.season.place_2:
+            return "Blingabowl %s runner-up" % self.season.blingabowl
 
-        if self.member == season.place_2:
-            return "Blingabowl %s runner-up" % season.blingabowl
-
-        if self.member == season.place_3:
+        if self.member == self.season.place_3:
             return 'Third place'
 
         return ''
+
+    @cached_property
+    def expected_wins(self):
+        game_scores = [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
+        return Game.expected_wins(game_scores)
+
+    @cached_property
+    def expected_win_pct(self):
+        return decimal.Decimal(self.expected_wins) / decimal.Decimal(len(self.games))
+
+    @cached_property
+    def robscore(self):
+        robscore = 0
+
+        if len(self.years) > 1:
+            return sum([MemberRecord(self.member.id, [year]).robscore for year in self.years])
+
+        return self.season.robscores[self.member]
 
     def __str__(self):
         text = "%s (%s-%s)" % (self.member, self.win_count, self.loss_count)

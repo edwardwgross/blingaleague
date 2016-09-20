@@ -1,40 +1,13 @@
 {% extends "blingaleague/base.html" %}
 
-{% load humanize %}
-
 {% block title %}{{ standings.headline }}{% endblock %}
 
 {% block content %}
-<div>{{ standings }}</div>
+<h1>{{ standings }}</h1>
 
-{% if standings.headline %}<div>{{ standings.headline }}</div>{% endif %}
+{% if standings.headline %}<h2>{{ standings.headline }}</h2>{% endif %}
 
-<table>
-  <tr>
-    <th/> {# Rank #}
-    <th/> {# Member #}
-    <th>W</th>
-    <th>L</th>
-    <th>Pct.</th>
-    <th>Points</th>
-    <th>Exp. W</th>
-    <th>RobScore</th>
-    <th/> {# Playoff Finish #}
-  </tr>
-  {% for member_record in standings.table %}
-      <tr>
-        <td style="text-align:right">{{ forloop.counter }}</td>
-        <td>{{ member_record.member }}</td>
-        <td style="text-align:right">{{ member_record.win_count }}</td>
-        <td style="text-align:right">{{ member_record.loss_count }}</td>
-        <td style="text-align:right">{{ member_record.win_pct|floatformat:3 }}</td>
-        <td style="text-align:right">{{ member_record.points|intcomma }}</td>
-        <td></td>
-        <td></td>
-        <td>{{ member_record.playoff_finish }}</td>
-      </tr>
-  {% endfor %}
-</table>
+{% include "blingaleague/standings_table.html" %}
 
 <div>
   {% for link in links %}

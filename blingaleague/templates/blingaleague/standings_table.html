@@ -1,0 +1,28 @@
+{% load humanize %}
+
+<table id="standings_table">
+  <tr>
+    <th/> {# Rank #}
+    <th/> {# Member #}
+    <th>W</th>
+    <th>L</th>
+    <th>W%</th>
+    <th>Points</th>
+    <th>Exp. W</th>
+    <th>Exp. %</th>
+    <th/> {# Playoff Finish #}
+  </tr>
+  {% for member_record in standings.table %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td style="text-align:left">{{ member_record.member }}</td>
+        <td>{{ member_record.win_count }}</td>
+        <td>{{ member_record.loss_count }}</td>
+        <td>{{ member_record.win_pct|floatformat:3 }}</td>
+        <td>{{ member_record.points|intcomma }}</td>
+        <td>{{ member_record.expected_wins|floatformat:1 }}</td>
+        <td>{{ member_record.expected_win_pct|floatformat:3 }}</td>
+        <td style="text-align:left">{{ member_record.playoff_finish }}</td>
+      </tr>
+  {% endfor %}
+</table>
