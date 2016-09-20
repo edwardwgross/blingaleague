@@ -1,3 +1,4 @@
 activate
 environ
 *.pyc
+static/blingaleague

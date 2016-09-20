@@ -8,15 +8,41 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="UTF-8">
 
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-responsive.css' %}"/>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}"/>
+    <link rel="stylesheet" href="{% static 'blingaleague/css/blingaleague.css' %}"/>
 
     <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
 
   </head>
 
   <body>
-    {% block content %}
-    {% endblock content %}
+    <nav class="navbar navbar-fixed">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">
+            <img alt="Blingaleague" id="nav_shield" src="{% static 'blingaleague/img/shield_medium.png' %}">
+          </a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="{% url 'blingaleague.standings' 2015 %}">Standings</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div id="main_outer">
+      <div id="main_inner">
+        {% block content %}
+        {% endblock content %}
+      </div>
+    </div>
   </body>
 
 </html>

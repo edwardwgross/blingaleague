@@ -1,0 +1,24 @@
+html, body, nav, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
+span, label, input, textarea, table, tr, th, td, ul, ol, li {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+nav {
+    background-color: #a4c2f4;
+}
+
+.navbar-brand {
+    padding: 5px;
+}
+
+#main_outer {
+}
+
+#main_inner {
+    background-color: white;
+}
+
+#nav_shield {
+    width: 40px;
+    height: 40px;
+}
