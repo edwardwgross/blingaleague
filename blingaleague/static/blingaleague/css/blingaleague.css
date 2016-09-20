@@ -3,6 +3,14 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+th, td {
+    padding: 0 6px;
+}
+
+th {
+    text-align: center;
+}
+
 nav {
     background-color: #a4c2f4;
     border: none !important;
@@ -18,12 +26,13 @@ nav .icon-bar {
 }
 
 .nav li > a, nav li > a:visited {
-    color: red;
+    color: white;
+    font-weight: bold;
 }
 
 .nav li > a:hover {
-    color: #a4c2f4;
-    background-color: red;
+    color: red;
+    background-color: white;
 }
 
 .nav a.navbar-brand:hover {
@@ -41,4 +50,9 @@ nav .icon-bar {
 #nav_shield {
     width: 40px;
     height: 40px;
+}
+
+table#team_vs_team_grid,
+table#team_vs_team_grid td {
+    border: 1px solid;
 }

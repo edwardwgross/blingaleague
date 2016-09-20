@@ -1,3 +1,5 @@
+import decimal
+
 from collections import defaultdict
 
 from django.db import models
@@ -74,10 +76,11 @@ class Season(models.Model):
         return self.year
 
 
-class MemberSeason(object):
-    def __init__(self, year, member_id):
-        self.year = year
+class MemberRecord(object):
+    def __init__(self, member_id, years, include_playoffs=False):
+        self.years = set(years)
         self.member = Member.objects.get(pk=member_id)
+        self.include_playoffs = include_playoffs
 
     @cached_property
     def games(self):
@@ -85,18 +88,57 @@ class MemberSeason(object):
 
     @cached_property
     def wins(self):
-        return list(self.member.games_won.filter(year=self.year, week__lte=REGULAR_SEASON_WEEKS))
+        wins = self.member.games_won.filter(year__in=self.years)
+        if not self.include_playoffs:
+            wins = wins.filter(week__lte=REGULAR_SEASON_WEEKS)
+        return list(wins)
 
     @cached_property
     def losses(self):
-        return list(self.member.games_lost.filter(year=self.year, week__lte=REGULAR_SEASON_WEEKS))
+        losses = self.member.games_lost.filter(year__in=self.years)
+        if not self.include_playoffs:
+            losses = losses.filter(week__lte=REGULAR_SEASON_WEEKS)
+        return list(losses)
+
+    @cached_property
+    def win_count(self):
+        return len(self.wins)
+
+    @cached_property
+    def loss_count(self):
+        return len(self.losses)
+
+    @cached_property
+    def win_pct(self):
+        return decimal.Decimal(self.win_count) / decimal.Decimal(self.win_count + self.loss_count)
 
     @cached_property
     def points(self):
         return sum(map(lambda x: x.winner_score, self.wins)) + sum(map(lambda x: x.loser_score, self.losses))
 
+    @cached_property
+    def playoff_finish(self):
+        if len(self.years) != 1:
+            return ''
+
+        season = Season.objects.get(year=self.years.pop())
+
+        if self.member == season.place_1:
+            return "Blingabowl %s champion" % season.blingabowl
+
+        if self.member == season.place_2:
+            return "Blingabowl %s runner-up" % season.blingabowl
+
+        if self.member == season.place_3:
+            return 'Third place'
+
+        return ''
+
     def __str__(self):
-        return "%s %s (%s-%s)" % (self.year, self.member, len(self.wins), len(self.losses))
+        text = "%s (%s-%s)" % (self.member, self.win_count, self.loss_count)
+        if self.playoff_finish:
+            text = "%s - %s" % (text, self.playoff_finish)
+        return text
 
     def __repr__(self):
         return str(self)
@@ -105,9 +147,10 @@ class MemberSeason(object):
 class Standings(object):
     def __init__(self, year=None, all_time=False, include_playoffs=False):
         self.year = year
+        self.all_time = all_time
         self.include_playoffs = include_playoffs
 
-        if all_time:
+        if self.all_time:
             self.year = None
             self.season = None
             self.headline = None
@@ -134,33 +177,25 @@ class Standings(object):
     @cached_property
     def table(self):
         results_by_member = defaultdict(lambda: defaultdict(lambda: 0))
-
+        member_years = defaultdict(set)
         for game in self.games:
-            results_by_member[game.winner]['wins'] += 1
-            results_by_member[game.winner]['points'] += game.winner_score
-            results_by_member[game.loser]['losses'] += 1
-            results_by_member[game.loser]['points'] += game.loser_score
+            member_years[game.winner.id].add(game.year)
+            member_years[game.loser.id].add(game.year)
 
-        if self.year is not None:
-            results_by_member[self.season.place_1]['notes'] = "Blingabowl %s Champion" % self.season.blingabowl
-            results_by_member[self.season.place_2]['notes'] = 'Runner-up'
-            results_by_member[self.season.place_3]['notes'] = 'Third place'
+        member_records = [MemberRecord(member_id, years, include_playoffs=self.include_playoffs) for member_id, years in member_years.items()]
 
-        members_ordered = sorted(results_by_member.items(), key=lambda x: (x[1]['wins'], x[1]['points']), reverse=True)
-
-        table = []
-        for member, record in members_ordered:
-            row = {'member': member}
-            row.update(record)
-            table.append(row)
-
-        return table
+        return sorted(member_records, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     def __str__(self):
         if self.year:
-            return "%s standings" % self.year
+            text = "%s standings" % self.year
         else:
-            return 'All-time standings'
+            text = 'All-time standings'
+
+        if self.include_playoffs:
+            text = "%s (including playoffs)" % text
+
+        return text
 
     def __repr__(self):
         return str(self)

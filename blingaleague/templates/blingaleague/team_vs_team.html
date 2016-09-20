@@ -1,0 +1,19 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Team vs. Team{% endblock %}
+
+{% block content %}
+<div>Team vs. Team</div>
+
+<table id="team_vs_team_grid">
+  {% for row in grid %}
+    <tr {% if not forloop.counter0 %}style="font-weight:bold"{% endif %}>
+      {% for col in row %}
+        <td {% if not forloop.counter0 %}style="font-weight:bold"{% endif %}>
+          {{ col }}
+        </td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}
