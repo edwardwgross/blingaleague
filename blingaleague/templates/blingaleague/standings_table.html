@@ -15,7 +15,7 @@
   {% for member_record in standings.table %}
       <tr>
         <td>{{ forloop.counter }}</td>
-        <td style="text-align:left">{{ member_record.member }}</td>
+        <td style="text-align:left"><a href="{{ member_record.href }}">{{ member_record.member }}</a></td>
         <td>{{ member_record.win_count }}</td>
         <td>{{ member_record.loss_count }}</td>
         <td>{{ member_record.win_pct|floatformat:3 }}</td>

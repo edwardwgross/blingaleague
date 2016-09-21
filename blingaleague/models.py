@@ -2,6 +2,7 @@ import decimal
 
 from collections import defaultdict
 
+from django.core import urlresolvers
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
@@ -137,7 +138,8 @@ class Season(models.Model):
         return str(self.year)
 
 
-class MemberRecord(object):
+class TeamRecord(object):
+
     def __init__(self, member_id, years, include_playoffs=False):
         self.years = set(years)
         self.member = Member.objects.get(pk=member_id)
@@ -152,7 +154,7 @@ class MemberRecord(object):
 
     @cached_property
     def games(self):
-        return self.wins + self.losses
+        return sorted(self.wins + self.losses, key=lambda x: (x.year, x.week))
 
     @cached_property
     def wins(self):
@@ -214,21 +216,36 @@ class MemberRecord(object):
         robscore = 0
 
         if len(self.years) > 1:
-            return sum([MemberRecord(self.member.id, [year]).robscore for year in self.years])
+            return sum([TeamRecord(self.member.id, [year]).robscore for year in self.years])
 
         return self.season.robscores[self.member]
 
-    def __str__(self):
-        text = "%s (%s-%s)" % (self.member, self.win_count, self.loss_count)
+    @cached_property
+    def headline(self):
+        text = "%s-%s, %s points" % (self.win_count, self.loss_count, self.points)
         if self.playoff_finish:
             text = "%s - %s" % (text, self.playoff_finish)
         return text
+
+    @cached_property
+    def href(self):
+        if len(self.years) == 1:
+            url_name = 'blingaleague.team_season'
+            args = (self.member.id, list(self.years)[0])
+        else:
+            url_name = 'blingaleague.team'
+            args = (self.member.id,)
+        return urlresolvers.reverse_lazy(url_name, args=args)
+
+    def __str__(self):
+        return "%s - %s" % (self.member, ', '.join(map(str, self.years)))
 
     def __repr__(self):
         return str(self)
 
 
 class Standings(object):
+
     def __init__(self, year=None, all_time=False, include_playoffs=False):
         self.year = year
         self.all_time = all_time
@@ -242,8 +259,7 @@ class Standings(object):
         else:
             if self.year is None:
                 # if we didn't specify all_time, that means we need a current year
-                self.year = Game.objects.all().order_by('-year').values_list('year', flat=True)[0]
-                self.headline = 'Current season'
+                self.year = Week.latest().year
 
             try:
                 self.season = Season.objects.get(year=self.year)
@@ -272,7 +288,7 @@ class Standings(object):
             member_years[game.winner.id].add(game.year)
             member_years[game.loser.id].add(game.year)
 
-        member_records = [MemberRecord(member_id, years, include_playoffs=self.include_playoffs) for member_id, years in member_years.items()]
+        member_records = [TeamRecord(member_id, years, include_playoffs=self.include_playoffs) for member_id, years in member_years.items()]
 
         return sorted(member_records, key=lambda x: (x.win_pct, x.points), reverse=True)
 
@@ -289,3 +305,72 @@ class Standings(object):
 
     def __repr__(self):
         return str(self)
+
+
+class Week(object):
+
+    def __init__(self, year, week):
+        self.year = year
+        self.week = week
+
+    @cached_property
+    def games(self):
+        games = Game.objects.filter(year=self.year, week=self.week)
+        return games.order_by('-winner_score', '-loser_score')
+
+    @classmethod
+    def latest(cls):
+        year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
+        return cls(year, week)
+
+    def __str__(self):
+        return "Week %s, %s" % (self.week, self.year)
+
+    def __repr__(self):
+        return str(self)
+
+
+class Matchup(object):
+
+    def __init__(self, team1_id, team2_id):
+        self.team1 = Member.objects.get(id=team1_id)
+        self.team2 = Member.objects.get(id=team2_id)
+
+    @cached_property
+    def games(self):
+        games = self.team1_wins + self.team2_wins
+        return sorted(games, key=lambda x: (x.year, x.week), reverse=True)
+
+    @cached_property
+    def team1_wins(self):
+        return list(Game.objects.filter(winner=self.team1, loser=self.team2))
+
+    @cached_property
+    def team2_wins(self):
+        return list(Game.objects.filter(winner=self.team2, loser=self.team1))
+
+    @cached_property
+    def team1_count(self):
+        return len(self.team1_wins)
+
+    @cached_property
+    def team2_count(self):
+        return len(self.team2_wins)
+
+    @cached_property
+    def headline(self):
+        if self.team1_count == self.team2_count:
+            return "All-time series tied, %s-%s" % (self.team1_count, self.team2_count)
+        else:
+            text = "%s leads all-time series, %s-%s"
+            if self.team1_count > self.team2_count:
+                return text % (self.team1, self.team1_count, self.team2_count)
+            else:
+                return text % (self.team2, self.team2_count, self.team1_count)
+
+    def __str__(self):
+        return "%s vs. %s" % (self.team1, self.team2)
+
+    def __repr__(self):
+        return str(self)
+

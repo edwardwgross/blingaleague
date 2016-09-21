@@ -1,11 +1,10 @@
 from collections import defaultdict
 
 from django.core import urlresolvers
-from django.db.models import Q
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView
 
-from .models import Standings, Game, Member
+from .models import Standings, Game, Member, TeamRecord, Week, Matchup
 
 class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
@@ -21,91 +20,90 @@ class HomeView(TemplateView):
 class StandingsView(TemplateView):
     template_name = 'blingaleague/standings.html'
 
-    def get(self, request):
-        standings_kwargs = {}
-
-        if 'year' in request.GET:
-            standings_kwargs['year'] = int(request.GET['year'])
-
-        for kwarg in ('all_time', 'include_playoffs'):
-            if kwarg in request.GET:
-                standings_kwargs[kwarg] = True
-
-        standings = Standings(**standings_kwargs)
-
+    def links(self):
         links = []
+
         for season in sorted(set(Game.objects.all().values_list('year', flat=True))):
-            link_data = {'text': season, 'args': None}
-            if season != standings.year:
-                link_data['args'] = "year=%s" % season
+            link_data = {'text': season, 'href': None}
+            if season != self.standings.year:
+                link_data['href'] = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(season,))
             links.append(link_data)
 
-        if standings.all_time and standings.include_playoffs:
-            links.extend([
-                {'text': 'All-time', 'args': 'all_time'},
-                {'text': '(including playoffs)', 'args': None},
-            ])
-        elif standings.all_time:
-            links.extend([
-                {'text': 'All-time', 'args': None},
-                {'text': '(including playoffs)', 'args': 'all_time&include_playoffs'},
-            ])
-        else:
-            links.extend([
-                {'text': 'All-time', 'args': 'all_time'},
-                {'text': '(including playoffs)', 'args': 'all_time&include_playoffs'},
-            ])
+        all_time_url = urlresolvers.reverse_lazy('blingaleague.standings_all_time')
+        including_playoffs_url = "%s?include_playoffs" % all_time_url
+
+        if self.standings.all_time:
+            if self.standings.include_playoffs:
+                including_playoffs_url = None
+            else:
+                all_time_url = None
+
+        links.extend([
+            {'text': 'All-time', 'href': all_time_url},
+            {'text': '(including playoffs)', 'href': including_playoffs_url},
+        ])
+
+        return links
 
 
-        context = {'standings': standings, 'links': links}
+class StandingsCurrentView(StandingsView):
 
+    def get(self, request):
+        self.standings = Standings()
+        context = {'standings': self.standings, 'links': self.links()}
+        return self.render_to_response(context)
+
+class StandingsYearView(StandingsView):
+
+    def get(self, request, year):
+        self.standings = Standings(year=year)
+        context = {'standings': self.standings, 'links': self.links()}
+        return self.render_to_response(context)
+
+
+class StandingsAllTimeView(StandingsView):
+
+    def get(self, request):
+        include_playoffs = 'include_playoffs' in request.GET
+        self.standings = Standings(all_time=True, include_playoffs=include_playoffs)
+        context = {'standings': self.standings, 'links': self.links()}
         return self.render_to_response(context)
 
 
 class GamesView(TemplateView):
     template_name = 'blingaleague/games.html'
 
-    def get(self, request):
-        games = Game.objects.all()
 
-        headline = 'Games'
+class MatchupView(GamesView):
 
-        teams = [Member.objects.get(pk=team_id) for team_id in request.GET.getlist('team')]
-        teams = sorted(teams, key=lambda x: x.full_name)[:2]  # never want more than 2
+    def get(self, request, team1, team2):
+        base_object = Matchup(team1, team2)
+        context = {'base_object': base_object}
+        return self.render_to_response(context)
 
-        years = [int(year) for year in request.GET.getlist('year')]
-        weeks = [int(week) for week in request.GET.getlist('week')]
 
-        for team in teams:
-            games = games.filter(Q(winner=team) | Q(loser=team))
+class WeekView(GamesView):
 
-        if len(teams) > 1:
-            # we're doing a matchup, so don't allow any date restrictions
-            headline = "%s played between %s and %s" % (headline, teams[0], teams[1])
-        else:
-            if teams:
-                if years:
-                    games = games.filter(year__in=years)
-                if weeks:
-                    games = games.filter(week__in=weeks)
-            else:
-                # if we didn't give a team filter, limit to the most recent one year and week specified
-                if years:
-                    year = years[-1]
-                else:
-                    year = Game.objects.all().order_by('-year').values_list('year', flat=True)[0]
+    def get(self, request, year, week):
+        base_object = Week(year, week)
+        context = {'base_object': base_object}
+        return self.render_to_response(context)
 
-                if weeks:
-                    week = weeks[-1]
-                else:
-                    week = Game.objects.filter(year=year).order_by('-week').values_list('week', flat=True)[0]
 
-                games = games.filter(year=year, week=week)
+class TeamSeasonView(GamesView):
 
-        games = games.order_by('year', 'week', 'winner_score', 'loser_score')
+    def get(self, request, team, year):
+        base_object = TeamRecord(team, [year])
+        context = {'base_object': base_object}
+        return self.render_to_response(context)
 
-        context = {'games': games}
 
+class TeamDetailsView(TemplateView):
+    template_name = 'blingaleague/team_details.html'
+
+    def get(self, request, team):
+        team = Member.objects.get(id=team)
+        context = {'team': team}
         return self.render_to_response(context)
 
 

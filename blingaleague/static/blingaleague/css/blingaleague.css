@@ -1,6 +1,10 @@
 html, body, nav, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
 span, label, input, textarea, table, tr, th, td, ul, ol, li {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+}
+
+table, tr, th, td {
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
 }
 
 table {
@@ -10,6 +14,14 @@ table {
 th, td {
     padding: 0 6px;
 }
+
+th,
+table#team_vs_team_grid .team_name {
+    font-weight: bold;
+    color: white;
+    background-color: #a4c2f4;
+}
+
 
 h1 {
     font-size: 28px;
@@ -49,7 +61,7 @@ nav .icon-bar {
 
 
 #main_outer {
-    padding: 15px;
+    padding: 0 15px 30px 15px;
 }
 
 #main_inner {
@@ -76,12 +88,22 @@ table#team_vs_team_grid td {
     vertical-align: middle;
 }
 
-table#team_vs_team_grid .team_name {
-    font-weight: bold;
-    color: white;
-    background-color: #a4c2f4;
-}
-
 table#team_vs_team_grid .empty {
     background-color: #eaeaea;
+}
+
+#games .game {
+    padding: 12px 24px;
+    text-align: center;
+    border-top: 1px solid #a4c2f4;
+}
+
+#games .game .week {
+    font-size: 12px;
+    font-color: #eaeaea;
+}
+
+#games .game teams,
+#games .game .score {
+    font-size: 18px;
 }

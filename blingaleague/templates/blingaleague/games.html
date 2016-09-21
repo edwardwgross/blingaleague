@@ -1,10 +1,18 @@
 {% extends "blingaleague/base.html" %}
 
+{% block title %}{{ base_object }}{% endblock %}
+
 {% block content %}
-<div>
-  {% for game in games %}
-    <div>
-      {{ game.year }}, week {{ game.week}}: {{ game.winner }} def. {{ game.loser }}, {{ game.winner_score }}-{{ game.loser_score }}
+<h1>{{ base_object }}</h1>
+
+{% if base_object.headline %}<h2>{{ base_object.headline }}</h2>{% endif %}
+
+<div id="games">
+  {% for game in base_object.games %}
+    <div class="game">
+      <div class="week">Week {{ game.week }}, {{ game.year }}</div>
+      <div class="teams">{{ game.winner }} def. {{ game.loser }}</div>
+      <div class="score">{{ game.winner_score }} - {{ game.loser_score }}</div>
     </div>
   {% endfor %}
 </div>

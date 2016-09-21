@@ -11,8 +11,8 @@
 
 <div>
   {% for link in links %}
-    {% if link.args %}
-      <a href="{% url 'blingaleague.standings' %}?{{ link.args }}">{{ link.text }}</a>
+    {% if link.href %}
+      <a href="{{ link.href }}">{{ link.text }}</a>
     {% else %}
       <strong>{{ link.text }}</strong>
     {% endif %}
