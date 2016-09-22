@@ -25,7 +25,7 @@ class StandingsView(TemplateView):
 
         for year in sorted(set(Game.objects.all().values_list('year', flat=True))):
             link_data = {'text': year, 'href': None}
-            if int(year) != int(self.standings.year):
+            if year != self.standings.year:
                 link_data['href'] = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(year,))
             links.append(link_data)
 
@@ -56,7 +56,7 @@ class StandingsCurrentView(StandingsView):
 class StandingsYearView(StandingsView):
 
     def get(self, request, year):
-        self.standings = Standings(year=year)
+        self.standings = Standings(year=int(year))
         context = {'standings': self.standings, 'links': self.links()}
         return self.render_to_response(context)
 

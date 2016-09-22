@@ -70,23 +70,27 @@ class Game(models.Model):
 
     @cached_property
     def title(self):
+        title = None
         if self.week > REGULAR_SEASON_WEEKS:
             try:
                 season = Season.objects.get(year=self.year)
                 if self.week == BLINGABOWL_WEEK:
                     if self.winner == season.place_1:
-                        return "Blingabowl %s" % season.blingabowl
+                        title = "Blingabowl %s" % season.blingabowl
                     else:
-                        return 'Third-place game'
+                        title = 'Third-place game'
                 elif self.week == (BLINGABOWL_WEEK - 1):
                     if self.winner == season.place_5:
-                        return 'Fifth-place game'
+                        title = 'Fifth-place game'
                     else:
-                        return 'Semifinals'
+                        title = 'Semifinals'
                 else:
-                    return 'Quarterfinals'
+                    title = 'Quarterfinals'
             except Season.DoesNotExist:
                 pass  # current season won't have one
+
+        if title is not None:
+            return "%s, %s" % (title, self.year)
 
         return str(self.week_object)
 
