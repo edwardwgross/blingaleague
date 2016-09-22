@@ -23,10 +23,10 @@ class StandingsView(TemplateView):
     def links(self):
         links = []
 
-        for season in sorted(set(Game.objects.all().values_list('year', flat=True))):
-            link_data = {'text': season, 'href': None}
-            if season != self.standings.year:
-                link_data['href'] = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(season,))
+        for year in sorted(set(Game.objects.all().values_list('year', flat=True))):
+            link_data = {'text': year, 'href': None}
+            if int(year) != int(self.standings.year):
+                link_data['href'] = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(year,))
             links.append(link_data)
 
         all_time_url = urlresolvers.reverse_lazy('blingaleague.standings_all_time')
