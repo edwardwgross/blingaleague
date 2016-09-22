@@ -3,5 +3,24 @@
 {% block title %}{{ team }}{% endblock %}
 
 {% block content %}
-<div>{{ team }}</div>
+
+<h1>{{ team }}</h1>
+
+<div id="team_details">
+  <div><h2>Overall record:</h2> {{ team.all_time_record }} ({{ team.all_time_record_with_playoffs }} including playoffs)</div>
+  <div>
+    <h2>Seasons</h2>
+    <ul>
+      {% for season in team.seasons %}
+        <li>
+          <a href="{{ season.standings.href }}">{{ season.standings.year }}</a>:
+          <a href="{{ season.href }}">{{ season.record }}</a>,
+          {{ season.place }}
+          {% if season.playoff_finish %}({{ season.playoff_finish }}){% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
 {% endblock content %}

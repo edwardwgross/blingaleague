@@ -2,6 +2,7 @@ import decimal
 
 from collections import defaultdict
 
+from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core import urlresolvers
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
@@ -12,6 +13,7 @@ from .utils import int_to_roman
 
 
 REGULAR_SEASON_WEEKS = 13
+BLINGABOWL_WEEK = 16
 FIRST_SEASON = 2008
 
 
@@ -26,6 +28,21 @@ class Member(models.Model):
         if self.nickname:
             middle = " \"%s\" " % self.nickname
         return "%s%s%s" % (self.first_name, middle, self.last_name)
+
+    @cached_property
+    def all_time_record(self):
+        wins = self.games_won.filter(week__lte=REGULAR_SEASON_WEEKS).count()
+        losses = self.games_lost.filter(week__lte=REGULAR_SEASON_WEEKS).count()
+        return "%s-%s" % (wins, losses)
+
+    @cached_property
+    def all_time_record_with_playoffs(self):
+        return "%s-%s" % (self.games_won.count(), self.games_lost.count())
+
+    @cached_property
+    def seasons(self):
+        years = set(self.games_won.values_list('year', flat=True)) | set(self.games_lost.values_list('year', flat=True))
+        return TeamRecord.get_all_for_team(self.id, years)
 
     @cached_property
     def href(self):
@@ -46,6 +63,32 @@ class Game(models.Model):
     winner_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
     loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
     notes = models.TextField(blank=True, null=True)
+
+    @cached_property
+    def week_object(self):
+        return Week(self.year, self.week)
+
+    @cached_property
+    def title(self):
+        if self.week > REGULAR_SEASON_WEEKS:
+            try:
+                season = Season.objects.get(year=self.year)
+                if self.week == BLINGABOWL_WEEK:
+                    if self.winner == season.place_1:
+                        return "Blingabowl %s" % season.blingabowl
+                    else:
+                        return 'Third-place game'
+                elif self.week == (BLINGABOWL_WEEK - 1):
+                    if self.winner == season.place_5:
+                        return 'Fifth-place game'
+                    else:
+                        return 'Semifinals'
+                else:
+                    return 'Quarterfinals'
+            except Season.DoesNotExist:
+                pass  # current season won't have one
+
+        return str(self.week_object)
 
     @classmethod
     def expected_wins(cls, game_scores):
@@ -142,15 +185,24 @@ class Season(models.Model):
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.standings_year', args=(self.year,))
 
+    def team_to_playoff_finish(self, team):
+        for place, finish_team in enumerate(self.playoff_results):
+            if team == finish_team:
+                return place + 1
+        return None
+
     def __str__(self):
         return str(self.year)
+
+    def __repr__(self):
+        return str(self)
 
 
 class TeamRecord(object):
 
-    def __init__(self, member_id, years, include_playoffs=False):
+    def __init__(self, team_id, years, include_playoffs=False):
         self.years = set(years)
-        self.member = Member.objects.get(pk=member_id)
+        self.team = Member.objects.get(id=team_id)
         self.include_playoffs = include_playoffs
 
         self.season = None
@@ -166,14 +218,14 @@ class TeamRecord(object):
 
     @cached_property
     def wins(self):
-        wins = self.member.games_won.filter(year__in=self.years)
+        wins = self.team.games_won.filter(year__in=self.years)
         if not self.include_playoffs:
             wins = wins.filter(week__lte=REGULAR_SEASON_WEEKS)
         return list(wins)
 
     @cached_property
     def losses(self):
-        losses = self.member.games_lost.filter(year__in=self.years)
+        losses = self.team.games_lost.filter(year__in=self.years)
         if not self.include_playoffs:
             losses = losses.filter(week__lte=REGULAR_SEASON_WEEKS)
         return list(losses)
@@ -187,6 +239,10 @@ class TeamRecord(object):
         return len(self.losses)
 
     @cached_property
+    def record(self):
+        return "%s-%s" % (self.win_count, self.loss_count)
+
+    @cached_property
     def win_pct(self):
         return decimal.Decimal(self.win_count) / decimal.Decimal(len(self.games))
 
@@ -195,18 +251,31 @@ class TeamRecord(object):
         return sum(map(lambda x: x.winner_score, self.wins)) + sum(map(lambda x: x.loser_score, self.losses))
 
     @cached_property
+    def standings(self):
+        return Standings(year=list(self.years)[0])
+
+    @cached_property
+    def place(self):
+        if len(self.years) != 1:
+            return None
+
+        place = self.standings.team_to_place(self.team)
+        if place is None:
+            return '?'
+
+        return ordinal(place)
+
+    @cached_property
     def playoff_finish(self):
         if len(self.years) != 1 or self.season is None:
             return ''
 
-        if self.member == self.season.place_1:
+        if self.team == self.season.place_1:
             return "Blingabowl %s champion" % self.season.blingabowl
 
-        if self.member == self.season.place_2:
-            return "Blingabowl %s runner-up" % self.season.blingabowl
-
-        if self.member == self.season.place_3:
-            return 'Third place'
+        playoff_finish = self.season.team_to_playoff_finish(self.team)
+        if playoff_finish is not None:
+            return ordinal(playoff_finish)
 
         return ''
 
@@ -224,9 +293,9 @@ class TeamRecord(object):
         robscore = 0
 
         if len(self.years) > 1:
-            return sum([TeamRecord(self.member.id, [year]).robscore for year in self.years])
+            return sum([TeamRecord(self.team.id, [year]).robscore for year in self.years])
 
-        return self.season.robscores[self.member]
+        return self.season.robscores[self.team]
 
     @cached_property
     def headline(self):
@@ -239,14 +308,18 @@ class TeamRecord(object):
     def href(self):
         if len(self.years) == 1:
             url_name = 'blingaleague.team_season'
-            args = (self.member.id, list(self.years)[0])
+            args = (self.team.id, list(self.years)[0])
         else:
             url_name = 'blingaleague.team'
-            args = (self.member.id,)
+            args = (self.team.id,)
         return urlresolvers.reverse_lazy(url_name, args=args)
 
+    @classmethod
+    def get_all_for_team(cls, team_id, years):
+        return [cls(team_id, [year]) for year in sorted(years, reverse=True)]
+
     def __str__(self):
-        return "%s - %s" % (self.member, ', '.join(map(str, self.years)))
+        return "%s - %s" % (self.team, ', '.join(map(str, self.years)))
 
     def __repr__(self):
         return str(self)
@@ -300,6 +373,13 @@ class Standings(object):
 
         return sorted(member_records, key=lambda x: (x.win_pct, x.points), reverse=True)
 
+    def team_to_place(self, team):
+        for place, team_record in enumerate(self.table):
+            if team == team_record.team:
+                return place + 1
+
+        return None
+
     def __str__(self):
         if self.year:
             text = "%s standings" % self.year
@@ -324,7 +404,7 @@ class Week(object):
     @cached_property
     def games(self):
         games = Game.objects.filter(year=self.year, week=self.week)
-        return games.order_by('-winner_score', '-loser_score')
+        return games.order_by('notes', '-winner_score', '-loser_score')
 
     @cached_property
     def href(self):

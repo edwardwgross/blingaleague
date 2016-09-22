@@ -86,14 +86,14 @@ class WeekView(GamesView):
 
     def get(self, request, year, week):
         base_object = Week(year, week)
-        context = {'base_object': base_object, 'hide_week': True}
+        context = {'base_object': base_object}
         return self.render_to_response(context)
 
 
 class TeamSeasonView(GamesView):
 
     def get(self, request, team, year):
-        base_object = TeamRecord(team, [year])
+        base_object = TeamRecord(team, [year], include_playoffs=True)
         context = {'base_object': base_object}
         return self.render_to_response(context)
 
@@ -124,5 +124,5 @@ class TeamVsTeamView(TemplateView):
 
 class AddGameResultView(CreateView):
     model = Game
-    fields = ['year', 'week', 'winner', 'winner_score', 'loser', 'loser_score']
+    fields = ['year', 'week', 'winner', 'winner_score', 'loser', 'loser_score', 'notes']
     success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')

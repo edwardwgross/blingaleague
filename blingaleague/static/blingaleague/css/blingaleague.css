@@ -4,6 +4,14 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-size: inherit;
 }
 
+ul {
+    padding: 6px;
+}
+
+li {
+    list-style-type: none;
+}
+
 table, tr, th, td, table a {
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
     font-size: inherit;
@@ -101,8 +109,12 @@ table#team_vs_team_grid .empty {
 #games .game {
     padding: 12px 24px;
     text-align: center;
-    border-top: 1px solid #a4c2f4;
+    border-bottom: 1px solid #a4c2f4;
     max-width: 600px;
+}
+
+#games .game:first {
+    border-top: 1px solid #a4c2f4;
 }
 
 #games .game .week {

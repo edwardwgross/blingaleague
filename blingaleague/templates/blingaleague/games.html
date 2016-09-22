@@ -10,11 +10,9 @@
 <div id="games">
   {% for game in base_object.games %}
     <div class="game">
-      {% if not hide_week %}
-        <div class="week">
-          <a href="{% url 'blingaleague.week' game.year game.week %}">Week {{ game.week }}, {{ game.year }}</a>
-        </div>
-      {% endif %}
+      <div class="week">
+        <a href="{{ game.week_object.href }}">{{ game.title }}</a>
+      </div>
       <div class="teams">
         <a href="{{ game.winner.href }}">{{ game.winner }}</a>
         def.
