@@ -86,7 +86,7 @@ class WeekView(GamesView):
 
     def get(self, request, year, week):
         base_object = Week(year, week)
-        context = {'base_object': base_object}
+        context = {'base_object': base_object, 'hide_week': True}
         return self.render_to_response(context)
 
 
@@ -111,29 +111,13 @@ class TeamVsTeamView(TemplateView):
     template_name = 'blingaleague/team_vs_team.html'
 
     def get(self, request):
-        stats = defaultdict(lambda: defaultdict(lambda: {'wins': 0, 'losses': 0}))
-        # ex: stats['Allen']['Matt'] = {'wins': 1, 'losses': 3}
+        matchups = []
 
-        for game in Game.objects.all():
-            stats[game.winner][game.loser]['wins'] += 1
-            stats[game.loser][game.winner]['losses'] += 1
+        teams = Member.objects.all().order_by('first_name', 'last_name')
 
-        all_teams = sorted(stats.keys(), key=lambda x: x.full_name)
-        grid = [['W\L'] + all_teams]
+        grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
 
-        for team_a in all_teams:
-            row = [team_a]
-            for team_b in all_teams:
-                if team_a == team_b:
-                    row.append('')
-                else:
-                    wins = stats[team_a][team_b]['wins']
-                    losses = stats[team_a][team_b]['losses']
-                    row.append("%s-%s" % (wins, losses))
-
-            grid.append(row)
-
-        context = {'grid': grid}
+        context = {'grid': grid, 'teams': teams}
 
         return self.render_to_response(context)
 

@@ -1,10 +1,12 @@
 html, body, nav, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
 span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+    font-size: inherit;
 }
 
-table, tr, th, td {
+table, tr, th, td, table a {
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-size: inherit;
 }
 
 table {
@@ -15,8 +17,7 @@ th, td {
     padding: 0 6px;
 }
 
-th,
-table#team_vs_team_grid .team_name {
+th, th a {
     font-weight: bold;
     color: white;
     background-color: #a4c2f4;
@@ -85,10 +86,12 @@ table#standings_table td {
 }
 
 table#team_vs_team_grid,
+table#team_vs_team_grid th,
 table#team_vs_team_grid td {
-    border: 1px solid;
+    border: 1px solid black;
     text-align: center;
     vertical-align: middle;
+    font-size: 12px;
 }
 
 table#team_vs_team_grid .empty {

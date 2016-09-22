@@ -1,5 +1,7 @@
 {% extends "blingaleague/base.html" %}
 
+{% block title %}Add game{% endblock %}
+
 {% block content %}
 <form action="" method="post">{% csrf_token %}
   {{ form.as_p }}

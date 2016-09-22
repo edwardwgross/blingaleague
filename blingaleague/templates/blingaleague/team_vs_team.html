@@ -6,12 +6,21 @@
 <h1>Team vs. Team</h1>
 
 <table id="team_vs_team_grid">
+  <tr>
+    <th>W\L</th>
+    {% for team in teams %}
+      <th><a href="{{ team.href }}">{{ team.full_name }}</a></th>
+    {% endfor %}
+  </tr>
   {% for row in grid %}
-    <tr class="{% if not forloop.counter0 %}team_name {% endif %}">
-      {% for col in row %}
-        <td class="{% if not forloop.counter0 %}team_name {% endif %}{% if not col %}empty {% endif %}">
-          {{ col }}
-        </td>
+    <tr>
+      <th><a href="{{ row.team.href }}">{{ row.team.full_name }}</a></th>
+      {% for matchup in row.matchups %}
+        {% ifequal matchup.team1 matchup.team2 %}
+          <td class="empty"/>
+        {% else %}
+          <td><a href="{{ matchup.href }}">{{ matchup.record }}</a></td>
+        {% endifequal %}
       {% endfor %}
     </tr>
   {% endfor %}

@@ -27,6 +27,10 @@ class Member(models.Model):
             middle = " \"%s\" " % self.nickname
         return "%s%s%s" % (self.first_name, middle, self.last_name)
 
+    @cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.team', args=(self.id,))
+
     def __str__(self):
         return self.full_name
 
@@ -133,6 +137,10 @@ class Season(models.Model):
         robscores[standings.table[1].member] += 0.25
 
         return robscores
+
+    @cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.standings_year', args=(self.year,))
 
     def __str__(self):
         return str(self.year)
@@ -318,6 +326,10 @@ class Week(object):
         games = Game.objects.filter(year=self.year, week=self.week)
         return games.order_by('-winner_score', '-loser_score')
 
+    @cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.week', args=(self.year, self.week))
+
     @classmethod
     def latest(cls):
         year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
@@ -358,6 +370,10 @@ class Matchup(object):
         return len(self.team2_wins)
 
     @cached_property
+    def record(self):
+        return "%s-%s" % (self.team1_count, self.team2_count)
+
+    @cached_property
     def headline(self):
         if self.team1_count == self.team2_count:
             return "All-time series tied, %s-%s" % (self.team1_count, self.team2_count)
@@ -367,6 +383,14 @@ class Matchup(object):
                 return text % (self.team1, self.team1_count, self.team2_count)
             else:
                 return text % (self.team2, self.team2_count, self.team1_count)
+
+    @cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.matchup', args=(self.team1.id, self.team2.id))
+
+    @classmethod
+    def get_all_for_team(cls, team1_id):
+        return [cls(team1_id, team2_id) for team2_id in Member.objects.all().order_by('first_name', 'last_name').values_list('id', flat=True)]
 
     def __str__(self):
         return "%s vs. %s" % (self.team1, self.team2)
