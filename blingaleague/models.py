@@ -163,21 +163,21 @@ class Season(models.Model):
     def robscores(self):
         robscores = defaultdict(lambda: 0)
 
-        for place, member in enumerate(self.playoff_results):
-            robscores[member] += 1 # all playoff teams get one
+        for place, team in enumerate(self.playoff_results):
+            robscores[team] += 1 # all playoff teams get one
 
             # there are bonuses for finishing in the top three
-            if member == self.place_1:
-                robscores[member] += 1.0
-            elif member == self.place_2:
-                robscores[member] += 0.5
-            elif member == self.place_3:
-                robscores[member] += 0.25
+            if team == self.place_1:
+                robscores[team] += 1.0
+            elif team == self.place_2:
+                robscores[team] += 0.5
+            elif team == self.place_3:
+                robscores[team] += 0.25
 
         # regular-season winner and runner-up also get something
         standings = Standings(year=self.year)
-        robscores[standings.table[0].member] += 0.5
-        robscores[standings.table[1].member] += 0.25
+        robscores[standings.table[0].team] += 0.5
+        robscores[standings.table[1].team] += 0.25
 
         return robscores
 
@@ -363,15 +363,15 @@ class Standings(object):
 
     @cached_property
     def table(self):
-        results_by_member = defaultdict(lambda: defaultdict(lambda: 0))
-        member_years = defaultdict(set)
+        results_by_team = defaultdict(lambda: defaultdict(lambda: 0))
+        team_years = defaultdict(set)
         for game in self.games:
-            member_years[game.winner.id].add(game.year)
-            member_years[game.loser.id].add(game.year)
+            team_years[game.winner.id].add(game.year)
+            team_years[game.loser.id].add(game.year)
 
-        member_records = [TeamRecord(member_id, years, include_playoffs=self.include_playoffs) for member_id, years in member_years.items()]
+        team_records = [TeamRecord(team_id, years, include_playoffs=self.include_playoffs) for team_id, years in team_years.items()]
 
-        return sorted(member_records, key=lambda x: (x.win_pct, x.points), reverse=True)
+        return sorted(team_records, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     def team_to_place(self, team):
         for place, team_record in enumerate(self.table):

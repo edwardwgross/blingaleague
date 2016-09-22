@@ -12,17 +12,17 @@
     <th>Exp. %</th>
     <th/> {# Playoff Finish #}
   </tr>
-  {% for member_record in standings.table %}
+  {% for team_record in standings.table %}
       <tr>
         <td>{{ forloop.counter }}</td>
-        <td style="text-align:left"><a href="{{ member_record.href }}">{{ member_record.member }}</a></td>
-        <td>{{ member_record.win_count }}</td>
-        <td>{{ member_record.loss_count }}</td>
-        <td>{{ member_record.win_pct|floatformat:3 }}</td>
-        <td>{{ member_record.points|intcomma }}</td>
-        <td>{{ member_record.expected_wins|floatformat:1 }}</td>
-        <td>{{ member_record.expected_win_pct|floatformat:3 }}</td>
-        <td style="text-align:left">{{ member_record.playoff_finish }}</td>
+        <td style="text-align:left"><a href="{{ team_record.href }}">{{ team_record.team }}</a></td>
+        <td>{{ team_record.win_count }}</td>
+        <td>{{ team_record.loss_count }}</td>
+        <td>{{ team_record.win_pct|floatformat:3 }}</td>
+        <td>{{ team_record.points|intcomma }}</td>
+        <td>{{ team_record.expected_wins|floatformat:1 }}</td>
+        <td>{{ team_record.expected_win_pct|floatformat:3 }}</td>
+        <td style="text-align:left">{{ team_record.playoff_finish }}</td>
       </tr>
   {% endfor %}
 </table>
