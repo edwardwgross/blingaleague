@@ -4,7 +4,7 @@ from django.core import urlresolvers
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView
 
-from .models import Standings, Game, Member, TeamRecord, Week, Matchup
+from .models import Standings, Game, Member, TeamSeason, Week, Matchup
 
 class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
@@ -93,7 +93,7 @@ class WeekView(GamesView):
 class TeamSeasonView(GamesView):
 
     def get(self, request, team, year):
-        base_object = TeamRecord(team, [year], include_playoffs=True)
+        base_object = TeamSeason(team, year, include_playoffs=True)
         context = {'base_object': base_object}
         return self.render_to_response(context)
 

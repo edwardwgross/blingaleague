@@ -41,8 +41,7 @@ class Member(models.Model):
 
     @cached_property
     def seasons(self):
-        years = set(self.games_won.values_list('year', flat=True)) | set(self.games_lost.values_list('year', flat=True))
-        return TeamRecord.get_all_for_team(self.id, years)
+        return TeamMultiSeasons(self.id)
 
     @cached_property
     def href(self):
@@ -202,19 +201,17 @@ class Season(models.Model):
         return str(self)
 
 
-class TeamRecord(object):
+class TeamSeason(object):
 
-    def __init__(self, team_id, years, include_playoffs=False):
-        self.years = set(years)
+    def __init__(self, team_id, year, include_playoffs=False):
+        self.year = int(year)
         self.team = Member.objects.get(id=team_id)
         self.include_playoffs = include_playoffs
 
-        self.season = None
-        if len(self.years) == 1:
-            try:
-                self.season = Season.objects.get(year=list(self.years)[0])
-            except Season.DoesNotExist:
-                pass # this is ok, it's the current season
+        try:
+            self.season = Season.objects.get(year=self.year)
+        except Season.DoesNotExist:
+            self.season = None  # this is ok, it's the current season
 
     @cached_property
     def games(self):
@@ -222,14 +219,14 @@ class TeamRecord(object):
 
     @cached_property
     def wins(self):
-        wins = self.team.games_won.filter(year__in=self.years)
+        wins = self.team.games_won.filter(year=self.year)
         if not self.include_playoffs:
             wins = wins.filter(week__lte=REGULAR_SEASON_WEEKS)
         return list(wins)
 
     @cached_property
     def losses(self):
-        losses = self.team.games_lost.filter(year__in=self.years)
+        losses = self.team.games_lost.filter(year=self.year)
         if not self.include_playoffs:
             losses = losses.filter(week__lte=REGULAR_SEASON_WEEKS)
         return list(losses)
@@ -256,13 +253,10 @@ class TeamRecord(object):
 
     @cached_property
     def standings(self):
-        return Standings(year=list(self.years)[0])
+        return Standings(year=self.year)
 
     @cached_property
     def place(self):
-        if len(self.years) != 1:
-            return None
-
         place = self.standings.team_to_place(self.team)
         if place is None:
             return '?'
@@ -271,7 +265,7 @@ class TeamRecord(object):
 
     @cached_property
     def playoff_finish(self):
-        if len(self.years) != 1 or self.season is None:
+        if self.season is None:
             return ''
 
         if self.team == self.season.place_1:
@@ -293,15 +287,6 @@ class TeamRecord(object):
         return decimal.Decimal(self.expected_wins) / decimal.Decimal(len(self.games))
 
     @cached_property
-    def robscore(self):
-        robscore = 0
-
-        if len(self.years) > 1:
-            return sum([TeamRecord(self.team.id, [year]).robscore for year in self.years])
-
-        return self.season.robscores[self.team]
-
-    @cached_property
     def headline(self):
         text = "%s-%s, %s points" % (self.win_count, self.loss_count, self.points)
         if self.playoff_finish:
@@ -310,17 +295,51 @@ class TeamRecord(object):
 
     @cached_property
     def href(self):
-        if len(self.years) == 1:
-            url_name = 'blingaleague.team_season'
-            args = (self.team.id, list(self.years)[0])
-        else:
-            url_name = 'blingaleague.team'
-            args = (self.team.id,)
-        return urlresolvers.reverse_lazy(url_name, args=args)
+        return urlresolvers.reverse_lazy('blingaleague.team_season', args=(self.team.id, self.year))
 
-    @classmethod
-    def get_all_for_team(cls, team_id, years):
-        return [cls(team_id, [year]) for year in sorted(years, reverse=True)]
+    def __str__(self):
+        return "%s - %s" % (self.team, self.year)
+
+    def __repr__(self):
+        return str(self)
+
+
+class TeamMultiSeasons(TeamSeason):
+
+    def __init__(self, team_id, years=None, include_playoffs=False):
+        if years is None:
+            years = Game.objects.all().values_list('year', flat=True).distinct()
+
+        self.years = sorted(years)
+        self.team = Member.objects.get(id=team_id)
+        self.include_playoffs = include_playoffs
+
+    @cached_property
+    def team_seasons(self):
+        team_seasons = []
+        for year in self.years:
+            team_season = TeamSeason(self.team.id, year, include_playoffs=self.include_playoffs)
+            if len(team_season.games) > 0:
+                team_seasons.append(team_season)
+        return team_seasons
+
+    @cached_property
+    def wins(self):
+        wins = []
+        for team_season in self:
+            wins += team_season.wins
+        return wins
+
+    @cached_property
+    def losses(self):
+        losses = []
+        for team_season in self:
+            losses += team_season.losses
+        return losses
+
+    def __iter__(self):
+        for team_season in self.team_seasons:
+            yield team_season
 
     def __str__(self):
         return "%s - %s" % (self.team, ', '.join(map(str, self.years)))
@@ -354,28 +373,29 @@ class Standings(object):
                 pass  # won't exist for the current season
 
     @cached_property
-    def games(self):
-        games = Game.objects.all()
-
-        if self.year is not None:
-            games = games.filter(year=self.year)
-
-        if not self.include_playoffs:
-            games = games.filter(week__lte=REGULAR_SEASON_WEEKS)
-
-        return games
-
-    @cached_property
     def table(self):
-        results_by_team = defaultdict(lambda: defaultdict(lambda: 0))
-        team_years = defaultdict(set)
-        for game in self.games:
-            team_years[game.winner.id].add(game.year)
-            team_years[game.loser.id].add(game.year)
+        team_records = []
 
-        team_records = [TeamRecord(team_id, years, include_playoffs=self.include_playoffs) for team_id, years in team_years.items()]
+        for member in Member.objects.all():
+            if self.all_time:
+                team_record = TeamMultiSeasons(member.id, include_playoffs=self.include_playoffs)
+            else:
+                team_record = TeamSeason(member.id, self.year, include_playoffs=self.include_playoffs)
+
+            if len(team_record.games) > 0:
+                team_records.append(team_record)
 
         return sorted(team_records, key=lambda x: (x.win_pct, x.points), reverse=True)
+
+    @cached_property
+    def href(self):
+        if self.year is not None:
+            return urlresolvers.reverse_lazy('blingaleague.standings_year', args=(self.year,))
+        elif self.all_time:
+            getargs = ''
+            if self.include_playoffs:
+                getargs = '?include_playoffs'
+            return "%s%s" % (urlresolvers.reverse_lazy('blingaleague.standings_all_time'), getargs)
 
     def team_to_place(self, team):
         for place, team_record in enumerate(self.table):

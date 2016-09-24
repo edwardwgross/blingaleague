@@ -11,12 +11,12 @@
   <div>
     <h2>Seasons</h2>
     <ul>
-      {% for season in team.seasons %}
+      {% for team_season in team.seasons %}
         <li>
-          <a href="{{ season.standings.href }}">{{ season.standings.year }}</a>:
-          <a href="{{ season.href }}">{{ season.record }}</a>,
-          {{ season.place }}
-          {% if season.playoff_finish %}({{ season.playoff_finish }}){% endif %}
+          <a href="{{ team_season.standings.href }}">{{ team_season.standings.year }}</a>:
+          <a href="{{ team_season.href }}">{{ team_season.record }}</a>,
+          {{ team_season.place }}
+          {% if team_season.playoff_finish %}({{ team_season.playoff_finish }}){% endif %}
         </li>
       {% endfor %}
     </ul>
