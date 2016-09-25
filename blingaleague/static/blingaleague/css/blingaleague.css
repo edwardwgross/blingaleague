@@ -55,15 +55,16 @@ nav .icon-bar {
 }
 
 .nav li a, nav li a,
-.nav li a, nav li a:visited,
-.nav li a, nav li a:focus,
-.nav li a, nav li a:active {
+.nav li a, nav li a:visited {
     color: white;
     background-color: #a4c2f4;
     font-weight: bold;
 }
 
-.nav li a:hover {
+.nav li a:hover,
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
     color: red;
     background-color: white;
 }
