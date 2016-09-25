@@ -6,6 +6,7 @@ from django.views.generic.edit import CreateView
 
 from .models import Standings, Game, Member, TeamSeason, Week, Matchup
 
+
 class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
 

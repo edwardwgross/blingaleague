@@ -434,6 +434,14 @@ class Week(object):
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.week', args=(self.year, self.week))
 
+    @cached_property
+    def average_score(self):
+        return sum(map(lambda x: x.winner_score + x.loser_score, self.games)) / (2 * self.games.count())
+
+    @cached_property
+    def average_margin(self):
+        return sum(map(lambda x: x.winner_score - x.loser_score, self.games)) / self.games.count()
+
     @classmethod
     def latest(cls):
         year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]

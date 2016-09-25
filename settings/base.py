@@ -17,6 +17,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.staticfiles',
     'blingaleague',
+    'blingalytics',
 )
 
 MIDDLEWARE_CLASSES = (

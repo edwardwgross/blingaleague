@@ -25,7 +25,7 @@ th, td {
     padding: 0 6px;
 }
 
-th, th a {
+th, th a, thead tr::before {
     font-weight: bold;
     color: white;
     background-color: #a4c2f4;
@@ -54,15 +54,16 @@ nav .icon-bar {
     background-color: red;
 }
 
-.nav li > a, nav li > a,
-.nav li > a, nav li > a:visited,
-.nav li > a, nav li > a:focus,
-.nav li > a, nav li > a:active {
+.nav li a, nav li a,
+.nav li a, nav li a:visited,
+.nav li a, nav li a:focus,
+.nav li a, nav li a:active {
     color: white;
+    background-color: #a4c2f4;
     font-weight: bold;
 }
 
-.nav li > a:hover {
+.nav li a:hover {
     color: red;
     background-color: white;
 }
@@ -71,6 +72,9 @@ nav .icon-bar {
     background-color: inherit;
 }
 
+.dropdown-menu {
+    padding: 0;
+}
 
 #main_outer {
     padding: 0 15px 30px 15px;
@@ -125,4 +129,20 @@ table#team_vs_team_grid .empty {
 #games .game teams,
 #games .game .score {
     font-size: 18px;
+}
+
+table.sortable tbody {
+    counter-reset: sortabletablescope;
+}
+table.sortable thead tr::before {
+    content: "";
+    display: table-cell;
+}
+table.sortable tbody tr::before {
+    content: counter(sortabletablescope);
+    counter-increment: sortabletablescope;
+    display: table-cell;
+}
+table.sortable th {
+    cursor: pointer;
 }

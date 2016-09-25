@@ -1,8 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 
 from .views import HomeView, TeamDetailsView, TeamVsTeamView, AddGameResultView,\
                    StandingsYearView, StandingsCurrentView, StandingsAllTimeView,\
                    GamesView, MatchupView, WeekView, TeamSeasonView
+
 
 urlpatterns = patterns('',
     url(r'^$', HomeView.as_view(), name='blingaleague.home'),
@@ -15,5 +16,7 @@ urlpatterns = patterns('',
     url(r'^team/(?P<team>\d+)/(?P<year>\d{4})/$', TeamSeasonView.as_view(), name='blingaleague.team_season'),
     url(r'^team_vs_team/$', TeamVsTeamView.as_view(), name='blingaleague.team_vs_team'),
     url(r'^add_game_result/$', AddGameResultView.as_view(), name='blingaleague.add_game_result'),
+
+    (r'^blingalytics/', include('blingalytics.urls')),
 )
 
