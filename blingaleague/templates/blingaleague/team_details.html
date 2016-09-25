@@ -11,7 +11,7 @@
   <div>
     <h2>Seasons</h2>
     <ul>
-      {% for team_season in team.seasons %}
+      {% for team_season in team.seasons reversed %}
         <li>
           <a href="{{ team_season.standings.href }}">{{ team_season.standings.year }}</a>:
           <a href="{{ team_season.href }}">{{ team_season.record }}</a>,

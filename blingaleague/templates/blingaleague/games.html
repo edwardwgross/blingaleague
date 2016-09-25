@@ -9,17 +9,7 @@
 
 <div id="games">
   {% for game in base_object.games %}
-    <div class="game">
-      <div class="week">
-        <a href="{{ game.week_object.href }}">{{ game.title }}</a>
-      </div>
-      <div class="teams">
-        <a href="{{ game.winner.href }}">{{ game.winner }}</a>
-        def.
-        <a href="{{ game.loser.href }}">{{ game.loser }}</a>
-      </div>
-      <div class="score">{{ game.winner_score }} - {{ game.loser_score }}</div>
-    </div>
+    {% include "blingaleague/single_game.html" %}
   {% endfor %}
 </div>
 

@@ -12,7 +12,10 @@ class HomeView(TemplateView):
     def get(self, request):
         standings = Standings()
 
-        context = {'standings': standings}
+        year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
+        week = Week(year, week)
+
+        context = {'standings': standings, 'week': week}
 
         return self.render_to_response(context)
 

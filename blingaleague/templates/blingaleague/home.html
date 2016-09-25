@@ -6,4 +6,11 @@
 <h2>Current standings</h2>
 {% include "blingaleague/standings_table.html" %}
 
+<div id="games">
+  <h2>Last week</h2>
+  {% for game in week.games %}
+    {% include "blingaleague/single_game.html" %}
+  {% endfor %}
+</div>
+
 {% endblock content %}
