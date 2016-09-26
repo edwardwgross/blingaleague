@@ -111,11 +111,22 @@ table#team_vs_team_grid .empty {
     background-color: #eaeaea;
 }
 
+#games {
+    max-width: 600px;
+}
+
 #games .game {
     padding: 12px 24px;
     text-align: center;
     border-bottom: 1px solid #a4c2f4;
-    max-width: 600px;
+}
+
+#games .previous {
+    float: left;
+}
+
+#games .next {
+    float: right;
 }
 
 #games .game:first {

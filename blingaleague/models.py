@@ -297,6 +297,24 @@ class TeamSeason(object):
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team_season', args=(self.team.id, self.year))
 
+    @cached_property
+    def previous(self):
+        prev_ts = TeamSeason(self.team.id, self.year - 1, include_playoffs=self.include_playoffs)
+
+        if len(prev_ts.games) == 0:
+            return None
+
+        return prev_ts
+
+    @cached_property
+    def next(self):
+        next_ts = TeamSeason(self.team.id, self.year + 1, include_playoffs=self.include_playoffs)
+
+        if len(next_ts.games) == 0:
+            return None
+
+        return next_ts
+
     def __str__(self):
         return "%s - %s" % (self.team, self.year)
 
@@ -422,8 +440,8 @@ class Standings(object):
 class Week(object):
 
     def __init__(self, year, week):
-        self.year = year
-        self.week = week
+        self.year = int(year)
+        self.week = int(week)
 
     @cached_property
     def games(self):
@@ -441,6 +459,30 @@ class Week(object):
     @cached_property
     def average_margin(self):
         return sum(map(lambda x: x.winner_score - x.loser_score, self.games)) / self.games.count()
+
+    @cached_property
+    def previous(self):
+        if self.week == 1:
+            prev_week = Week(self.year - 1, BLINGABOWL_WEEK)
+        else:
+            prev_week = Week(self.year, self.week - 1)
+
+        if prev_week.games.count() == 0:
+            return None
+
+        return prev_week
+
+    @cached_property
+    def next(self):
+        if self.week == BLINGABOWL_WEEK:
+            next_week = Week(self.year + 1, 1)
+        else:
+            next_week = Week(self.year, self.week + 1)
+
+        if next_week.games.count() == 0:
+            return None
+
+        return next_week
 
     @classmethod
     def latest(cls):
