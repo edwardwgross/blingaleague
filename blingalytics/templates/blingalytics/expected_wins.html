@@ -1,0 +1,18 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Blingalytics: Expected Wins Calculator{% endblock %}
+
+{% block content %}
+<h1>Blingalytics: Expected Wins Calculator</h1>
+
+<div id="expected_wins">
+  {% if expected_wins != None %}
+    <span>Expected wins for a score of <em>{{ score }}</em>: <strong>{{ expected_wins|floatformat:3 }}</strong>
+  {% endif %}
+
+  <form method="get">
+    Score <input type="text" name="score" {% if score != None %}value="{{ score }}"{% endif %}/>
+    <input type="submit" value="Submit"/>
+  </form>
+</div>
+{% endblock content %}

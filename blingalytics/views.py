@@ -20,7 +20,19 @@ class WeeklyScoresView(TemplateView):
 
 
 class ExpectedWinsView(TemplateView):
-    template_name = 'blingaleague/home.html'
+    template_name = 'blingalytics/expected_wins.html'
+
+    def get(self, request):
+        expected_wins = None
+
+        score = request.GET.get('score', None)
+        if score is not None:
+            expected_wins = Game.expected_wins([decimal.Decimal(score)])
+
+        context = {'score': score, 'expected_wins': expected_wins}
+
+        return self.render_to_response(context)
+
 
 class GameFinderView(TemplateView):
     template_name = 'blingalytics/game_finder.html'

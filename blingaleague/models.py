@@ -99,9 +99,11 @@ class Game(models.Model):
         for winner_score, loser_score in Game.objects.all().values_list('winner_score', 'loser_score'):
             all_scores.extend([winner_score, loser_score])
 
+        all_scores_count = decimal.Decimal(len(all_scores))
+
         def _win_expectancy(score):
             win_count = len(filter(lambda x: x < score, all_scores))
-            return decimal.Decimal(win_count) / decimal.Decimal(len(all_scores))
+            return decimal.Decimal(win_count) / all_scores_count
 
         return sum(_win_expectancy(score) for score in game_scores)
 
