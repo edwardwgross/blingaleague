@@ -355,6 +355,10 @@ class TeamMultiSeasons(TeamSeason):
             losses += team_season.losses
         return losses
 
+    @cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.team', args=(self.team.id,))
+
     def __iter__(self):
         for team_season in self.team_seasons:
             yield team_season

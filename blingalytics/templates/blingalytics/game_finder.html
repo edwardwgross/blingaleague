@@ -1,0 +1,32 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Blingalytics: Game Finder{% endblock %}
+
+{% block content %}
+<h1>Blingalytics: Game Finder</h1>
+
+{{ games.query }}
+<div id="game_finder">
+  <em>(click on the column headings to sort)</em>
+  <table id="game_finder_list" class="sortable">
+    <tr>
+      <th>Year</th>
+      <th>Week</th>
+      <th>Winner</th>
+      <th>Loser</th>
+      <th>Winner Score</th>
+      <th>Loser Score</th>
+    </tr>
+    {% for game in games %}
+      <tr>
+        <td>{{ game.year}}</td>
+        <td>{{ game.week }}</td>
+        <td>{{ game.winner }}</td>
+        <td>{{ game.loser }}</td>
+        <td>{{ game.winner_score }}</td>
+        <td>{{ game.loser_score }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock content %}
