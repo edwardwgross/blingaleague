@@ -6,6 +6,11 @@
 <h1>Blingalytics: Game Finder</h1>
 
 <div id="game_finder">
+  <form method="get">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit"/>
+  </form>
   <em>(click on the column headings to sort)</em>
   <table id="game_finder_list" class="sortable">
     <tr>

@@ -1,9 +1,10 @@
 import decimal
 
+from django import forms
 from django.db.models import Q
 from django.views.generic import TemplateView
 
-from blingaleague.models import REGULAR_SEASON_WEEKS, Game, Week
+from blingaleague.models import REGULAR_SEASON_WEEKS, Game, Week, Member
 
 
 class WeeklyScoresView(TemplateView):
@@ -34,34 +35,51 @@ class ExpectedWinsView(TemplateView):
         return self.render_to_response(context)
 
 
+class GameFinderForm(forms.Form):
+    year = forms.IntegerField(required=False)
+    week = forms.IntegerField(required=False)
+    winner = forms.TypedChoiceField(required=False, coerce=int,
+        choices=[('', '')] + [(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
+    )
+    loser = forms.TypedChoiceField(required=False, coerce=int,
+        choices=[('', '')] + [(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
+    )
+    winner_score_min = forms.DecimalField(required=False)
+    winner_score_max = forms.DecimalField(required=False)
+    loser_score_min = forms.DecimalField(required=False)
+    loser_score_max = forms.DecimalField(required=False)
+
+
 class GameFinderView(TemplateView):
     template_name = 'blingalytics/game_finder.html'
 
     def get(self, request):
+        game_finder_form = GameFinderForm(request.GET)
+
         games = Game.objects.all()
 
         for arg in ('year', 'week'):
-            arg_vals = request.GET.getlist(arg)
-            if arg_vals:
-                games = games.filter(**{"%s__in" % arg: arg_vals})
+            arg_val = request.GET.get(arg, '')
+            if arg_val:
+                games = games.filter(**{arg: arg_val})
 
-        winner = request.GET.get('winner', None)
-        loser = request.GET.get('loser', None)
-        if winner is not None and loser is not None and winner == loser:
+        winner = request.GET.get('winner', '')
+        loser = request.GET.get('loser', '')
+        if winner and loser and winner == loser:
             games = games.filter(Q(winner__id=int(winner)) | Q(loser__id=int(loser)))
         else:
-            if winner is not None:
+            if winner:
                 games = games.filter(winner__id=int(winner))
-            if loser is not None:
+            if loser:
                 games = games.filter(loser__id=int(loser))
 
-        winner_score_min = request.GET.get('winner_score_min', None)
-        winner_score_max = request.GET.get('winner_score_max', None)
-        loser_score_min = request.GET.get('loser_score_min', None)
-        loser_score_max = request.GET.get('loser_score_max', None)
+        winner_score_min = request.GET.get('winner_score_min', '')
+        winner_score_max = request.GET.get('winner_score_max', '')
+        loser_score_min = request.GET.get('loser_score_min', '')
+        loser_score_max = request.GET.get('loser_score_max', '')
         for arg in ('winner_score_min', 'winner_score_max', 'loser_score_min', 'loser_score_max'):
-            arg_val = request.GET.get(arg, None)
-            if arg_val is not None:
+            arg_val = request.GET.get(arg, '')
+            if arg_val:
                 arg_val = decimal.Decimal(arg_val)
                 field = '_'.join(arg.split('_')[0:2])
                 if arg.endswith('_max'):
@@ -75,6 +93,6 @@ class GameFinderView(TemplateView):
 
         games = games.order_by('year', 'week', '-winner_score', '-loser_score')
 
-        context = {'games': games}
+        context = {'form': game_finder_form, 'games': games}
 
         return self.render_to_response(context)
