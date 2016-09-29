@@ -201,3 +201,6 @@ table.sortable th {
     clear: none;
 }
 
+#game_finder form ul li ul li label {
+    font-weight: normal;
+}

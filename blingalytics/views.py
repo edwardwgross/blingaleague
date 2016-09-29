@@ -44,18 +44,21 @@ class ExpectedWinsView(TemplateView):
 class GameFinderForm(forms.Form):
     year_min = forms.IntegerField(required=False, label='Start Year')
     year_max = forms.IntegerField(required=False, label='End Year')
-    week_type = forms.TypedChoiceField(required=False, label='Regular Season / Playoffs',
-        choices=[('', '(Any)'), (CHOICE_REGULAR_SEASON, 'Regular season only'), (CHOICE_PLAYOFFS, 'Playoffs only')],
+    week_type = forms.TypedChoiceField(required=False, label='Weeks',
+        widget=forms.RadioSelect,
+        choices=[('', 'Any week'), (CHOICE_REGULAR_SEASON, 'Regular season only'), (CHOICE_PLAYOFFS, 'Playoffs only')],
     )
-    teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams', widget=forms.CheckboxSelectMultiple,
+    teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams',
+        widget=forms.CheckboxSelectMultiple,
         choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
     )
     score_min = forms.DecimalField(required=False, label='Minimum Score')
     score_max = forms.DecimalField(required=False, label='Maximum Score')
     margin_min = forms.DecimalField(required=False, label='Minimum Margin')
     margin_max = forms.DecimalField(required=False, label='Maximum Margin')
-    outcome = forms.TypedChoiceField(required=False, label='Wins / Losses',
-        choices=[('', '(Any)'), (CHOICE_WINS, 'Wins only'), (CHOICE_LOSSES, 'Losses only')],
+    outcome = forms.TypedChoiceField(required=False, label='Outcome',
+        widget=forms.RadioSelect,
+        choices=[('', 'Any outcome'), (CHOICE_WINS, 'Wins only'), (CHOICE_LOSSES, 'Losses only')],
     )
 
 

@@ -29,6 +29,7 @@
           <th>Winner Score</th>
           <th>Loser Score</th>
           <th>Margin</th>
+          <th>{# Playoff Title #}</th>
         </tr>
         {% for game in games %}
           <tr>
@@ -39,6 +40,7 @@
             <td>{{ game.winner_score }}</td>
             <td>{{ game.loser_score }}</td>
             <td>{{ game.margin }}</td>
+            <td>{{ game.playoff_title }}</td>
           </tr>
         {% endfor %}
       </table>

@@ -69,29 +69,34 @@ class Game(models.Model):
 
     @cached_property
     def title(self):
-        title = None
+        if self.playoff_title:
+            return self.playoff_title
+        return str(self.week_object)
+
+    @cached_property
+    def playoff_title(self):
         if self.week > REGULAR_SEASON_WEEKS:
             try:
                 season = Season.objects.get(year=self.year)
                 if self.week == BLINGABOWL_WEEK:
                     if self.winner == season.place_1:
-                        title = "Blingabowl %s" % season.blingabowl
+                        playoff_title = "Blingabowl %s" % season.blingabowl
                     else:
-                        title = 'Third-place game'
+                        playoff_title = 'Third-place game'
                 elif self.week == (BLINGABOWL_WEEK - 1):
                     if self.winner == season.place_5:
-                        title = 'Fifth-place game'
+                        playoff_title = 'Fifth-place game'
                     else:
-                        title = 'Semifinals'
+                        playoff_title = 'Semifinals'
                 else:
-                    title = 'Quarterfinals'
+                    playoff_title = 'Quarterfinals'
+
+                return "%s, %s" % (playoff_title, self.year)
             except Season.DoesNotExist:
                 pass  # current season won't have one
 
-        if title is not None:
-            return "%s, %s" % (title, self.year)
+        return ''
 
-        return str(self.week_object)
 
     @cached_property
     def margin(self):
@@ -138,7 +143,7 @@ class Game(models.Model):
         super(Game, self).validate_unique(**kwargs)
 
     def __str__(self):
-        return "%s, week %s: %s def. %s" % (self.year, self.week, self.winner, self.loser)
+        return "%s: %s def. %s" % (self.title, self.winner, self.loser)
 
     def __repr__(self):
         return str(self)
