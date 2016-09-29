@@ -171,36 +171,42 @@ table.sortable th {
 }
 
 #game_finder button,
-#game_finder form {
+#game_finder_form {
     font-size: 12px;
     max-width: 600px;
 }
 
-#game_finder form input[type=submit] {
+#game_finder_form input[type=submit] {
     clear: both;
     margin-left: 150px;
 }
 
-#game_finder form input[type=checkbox] {
+#game_finder_form input[type=checkbox] {
     vertical-align: top;
     margin-top: 2px;
 }
 
-#game_finder form label {
+#game_finder_form label {
     width: 150px;
 }
 
-#game_finder form ul li {
+#game_finder_form ul li {
     display: block;
     clear: both;
 }
 
-#game_finder form ul li ul li {
+#game_finder_form ul li ul li {
     width: 150px;
     float: left;
     clear: none;
 }
 
-#game_finder form ul li ul li label {
+#game_finder_form ul li ul li label {
     font-weight: normal;
+}
+
+#game_finder_form .errorlist {
+    float: right;
+    font-style: italic;
+    color: red;
 }
