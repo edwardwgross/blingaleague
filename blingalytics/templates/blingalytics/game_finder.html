@@ -5,32 +5,52 @@
 {% block content %}
 <h1>Blingalytics: Game Finder</h1>
 
-<div id="game_finder">
-  <form method="get">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit"/>
-  </form>
-  <em>(click on the column headings to sort)</em>
-  <table id="game_finder_list" class="sortable">
-    <tr>
-      <th>Year</th>
-      <th>Week</th>
-      <th>Winner</th>
-      <th>Loser</th>
-      <th>Winner Score</th>
-      <th>Loser Score</th>
-    </tr>
-    {% for game in games %}
-      <tr>
-        <td>{{ game.year}}</td>
-        <td>{{ game.week }}</td>
-        <td>{{ game.winner }}</td>
-        <td>{{ game.loser }}</td>
-        <td>{{ game.winner_score }}</td>
-        <td>{{ game.loser_score }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+<div id="game_finder" class="blingalytics">
+  <div id="game_finder_controls">
+    <button type="button" id="form_toggle_button">Show/hide form</button>
+    <form id="game_finder_form" method="get">
+      {% csrf_token %}
+      <ul>
+        {{ form.as_ul }}
+        <li><input type="submit" value="Submit"/></li>
+      </ul>
+    </form>
+    <div style="clear:both"></div>
+  </div>
+  <div id="games_found">
+    {% if games %}
+      <em>(click on the column headings to sort)</em>
+      <table class="sortable">
+        <tr>
+          <th>Year</th>
+          <th>Week</th>
+          <th>Winner</th>
+          <th>Loser</th>
+          <th>Winner Score</th>
+          <th>Loser Score</th>
+          <th>Margin</th>
+        </tr>
+        {% for game in games %}
+          <tr>
+            <td>{{ game.year}}</td>
+            <td>{{ game.week }}</td>
+            <td>{{ game.winner }}</td>
+            <td>{{ game.loser }}</td>
+            <td>{{ game.winner_score }}</td>
+            <td>{{ game.loser_score }}</td>
+            <td>{{ game.margin }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <em>No games found</em>
+    {% endif %}
+  </div>
 </div>
+
+<script type="text/javascript">
+    $("#form_toggle_button").click(function() {
+        $('#game_finder_form').toggle();
+    });
+</script>
 {% endblock content %}

@@ -13,7 +13,6 @@ li {
 }
 
 table, tr, th, td, table a {
-    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
     font-size: inherit;
 }
 
@@ -59,7 +58,8 @@ nav .icon-bar {
 }
 
 .nav li a, nav li a,
-.nav li a, nav li a:visited {
+.nav li a:visited, nav li a:visited,
+.nav li a:focus, nav li a:focus {
     color: white;
     background-color: #a4c2f4;
     font-weight: bold;
@@ -120,6 +120,7 @@ table#team_vs_team_grid .empty {
 }
 
 #games .game {
+    clear: both;
     padding: 12px 24px;
     text-align: center;
     border-bottom: 1px solid #a4c2f4;
@@ -161,3 +162,42 @@ table.sortable tbody tr::before {
 table.sortable th {
     cursor: pointer;
 }
+
+.blingalytics th,
+.blingalytics td,
+.blingalytics thead tr::before,
+.blingalytics tbody tr::before {
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+}
+
+#game_finder button,
+#game_finder form {
+    font-size: 12px;
+    max-width: 600px;
+}
+
+#game_finder form input[type=submit] {
+    clear: both;
+    margin-left: 150px;
+}
+
+#game_finder form input[type=checkbox] {
+    vertical-align: top;
+    margin-top: 2px;
+}
+
+#game_finder form label {
+    width: 150px;
+}
+
+#game_finder form ul li {
+    display: block;
+    clear: both;
+}
+
+#game_finder form ul li ul li {
+    width: 150px;
+    float: left;
+    clear: none;
+}
+

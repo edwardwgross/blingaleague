@@ -5,22 +5,23 @@
 {% block content %}
 <h1>Blingalytics: Weekly Average Scores</h1>
 
-<em>(click on the column headings to sort)</em>
-
-<table id="weekly_average_scores" class="sortable">
-  <tr>
-    <th>Year</th>
-    <th>Week</th>
-    <th>Score</th>
-    <th>Margin</th>
-  </tr>
-  {% for week in weeks %}
+<div id="weekly_average_scores" class="blingalytics">
+  <em>(click on the column headings to sort)</em>
+  <table class="sortable">
     <tr>
-      <td>{{ week.year }}</td>
-      <td>{{ week.week }}</td>
-      <td>{{ week.average_score|floatformat:2 }}</td>
-      <td>{{ week.average_margin|floatformat:2 }}</td>
+      <th>Year</th>
+      <th>Week</th>
+      <th>Score</th>
+      <th>Margin</th>
     </tr>
-  {% endfor %}
-</table>
+    {% for week in weeks %}
+      <tr>
+        <td>{{ week.year }}</td>
+        <td>{{ week.week }}</td>
+        <td>{{ week.average_score|floatformat:2 }}</td>
+        <td>{{ week.average_margin|floatformat:2 }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
 {% endblock content %}

@@ -5,7 +5,7 @@
 {% block content %}
 <h1>Blingalytics: Expected Wins Calculator</h1>
 
-<div id="expected_wins">
+<div id="expected_wins" class="blingalytics">
   {% if expected_wins != None %}
     <span>Expected wins for a score of <em>{{ score }}</em>: <strong>{{ expected_wins|floatformat:3 }}</strong>
   {% endif %}

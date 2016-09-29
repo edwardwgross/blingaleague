@@ -93,6 +93,10 @@ class Game(models.Model):
 
         return str(self.week_object)
 
+    @cached_property
+    def margin(self):
+        return self.winner_score - self.loser_score
+
     @classmethod
     def expected_wins(cls, game_scores):
         all_scores = []
@@ -460,11 +464,11 @@ class Week(object):
 
     @cached_property
     def average_score(self):
-        return sum(map(lambda x: x.winner_score + x.loser_score, self.games)) / (2 * self.games.count())
+        return sum(map(lambda x: x.margin, self.games)) / (2 * self.games.count())
 
     @cached_property
     def average_margin(self):
-        return sum(map(lambda x: x.winner_score - x.loser_score, self.games)) / self.games.count()
+        return sum(map(lambda x: x.margin, self.games)) / self.games.count()
 
     @cached_property
     def previous(self):
