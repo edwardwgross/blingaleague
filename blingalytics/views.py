@@ -96,25 +96,26 @@ class GameFinderView(TemplateView):
 
             score_min = form_data['score_min']
             score_max = form_data['score_max']
-            winner_score_filter = None
-            loser_score_filter = None
-            has_score_filter = (score_min is not None) or (score_max is not None)
+            score_filter_kwargs = {}
             if score_min is not None and score_max is not None:
-                winner_score_filter = Q(winner_score__gte=score_min, winner_score__lte=score_max)
-                loser_score_filter = Q(loser_score__gte=score_min, loser_score__lte=score_max)
+                score_filter_kwargs['winner_score__gte'] = score_min
+                score_filter_kwargs['winner_score__lte'] = score_max
+                score_filter_kwargs['loser_score__gte'] = score_min
+                score_filter_kwargs['loser_score__lte'] = score_max
             elif score_min is not None:
-                winner_score_filter = Q(winner_score__gte=score_min)
-                loser_score_filter = Q(loser_score__gte=score_min)
+                score_filter_kwargs['winner_score__gte'] = score_min
+                score_filter_kwargs['loser_score__gte'] = score_min
             elif score_max is not None:
-                winner_score_filter = Q(winner_score__lte=score_max)
-                loser_score_filter = Q(loser_score__lte=score_max)
+                score_filter_kwargs['winner_score__lte'] = score_max
+                score_filter_kwargs['loser_score__lte'] = score_max
 
-            if has_score_filter:
-                score_filter = winner_score_filter | loser_score_filter
-                if wins_only:
-                    games = games.filter(winner_score_filter)
-                elif losses_only:
-                    games = games.filter(loser_score_filter)
+            if wins_only:
+                score_filter_kwargs = dict(filter(lambda x: x[0].startswith('winner'), score_filter_kwargs.items()))
+            elif losses_only:
+                score_filter_kwargs = dict(filter(lambda x: x[0].startswith('loser'), score_filter_kwargs.items()))
+
+            if score_filter_kwargs:
+                games = games.filter(**score_filter_kwargs)
 
             margin_min= form_data['margin_min']
             margin_max = form_data['margin_max']
