@@ -469,7 +469,7 @@ class Week(object):
 
     @cached_property
     def average_score(self):
-        return sum(map(lambda x: x.margin, self.games)) / (2 * self.games.count())
+        return sum(map(lambda x: x.winner_score + x.loser_score, self.games)) / (2 * self.games.count())
 
     @cached_property
     def average_margin(self):
