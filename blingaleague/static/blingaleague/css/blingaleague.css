@@ -12,6 +12,14 @@ li {
     list-style-type: none;
 }
 
+a, a:visited, a:focus {
+    color: #3344dd;
+}
+
+a:hover {
+    color: #5e44b3;
+}
+
 table, tr, th, td, table a {
     font-size: inherit;
 }
@@ -170,42 +178,50 @@ table.sortable th {
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
 }
 
-#game_finder button,
-#game_finder_form {
+.blingalytics th {
+    text-align: center;
+}
+
+.blingalytics td {
+    text-align: right;
+}
+
+.blingalytics_form {
     font-size: 12px;
     max-width: 600px;
 }
 
-#game_finder_form input[type=submit] {
+.blingalytics_form input[type=submit] {
     clear: both;
     margin-left: 150px;
 }
 
-#game_finder_form input[type=checkbox] {
+.blingalytics_form input[type=checkbox],
+.blingalytics_form input[type=radio] {
     vertical-align: top;
     margin-top: 2px;
 }
 
-#game_finder_form label {
+.blingalytics_form label {
     width: 150px;
 }
 
-#game_finder_form ul li {
+.blingalytics_form ul li {
     display: block;
     clear: both;
 }
 
-#game_finder_form ul li ul li {
+.blingalytics_form ul li ul li {
     width: 150px;
     float: left;
     clear: none;
 }
 
-#game_finder_form ul li ul li label {
+.blingalytics_form ul li ul li label {
     font-weight: normal;
 }
 
-#game_finder_form .errorlist {
+.blingalytics_form .errorlist {
     float: right;
     font-style: italic;
     color: red;

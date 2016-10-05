@@ -1,16 +1,20 @@
+import datetime
 import decimal
 
 from django import forms
 from django.db.models import Q, F
 from django.views.generic import TemplateView
 
-from blingaleague.models import REGULAR_SEASON_WEEKS, Game, Week, Member
+from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, \
+                                Game, Week, Member, TeamSeason
 
 
 CHOICE_WINS = 'wins'
 CHOICE_LOSSES = 'losses'
 CHOICE_REGULAR_SEASON = 'regular'
 CHOICE_PLAYOFFS = 'playoffs'
+CHOICE_MADE_PLAYOFFS = 'made_playoffs'
+CHOICE_MISSED_PLAYOFFS = 'missed_playoffs'
 
 
 class WeeklyScoresView(TemplateView):
@@ -129,3 +133,78 @@ class GameFinderView(TemplateView):
         context = {'form': game_finder_form, 'games': games}
 
         return self.render_to_response(context)
+
+
+class SeasonFinderForm(forms.Form):
+    year_min = forms.IntegerField(required=False, label='Start Year')
+    year_max = forms.IntegerField(required=False, label='End Year')
+    week_max = forms.IntegerField(required=False, label='Through Week')
+    teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
+    )
+    wins_min = forms.IntegerField(required=False, label='Minimum Wins')
+    wins_max = forms.IntegerField(required=False, label='Maximum Wins')
+    points_min = forms.IntegerField(required=False, label='Minimum Points')
+    points_max = forms.IntegerField(required=False, label='Maximum Points')
+    playoffs = forms.TypedChoiceField(required=False, label='Playoffs',
+        widget=forms.RadioSelect,
+        choices=[('', 'Any outcome'), (CHOICE_MADE_PLAYOFFS, 'Made playoffs'), (CHOICE_MISSED_PLAYOFFS, 'Missed playoffs')],
+    )
+
+
+class SeasonFinderView(TemplateView):
+    template_name = 'blingalytics/season_finder.html'
+
+    def filter_seasons(self, form_data):
+        year_min = FIRST_SEASON
+        year_max = datetime.datetime.today().year
+        if form_data['year_min'] is not None:
+            year_min = form_data['year_min']
+        if form_data['year_max'] is not None:
+            year_max = form_data['year_max']
+
+        team_ids = form_data['teams']
+        if len(team_ids) == 0:
+            team_ids = Member.objects.all().order_by('first_name', 'last_name').values_list('id', flat=True)
+
+        for year in range(year_min, year_max + 1):
+            for team_id in team_ids:
+                team_season = TeamSeason(team_id, year, week_max=form_data['week_max'])
+                if len(team_season.games) == 0:
+                    continue
+
+                if form_data['wins_min'] is not None:
+                    if team_season.win_count < form_data['wins_min']:
+                        continue
+                if form_data['wins_max'] is not None:
+                    if team_season.win_count > form_data['wins_max']:
+                        continue
+
+                if form_data['points_min'] is not None:
+                    if team_season.points < form_data['points_min']:
+                        continue
+                if form_data['points_max'] is not None:
+                    if team_season.points > form_data['points_max']:
+                        continue
+
+                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS:
+                    if team_season.place_numeric > 6:
+                        continue
+                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS:
+                    if team_season.place_numeric <= 6:
+                        continue
+
+                yield team_season
+
+    def get(self, request):
+        season_finder_form = SeasonFinderForm(request.GET)
+        if season_finder_form.is_valid():
+            form_data = season_finder_form.cleaned_data
+
+            seasons = self.filter_seasons(form_data)
+
+        context = {'form': season_finder_form, 'seasons': seasons}
+
+        return self.render_to_response(context)
+

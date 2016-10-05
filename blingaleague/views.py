@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from django.core import urlresolvers
+from django.http import HttpResponseForbidden
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView
 
@@ -130,3 +131,8 @@ class AddGameResultView(CreateView):
     model = Game
     fields = ['year', 'week', 'winner', 'winner_score', 'loser', 'loser_score', 'notes']
     success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')
+
+    def get(self, request):
+        if 'livecommish' != request.GET.get('_u', None):
+            return HttpResponseForbidden()
+        return super(AddGameResultView, self).get(request)

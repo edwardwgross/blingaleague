@@ -214,10 +214,15 @@ class Season(models.Model):
 
 class TeamSeason(object):
 
-    def __init__(self, team_id, year, include_playoffs=False):
+    def __init__(self, team_id, year, include_playoffs=False, week_max=None):
         self.year = int(year)
         self.team = Member.objects.get(id=team_id)
-        self.include_playoffs = include_playoffs
+        if week_max is None:
+            if include_playoffs:
+                week_max = BLINGABOWL_WEEK
+            else:
+                week_max = REGULAR_SEASON_WEEKS
+        self.week_max = week_max
 
         try:
             self.season = Season.objects.get(year=self.year)
@@ -230,16 +235,12 @@ class TeamSeason(object):
 
     @cached_property
     def wins(self):
-        wins = self.team.games_won.filter(year=self.year)
-        if not self.include_playoffs:
-            wins = wins.filter(week__lte=REGULAR_SEASON_WEEKS)
+        wins = self.team.games_won.filter(year=self.year, week__lte=self.week_max)
         return list(wins)
 
     @cached_property
     def losses(self):
-        losses = self.team.games_lost.filter(year=self.year)
-        if not self.include_playoffs:
-            losses = losses.filter(week__lte=REGULAR_SEASON_WEEKS)
+        losses = self.team.games_lost.filter(year=self.year, week__lte=self.week_max)
         return list(losses)
 
     @cached_property
@@ -267,12 +268,15 @@ class TeamSeason(object):
         return Standings(year=self.year)
 
     @cached_property
+    def place_numeric(self):
+        return self.standings.team_to_place(self.team)
+
+    @cached_property
     def place(self):
-        place = self.standings.team_to_place(self.team)
-        if place is None:
+        if self.place_numeric is None:
             return '?'
 
-        return ordinal(place)
+        return ordinal(place_numeric)
 
     @cached_property
     def playoff_finish(self):
@@ -310,7 +314,7 @@ class TeamSeason(object):
 
     @cached_property
     def previous(self):
-        prev_ts = TeamSeason(self.team.id, self.year - 1, include_playoffs=self.include_playoffs)
+        prev_ts = TeamSeason(self.team.id, self.year - 1, week_max=self.week_max)
 
         if len(prev_ts.games) == 0:
             return None
@@ -319,7 +323,7 @@ class TeamSeason(object):
 
     @cached_property
     def next(self):
-        next_ts = TeamSeason(self.team.id, self.year + 1, include_playoffs=self.include_playoffs)
+        next_ts = TeamSeason(self.team.id, self.year + 1, week_max=self.week_max)
 
         if len(next_ts.games) == 0:
             return None

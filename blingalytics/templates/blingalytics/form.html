@@ -1,0 +1,9 @@
+<button type="button" id="form_toggle_button">Show/hide form</button>
+<form id="{{ form_id }}" class="blingalytics_form" method="get">
+  {% csrf_token %}
+  <ul>
+    {{ form.as_ul }}
+    <li><input type="submit" value="Submit"/></li>
+  </ul>
+</form>
+<div style="clear:both"></div>

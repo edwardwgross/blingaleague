@@ -7,15 +7,9 @@
 
 <div id="game_finder" class="blingalytics">
   <div id="game_finder_controls">
-    <button type="button" id="form_toggle_button">Show/hide form</button>
-    <form id="game_finder_form" method="get">
-      {% csrf_token %}
-      <ul>
-        {{ form.as_ul }}
-        <li><input type="submit" value="Submit"/></li>
-      </ul>
-    </form>
-    <div style="clear:both"></div>
+    {% with "game_finder_form" as form_id %}
+      {% include "blingalytics/form.html" %}
+    {% endwith %}
   </div>
   <div id="games_found">
     {% if games %}
@@ -35,12 +29,12 @@
           <tr>
             <td>{{ game.year}}</td>
             <td>{{ game.week }}</td>
-            <td>{{ game.winner }}</td>
-            <td>{{ game.loser }}</td>
+            <td style="text-align:left">{{ game.winner }}</td>
+            <td style="text-align:left">{{ game.loser }}</td>
             <td>{{ game.winner_score }}</td>
             <td>{{ game.loser_score }}</td>
             <td>{{ game.margin }}</td>
-            <td>{{ game.playoff_title }}</td>
+            <td style="text-align:left">{{ game.playoff_title }}</td>
           </tr>
         {% endfor %}
       </table>
