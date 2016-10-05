@@ -276,7 +276,7 @@ class TeamSeason(object):
         if self.place_numeric is None:
             return '?'
 
-        return ordinal(place_numeric)
+        return ordinal(self.place_numeric)
 
     @cached_property
     def playoff_finish(self):
