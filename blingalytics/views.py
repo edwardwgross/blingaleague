@@ -11,6 +11,7 @@ from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, \
 
 CHOICE_WINS = 'wins'
 CHOICE_LOSSES = 'losses'
+CHOICE_WINS_AND_LOSSES = 'wins_and_losses'
 CHOICE_REGULAR_SEASON = 'regular'
 CHOICE_PLAYOFFS = 'playoffs'
 CHOICE_MADE_PLAYOFFS = 'made_playoffs'
@@ -56,13 +57,13 @@ class GameFinderForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
     )
-    score_min = forms.DecimalField(required=False, label='Minimum Score')
-    score_max = forms.DecimalField(required=False, label='Maximum Score')
-    margin_min = forms.DecimalField(required=False, label='Minimum Margin')
-    margin_max = forms.DecimalField(required=False, label='Maximum Margin')
-    outcome = forms.TypedChoiceField(required=False, label='Outcome',
+    score_min = forms.DecimalField(required=False, label='Minimum Score', decimal_places=2)
+    score_max = forms.DecimalField(required=False, label='Maximum Score', decimal_places=2)
+    margin_min = forms.DecimalField(required=False, label='Minimum Margin', decimal_places=2)
+    margin_max = forms.DecimalField(required=False, label='Maximum Margin', decimal_places=2)
+    outcome = forms.TypedChoiceField(required=False, label='Winner / Loser',
         widget=forms.RadioSelect,
-        choices=[('', 'Any outcome'), (CHOICE_WINS, 'Wins only'), (CHOICE_LOSSES, 'Losses only')],
+        choices=[('', 'Either winner or loser'), (CHOICE_WINS, 'Winner only'), (CHOICE_LOSSES, 'Loser only'), (CHOICE_WINS_AND_LOSSES, 'Both winner and loser')],
     )
 
 
@@ -88,6 +89,7 @@ class GameFinderView(TemplateView):
 
             wins_only = form_data['outcome'] == CHOICE_WINS
             losses_only = form_data['outcome'] == CHOICE_LOSSES
+            wins_and_losses = form_data['outcome'] == CHOICE_WINS_AND_LOSSES
 
             teams = form_data['teams']
             if len(teams) > 0:
@@ -100,26 +102,29 @@ class GameFinderView(TemplateView):
 
             score_min = form_data['score_min']
             score_max = form_data['score_max']
-            score_filter_kwargs = {}
+            score_winner_kwargs = {}
+            score_loser_kwargs = {}
             if score_min is not None and score_max is not None:
-                score_filter_kwargs['winner_score__gte'] = score_min
-                score_filter_kwargs['winner_score__lte'] = score_max
-                score_filter_kwargs['loser_score__gte'] = score_min
-                score_filter_kwargs['loser_score__lte'] = score_max
+                score_winner_kwargs['winner_score__gte'] = score_min
+                score_winner_kwargs['winner_score__lte'] = score_max
+                score_loser_kwargs['loser_score__gte'] = score_min
+                score_loser_kwargs['loser_score__lte'] = score_max
             elif score_min is not None:
-                score_filter_kwargs['winner_score__gte'] = score_min
-                score_filter_kwargs['loser_score__gte'] = score_min
+                score_winner_kwargs['winner_score__gte'] = score_min
+                score_loser_kwargs['loser_score__gte'] = score_min
             elif score_max is not None:
-                score_filter_kwargs['winner_score__lte'] = score_max
-                score_filter_kwargs['loser_score__lte'] = score_max
+                score_winner_kwargs['winner_score__lte'] = score_max
+                score_loser_kwargs['loser_score__lte'] = score_max
 
             if wins_only:
-                score_filter_kwargs = dict(filter(lambda x: x[0].startswith('winner'), score_filter_kwargs.items()))
+                games = games.filter(**score_winner_kwargs)
             elif losses_only:
-                score_filter_kwargs = dict(filter(lambda x: x[0].startswith('loser'), score_filter_kwargs.items()))
-
-            if score_filter_kwargs:
-                games = games.filter(**score_filter_kwargs)
+                games = games.filter(**score_loser_kwargs)
+            elif wins_and_losses:
+                games = games.filter(**score_winner_kwargs)
+                games = games.filter(**score_loser_kwargs)
+            else:
+                games = games.filter(Q(**score_winner_kwargs) | Q(**score_loser_kwargs))
 
             margin_min= form_data['margin_min']
             margin_max = form_data['margin_max']
@@ -145,11 +150,11 @@ class SeasonFinderForm(forms.Form):
     )
     wins_min = forms.IntegerField(required=False, label='Minimum Wins')
     wins_max = forms.IntegerField(required=False, label='Maximum Wins')
-    points_min = forms.IntegerField(required=False, label='Minimum Points')
-    points_max = forms.IntegerField(required=False, label='Maximum Points')
-    playoffs = forms.TypedChoiceField(required=False, label='Playoffs',
+    points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
+    points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
+    playoffs = forms.TypedChoiceField(required=False, label='Finish',
         widget=forms.RadioSelect,
-        choices=[('', 'Any outcome'), (CHOICE_MADE_PLAYOFFS, 'Made playoffs'), (CHOICE_MISSED_PLAYOFFS, 'Missed playoffs')],
+        choices=[('', 'Any finish'), (CHOICE_MADE_PLAYOFFS, 'Made playoffs'), (CHOICE_MISSED_PLAYOFFS, 'Missed playoffs')],
     )
 
 
@@ -174,6 +179,12 @@ class SeasonFinderView(TemplateView):
                 if len(team_season.games) == 0:
                     continue
 
+                if form_data['week_max'] is not None:
+                    # if the user specified the "Through X Weeks" field,
+                    # don't show seasons that haven't yet reached that week
+                    if len(team_season.games) < form_data['week_max']:
+                        continue
+
                 if form_data['wins_min'] is not None:
                     if team_season.win_count < form_data['wins_min']:
                         continue
@@ -189,20 +200,22 @@ class SeasonFinderView(TemplateView):
                         continue
 
                 if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS:
-                    if team_season.place_numeric > 6:
+                    if team_season.place_numeric > 6 or len(team_season.games) < REGULAR_SEASON_WEEKS:
                         continue
                 elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS:
-                    if team_season.place_numeric <= 6:
+                    if team_season.place_numeric <= 6 or len(team_season.games) < REGULAR_SEASON_WEEKS:
                         continue
 
                 yield team_season
 
     def get(self, request):
+        seasons = []
+
         season_finder_form = SeasonFinderForm(request.GET)
         if season_finder_form.is_valid():
             form_data = season_finder_form.cleaned_data
 
-            seasons = self.filter_seasons(form_data)
+            seasons = list(self.filter_seasons(form_data))
 
         context = {'form': season_finder_form, 'seasons': seasons}
 

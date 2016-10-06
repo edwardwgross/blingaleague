@@ -27,6 +27,7 @@
           <th>Exp. W</th>
           <th>Exp. %</th>
           <th>Place</th>
+          <th>Playoff Finish</th>
         </tr>
         {% for season in seasons %}
           <tr>
@@ -39,6 +40,7 @@
             <td>{{ season.expected_wins|floatformat:1 }}</td>
             <td>{{ season.expected_win_pct|floatformat:3 }}</td>
             <td>{{ season.place_numeric }}</td>
+            <td style="text-align:left">{{ season.playoff_finish }}</td>
           </tr>
         {% endfor %}
       </table>

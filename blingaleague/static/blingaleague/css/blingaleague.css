@@ -166,6 +166,7 @@ table.sortable tbody tr::before {
     content: counter(sortabletablescope);
     counter-increment: sortabletablescope;
     display: table-cell;
+    text-align: right;
 }
 table.sortable th {
     cursor: pointer;
