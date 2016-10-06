@@ -161,6 +161,8 @@ class SeasonFinderForm(forms.Form):
     )
     wins_min = forms.IntegerField(required=False, label='Minimum Wins')
     wins_max = forms.IntegerField(required=False, label='Maximum Wins')
+    expected_wins_min = forms.DecimalField(required=False, label='Minimum Expected Wins', decimal_places=1)
+    expected_wins_max = forms.DecimalField(required=False, label='Maximum Expected Wins', decimal_places=1)
     points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
     points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
     playoffs = forms.TypedChoiceField(required=False, label='Finish',
@@ -201,6 +203,13 @@ class SeasonFinderView(TemplateView):
                         continue
                 if form_data['wins_max'] is not None:
                     if team_season.win_count > form_data['wins_max']:
+                        continue
+
+                if form_data['expected_wins_min'] is not None:
+                    if team_season.expected_wins < form_data['expected_wins_min']:
+                        continue
+                if form_data['expected_wins_max'] is not None:
+                    if team_season.expected_wins > form_data['expected_wins_max']:
                         continue
 
                 if form_data['points_min'] is not None:
