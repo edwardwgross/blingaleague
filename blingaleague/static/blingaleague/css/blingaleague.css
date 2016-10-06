@@ -12,12 +12,8 @@ li {
     list-style-type: none;
 }
 
-a, a:visited, a:focus {
+a, a:hover, a:visited, a:focus {
     color: #3344dd;
-}
-
-a:hover {
-    color: #5e44b3;
 }
 
 table, tr, th, td, table a {
@@ -29,14 +25,15 @@ table {
 }
 
 tbody tr:hover {
-    background-color: #f5f5f5;
+    background-color: #eaeaea;
 }
 
 th, td {
     padding: 0 6px;
 }
 
-th, th a, thead tr::before {
+th, thead tr::before,
+th a, th a:hover, th a:visited, th a:focus {
     font-weight: bold;
     color: white;
     background-color: #a4c2f4;
@@ -120,7 +117,7 @@ table#team_vs_team_grid td {
 }
 
 table#team_vs_team_grid .empty {
-    background-color: #f5f5f5;
+    background-color: #eaeaea;
 }
 
 #games {
