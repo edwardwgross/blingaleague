@@ -302,10 +302,15 @@ class TeamSeason(object):
         return decimal.Decimal(self.expected_wins) / decimal.Decimal(len(self.games))
 
     @cached_property
+    def blangums_count(self):
+        blangums = filter(lambda x: x.week_object.blangums.winner == self.team and x.week <= REGULAR_SEASON_WEEKS, self.games)
+        return len(blangums)
+
+    @cached_property
     def headline(self):
-        text = "%s-%s, %s points" % (self.win_count, self.loss_count, self.points)
+        text = "%s-%s, %s points, %s" % (self.win_count, self.loss_count, self.points, self.place)
         if self.playoff_finish:
-            text = "%s - %s" % (text, self.playoff_finish)
+            text = "%s (regular season), %s (playoffs)" % (text, self.playoff_finish)
         return text
 
     @cached_property

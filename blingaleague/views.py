@@ -58,6 +58,7 @@ class StandingsCurrentView(StandingsView):
         context = {'standings': self.standings, 'links': self.links()}
         return self.render_to_response(context)
 
+
 class StandingsYearView(StandingsView):
 
     def get(self, request, year):

@@ -9,6 +9,8 @@ from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, \
                                 Game, Week, Member, TeamSeason
 
 
+CHOICE_BLANGUMS = 'team_blangums'
+CHOICE_SLAPPED_HEARTBEAT = 'slapped_heartbeat'
 CHOICE_WINS = 'wins'
 CHOICE_LOSSES = 'losses'
 CHOICE_WINS_AND_LOSSES = 'wins_and_losses'
@@ -57,6 +59,10 @@ class GameFinderForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
     )
+    awards = forms.TypedChoiceField(required=False, label='Weekly Awards',
+        widget=forms.RadioSelect,
+        choices=[('', 'Any game'), (CHOICE_BLANGUMS, 'Team Blangums'), (CHOICE_SLAPPED_HEARTBEAT, 'Slapped Heartbeat')],
+    )
     score_min = forms.DecimalField(required=False, label='Minimum Score', decimal_places=2)
     score_max = forms.DecimalField(required=False, label='Maximum Score', decimal_places=2)
     margin_min = forms.DecimalField(required=False, label='Minimum Margin', decimal_places=2)
@@ -71,7 +77,7 @@ class GameFinderView(TemplateView):
     template_name = 'blingalytics/game_finder.html'
 
     def get(self, request):
-        games = Game.objects.all()
+        games = Game.objects.all().order_by('year', 'week', '-winner_score', '-loser_score')
 
         game_finder_form = GameFinderForm(request.GET)
         if game_finder_form.is_valid():
@@ -133,7 +139,12 @@ class GameFinderView(TemplateView):
             if margin_max is not None:
                 games = games.filter(loser_score__gte=F('winner_score') - margin_max)
 
-        games = games.order_by('year', 'week', '-winner_score', '-loser_score')
+            games = list(games)
+
+            if form_data['awards'] == CHOICE_BLANGUMS:
+                games = filter(lambda x: x.winner == x.week_object.blangums.winner and x.week <= REGULAR_SEASON_WEEKS, games)
+            elif form_data['awards'] == CHOICE_SLAPPED_HEARTBEAT:
+                games = filter(lambda x: x.loser == x.week_object.slapped_heartbeat.loser and x.week <= REGULAR_SEASON_WEEKS, games)
 
         context = {'form': game_finder_form, 'games': games}
 
