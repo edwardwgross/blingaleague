@@ -503,6 +503,18 @@ class Week(object):
 
         return next_week
 
+    @cached_property
+    def blangums(self):
+        return self.games.order_by('-winner_score')[0]
+
+    @cached_property
+    def slapped_heartbeat(self):
+        return self.games.order_by('loser_score')[0]
+
+    @cached_property
+    def headline(self):
+        return "Team Blangums: %s (%s) / Slapped Heartbeat: %s (%s)" % (self.blangums.winner, self.blangums.winner_score, self.slapped_heartbeat.loser, self.slapped_heartbeat.loser_score)
+
     @classmethod
     def latest(cls):
         year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
