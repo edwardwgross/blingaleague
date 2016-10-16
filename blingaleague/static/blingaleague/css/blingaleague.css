@@ -172,7 +172,8 @@ table.sortable th {
 .blingalytics th,
 .blingalytics td,
 .blingalytics thead tr::before,
-.blingalytics tbody tr::before {
+.blingalytics tbody tr::before,
+.blingalytics a {
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
 }
 

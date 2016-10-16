@@ -32,8 +32,8 @@
         </tr>
         {% for season in seasons %}
           <tr>
-            <td>{{ season.year }}</td>
-            <td style="text-align:left">{{ season.team }}</td>
+            <td><a href="{{ season.standings.href }}">{{ season.year }}</a></td>
+            <td style="text-align:left"><a href="{{ season.href }}">{{ season.team }}</a></td>
             <td>{{ season.win_count }}</td>
             <td>{{ season.loss_count }}</td>
             <td>{{ season.win_pct|floatformat:3 }}</td>

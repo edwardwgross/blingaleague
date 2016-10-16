@@ -221,9 +221,9 @@ class SeasonFinderView(TemplateView):
                     if team_season.points > form_data['points_max']:
                         continue
 
-                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not team_season.playoffs:
+                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and (team_season.season is None or not team_season.playoffs):
                     continue
-                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and team_season.playoffs:
+                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and (team_season.season is None or team_season.playoffs):
                     continue
 
                 if form_data['bye'] and not team_season.bye:
