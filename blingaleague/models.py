@@ -325,6 +325,30 @@ class TeamSeason(object):
         return len(blangums)
 
     @cached_property
+    def robscore(self):
+        if self.season is None:
+            return 0
+
+        robscore = 0
+
+        if self.playoffs:
+            robscore += 1
+
+        if self.champion:
+            robscore += 1
+        elif self.team == self.season.place_2:
+            robscore += 0.5
+        elif self.team == self.season.place_3:
+            robscore += 0.25
+
+        if self.place_numeric == 1:
+            robscore += 0.5
+        elif self.place_numeric == 2:
+            robscore += 0.25
+
+        return robscore
+
+    @cached_property
     def headline(self):
         text = "%s-%s, %s points, %s" % (self.win_count, self.loss_count, self.points, self.place)
         if self.playoff_finish:
@@ -392,6 +416,10 @@ class TeamMultiSeasons(TeamSeason):
         for team_season in self:
             losses += team_season.losses
         return losses
+
+    @cached_property
+    def robscore(self):
+        return sum(team_season.robscore for team_season in self)
 
     @cached_property
     def href(self):

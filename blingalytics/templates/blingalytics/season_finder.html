@@ -26,8 +26,9 @@
           <th>Points</th>
           <th>Exp. W</th>
           <th>Exp. %</th>
-          <th>Blangums</th>
           <th>Place</th>
+          <th>RobScore</th>
+          <th>Blangums</th>
           <th>Playoff Finish</th>
         </tr>
         {% for season in seasons %}
@@ -40,8 +41,9 @@
             <td>{{ season.points|intcomma }}</td>
             <td>{{ season.expected_wins|floatformat:1 }}</td>
             <td>{{ season.expected_win_pct|floatformat:3 }}</td>
-            <td>{{ season.blangums_count }}</td>
             <td>{{ season.place_numeric }}</td>
+            <td>{{ season.robscore|floatformat:2 }}</td>
+            <td>{{ season.blangums_count }}</td>
             <td style="text-align:left">{{ season.playoff_finish }}</td>
           </tr>
         {% endfor %}

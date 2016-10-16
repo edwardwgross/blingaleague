@@ -10,21 +10,23 @@
     <th>Points</th>
     <th>Exp. W</th>
     <th>Exp. %</th>
+    <th>RobScore</th>
     <th>Blangums</th>
     <th/> {# Playoff Finish #}
   </tr>
-  {% for team_record in standings.table %}
+  {% for team_season in standings.table %}
       <tr>
         <td>{{ forloop.counter }}</td>
-        <td style="text-align:left"><a href="{{ team_record.href }}">{{ team_record.team }}</a></td>
-        <td>{{ team_record.win_count }}</td>
-        <td>{{ team_record.loss_count }}</td>
-        <td>{{ team_record.win_pct|floatformat:3 }}</td>
-        <td>{{ team_record.points|intcomma }}</td>
-        <td>{{ team_record.expected_wins|floatformat:1 }}</td>
-        <td>{{ team_record.expected_win_pct|floatformat:3 }}</td>
-        <td>{{ team_record.blangums_count }}</td>
-        <td style="text-align:left">{{ team_record.playoff_finish }}</td>
+        <td style="text-align:left"><a href="{{ team_season.href }}">{{ team_season.team }}</a></td>
+        <td>{{ team_season.win_count }}</td>
+        <td>{{ team_season.loss_count }}</td>
+        <td>{{ team_season.win_pct|floatformat:3 }}</td>
+        <td>{{ team_season.points|intcomma }}</td>
+        <td>{{ team_season.expected_wins|floatformat:1 }}</td>
+        <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
+        <td>{{ team_season.robscore|floatformat:2 }}</td>
+        <td>{{ team_season.blangums_count }}</td>
+        <td style="text-align:left">{{ team_season.playoff_finish }}</td>
       </tr>
   {% endfor %}
 </table>
