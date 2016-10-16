@@ -169,6 +169,8 @@ class SeasonFinderForm(forms.Form):
         widget=forms.RadioSelect,
         choices=[('', 'Any finish'), (CHOICE_MADE_PLAYOFFS, 'Made playoffs'), (CHOICE_MISSED_PLAYOFFS, 'Missed playoffs')],
     )
+    bye = forms.BooleanField(required=False, label='Earned Bye')
+    champion = forms.BooleanField(required=False, label='Won Sanderson Cup')
 
 
 class SeasonFinderView(TemplateView):
@@ -219,12 +221,16 @@ class SeasonFinderView(TemplateView):
                     if team_season.points > form_data['points_max']:
                         continue
 
-                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS:
-                    if team_season.place_numeric > 6 or len(team_season.games) < REGULAR_SEASON_WEEKS:
-                        continue
-                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS:
-                    if team_season.place_numeric <= 6 or len(team_season.games) < REGULAR_SEASON_WEEKS:
-                        continue
+                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not team_season.playoffs:
+                    continue
+                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and team_season.playoffs:
+                    continue
+
+                if form_data['bye'] and not team_season.bye:
+                    continue
+
+                if form_data['champion'] and not team_season.champion:
+                    continue
 
                 yield team_season
 

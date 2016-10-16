@@ -293,6 +293,24 @@ class TeamSeason(object):
         return ''
 
     @cached_property
+    def playoffs(self):
+        if self.season is None:
+            return False
+        return self.season.team_to_playoff_finish(self.team) is not None
+
+    @cached_property
+    def bye(self):
+        if self.season is None:
+            return False
+        return self.place_numeric <= 2
+
+    @cached_property
+    def champion(self):
+        if self.season is None:
+            return False
+        return (self.team == self.season.place_1)
+
+    @cached_property
     def expected_wins(self):
         game_scores = [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
         return Game.expected_wins(game_scores)
