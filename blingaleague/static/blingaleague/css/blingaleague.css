@@ -24,12 +24,21 @@ table {
     margin-bottom: 12px;
 }
 
-tbody tr:hover {
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+tbody tr:hover,
+.table-striped > tbody > tr:nth-of-type(odd):hover {
     background-color: #eaeaea;
 }
 
 th, td {
     padding: 0 6px;
+}
+
+th, td, tr::before {
+    vertical-align: middle;
 }
 
 th, thead tr::before,
