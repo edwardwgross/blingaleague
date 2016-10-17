@@ -142,9 +142,9 @@ class GameFinderView(TemplateView):
             games = list(games)
 
             if form_data['awards'] == CHOICE_BLANGUMS:
-                games = filter(lambda x: x.winner == x.week_object.blangums.winner and x.week <= REGULAR_SEASON_WEEKS, games)
+                games = filter(lambda x: x.blangums and x.week <= REGULAR_SEASON_WEEKS, games)
             elif form_data['awards'] == CHOICE_SLAPPED_HEARTBEAT:
-                games = filter(lambda x: x.loser == x.week_object.slapped_heartbeat.loser and x.week <= REGULAR_SEASON_WEEKS, games)
+                games = filter(lambda x: x.slapped_heartbeat and x.week <= REGULAR_SEASON_WEEKS, games)
 
         context = {'form': game_finder_form, 'games': games}
 

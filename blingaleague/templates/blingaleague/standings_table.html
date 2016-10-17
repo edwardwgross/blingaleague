@@ -10,7 +10,7 @@
     <th>Points</th>
     <th>Exp. W</th>
     <th>Exp. %</th>
-    <th>RobScore</th>
+    {% if standings.all_time %}<th>RobScore</th>{% endif %}
     <th>Blangums</th>
     <th/> {# Playoff Finish #}
   </tr>
@@ -24,7 +24,7 @@
         <td>{{ team_season.points|intcomma }}</td>
         <td>{{ team_season.expected_wins|floatformat:1 }}</td>
         <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
-        <td>{{ team_season.robscore|floatformat:2 }}</td>
+        {% if standings.all_time %}<td>{{ team_season.robscore|floatformat:2 }}</td>{% endif %}
         <td>{{ team_season.blangums_count }}</td>
         <td style="text-align:left">{{ team_season.playoff_finish }}</td>
       </tr>

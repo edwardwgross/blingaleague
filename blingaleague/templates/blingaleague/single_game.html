@@ -7,5 +7,17 @@
     def.
     <a href="{{ game.loser.href }}">{{ game.loser }}</a>
   </div>
-  <div class="score">{{ game.winner_score }} - {{ game.loser_score }}</div>
+  <div class="score">
+    {% if game.blangums %}
+      <strong>{{ game.winner_score }}</strong>
+    {% else %}
+      {{ game.winner_score }}
+    {% endif %}
+    -
+    {% if game.slapped_heartbeat %}
+      <strong>{{ game.loser_score }}</strong>
+    {% else %}
+      {{ game.loser_score }}
+    {% endif %}
+  </div>
 </div>

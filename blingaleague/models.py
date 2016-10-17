@@ -68,6 +68,14 @@ class Game(models.Model):
         return Week(self.year, self.week)
 
     @cached_property
+    def blangums(self):
+        return self.winner == self.week_object.blangums
+
+    @cached_property
+    def slapped_heartbeat(self):
+        return self.loser == self.week_object.slapped_heartbeat
+
+    @cached_property
     def title(self):
         if self.playoff_title:
             return self.playoff_title
@@ -96,7 +104,6 @@ class Game(models.Model):
                 pass  # current season won't have one
 
         return ''
-
 
     @cached_property
     def margin(self):
@@ -321,7 +328,7 @@ class TeamSeason(object):
 
     @cached_property
     def blangums_count(self):
-        blangums = filter(lambda x: x.week_object.blangums.winner == self.team and x.week <= REGULAR_SEASON_WEEKS, self.games)
+        blangums = filter(lambda x: x.week_object.blangums == self.team and x.week <= REGULAR_SEASON_WEEKS, self.games)
         return len(blangums)
 
     @cached_property
@@ -556,11 +563,11 @@ class Week(object):
 
     @cached_property
     def blangums(self):
-        return self.games.order_by('-winner_score')[0]
+        return self.games.order_by('-winner_score')[0].winner
 
     @cached_property
     def slapped_heartbeat(self):
-        return self.games.order_by('loser_score')[0]
+        return self.games.order_by('loser_score')[0].loser
 
     @cached_property
     def headline(self):
