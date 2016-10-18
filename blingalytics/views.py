@@ -119,10 +119,12 @@ class GameFinderView(TemplateView):
     template_name = 'blingalytics/game_finder.html'
 
     def get(self, request):
-        games = Game.objects.all().order_by('year', 'week', '-winner_score', '-loser_score')
+        games = []
 
         game_finder_form = GameFinderForm(request.GET)
         if game_finder_form.is_valid():
+            games = Game.objects.all().order_by('year', 'week', '-winner_score', '-loser_score')
+
             form_data = game_finder_form.cleaned_data
 
             if form_data['year_min'] is not None:
