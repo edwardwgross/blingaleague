@@ -1,5 +1,6 @@
 import datetime
 import decimal
+import logging
 
 from django import forms
 from django.db.models import Q, F
@@ -18,6 +19,77 @@ CHOICE_REGULAR_SEASON = 'regular'
 CHOICE_PLAYOFFS = 'playoffs'
 CHOICE_MADE_PLAYOFFS = 'made_playoffs'
 CHOICE_MISSED_PLAYOFFS = 'missed_playoffs'
+
+
+logger = logging.getLogger('blingaleague')
+
+
+class BaseFinderForm(forms.Form):
+
+    filter_threshold = 2
+
+    def is_valid(self):
+        logger.error(self.data)
+        if not super(BaseFinderForm, self).is_valid():
+            return False
+
+        # if the values are valid, now we need to make sure we've provided
+        # at least a reasonable amount of filters
+        unfiltered_values = (None, False, '', [], [''])
+        filtered_fields = filter(lambda x: x[1] not in unfiltered_values, self.cleaned_data.items())
+        logger.error(filtered_fields)
+        if len(filtered_fields) < self.filter_threshold:
+            self.add_error(None, "You must filter on at least %s fields to see results" % self.filter_threshold)
+            return False
+
+        return True
+
+
+class GameFinderForm(BaseFinderForm):
+    year_min = forms.IntegerField(required=False, label='Start Year')
+    year_max = forms.IntegerField(required=False, label='End Year')
+    week_type = forms.TypedChoiceField(required=False, label='Weeks',
+        widget=forms.RadioSelect,
+        choices=[('', 'Any week'), (CHOICE_REGULAR_SEASON, 'Regular season only'), (CHOICE_PLAYOFFS, 'Playoffs only')],
+    )
+    teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
+    )
+    awards = forms.TypedChoiceField(required=False, label='Weekly Awards',
+        widget=forms.RadioSelect,
+        choices=[('', 'Any game'), (CHOICE_BLANGUMS, 'Team Blangums'), (CHOICE_SLAPPED_HEARTBEAT, 'Slapped Heartbeat')],
+    )
+    score_min = forms.DecimalField(required=False, label='Minimum Score', decimal_places=2)
+    score_max = forms.DecimalField(required=False, label='Maximum Score', decimal_places=2)
+    margin_min = forms.DecimalField(required=False, label='Minimum Margin', decimal_places=2)
+    margin_max = forms.DecimalField(required=False, label='Maximum Margin', decimal_places=2)
+    outcome = forms.TypedChoiceField(required=False, label='Winner / Loser',
+        widget=forms.RadioSelect,
+        choices=[('', 'Either winner or loser'), (CHOICE_WINS, 'Winner only'), (CHOICE_LOSSES, 'Loser only'), (CHOICE_WINS_AND_LOSSES, 'Both winner and loser')],
+    )
+
+
+class SeasonFinderForm(BaseFinderForm):
+    year_min = forms.IntegerField(required=False, label='Start Year')
+    year_max = forms.IntegerField(required=False, label='End Year')
+    week_max = forms.IntegerField(required=False, label='Through Week')
+    teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
+    )
+    wins_min = forms.IntegerField(required=False, label='Minimum Wins')
+    wins_max = forms.IntegerField(required=False, label='Maximum Wins')
+    expected_wins_min = forms.DecimalField(required=False, label='Minimum Expected Wins', decimal_places=1)
+    expected_wins_max = forms.DecimalField(required=False, label='Maximum Expected Wins', decimal_places=1)
+    points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
+    points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
+    playoffs = forms.TypedChoiceField(required=False, label='Finish',
+        widget=forms.RadioSelect,
+        choices=[('', 'Any finish'), (CHOICE_MADE_PLAYOFFS, 'Made playoffs'), (CHOICE_MISSED_PLAYOFFS, 'Missed playoffs')],
+    )
+    bye = forms.BooleanField(required=False, label='Earned Bye')
+    champion = forms.BooleanField(required=False, label='Won Sanderson Cup')
 
 
 class WeeklyScoresView(TemplateView):
@@ -46,31 +118,6 @@ class ExpectedWinsView(TemplateView):
         context = {'score': score, 'expected_wins': expected_wins}
 
         return self.render_to_response(context)
-
-
-class GameFinderForm(forms.Form):
-    year_min = forms.IntegerField(required=False, label='Start Year')
-    year_max = forms.IntegerField(required=False, label='End Year')
-    week_type = forms.TypedChoiceField(required=False, label='Weeks',
-        widget=forms.RadioSelect,
-        choices=[('', 'Any week'), (CHOICE_REGULAR_SEASON, 'Regular season only'), (CHOICE_PLAYOFFS, 'Playoffs only')],
-    )
-    teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
-    )
-    awards = forms.TypedChoiceField(required=False, label='Weekly Awards',
-        widget=forms.RadioSelect,
-        choices=[('', 'Any game'), (CHOICE_BLANGUMS, 'Team Blangums'), (CHOICE_SLAPPED_HEARTBEAT, 'Slapped Heartbeat')],
-    )
-    score_min = forms.DecimalField(required=False, label='Minimum Score', decimal_places=2)
-    score_max = forms.DecimalField(required=False, label='Maximum Score', decimal_places=2)
-    margin_min = forms.DecimalField(required=False, label='Minimum Margin', decimal_places=2)
-    margin_max = forms.DecimalField(required=False, label='Maximum Margin', decimal_places=2)
-    outcome = forms.TypedChoiceField(required=False, label='Winner / Loser',
-        widget=forms.RadioSelect,
-        choices=[('', 'Either winner or loser'), (CHOICE_WINS, 'Winner only'), (CHOICE_LOSSES, 'Loser only'), (CHOICE_WINS_AND_LOSSES, 'Both winner and loser')],
-    )
 
 
 class GameFinderView(TemplateView):
@@ -149,28 +196,6 @@ class GameFinderView(TemplateView):
         context = {'form': game_finder_form, 'games': games}
 
         return self.render_to_response(context)
-
-
-class SeasonFinderForm(forms.Form):
-    year_min = forms.IntegerField(required=False, label='Start Year')
-    year_max = forms.IntegerField(required=False, label='End Year')
-    week_max = forms.IntegerField(required=False, label='Through Week')
-    teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
-    )
-    wins_min = forms.IntegerField(required=False, label='Minimum Wins')
-    wins_max = forms.IntegerField(required=False, label='Maximum Wins')
-    expected_wins_min = forms.DecimalField(required=False, label='Minimum Expected Wins', decimal_places=1)
-    expected_wins_max = forms.DecimalField(required=False, label='Maximum Expected Wins', decimal_places=1)
-    points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
-    points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
-    playoffs = forms.TypedChoiceField(required=False, label='Finish',
-        widget=forms.RadioSelect,
-        choices=[('', 'Any finish'), (CHOICE_MADE_PLAYOFFS, 'Made playoffs'), (CHOICE_MISSED_PLAYOFFS, 'Missed playoffs')],
-    )
-    bye = forms.BooleanField(required=False, label='Earned Bye')
-    champion = forms.BooleanField(required=False, label='Won Sanderson Cup')
 
 
 class SeasonFinderView(TemplateView):

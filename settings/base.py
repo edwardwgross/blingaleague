@@ -1,9 +1,12 @@
+import datetime
 import os
 
 SECRET_KEY = 's4nders0n'
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+
+ALLOWED_HOSTS = ('blingaleague.com',)
 
 ROOT_URLCONF = 'blingaleague.urls'
 FORCE_SCRIPT_NAME = ''
@@ -38,3 +41,32 @@ DATABASES = {
     },
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_logger': False,
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'formatter': 'default',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'blingaleague': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

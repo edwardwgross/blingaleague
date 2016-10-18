@@ -230,7 +230,10 @@ table.sortable th {
 }
 
 .blingalytics_form .errorlist {
-    float: right;
     font-style: italic;
     color: red;
+}
+
+.blingalytics_form .errorlist li {
+    width: 100%;
 }
