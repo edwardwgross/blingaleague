@@ -21,15 +21,11 @@ CHOICE_MADE_PLAYOFFS = 'made_playoffs'
 CHOICE_MISSED_PLAYOFFS = 'missed_playoffs'
 
 
-logger = logging.getLogger('blingaleague')
-
-
 class BaseFinderForm(forms.Form):
 
     filter_threshold = 2
 
     def is_valid(self):
-        logger.error(self.data)
         if not super(BaseFinderForm, self).is_valid():
             return False
 
@@ -37,7 +33,6 @@ class BaseFinderForm(forms.Form):
         # at least a reasonable amount of filters
         unfiltered_values = (None, False, '', [], [''])
         filtered_fields = filter(lambda x: x[1] not in unfiltered_values, self.cleaned_data.items())
-        logger.error(filtered_fields)
         if len(filtered_fields) < self.filter_threshold:
             self.add_error(None, "You must filter on at least %s fields to see results" % self.filter_threshold)
             return False
