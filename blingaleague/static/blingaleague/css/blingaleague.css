@@ -108,11 +108,11 @@ nav .icon-bar {
     height: 40px;
 }
 
-table#standings_table th {
+table.standings_table th {
     text-align: center;
 }
 
-table#standings_table td {
+table.standings_table td {
     text-align: right;  /* by default, since these are mostly numbers */
 }
 

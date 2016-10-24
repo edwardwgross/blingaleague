@@ -1,5 +1,7 @@
 {% extends 'blingaleague/base.html' %}
 
+{% load humanize %}
+
 {% block title %}{{ team }}{% endblock %}
 
 {% block content %}
@@ -10,14 +12,30 @@
   <div><h2>Overall record:</h2> {{ team.all_time_record }} ({{ team.all_time_record_with_playoffs }} including playoffs)</div>
   <div>
     <h2>Seasons</h2>
-    <ul>
+    <table class="standings_table">
+      <tr>
+        <th>Year</th>
+        <th>Place</th>
+        <th>W</th>
+        <th>L</th>
+        <th>Points</th>
+        <th>Exp. W</th>
+        <th>Exp. %</th>
+        <th>Blangums</th>
+        <th/>{# Playoff Finish #}
+      </tr>
       {% for team_season in team.seasons reversed %}
-        <li>
-          <a href="{{ team_season.standings.href }}">{{ team_season.standings.year }}</a>:
-          <a href="{{ team_season.href }}">{{ team_season.record }}</a>,
-          {{ team_season.place }}
-          {% if team_season.playoff_finish %}({{ team_season.playoff_finish }}){% endif %}
-        </li>
+        <tr>
+          <td><a href="{{ team_season.standings.href }}">{{ team_season.standings.year }}</a></td>
+          <td><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
+          <td><a href="{{ team_season.href }}">{{ team_season.win_count }}</a></td>
+          <td><a href="{{ team_season.href }}">{{ team_season.loss_count }}</a></td>
+          <td>{{ team_season.points|intcomma }}</td>
+          <td>{{ team_season.expected_wins|floatformat:1 }}</td>
+          <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
+          <td>{{ team_season.blangums_count }}</td>
+          <td style="text-align:left">{{ team_season.playoff_finish }}</td>
+        </tr>
       {% endfor %}
     </ul>
   </div>
