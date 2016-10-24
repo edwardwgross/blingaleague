@@ -3,7 +3,7 @@ from collections import defaultdict
 from django.core import urlresolvers
 from django.http import HttpResponseForbidden
 from django.views.generic import TemplateView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import Standings, Game, Member, TeamSeason, Week, Matchup
 
@@ -128,12 +128,38 @@ class TeamVsTeamView(TemplateView):
         return self.render_to_response(context)
 
 
-class AddGameResultView(CreateView):
+
+class BaseGameResultMixin(object):
     model = Game
     fields = ['year', 'week', 'winner', 'winner_score', 'loser', 'loser_score', 'notes']
+
+    def allow_view(self, request):
+        return 'livecommish' == request.GET.get('_u', None)
+
+
+class AddGameResultView(BaseGameResultMixin, CreateView):
     success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')
 
     def get(self, request):
-        if 'livecommish' != request.GET.get('_u', None):
+        if not self.allow_view(request):
             return HttpResponseForbidden()
         return super(AddGameResultView, self).get(request)
+
+
+class EditGameResultView(BaseGameResultMixin, UpdateView):
+    success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')
+
+    def get(self, request, *args, **kwargs):
+        if not self.allow_view(request):
+            return HttpResponseForbidden()
+        return super(EditGameResultView, self).get(request)
+
+
+class DeleteGameResultView(BaseGameResultMixin, DeleteView):
+    success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')
+
+    def get(self, request, *args, **kwargs):
+        if not self.allow_view(request):
+            return HttpResponseForbidden()
+        return super(DeleteGameResultView, self).get(request)
+
