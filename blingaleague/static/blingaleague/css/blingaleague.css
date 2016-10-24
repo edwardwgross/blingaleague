@@ -12,6 +12,10 @@ li {
     list-style-type: none;
 }
 
+ol li {
+    list-style-type: decimal;
+}
+
 a, a:hover, a:visited, a:focus {
     color: #3344dd;
 }
@@ -55,6 +59,10 @@ h1 {
 
 h2 {
     font-size: 20px;
+}
+
+h3 {
+    font-size: 16px;
 }
 
 nav {
@@ -236,4 +244,11 @@ table.sortable th {
 
 .blingalytics_form .errorlist li {
     width: 100%;
+}
+
+#similar_seasons ol,
+#similar_seasons ol li,
+#similar_seasons a {
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-size: 12px;
 }

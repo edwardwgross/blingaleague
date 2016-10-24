@@ -78,13 +78,17 @@ class StandingsAllTimeView(StandingsView):
 
 class GamesView(TemplateView):
     template_name = 'blingaleague/games.html'
+    sub_templates = []
+
+    def _context(self, base_object):
+        return {'base_object': base_object, 'sub_templates': self.sub_templates}
 
 
 class MatchupView(GamesView):
 
     def get(self, request, team1, team2):
         base_object = Matchup(team1, team2)
-        context = {'base_object': base_object}
+        context = self._context(base_object)
         return self.render_to_response(context)
 
 
@@ -92,15 +96,16 @@ class WeekView(GamesView):
 
     def get(self, request, year, week):
         base_object = Week(year, week)
-        context = {'base_object': base_object}
+        context = self._context(base_object)
         return self.render_to_response(context)
 
 
 class TeamSeasonView(GamesView):
+    sub_templates = ['blingaleague/similar_seasons.html']
 
     def get(self, request, team, year):
         base_object = TeamSeason(team, year, include_playoffs=True)
-        context = {'base_object': base_object}
+        context = self._context(base_object)
         return self.render_to_response(context)
 
 

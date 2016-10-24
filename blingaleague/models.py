@@ -1,3 +1,4 @@
+import datetime
 import decimal
 
 from collections import defaultdict
@@ -357,7 +358,8 @@ class TeamSeason(object):
 
     @cached_property
     def headline(self):
-        text = "%s-%s, %s points, %s" % (self.win_count, self.loss_count, self.points, self.place)
+        regular_season = self.regular_season
+        text = "%s-%s, %s points, %s" % (regular_season.win_count, regular_season.loss_count, regular_season.points, regular_season.place)
         if self.playoff_finish:
             text = "%s (regular season), %s (playoffs)" % (text, self.playoff_finish)
         return text
@@ -384,8 +386,54 @@ class TeamSeason(object):
 
         return next_ts
 
+    @cached_property
+    def regular_season(self):
+        return TeamSeason(self.team.id, self.year, week_max=REGULAR_SEASON_WEEKS)
+
+    @cached_property
+    def most_similar(self):
+        limit = 10
+        similar_seasons = []
+        min_score = 900
+        while len(similar_seasons) < limit:
+            similar_seasons = list(self._filter_similar_seasons(min_score))
+            min_score -= 100
+
+        sorted_seasons = sorted(similar_seasons, key=lambda x: x['score'], reverse=True)[:limit]
+        # we want to show the end result of the season
+        return map(lambda x: {'season': x['season'].regular_season, 'score': x['score']}, sorted_seasons)
+
+    def similarity_score(self, other_season):
+        score = 1000
+        score -= abs(self.win_count - other_season.win_count) * 100
+        score -= int(abs(self.points - other_season.points) / 10)
+        score -= int(abs(self.expected_wins - other_season.expected_wins) * 100)
+        return score
+
+    def _filter_similar_seasons(self, threshold):
+        base_season = self
+        week_max = self.win_count + self.loss_count
+
+        if week_max > REGULAR_SEASON_WEEKS:
+            base_season = self.regular_season
+            week_max = REGULAR_SEASON_WEEKS
+
+        for year in range(FIRST_SEASON, datetime.datetime.today().year + 1):
+            for team_id in Member.objects.all().values_list('id', flat=True):
+                if team_id == base_season.team.id and year == base_season.year:
+                    continue
+
+                team_season = TeamSeason(team_id, year, week_max=week_max)
+
+                if len(team_season.games) == 0:
+                    continue
+
+                sim_score = base_season.similarity_score(team_season)
+                if sim_score >= threshold:
+                    yield {'season': team_season, 'score': sim_score}
+
     def __str__(self):
-        return "%s - %s" % (self.team, self.year)
+        return "%s, %s" % (self.team, self.year)
 
     def __repr__(self):
         return str(self)

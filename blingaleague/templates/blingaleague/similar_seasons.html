@@ -1,0 +1,12 @@
+<h3>Most Similar Seasons</h3>
+
+<div id="similar_seasons">
+  <ol>
+    {% for similar_season in base_object.most_similar %}
+      <li>
+        <strong>{{ similar_season.score }}</strong>:
+        <a href="{{ similar_season.season.href }}">{{ similar_season.season }}: {{ similar_season.season.headline }}</a>
+      </li>
+    {% endfor %}
+  </ol>
+</div>
