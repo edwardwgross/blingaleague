@@ -101,7 +101,7 @@ class WeekView(GamesView):
 
 
 class TeamSeasonView(GamesView):
-    sub_templates = ['blingaleague/similar_seasons.html']
+    # TODO enable when more performant sub_templates = ['blingaleague/similar_seasons.html']
 
     def get(self, request, team, year):
         base_object = TeamSeason(team, year, include_playoffs=True)

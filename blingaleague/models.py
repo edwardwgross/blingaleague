@@ -273,7 +273,7 @@ class TeamSeason(object):
 
     @cached_property
     def standings(self):
-        return Standings(year=self.year)
+        return Standings(year=self.year, week_max=self.week_max)
 
     @cached_property
     def place_numeric(self):
@@ -449,19 +449,20 @@ class TeamSeason(object):
 
 class TeamMultiSeasons(TeamSeason):
 
-    def __init__(self, team_id, years=None, include_playoffs=False):
+    def __init__(self, team_id, years=None, include_playoffs=False, week_max=None):
         if years is None:
             years = Game.objects.all().values_list('year', flat=True).distinct()
 
         self.years = sorted(years)
         self.team = Member.objects.get(id=team_id)
         self.include_playoffs = include_playoffs
+        self.week_max = week_max
 
     @cached_property
     def team_seasons(self):
         team_seasons = []
         for year in self.years:
-            team_season = TeamSeason(self.team.id, year, include_playoffs=self.include_playoffs)
+            team_season = TeamSeason(self.team.id, year, include_playoffs=self.include_playoffs, week_max=self.week_max)
             if len(team_season.games) > 0:
                 team_seasons.append(team_season)
         return team_seasons
@@ -501,10 +502,11 @@ class TeamMultiSeasons(TeamSeason):
 
 class Standings(object):
 
-    def __init__(self, year=None, all_time=False, include_playoffs=False):
+    def __init__(self, year=None, all_time=False, include_playoffs=False, week_max=None):
         self.year = year
         self.all_time = all_time
         self.include_playoffs = include_playoffs
+        self.week_max = week_max
 
         self.season = None
         self.headline = None
@@ -529,9 +531,9 @@ class Standings(object):
 
         for member in Member.objects.all():
             if self.all_time:
-                team_record = TeamMultiSeasons(member.id, include_playoffs=self.include_playoffs)
+                team_record = TeamMultiSeasons(member.id, include_playoffs=self.include_playoffs, week_max=self.week_max)
             else:
-                team_record = TeamSeason(member.id, self.year, include_playoffs=self.include_playoffs)
+                team_record = TeamSeason(member.id, self.year, include_playoffs=self.include_playoffs, week_max=self.week_max)
 
             if len(team_record.games) > 0:
                 team_records.append(team_record)
