@@ -621,11 +621,11 @@ class Week(object):
 
     @cached_property
     def blangums(self):
-        return self.games.order_by('-winner_score')[0].winner
+        return self.games.order_by('-winner_score').first().winner
 
     @cached_property
     def slapped_heartbeat(self):
-        return self.games.order_by('loser_score')[0].loser
+        return self.games.order_by('loser_score').first().loser
 
     @cached_property
     def headline(self):
@@ -633,7 +633,7 @@ class Week(object):
 
     @classmethod
     def latest(cls):
-        year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
+        year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week').first()
         return cls(year, week)
 
     def __str__(self):
