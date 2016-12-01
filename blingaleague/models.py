@@ -387,6 +387,10 @@ class TeamSeason(object):
         return next_ts
 
     @cached_property
+    def level_up_link(self):
+        return {'description': 'Franchise index', 'href': self.team.href}
+
+    @cached_property
     def regular_season(self):
         return TeamSeason(self.team.id, self.year, week_max=REGULAR_SEASON_WEEKS)
 
@@ -629,7 +633,7 @@ class Week(object):
 
     @cached_property
     def headline(self):
-        return "Team Blangums: %s (%s) / Slapped Heartbeat: %s (%s)" % (self.blangums.winner, self.blangums.winner_score, self.slapped_heartbeat.loser, self.slapped_heartbeat.loser_score)
+        return "Team Blangums: %s / Slapped Heartbeat: %s" % (self.blangums, self.slapped_heartbeat)
 
     @classmethod
     def latest(cls):

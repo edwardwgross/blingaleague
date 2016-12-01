@@ -3,9 +3,9 @@
     <a href="{{ game.week_object.href }}">{{ game.title }}</a>
   </div>
   <div class="teams">
-    <a href="{{ game.winner.href }}">{{ game.winner }}</a>
+    <a href="{% url 'blingaleague.team_season' game.winner.id game.year %}">{{ game.winner }}</a>
     def.
-    <a href="{{ game.loser.href }}">{{ game.loser }}</a>
+    <a href="{% url 'blingaleague.team_season' game.loser.id game.year %}">{{ game.loser }}</a>
   </div>
   <div class="score">
     {% if game.blangums %}
