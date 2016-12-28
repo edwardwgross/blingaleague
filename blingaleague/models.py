@@ -337,24 +337,7 @@ class TeamSeason(object):
         if self.season is None:
             return 0
 
-        robscore = 0
-
-        if self.playoffs:
-            robscore += 1
-
-        if self.champion:
-            robscore += 1
-        elif self.team == self.season.place_2:
-            robscore += 0.5
-        elif self.team == self.season.place_3:
-            robscore += 0.25
-
-        if self.place_numeric == 1:
-            robscore += 0.5
-        elif self.place_numeric == 2:
-            robscore += 0.25
-
-        return robscore
+        return self.season.robscores[self.team]
 
     @cached_property
     def headline(self):
