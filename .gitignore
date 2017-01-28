@@ -3,3 +3,4 @@ environ
 *.pyc
 static/blingaleague
 logs/*
+cache/*

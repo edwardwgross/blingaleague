@@ -17,6 +17,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
     'blingaleague',
@@ -39,6 +41,13 @@ DATABASES = {
         'PASSWORD': 'Sanderson2008',
         'HOST': 'localhost',
     },
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache'),
+    }
 }
 
 LOGGING = {
