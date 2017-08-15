@@ -601,11 +601,11 @@ class Week(object):
 
     @cached_property
     def average_score(self):
-        return sum(map(lambda x: x.winner_score + x.loser_score, self.games)) / (2 * self.games.count())
+        return sum(map(lambda x: x.winner_score + x.loser_score, self.games)) / (2 * len(self.games))
 
     @cached_property
     def average_margin(self):
-        return sum(map(lambda x: x.margin, self.games)) / self.games.count()
+        return sum(map(lambda x: x.margin, self.games)) / len(self.games)
 
     @cached_property
     def previous(self):
