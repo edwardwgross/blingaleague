@@ -284,6 +284,8 @@ class TeamSeason(object):
 
     @cached_property
     def place_numeric(self):
+        if self.week_max > REGULAR_SEASON_WEEKS:
+            return self.regular_season.place_numeric
         return self.standings.team_to_place(self.team)
 
     @cached_property
