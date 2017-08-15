@@ -633,11 +633,11 @@ class Week(object):
 
     @cached_property
     def blangums(self):
-        return self.games.order_by('-winner_score').first().winner
+        return sorted(self.games, key=lambda x: x.winner_score, reverse=True)[0].winner
 
     @cached_property
     def slapped_heartbeat(self):
-        return self.games.order_by('loser_score').first().loser
+        return sorted(self.games, key=lambda x: x.loser_score)[0].loser
 
     @cached_property
     def headline(self):
