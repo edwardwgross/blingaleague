@@ -15,6 +15,7 @@ from .utils import int_to_roman
 
 REGULAR_SEASON_WEEKS = 13
 BLINGABOWL_WEEK = 16
+BYE_TEAMS = 2
 FIRST_SEASON = 2008
 
 BLINGABOWL_TITLE_BASE = 'Blingabowl'
@@ -316,7 +317,7 @@ class TeamSeason(object):
     def bye(self):
         if self.season is None:
             return False
-        return self.place_numeric <= 2
+        return self.place_numeric <= BYE_TEAMS
 
     @cached_property
     def champion(self):

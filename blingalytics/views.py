@@ -6,7 +6,7 @@ from django import forms
 from django.db.models import Q, F
 from django.views.generic import TemplateView
 
-from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, \
+from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, BYE_TEAMS, \
                                 Game, Week, Member, TeamSeason
 
 
@@ -213,14 +213,21 @@ class SeasonFinderView(TemplateView):
         for year in range(year_min, year_max + 1):
             for team_id in team_ids:
                 team_season = TeamSeason(team_id, year, week_max=form_data['week_max'])
-                if len(team_season.games) == 0:
+
+                game_count = len(team_season.games)
+                if game_count == 0:
                     continue
 
                 if form_data['week_max'] is not None:
-                    # if the user specified the "Through X Weeks" field,
+                    # if the user specified the "Through X Weeks" field that is in the regular season,
                     # don't show seasons that haven't yet reached that week
-                    if len(team_season.games) < form_data['week_max']:
-                        continue
+                    # playoffs are special, though - teams with byes won't have the same logic
+                    if form_data['week_max'] <= REGULAR_SEASON_WEEKS or not team_season.bye:
+                        if game_count < form_data['week_max']:
+                            continue
+                    elif team_season.bye:
+                        if game_count < (form_data['week_max'] - 1):
+                            continue
 
                 if form_data['wins_min'] is not None:
                     if team_season.win_count < form_data['wins_min']:
