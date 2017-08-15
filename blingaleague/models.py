@@ -17,6 +17,12 @@ REGULAR_SEASON_WEEKS = 13
 BLINGABOWL_WEEK = 16
 FIRST_SEASON = 2008
 
+BLINGABOWL_TITLE_BASE = 'Blingabowl'
+SEMIFINALS_TITLE_BASE = 'Semifinals'
+QUARTERFINALS_TITLE_BASE = 'Quarterfinals'
+THIRD_PLACE_TITLE_BASE = 'Third-place game'
+FIFTH_PLACE_TITLE_BASE = 'Fifth-place game'
+
 
 class Member(models.Model):
     first_name = models.CharField(max_length=50)
@@ -89,16 +95,16 @@ class Game(models.Model):
                 season = Season.objects.get(year=self.year)
                 if self.week == BLINGABOWL_WEEK:
                     if self.winner == season.place_1:
-                        playoff_title = "Blingabowl %s" % season.blingabowl
+                        playoff_title = "%s %s" % (BLINGABOWL_TITLE_BASE, season.blingabowl)
                     else:
-                        playoff_title = 'Third-place game'
+                        playoff_title = THIRD_PLACE_TITLE_BASE
                 elif self.week == (BLINGABOWL_WEEK - 1):
                     if self.winner == season.place_5:
-                        playoff_title = 'Fifth-place game'
+                        playoff_title = FIFTH_PLACE_TITLE_BASE
                     else:
-                        playoff_title = 'Semifinals'
+                        playoff_title = SEMIFINALS_TITLE_BASE
                 else:
-                    playoff_title = 'Quarterfinals'
+                    playoff_title = QUARTERFINALS_TITLE_BASE
 
                 return "%s, %s" % (playoff_title, self.year)
             except Season.DoesNotExist:
@@ -571,18 +577,20 @@ class Week(object):
 
         def _sort(game):
             playoff_title_order = {
-                'Semifinals': 90,
-                'Third-place game': 80,
-                'Semifinals': 70,
-                'Quarterfinals': 60,
-                'Fifth-place game': 50,
+                BLINGABOWL_TITLE_BASE: 100,
+                SEMIFINALS_TITLE_BASE: 90,
+                THIRD_PLACE_TITLE_BASE: 80,
+                QUARTERFINALS_TITLE_BASE: 70,
+                FIFTH_PLACE_TITLE_BASE: 60,
             }
-            title_sort = playoff_title_order.get(game.playoff_title, 0)
-            if game.playoff_title.startswith('Blingabowl'):
-                title_sort = 100
-            return (title_sort, game.winner_score, game.loser_score)
 
-        return sorted(games, key=_sort, reverse=True)
+            for playoff_title, sort_val in sorted(playoff_title_order.items(), key=lambda x: x[1], reverse=True):
+                if game.playoff_title.startswith(playoff_title):
+                    return sort_val
+
+            return 0
+
+        return sorted(games, key=lambda x: (_sort(x), x.winner_score, x.loser_score), reverse=True)
 
     @cached_property
     def href(self):
