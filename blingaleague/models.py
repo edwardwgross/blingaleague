@@ -568,7 +568,21 @@ class Week(object):
     @cached_property
     def games(self):
         games = Game.objects.filter(year=self.year, week=self.week)
-        return games.order_by('notes', '-winner_score', '-loser_score')
+
+        def _sort(game):
+            playoff_title_order = {
+                'Semifinals': 90,
+                'Third-place game': 80,
+                'Semifinals': 70,
+                'Quarterfinals': 60,
+                'Fifth-place game': 50,
+            }
+            title_sort = playoff_title_order.get(game.playoff_title, 0)
+            if game.playoff_title.startswith('Blingabowl'):
+                title_sort = 100
+            return (title_sort, game.winner_score, game.loser_score)
+
+        return sorted(games, key=_sort, reverse=True)
 
     @cached_property
     def href(self):
@@ -589,7 +603,7 @@ class Week(object):
         else:
             prev_week = Week(self.year, self.week - 1)
 
-        if prev_week.games.count() == 0:
+        if len(prev_week.games) == 0:
             return None
 
         return prev_week
@@ -601,7 +615,7 @@ class Week(object):
         else:
             next_week = Week(self.year, self.week + 1)
 
-        if next_week.games.count() == 0:
+        if len(next_week.games) == 0:
             return None
 
         return next_week
