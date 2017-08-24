@@ -133,38 +133,3 @@ class TeamVsTeamView(TemplateView):
         return self.render_to_response(context)
 
 
-
-class BaseGameResultMixin(object):
-    model = Game
-    fields = ['year', 'week', 'winner', 'winner_score', 'loser', 'loser_score', 'notes']
-
-    def allow_view(self, request):
-        return 'livecommish' == request.GET.get('_u', None)
-
-
-class AddGameResultView(BaseGameResultMixin, CreateView):
-    success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')
-
-    def get(self, request):
-        if not self.allow_view(request):
-            return HttpResponseForbidden()
-        return super(AddGameResultView, self).get(request)
-
-
-class EditGameResultView(BaseGameResultMixin, UpdateView):
-    success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')
-
-    def get(self, request, *args, **kwargs):
-        if not self.allow_view(request):
-            return HttpResponseForbidden()
-        return super(EditGameResultView, self).get(request)
-
-
-class DeleteGameResultView(BaseGameResultMixin, DeleteView):
-    success_url = urlresolvers.reverse_lazy('blingaleague.add_game_result')
-
-    def get(self, request, *args, **kwargs):
-        if not self.allow_view(request):
-            return HttpResponseForbidden()
-        return super(DeleteGameResultView, self).get(request)
-

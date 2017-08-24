@@ -1,10 +1,14 @@
 from django.conf.urls import patterns, url, include
+from django.contrib import admin
+
+from django.contrib.auth.views import login, logout
 
 from .views import HomeView, TeamDetailsView, TeamVsTeamView,\
                    StandingsYearView, StandingsCurrentView, StandingsAllTimeView,\
-                   GamesView, MatchupView, WeekView, TeamSeasonView,\
-                   AddGameResultView, EditGameResultView, DeleteGameResultView
+                   GamesView, MatchupView, WeekView, TeamSeasonView
 
+
+admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', HomeView.as_view(), name='blingaleague.home'),
@@ -16,10 +20,11 @@ urlpatterns = patterns('',
     url(r'^team/(?P<team>\d+)/$', TeamDetailsView.as_view(), name='blingaleague.team'),
     url(r'^team/(?P<team>\d+)/(?P<year>\d{4})/$', TeamSeasonView.as_view(), name='blingaleague.team_season'),
     url(r'^team_vs_team/$', TeamVsTeamView.as_view(), name='blingaleague.team_vs_team'),
-    url(r'^add_game_result/$', AddGameResultView.as_view(), name='blingaleague.add_game_result'),
-    url(r'^edit_game_result/(?P<pk>\d+)/$', EditGameResultView.as_view(), name='blingaleague.edit_game_result'),
-    url(r'^delete_game_result/(?P<pk>\d+)/$', DeleteGameResultView.as_view(), name='blingaleague.delete_game_result'),
 
     (r'^blingalytics/', include('blingalytics.urls')),
+
+    url(r'^login/$', login, {'template_name': 'blingaleague/login.html'}, name='login'),
+    url(r'^logout/$', logout, name='logout'),
+    url(r'^admin/', include(admin.site.urls)),
 )
 
