@@ -75,8 +75,8 @@ class SeasonFinderForm(BaseFinderForm):
     )
     wins_min = forms.IntegerField(required=False, label='Minimum Wins')
     wins_max = forms.IntegerField(required=False, label='Maximum Wins')
-    expected_wins_min = forms.DecimalField(required=False, label='Minimum Expected Wins', decimal_places=1)
-    expected_wins_max = forms.DecimalField(required=False, label='Maximum Expected Wins', decimal_places=1)
+    expected_wins_min = forms.DecimalField(required=False, label='Minimum Expected Wins', decimal_places=3)
+    expected_wins_max = forms.DecimalField(required=False, label='Maximum Expected Wins', decimal_places=3)
     points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
     points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
     playoffs = forms.TypedChoiceField(required=False, label='Finish',
