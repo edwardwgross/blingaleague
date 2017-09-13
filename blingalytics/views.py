@@ -53,9 +53,9 @@ class GameFinderForm(BaseFinderForm):
         widget=forms.CheckboxSelectMultiple,
         choices=[(m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')],
     )
-    awards = forms.TypedChoiceField(required=False, label='Weekly Awards',
-        widget=forms.RadioSelect,
-        choices=[('', 'Any game'), (CHOICE_BLANGUMS, 'Team Blangums'), (CHOICE_SLAPPED_HEARTBEAT, 'Slapped Heartbeat')],
+    awards = forms.TypedMultipleChoiceField(required=False, label='Weekly Awards',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(CHOICE_BLANGUMS, 'Team Blangums'), (CHOICE_SLAPPED_HEARTBEAT, 'Slapped Heartbeat')],
     )
     score_min = forms.DecimalField(required=False, label='Minimum Score', decimal_places=2)
     score_max = forms.DecimalField(required=False, label='Maximum Score', decimal_places=2)
@@ -188,9 +188,10 @@ class GameFinderView(TemplateView):
 
         games = list(games)
 
-        if form_data['awards'] == CHOICE_BLANGUMS:
+        awards = form_data['awards']
+        if CHOICE_BLANGUMS in awards:
             games = filter(lambda x: x.blangums and x.week <= REGULAR_SEASON_WEEKS, games)
-        elif form_data['awards'] == CHOICE_SLAPPED_HEARTBEAT:
+        if CHOICE_SLAPPED_HEARTBEAT in awards:
             games = filter(lambda x: x.slapped_heartbeat and x.week <= REGULAR_SEASON_WEEKS, games)
 
         return games
