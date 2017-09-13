@@ -45,9 +45,9 @@ class GameFinderForm(BaseFinderForm):
     year_max = forms.IntegerField(required=False, label='End Year')
     week_min = forms.IntegerField(required=False, label='Start Week')
     week_max = forms.IntegerField(required=False, label='End Week')
-    week_type = forms.TypedChoiceField(required=False, label='Weeks',
+    week_type = forms.TypedChoiceField(required=False, label='Game Type',
         widget=forms.RadioSelect,
-        choices=[('', 'Any week'), (CHOICE_REGULAR_SEASON, 'Regular season only'), (CHOICE_PLAYOFFS, 'Playoffs only')],
+        choices=[('', 'Any'), (CHOICE_REGULAR_SEASON, 'Regular season only'), (CHOICE_PLAYOFFS, 'Playoffs only')],
     )
     teams = forms.TypedMultipleChoiceField(required=False, coerce=int, label='Teams',
         widget=forms.CheckboxSelectMultiple,
