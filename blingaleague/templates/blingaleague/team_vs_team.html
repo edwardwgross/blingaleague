@@ -9,17 +9,17 @@
   <tr>
     <th>W\L</th>
     {% for team in teams %}
-      <th><a href="{{ team.href }}">{{ team.full_name }}</a></th>
+      <th {% if team.defunct %}class="defunct"{% endif %}><a href="{{ team.href }}">{{ team.full_name }}</a></th>
     {% endfor %}
   </tr>
   {% for row in grid %}
     <tr>
-      <th><a href="{{ row.team.href }}">{{ row.team.full_name }}</a></th>
+      <th {% if row.team.defunct %}class="defunct"{% endif %}><a href="{{ row.team.href }}">{{ row.team.full_name }}</a></th>
       {% for matchup in row.matchups %}
         {% ifequal matchup.team1 matchup.team2 %}
           <td class="empty"/>
         {% else %}
-          <td><a href="{{ matchup.href }}">{{ matchup.record }}</a></td>
+          <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}><a href="{{ matchup.href }}">{{ matchup.record }}</a></td>
         {% endifequal %}
       {% endfor %}
     </tr>

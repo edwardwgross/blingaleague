@@ -1,5 +1,3 @@
-{% load humanize %}
-
 <table class="standings_table">
   <tr>
     <th/> {# Rank #}
@@ -15,18 +13,14 @@
     <th/> {# Playoff Finish #}
   </tr>
   {% for team_season in standings.table %}
-      <tr>
-        <td>{{ forloop.counter }}</td>
-        <td style="text-align:left"><a href="{{ team_season.href }}">{{ team_season.team }}</a></td>
-        <td>{{ team_season.win_count }}</td>
-        <td>{{ team_season.loss_count }}</td>
-        <td>{{ team_season.win_pct|floatformat:3 }}</td>
-        <td>{{ team_season.points|intcomma }}</td>
-        <td>{{ team_season.expected_wins|floatformat:1 }}</td>
-        <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
-        {% if standings.all_time %}<td>{{ team_season.robscore|floatformat:2 }}</td>{% endif %}
-        <td>{{ team_season.blangums_count }}</td>
-        <td style="text-align:left">{{ team_season.playoff_finish }}</td>
-      </tr>
+    <tr>{% include "blingaleague/standings_table_row.html" %}</tr>
   {% endfor %}
+  {% if standings.defunct_table %}
+    <tr class="defunct">
+      <th colspan="100%">Defunct Teams</th>
+    </tr>
+    {% for team_season in standings.defunct_table %}
+      <tr class="defunct">{% include "blingaleague/standings_table_row.html" %}</tr>
+    {% endfor %}
+  {% endif %}
 </table>

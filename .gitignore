@@ -1,6 +1,8 @@
 activate
 environ
 *.pyc
+static/admin
 static/blingaleague
 logs/*
 cache/*
+settings/__init__.py

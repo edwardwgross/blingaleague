@@ -29,6 +29,7 @@ class Member(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     nickname = models.CharField(max_length=50, blank=True, null=True)
+    defunct = models.BooleanField(default=False)
 
     @cached_property
     def full_name(self):
@@ -521,20 +522,30 @@ class Standings(object):
             except Season.DoesNotExist:
                 pass  # won't exist for the current season
 
-    @cached_property
-    def table(self):
+    def team_record(self, member):
+        if self.all_time:
+            return TeamMultiSeasons(member.id, include_playoffs=self.include_playoffs, week_max=self.week_max)
+        else:
+            return TeamSeason(member.id, self.year, include_playoffs=self.include_playoffs, week_max=self.week_max)
+
+    def build_table(self, members):
         team_records = []
 
-        for member in Member.objects.all():
-            if self.all_time:
-                team_record = TeamMultiSeasons(member.id, include_playoffs=self.include_playoffs, week_max=self.week_max)
-            else:
-                team_record = TeamSeason(member.id, self.year, include_playoffs=self.include_playoffs, week_max=self.week_max)
+        for member in members:
+            team_record = self.team_record(member)
 
             if len(team_record.games) > 0:
                 team_records.append(team_record)
 
         return sorted(team_records, key=lambda x: (x.win_pct, x.points), reverse=True)
+
+    @cached_property
+    def table(self):
+        return self.build_table(Member.objects.filter(defunct=False))
+
+    @cached_property
+    def defunct_table(self):
+        return self.build_table(Member.objects.filter(defunct=True))
 
     @cached_property
     def href(self):
@@ -703,7 +714,7 @@ class Matchup(object):
 
     @classmethod
     def get_all_for_team(cls, team1_id):
-        return [cls(team1_id, team2_id) for team2_id in Member.objects.all().order_by('first_name', 'last_name').values_list('id', flat=True)]
+        return [cls(team1_id, team2_id) for team2_id in Member.objects.all().order_by('defunct', 'first_name', 'last_name').values_list('id', flat=True)]
 
     def __str__(self):
         return "%s vs. %s" % (self.team1, self.team2)

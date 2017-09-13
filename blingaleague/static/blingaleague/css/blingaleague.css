@@ -52,6 +52,15 @@ th a, th a:hover, th a:visited, th a:focus {
     background-color: #a4c2f4;
 }
 
+th.defunct, th.defunct a, th.defunct a:hover, th.defunct a:visited, th.defunct a:focus {
+    font-style: italic;
+}
+
+td.defunct,
+td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
+    color: #a0a0a0;
+    font-style: italic;
+}
 
 h1 {
     font-size: 28px;
@@ -122,6 +131,13 @@ table.standings_table th {
 
 table.standings_table td {
     text-align: right;  /* by default, since these are mostly numbers */
+}
+
+table.standings_table tr.defunct th {
+    background-color: white;
+    color: black;
+    padding-top: 12px;
+    text-align: left;
 }
 
 table#team_vs_team_grid,

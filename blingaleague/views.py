@@ -124,7 +124,7 @@ class TeamVsTeamView(TemplateView):
     def get(self, request):
         matchups = []
 
-        teams = Member.objects.all().order_by('first_name', 'last_name')
+        teams = Member.objects.all().order_by('defunct', 'first_name', 'last_name')
 
         grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
 

@@ -43,6 +43,8 @@ class BaseFinderForm(forms.Form):
 class GameFinderForm(BaseFinderForm):
     year_min = forms.IntegerField(required=False, label='Start Year')
     year_max = forms.IntegerField(required=False, label='End Year')
+    week_min = forms.IntegerField(required=False, label='Start Week')
+    week_max = forms.IntegerField(required=False, label='End Week')
     week_type = forms.TypedChoiceField(required=False, label='Weeks',
         widget=forms.RadioSelect,
         choices=[('', 'Any week'), (CHOICE_REGULAR_SEASON, 'Regular season only'), (CHOICE_PLAYOFFS, 'Playoffs only')],
@@ -118,77 +120,89 @@ class ExpectedWinsView(TemplateView):
 class GameFinderView(TemplateView):
     template_name = 'blingalytics/game_finder.html'
 
+    def filter_games(self, form_data):
+        games = []
+
+        games = Game.objects.all().order_by('year', 'week', '-winner_score', '-loser_score')
+
+        if form_data['year_min'] is not None:
+            games = games.filter(year__gte=form_data['year_min'])
+        if form_data['year_max'] is not None:
+            games = games.filter(year__lte=form_data['year_max'])
+
+        if form_data['week_min'] is not None:
+            games = games.filter(week__gte=form_data['week_min'])
+        if form_data['week_max'] is not None:
+            games = games.filter(week__lte=form_data['week_max'])
+
+        if form_data['week_type'] == CHOICE_REGULAR_SEASON:
+            games = games.filter(week__lte=REGULAR_SEASON_WEEKS)
+        elif form_data['week_type'] == CHOICE_PLAYOFFS:
+            games = games.filter(week__gt=REGULAR_SEASON_WEEKS)
+
+        wins_only = form_data['outcome'] == CHOICE_WINS
+        losses_only = form_data['outcome'] == CHOICE_LOSSES
+        wins_and_losses = form_data['outcome'] == CHOICE_WINS_AND_LOSSES
+
+        teams = form_data['teams']
+        if len(teams) > 0:
+            if wins_only:
+                games = games.filter(winner__id__in=teams)
+            elif losses_only:
+                games = games.filter(loser__id__in=teams)
+            else:
+                games = games.filter(Q(winner__id__in=teams) | Q(loser__id__in=teams))
+
+        score_min = form_data['score_min']
+        score_max = form_data['score_max']
+        score_winner_kwargs = {}
+        score_loser_kwargs = {}
+        if score_min is not None and score_max is not None:
+            score_winner_kwargs['winner_score__gte'] = score_min
+            score_winner_kwargs['winner_score__lte'] = score_max
+            score_loser_kwargs['loser_score__gte'] = score_min
+            score_loser_kwargs['loser_score__lte'] = score_max
+        elif score_min is not None:
+            score_winner_kwargs['winner_score__gte'] = score_min
+            score_loser_kwargs['loser_score__gte'] = score_min
+        elif score_max is not None:
+            score_winner_kwargs['winner_score__lte'] = score_max
+            score_loser_kwargs['loser_score__lte'] = score_max
+
+        if wins_only:
+            games = games.filter(**score_winner_kwargs)
+        elif losses_only:
+            games = games.filter(**score_loser_kwargs)
+        elif wins_and_losses:
+            games = games.filter(**score_winner_kwargs)
+            games = games.filter(**score_loser_kwargs)
+        else:
+            games = games.filter(Q(**score_winner_kwargs) | Q(**score_loser_kwargs))
+
+        margin_min= form_data['margin_min']
+        margin_max = form_data['margin_max']
+        if margin_min is not None:
+            games = games.filter(loser_score__lte=F('winner_score') - margin_min)
+        if margin_max is not None:
+            games = games.filter(loser_score__gte=F('winner_score') - margin_max)
+
+        games = list(games)
+
+        if form_data['awards'] == CHOICE_BLANGUMS:
+            games = filter(lambda x: x.blangums and x.week <= REGULAR_SEASON_WEEKS, games)
+        elif form_data['awards'] == CHOICE_SLAPPED_HEARTBEAT:
+            games = filter(lambda x: x.slapped_heartbeat and x.week <= REGULAR_SEASON_WEEKS, games)
+
+        return games
+
     def get(self, request):
         games = []
 
         game_finder_form = GameFinderForm(request.GET)
         if game_finder_form.is_valid():
-            games = Game.objects.all().order_by('year', 'week', '-winner_score', '-loser_score')
-
             form_data = game_finder_form.cleaned_data
 
-            if form_data['year_min'] is not None:
-                games = games.filter(year__gte=form_data['year_min'])
-            if form_data['year_max'] is not None:
-                games = games.filter(year__lte=form_data['year_max'])
-
-            if form_data['week_type'] == CHOICE_REGULAR_SEASON:
-                games = games.filter(week__lte=REGULAR_SEASON_WEEKS)
-            elif form_data['week_type'] == CHOICE_PLAYOFFS:
-                games = games.filter(week__gt=REGULAR_SEASON_WEEKS)
-
-            wins_only = form_data['outcome'] == CHOICE_WINS
-            losses_only = form_data['outcome'] == CHOICE_LOSSES
-            wins_and_losses = form_data['outcome'] == CHOICE_WINS_AND_LOSSES
-
-            teams = form_data['teams']
-            if len(teams) > 0:
-                if wins_only:
-                    games = games.filter(winner__id__in=teams)
-                elif losses_only:
-                    games = games.filter(loser__id__in=teams)
-                else:
-                    games = games.filter(Q(winner__id__in=teams) | Q(loser__id__in=teams))
-
-            score_min = form_data['score_min']
-            score_max = form_data['score_max']
-            score_winner_kwargs = {}
-            score_loser_kwargs = {}
-            if score_min is not None and score_max is not None:
-                score_winner_kwargs['winner_score__gte'] = score_min
-                score_winner_kwargs['winner_score__lte'] = score_max
-                score_loser_kwargs['loser_score__gte'] = score_min
-                score_loser_kwargs['loser_score__lte'] = score_max
-            elif score_min is not None:
-                score_winner_kwargs['winner_score__gte'] = score_min
-                score_loser_kwargs['loser_score__gte'] = score_min
-            elif score_max is not None:
-                score_winner_kwargs['winner_score__lte'] = score_max
-                score_loser_kwargs['loser_score__lte'] = score_max
-
-            if wins_only:
-                games = games.filter(**score_winner_kwargs)
-            elif losses_only:
-                games = games.filter(**score_loser_kwargs)
-            elif wins_and_losses:
-                games = games.filter(**score_winner_kwargs)
-                games = games.filter(**score_loser_kwargs)
-            else:
-                games = games.filter(Q(**score_winner_kwargs) | Q(**score_loser_kwargs))
-
-            margin_min= form_data['margin_min']
-            margin_max = form_data['margin_max']
-            if margin_min is not None:
-                games = games.filter(loser_score__lte=F('winner_score') - margin_min)
-            if margin_max is not None:
-                games = games.filter(loser_score__gte=F('winner_score') - margin_max)
-
-            games = list(games)
-
-            if form_data['awards'] == CHOICE_BLANGUMS:
-                games = filter(lambda x: x.blangums and x.week <= REGULAR_SEASON_WEEKS, games)
-            elif form_data['awards'] == CHOICE_SLAPPED_HEARTBEAT:
-                games = filter(lambda x: x.slapped_heartbeat and x.week <= REGULAR_SEASON_WEEKS, games)
+            games = self.filter_games(form_data)
 
         context = {'form': game_finder_form, 'games': games}
 
