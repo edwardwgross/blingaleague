@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core import urlresolvers
+from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
@@ -23,6 +24,9 @@ SEMIFINALS_TITLE_BASE = 'Semifinals'
 QUARTERFINALS_TITLE_BASE = 'Quarterfinals'
 THIRD_PLACE_TITLE_BASE = 'Third-place game'
 FIFTH_PLACE_TITLE_BASE = 'Fifth-place game'
+
+
+CACHE = caches['default']
 
 
 class Member(models.Model):
@@ -55,6 +59,10 @@ class Member(models.Model):
     @cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.id,))
+
+    def save(self, *args, **kwargs):
+        CACHE.clear()
+        super(Member, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.full_name
@@ -135,7 +143,7 @@ class Game(models.Model):
     def validate_unique(self, **kwargs):
         errors = {}
 
-        other_weekly_games = Game.objects.filter(year=self.year, week=self.week)
+        other_weekly_games = Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
         if (self.year < 2012 and other_weekly_games.count() >= 6) or other_weekly_games.count() >= 7:
             errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Too many games', code='too_many_games'))
@@ -157,6 +165,10 @@ class Game(models.Model):
 
         # don't neglect the default validation
         super(Game, self).validate_unique(**kwargs)
+
+    def save(self, *args, **kwargs):
+        CACHE.clear()
+        super(Game, self).save(*args, **kwargs)
 
     def __str__(self):
         return "%s: %s def. %s" % (self.title, self.winner, self.loser)
@@ -220,6 +232,10 @@ class Season(models.Model):
             if team == finish_team:
                 return place + 1
         return None
+
+    def save(self, *args, **kwargs):
+        CACHE.clear()
+        super(Season, self).save(*args, **kwargs)
 
     def __str__(self):
         return str(self.year)

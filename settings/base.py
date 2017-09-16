@@ -3,8 +3,8 @@ import os
 
 SECRET_KEY = 's4nders0n'
 
-DEBUG = False
-TEMPLATE_DEBUG = DEBUG
+INFO = False
+TEMPLATE_INFO = INFO
 
 ALLOWED_HOSTS = ('blingaleague.com',)
 
@@ -53,7 +53,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': '127.0.0.1;11211',
-        'TIMEOUT': 7 * 24 * 60 * 60,
+        'TIMEOUT': None,
     }
 }
 
@@ -67,7 +67,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
             'formatter': 'default',
@@ -76,12 +76,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
         'blingaleague': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     },
