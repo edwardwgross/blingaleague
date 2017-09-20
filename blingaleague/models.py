@@ -557,10 +557,15 @@ class Standings(object):
 
     @cached_property
     def table(self):
-        return self.build_table(Member.objects.filter(defunct=False))
+        members = Member.objects.all()
+        if self.all_time:
+            members = members.filter(defunct=False)
+        return self.build_table(members)
 
     @cached_property
     def defunct_table(self):
+        if not self.all_time:
+            return []
         return self.build_table(Member.objects.filter(defunct=True))
 
     @cached_property
