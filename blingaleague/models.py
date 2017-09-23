@@ -38,10 +38,7 @@ class Member(models.Model):
 
     @cached_property
     def full_name(self):
-        middle = ' '
-        if self.nickname:
-            middle = " \"%s\" " % self.nickname
-        return "%s%s%s" % (self.first_name, middle, self.last_name)
+        return "%s %s" % (self.first_name, self.last_name)
 
     @cached_property
     def all_time_record(self):
@@ -695,10 +692,14 @@ class Week(object):
 
     @cached_property
     def blangums(self):
+        if self.week > REGULAR_SEASON_WEEKS:
+            return None
         return sorted(self.games, key=lambda x: x.winner_score, reverse=True)[0].winner
 
     @cached_property
     def slapped_heartbeat(self):
+        if self.week > REGULAR_SEASON_WEEKS:
+            return None
         return sorted(self.games, key=lambda x: x.loser_score)[0].loser
 
     @cached_property

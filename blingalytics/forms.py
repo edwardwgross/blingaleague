@@ -7,7 +7,6 @@ CHOICE_BLANGUMS = 'team_blangums'
 CHOICE_SLAPPED_HEARTBEAT = 'slapped_heartbeat'
 CHOICE_WINS = 'wins'
 CHOICE_LOSSES = 'losses'
-CHOICE_WINS_AND_LOSSES = 'wins_and_losses'
 CHOICE_REGULAR_SEASON = 'regular'
 CHOICE_PLAYOFFS = 'playoffs'
 CHOICE_MADE_PLAYOFFS = 'made_playoffs'
@@ -56,7 +55,7 @@ class GameFinderForm(BaseFinderForm):
     margin_max = forms.DecimalField(required=False, label='Maximum Margin', decimal_places=2)
     outcome = forms.TypedChoiceField(required=False, label='Winner / Loser',
         widget=forms.RadioSelect,
-        choices=[('', 'Either winner or loser'), (CHOICE_WINS, 'Winner only'), (CHOICE_LOSSES, 'Loser only'), (CHOICE_WINS_AND_LOSSES, 'Both winner and loser')],
+        choices=[('', 'Either winner or loser'), (CHOICE_WINS, 'Winner only'), (CHOICE_LOSSES, 'Loser only')],
     )
 
 

@@ -18,23 +18,27 @@
         <tr>
           <th>Year</th>
           <th>Week</th>
-          <th>Winner</th>
-          <th>Loser</th>
-          <th>Winner Score</th>
-          <th>Loser Score</th>
+          <th>Team</td>
+          <th>W/L</th>
+          <th>Score</th>
+          <th>{# - #}</th>
+          <th>OppScore</th>
+          <th>Opponent</th>
           <th>Margin</th>
-          <th>{# Playoff Title #}</th>
+          <th>{# Extra Description #}</th>
         </tr>
         {% for game in games %}
           <tr>
             <td>{{ game.year}}</td>
             <td>{{ game.week }}</td>
-            <td style="text-align:left">{{ game.winner }}</td>
-            <td style="text-align:left">{{ game.loser }}</td>
-            <td>{{ game.winner_score }}</td>
-            <td>{{ game.loser_score }}</td>
+            <td style="text-align:left">{{ game.team.nickname }}</td>
+            <td style="text-align:left">{{ game.outcome }}</td>
+            <td>{{ game.score }}</td>
+            <td style="text-align:center">&ndash;</td>
+            <td>{{ game.opponent_score }}</td>
+            <td style="text-align:left">{{ game.opponent.nickname }}</td>
             <td>{{ game.margin }}</td>
-            <td style="text-align:left">{{ game.playoff_title }}</td>
+            <td style="text-align:left">{{ game.extra_description }}</td>
           </tr>
         {% endfor %}
       </table>

@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<h1>{{ team }}</h1>
+<h1>{{ team }} ("{{ team.nickname }}")</h1>
 
 <div id="team_details">
   <div><h2>Overall record:</h2> {{ team.all_time_record }} ({{ team.all_time_record_with_playoffs }} including playoffs)</div>
