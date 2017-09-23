@@ -1,3 +1,7 @@
+import nvd3
+
+from cached_property import cached_property
+
 from collections import defaultdict
 
 from django.core import urlresolvers
@@ -25,6 +29,7 @@ class HomeView(TemplateView):
 class StandingsView(TemplateView):
     template_name = 'blingaleague/standings.html'
 
+    @cached_property
     def links(self):
         links = []
 
@@ -55,7 +60,7 @@ class StandingsCurrentView(StandingsView):
 
     def get(self, request):
         self.standings = Standings()
-        context = {'standings': self.standings, 'links': self.links()}
+        context = {'standings': self.standings, 'links': self.links}
         return self.render_to_response(context)
 
 
@@ -63,7 +68,7 @@ class StandingsYearView(StandingsView):
 
     def get(self, request, year):
         self.standings = Standings(year=int(year))
-        context = {'standings': self.standings, 'links': self.links()}
+        context = {'standings': self.standings, 'links': self.links}
         return self.render_to_response(context)
 
 
@@ -72,7 +77,7 @@ class StandingsAllTimeView(StandingsView):
     def get(self, request):
         include_playoffs = 'include_playoffs' in request.GET
         self.standings = Standings(all_time=True, include_playoffs=include_playoffs)
-        context = {'standings': self.standings, 'links': self.links()}
+        context = {'standings': self.standings, 'links': self.links}
         return self.render_to_response(context)
 
 
@@ -101,11 +106,33 @@ class WeekView(GamesView):
 
 
 class TeamSeasonView(GamesView):
-    # TODO enable when more performant sub_templates = ['blingaleague/similar_seasons.html']
+    sub_templates = (
+        'blingaleague/expected_win_distribution.html',
+        # TODO enable when more performant sub_templates 'blingaleague/similar_seasons.html',
+    )
+
+    def _expected_win_distribution_graph(self, expected_win_distribution):
+        expected_win_distribution = sorted(expected_win_distribution.items())
+        x_data = map(lambda x: x[0], expected_win_distribution)
+        y_data = map(lambda x: round(x[1], 2), expected_win_distribution)
+
+        graph = nvd3.discreteBarChart(
+            name='expected_win_distribution',
+            width=600,
+            height=200,
+            y_axis_format='%',
+        )
+
+        graph.add_serie(x=x_data, y=y_data)
+
+        graph.buildcontent()
+
+        return graph
 
     def get(self, request, team, year):
         base_object = TeamSeason(team, year, include_playoffs=True)
         context = self._context(base_object)
+        context['expected_win_distribution_graph'] = self._expected_win_distribution_graph(base_object.expected_win_distribution)
         return self.render_to_response(context)
 
 

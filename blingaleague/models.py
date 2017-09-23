@@ -1,5 +1,8 @@
 import datetime
 import decimal
+import itertools
+
+from cached_property import cached_property
 
 from collections import defaultdict
 
@@ -8,8 +11,6 @@ from django.core import urlresolvers
 from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
-
-from cached_property import cached_property
 
 from .utils import int_to_roman
 
@@ -127,7 +128,7 @@ class Game(models.Model):
         return self.winner_score - self.loser_score
 
     @classmethod
-    def expected_wins(cls, game_scores):
+    def expected_wins(cls, *game_scores):
         all_scores = []
         for winner_score, loser_score in Game.objects.all().values_list('winner_score', 'loser_score'):
             all_scores.extend([winner_score, loser_score])
@@ -345,13 +346,42 @@ class TeamSeason(object):
         return (self.team == self.season.place_1)
 
     @cached_property
+    def game_scores(self):
+        return [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
+
+    @cached_property
     def expected_wins(self):
-        game_scores = [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
-        return Game.expected_wins(game_scores)
+        return Game.expected_wins(*self.game_scores)
 
     @cached_property
     def expected_win_pct(self):
         return decimal.Decimal(self.expected_wins) / decimal.Decimal(len(self.games))
+
+    @cached_property
+    def expected_win_distribution(self):
+        expected_wins_by_game = map(Game.expected_wins, self.regular_season.game_scores)
+
+        num_games = len(expected_wins_by_game)
+
+        outcome_combos = itertools.product([0, 1], repeat=num_games)
+
+        win_distribution = defaultdict(decimal.Decimal)
+
+        for outcome_combo in outcome_combos:
+            win_count = 0
+            running_prob = decimal.Decimal(1)
+            for i in range(num_games):
+                wp = expected_wins_by_game[i]
+                outcome = outcome_combo[i]
+                if outcome:
+                    win_count += 1
+                    running_prob *= wp
+                else:
+                    running_prob *= (1 - wp)
+
+            win_distribution[win_count] += running_prob
+
+        return dict(win_distribution)
 
     @cached_property
     def blangums_count(self):

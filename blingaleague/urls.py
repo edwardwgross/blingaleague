@@ -10,7 +10,7 @@ from .views import HomeView, TeamDetailsView, TeamVsTeamView,\
 
 admin.autodiscover()
 
-default_cache_timeout = 365 * 24 * 60 * 60
+default_cache_timeout = 1#365 * 24 * 60 * 60
 
 urlpatterns = patterns('',
     url(r'^$', cache_page(default_cache_timeout)(HomeView.as_view()), name='blingaleague.home'),
