@@ -1,4 +1,4 @@
-<h3>{{ base_object.expected_wins|floatformat:1 }} expected wins ({{ base_object.expected_win_pct|floatformat:3 }})</h3>
+<h3>{{ base_object.regular_season.expected_wins|floatformat:1 }} expected wins ({{ base_object.regular_season.expected_win_pct|floatformat:3 }})</h3>
 
 <strong>Expected win distribution:</strong>
 {{ expected_win_distribution_graph.htmlcontent|safe }}
