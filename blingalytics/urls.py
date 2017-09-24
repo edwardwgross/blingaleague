@@ -3,7 +3,7 @@ from django.views.decorators.cache import cache_page
 
 from .views import WeeklyScoresView, ExpectedWinsView, GameFinderView, SeasonFinderView
 
-default_cache_timeout = 1#365 * 24 * 60 * 60
+default_cache_timeout = 365 * 24 * 60 * 60
 
 urlpatterns = patterns('',
     url(r'weekly_scores/$', cache_page(default_cache_timeout)(WeeklyScoresView.as_view()), name='blingalytics.weekly_scores'),

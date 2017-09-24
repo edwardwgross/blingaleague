@@ -126,6 +126,7 @@ class TeamSeasonView(GamesView):
         graph.add_serie(x=x_data, y=y_data)
 
         graph.buildcontent()
+        graph.buildhtml()
 
         return graph
 
