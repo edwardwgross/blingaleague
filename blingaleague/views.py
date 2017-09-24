@@ -114,7 +114,7 @@ class TeamSeasonView(GamesView):
     def _expected_win_distribution_graph(self, expected_win_distribution):
         expected_win_distribution = sorted(expected_win_distribution.items())
         x_data = map(lambda x: x[0], expected_win_distribution)
-        y_data = map(lambda x: round(x[1], 2), expected_win_distribution)
+        y_data = map(lambda x: float(x[1]), expected_win_distribution)
 
         graph = nvd3.discreteBarChart(
             name='expected_win_distribution',
