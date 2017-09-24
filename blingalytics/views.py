@@ -40,7 +40,7 @@ class ExpectedWinsView(TemplateView):
 
         score = request.GET.get('score', None)
         if score is not None:
-            expected_wins = Game.expected_wins([decimal.Decimal(score)])
+            expected_wins = Game.expected_wins(decimal.Decimal(score))
 
         context = {'score': score, 'expected_wins': expected_wins}
 
