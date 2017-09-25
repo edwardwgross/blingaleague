@@ -14,5 +14,7 @@
     Score <input type="text" name="score" {% if score != None %}value="{{ score }}"{% endif %}/>
     <input type="submit" value="Submit"/>
   </form>
+
+  {{ expected_wins_graph.htmlcontent|safe }}
 </div>
 {% endblock content %}

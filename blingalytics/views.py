@@ -1,5 +1,6 @@
 import datetime
 import decimal
+import nvd3
 
 from django import forms
 from django.db.models import Q, F
@@ -35,14 +36,58 @@ class WeeklyScoresView(TemplateView):
 class ExpectedWinsView(TemplateView):
     template_name = 'blingalytics/expected_wins.html'
 
+    def _expected_wins_graph(self, score):
+        min_score = Game.objects.all().order_by('loser_score')[0].loser_score
+        max_score = Game.objects.all().order_by('-winner_score')[0].winner_score
+
+        min_x = int(5 * (min_score // 5))
+        max_x = int(5 * (max_score // 5)) + 10
+       # add 5 to round up, another 5 because range() is exclusive at the high end
+
+        x_data = range(min_x, max_x, 5)
+        if score is not None:
+            x_data = sorted(x_data + [score])
+
+        x_data = map(float, x_data)
+        y_data = map(float, map(Game.expected_wins, x_data))
+
+        graph_class = nvd3.lineChart
+
+        graph_series = [{'x': x_data, 'y': y_data}]
+
+        graph = graph_class(
+            name='expected_wins',
+            width=600,
+            height=400,
+            x_axis_format='.2f',
+            y_axis_format='.3f',
+            show_legend=False,
+        )
+
+        for serie in graph_series:
+            graph.add_serie(**serie)
+
+        graph.buildcontent()
+        graph.buildhtml()
+
+        import logging
+        logging.getLogger('blingaleague').error(graph.series)
+
+        return graph
+
     def get(self, request):
         expected_wins = None
 
         score = request.GET.get('score', None)
         if score is not None:
-            expected_wins = Game.expected_wins(decimal.Decimal(score))
+            score = decimal.Decimal(score)
+            expected_wins = Game.expected_wins(score)
 
-        context = {'score': score, 'expected_wins': expected_wins}
+        context = {
+            'score': score,
+            'expected_wins': expected_wins,
+            'expected_wins_graph': self._expected_wins_graph(score),
+        }
 
         return self.render_to_response(context)
 
