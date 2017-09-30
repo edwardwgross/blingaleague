@@ -70,9 +70,6 @@ class ExpectedWinsView(TemplateView):
         graph.buildcontent()
         graph.buildhtml()
 
-        import logging
-        logging.getLogger('blingaleague').error(graph.series)
-
         return graph
 
     def get(self, request):
