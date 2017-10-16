@@ -55,20 +55,60 @@ class StandingsView(TemplateView):
 
         return links
 
+    def _expected_win_distribution_graph(self, team_seasons):
+        graph = nvd3.lineChart(
+            name='expected_wins',
+            width=600,
+            height=400,
+            y_axis_format='%',
+        )
+
+        x_data = None
+
+        for team_season in team_seasons:
+            expected_win_distribution = sorted(team_season.expected_win_distribution.items())
+            y_data = map(lambda x: float(x[1]), expected_win_distribution)
+            if x_data is None:
+                x_data = map(lambda x: x[0], expected_win_distribution)
+
+            graph.add_serie(x=x_data, y=y_data, name=team_season.team.nickname)
+
+        graph.buildcontent()
+        graph.buildhtml()
+
+        return graph
+
+
 
 class StandingsCurrentView(StandingsView):
+    sub_templates = (
+        #'blingaleague/expected_win_distribution_standings.html',
+    )
 
     def get(self, request):
         self.standings = Standings()
-        context = {'standings': self.standings, 'links': self.links}
+        context = {
+            'standings': self.standings,
+            'links': self.links,
+            #'sub_templates': self.sub_templates,
+            #'expected_win_distribution_graph': self._expected_win_distribution_graph(self.standings.table),
+        }
         return self.render_to_response(context)
 
 
 class StandingsYearView(StandingsView):
+    sub_templates = (
+        #'blingaleague/expected_win_distribution_standings.html',
+    )
 
     def get(self, request, year):
         self.standings = Standings(year=int(year))
-        context = {'standings': self.standings, 'links': self.links}
+        context = {
+            'standings': self.standings,
+            'links': self.links,
+            #'sub_templates': self.sub_templates,
+            #'expected_win_distribution_graph': self._expected_win_distribution_graph(self.standings.table),
+        }
         return self.render_to_response(context)
 
 
@@ -107,7 +147,7 @@ class WeekView(GamesView):
 
 class TeamSeasonView(GamesView):
     sub_templates = (
-        'blingaleague/expected_win_distribution.html',
+        'blingaleague/expected_win_distribution_team.html',
         # TODO enable when more performant sub_templates 'blingaleague/similar_seasons.html',
     )
 

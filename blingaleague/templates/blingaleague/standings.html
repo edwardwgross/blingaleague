@@ -18,4 +18,9 @@
     {% endif %}
   {% endfor %}
 </div>
+
+{% for sub_template in sub_templates %}
+  {% include sub_template %}
+{% endfor %}
+
 {% endblock %}

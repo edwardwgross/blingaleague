@@ -42,7 +42,7 @@ class ExpectedWinsView(TemplateView):
 
         min_x = int(5 * (min_score // 5))
         max_x = int(5 * (max_score // 5)) + 10
-       # add 5 to round up, another 5 because range() is exclusive at the high end
+        # add 5 to round up, another 5 because range() is exclusive at the high end
 
         x_data = range(min_x, max_x, 5)
         if score is not None:
@@ -51,11 +51,9 @@ class ExpectedWinsView(TemplateView):
         x_data = map(float, x_data)
         y_data = map(float, map(Game.expected_wins, x_data))
 
-        graph_class = nvd3.lineChart
-
         graph_series = [{'x': x_data, 'y': y_data}]
 
-        graph = graph_class(
+        graph = nvd3.lineChart(
             name='expected_wins',
             width=600,
             height=400,

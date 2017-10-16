@@ -1,3 +1,32 @@
+from django.core.cache import caches
+
+
+CACHE = caches['default']
+
+
+class fully_cached_property(object):
+
+    def __init__(self, func):
+        self.__doc__ = getattr(func, '__doc__')
+        self.func = func
+
+    def __get__(self, obj, cls):
+        if obj is None:
+           return self
+
+        if not hasattr(obj, 'cache_key'):
+            return self.func(obj)
+
+        cache_key = "%s|%s:%s" % (cls.__name__, obj.cache_key, self.func.__name__)
+        if cache_key in CACHE:
+            return CACHE.get(cache_key)
+
+        value = self.func(obj)
+        CACHE.set(cache_key, value)
+
+        return value
+
+
 def int_to_roman(integer):
     if integer <= 0:
         return '?'

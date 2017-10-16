@@ -1,8 +1,7 @@
 import datetime
 import decimal
 import itertools
-
-from cached_property import cached_property
+import threading
 
 from collections import defaultdict
 
@@ -12,7 +11,7 @@ from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
-from .utils import int_to_roman
+from .utils import int_to_roman, fully_cached_property
 
 
 REGULAR_SEASON_WEEKS = 13
@@ -36,31 +35,35 @@ class Member(models.Model):
     nickname = models.CharField(max_length=50, blank=True, null=True)
     defunct = models.BooleanField(default=False)
 
-    @cached_property
+    @property
+    def cache_key(self):
+        return str(self.pk)
+
+    @fully_cached_property
     def full_name(self):
         return "%s %s" % (self.first_name, self.last_name)
 
-    @cached_property
+    @fully_cached_property
     def all_time_record(self):
         wins = self.games_won.filter(week__lte=REGULAR_SEASON_WEEKS).count()
         losses = self.games_lost.filter(week__lte=REGULAR_SEASON_WEEKS).count()
         return "%s-%s" % (wins, losses)
 
-    @cached_property
+    @fully_cached_property
     def all_time_record_with_playoffs(self):
         return "%s-%s" % (self.games_won.count(), self.games_lost.count())
 
-    @cached_property
+    @fully_cached_property
     def seasons(self):
         return TeamMultiSeasons(self.id)
 
-    @cached_property
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.id,))
 
     def save(self, *args, **kwargs):
-        CACHE.clear()
         super(Member, self).save(*args, **kwargs)
+        rebuild_whole_cache()
 
     def __str__(self):
         return self.full_name
@@ -78,25 +81,29 @@ class Game(models.Model):
     loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
     notes = models.TextField(blank=True, null=True)
 
-    @cached_property
+    @property
+    def cache_key(self):
+        return str(self.pk)
+
+    @fully_cached_property
     def week_object(self):
         return Week(self.year, self.week)
 
-    @cached_property
+    @fully_cached_property
     def blangums(self):
         return self.winner == self.week_object.blangums
 
-    @cached_property
+    @fully_cached_property
     def slapped_heartbeat(self):
         return self.loser == self.week_object.slapped_heartbeat
 
-    @cached_property
+    @fully_cached_property
     def title(self):
         if self.playoff_title:
             return self.playoff_title
         return str(self.week_object)
 
-    @cached_property
+    @fully_cached_property
     def playoff_title(self):
         if self.week > REGULAR_SEASON_WEEKS:
             try:
@@ -120,7 +127,7 @@ class Game(models.Model):
 
         return ''
 
-    @cached_property
+    @fully_cached_property
     def margin(self):
         return self.winner_score - self.loser_score
 
@@ -138,15 +145,24 @@ class Game(models.Model):
 
         return sum(_win_expectancy(score) for score in game_scores)
 
+    def other_weekly_games(self):
+        return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
+
+    def week_is_full(self):
+        other_games_count = self.other_weekly_games().count()
+
+        if (self.year < 2012 and other_games_count >= 6) or other_games_count >= 7:
+            return True
+
+        return False
+
     def validate_unique(self, **kwargs):
         errors = {}
 
-        other_weekly_games = Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
-
-        if (self.year < 2012 and other_weekly_games.count() >= 6) or other_weekly_games.count() >= 7:
+        if self.week_is_full():
             errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Too many games', code='too_many_games'))
 
-        for game in other_weekly_games:
+        for game in self.other_weekly_games():
             if set([self.winner, self.loser]) & set([game.winner, game.loser]):
                 errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Duplicate team', code='duplicate_team'))
 
@@ -154,7 +170,7 @@ class Game(models.Model):
             errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Loser score greater than winner score', code='loser_gt_winner'))
 
         if self.week > 1 and self.week <= 13:
-            previous_week_games = Game.objects.filter(year=self.year, week=self.week-1)
+            previous_week_game = Game.objects.filter(year=self.year, week=self.week-1)
             if (self.year >= 2012 and previous_week_games.count() < 7) or previous_week_games.count() < 6:
                 errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Previous week isn\'t done', code='previous_not_done'))
 
@@ -165,8 +181,9 @@ class Game(models.Model):
         super(Game, self).validate_unique(**kwargs)
 
     def save(self, *args, **kwargs):
-        CACHE.clear()
         super(Game, self).save(*args, **kwargs)
+        if self.week_is_full():
+            rebuild_whole_cache()
 
     def __str__(self):
         return "%s: %s def. %s" % (self.title, self.winner, self.loser)
@@ -184,7 +201,11 @@ class Season(models.Model):
     place_5 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='fifth_place_finishes')
     place_6 = models.ForeignKey(Member, db_index=True, null=True, default=None, related_name='sixth_place_finishes')
 
-    @cached_property
+    @property
+    def cache_key(self):
+        return str(self.pk)
+
+    @fully_cached_property
     def playoff_results(self):
         return (
             self.place_1,
@@ -195,11 +216,11 @@ class Season(models.Model):
             self.place_6,
         )
 
-    @cached_property
+    @fully_cached_property
     def blingabowl(self):
         return int_to_roman(self.year + 1 - FIRST_SEASON)
 
-    @cached_property
+    @fully_cached_property
     def robscores(self):
         robscores = defaultdict(lambda: 0)
 
@@ -219,9 +240,9 @@ class Season(models.Model):
         robscores[standings.table[0].team] += 0.5
         robscores[standings.table[1].team] += 0.25
 
-        return robscores
+        return dict(robscores)
 
-    @cached_property
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.standings_year', args=(self.year,))
 
@@ -232,8 +253,8 @@ class Season(models.Model):
         return None
 
     def save(self, *args, **kwargs):
-        CACHE.clear()
         super(Season, self).save(*args, **kwargs)
+        rebuild_whole_cache()
 
     def __str__(self):
         return str(self.year)
@@ -243,6 +264,7 @@ class Season(models.Model):
 
 
 class TeamSeason(object):
+    is_single_season = True
 
     def __init__(self, team_id, year, include_playoffs=False, week_max=None):
         self.year = int(year)
@@ -259,58 +281,60 @@ class TeamSeason(object):
         except Season.DoesNotExist:
             self.season = None  # this is ok, it's the current season
 
-    @cached_property
+        self.cache_key = '|'.join(map(str, (team_id, year, include_playoffs, week_max)))
+
+    @fully_cached_property
     def games(self):
         return sorted(self.wins + self.losses, key=lambda x: (x.year, x.week))
 
-    @cached_property
+    @fully_cached_property
     def wins(self):
         wins = self.team.games_won.filter(year=self.year, week__lte=self.week_max)
         return list(wins)
 
-    @cached_property
+    @fully_cached_property
     def losses(self):
         losses = self.team.games_lost.filter(year=self.year, week__lte=self.week_max)
         return list(losses)
 
-    @cached_property
+    @fully_cached_property
     def win_count(self):
         return len(self.wins)
 
-    @cached_property
+    @fully_cached_property
     def loss_count(self):
         return len(self.losses)
 
-    @cached_property
+    @fully_cached_property
     def record(self):
         return "%s-%s" % (self.win_count, self.loss_count)
 
-    @cached_property
+    @fully_cached_property
     def win_pct(self):
         return decimal.Decimal(self.win_count) / decimal.Decimal(len(self.games))
 
-    @cached_property
+    @fully_cached_property
     def points(self):
         return sum(map(lambda x: x.winner_score, self.wins)) + sum(map(lambda x: x.loser_score, self.losses))
 
-    @cached_property
+    @fully_cached_property
     def standings(self):
         return Standings(year=self.year, week_max=self.week_max)
 
-    @cached_property
+    @fully_cached_property
     def place_numeric(self):
         if self.week_max > REGULAR_SEASON_WEEKS:
             return self.regular_season.place_numeric
         return self.standings.team_to_place(self.team)
 
-    @cached_property
+    @fully_cached_property
     def place(self):
         if self.place_numeric is None:
             return '?'
 
         return ordinal(self.place_numeric)
 
-    @cached_property
+    @fully_cached_property
     def playoff_finish(self):
         if self.season is None:
             return ''
@@ -324,38 +348,44 @@ class TeamSeason(object):
 
         return ''
 
-    @cached_property
+    @fully_cached_property
     def playoffs(self):
         if self.season is None:
             return False
         return self.season.team_to_playoff_finish(self.team) is not None
 
-    @cached_property
+    @fully_cached_property
     def bye(self):
         if self.season is None:
             return False
         return self.place_numeric <= BYE_TEAMS
 
-    @cached_property
+    @fully_cached_property
     def champion(self):
         if self.season is None:
             return False
         return (self.team == self.season.place_1)
 
-    @cached_property
+    @fully_cached_property
     def game_scores(self):
         return [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
 
-    @cached_property
+    @fully_cached_property
     def expected_wins(self):
         return Game.expected_wins(*self.game_scores)
 
-    @cached_property
+    @fully_cached_property
     def expected_win_pct(self):
+        if len(self.games) == 0:
+            return 0
         return decimal.Decimal(self.expected_wins) / decimal.Decimal(len(self.games))
 
-    @cached_property
+    @fully_cached_property
     def expected_win_distribution(self):
+        if not self.is_single_season:
+            # too expensive to calculate for more than one season
+            return None
+
         expected_wins_by_game = map(Game.expected_wins, self.regular_season.game_scores)
 
         num_games = len(expected_wins_by_game)
@@ -380,19 +410,19 @@ class TeamSeason(object):
 
         return dict(win_distribution)
 
-    @cached_property
+    @fully_cached_property
     def blangums_count(self):
         blangums = filter(lambda x: x.week_object.blangums == self.team and x.week <= REGULAR_SEASON_WEEKS, self.games)
         return len(blangums)
 
-    @cached_property
+    @fully_cached_property
     def robscore(self):
         if self.season is None:
             return 0
 
-        return self.season.robscores[self.team]
+        return self.season.robscores.get(self.team, 0)
 
-    @cached_property
+    @fully_cached_property
     def headline(self):
         regular_season = self.regular_season
         text = "%s-%s, %s points, %s" % (regular_season.win_count, regular_season.loss_count, regular_season.points, regular_season.place)
@@ -400,11 +430,11 @@ class TeamSeason(object):
             text = "%s (regular season), %s (playoffs)" % (text, self.playoff_finish)
         return text
 
-    @cached_property
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team_season', args=(self.team.id, self.year))
 
-    @cached_property
+    @fully_cached_property
     def previous(self):
         prev_ts = TeamSeason(self.team.id, self.year - 1, week_max=self.week_max)
 
@@ -413,7 +443,7 @@ class TeamSeason(object):
 
         return prev_ts
 
-    @cached_property
+    @fully_cached_property
     def next(self):
         next_ts = TeamSeason(self.team.id, self.year + 1, week_max=self.week_max)
 
@@ -422,19 +452,19 @@ class TeamSeason(object):
 
         return next_ts
 
-    @cached_property
+    @fully_cached_property
     def level_up_link(self):
         return {'description': 'Franchise index', 'href': self.team.href}
 
-    @cached_property
+    @fully_cached_property
     def regular_season(self):
         return TeamSeason(self.team.id, self.year, week_max=REGULAR_SEASON_WEEKS)
 
-    @cached_property
+    @fully_cached_property
     def win_loss_sequence(self):
         return map(lambda x: 'W' if self.team == x.winner else 'L', self.games)
 
-    @cached_property
+    @fully_cached_property
     def most_similar(self):
         limit = 10
         similar_seasons = []
@@ -488,6 +518,7 @@ class TeamSeason(object):
 
 
 class TeamMultiSeasons(TeamSeason):
+    is_single_season = False
 
     def __init__(self, team_id, years=None, include_playoffs=False, week_max=None):
         if years is None:
@@ -498,7 +529,9 @@ class TeamMultiSeasons(TeamSeason):
         self.include_playoffs = include_playoffs
         self.week_max = week_max
 
-    @cached_property
+        self.cache_key = '|'.join(map(str, (team_id, years, include_playoffs, week_max)))
+
+    @fully_cached_property
     def team_seasons(self):
         team_seasons = []
         for year in self.years:
@@ -507,25 +540,25 @@ class TeamMultiSeasons(TeamSeason):
                 team_seasons.append(team_season)
         return team_seasons
 
-    @cached_property
+    @fully_cached_property
     def wins(self):
         wins = []
         for team_season in self:
             wins += team_season.wins
         return wins
 
-    @cached_property
+    @fully_cached_property
     def losses(self):
         losses = []
         for team_season in self:
             losses += team_season.losses
         return losses
 
-    @cached_property
+    @fully_cached_property
     def robscore(self):
         return sum(team_season.robscore for team_season in self)
 
-    @cached_property
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.team.id,))
 
@@ -565,6 +598,8 @@ class Standings(object):
             except Season.DoesNotExist:
                 pass  # won't exist for the current season
 
+        self.cache_key = "|".join(map(str, (year, all_time, include_playoffs, week_max)))
+
     def team_record(self, member):
         if self.all_time:
             return TeamMultiSeasons(member.id, include_playoffs=self.include_playoffs, week_max=self.week_max)
@@ -582,20 +617,20 @@ class Standings(object):
 
         return sorted(team_records, key=lambda x: (x.win_pct, x.points), reverse=True)
 
-    @cached_property
+    @fully_cached_property
     def table(self):
         members = Member.objects.all()
         if self.all_time:
             members = members.filter(defunct=False)
         return self.build_table(members)
 
-    @cached_property
+    @fully_cached_property
     def defunct_table(self):
         if not self.all_time:
             return []
         return self.build_table(Member.objects.filter(defunct=True))
 
-    @cached_property
+    @fully_cached_property
     def href(self):
         if self.year is not None:
             return urlresolvers.reverse_lazy('blingaleague.standings_year', args=(self.year,))
@@ -633,7 +668,9 @@ class Week(object):
         self.year = int(year)
         self.week = int(week)
 
-    @cached_property
+        self.cache_key = "%s|%s" % (year, week)
+
+    @fully_cached_property
     def games(self):
         games = Game.objects.filter(year=self.year, week=self.week)
 
@@ -654,19 +691,19 @@ class Week(object):
 
         return sorted(games, key=lambda x: (_sort(x), x.winner_score, x.loser_score), reverse=True)
 
-    @cached_property
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.week', args=(self.year, self.week))
 
-    @cached_property
+    @fully_cached_property
     def average_score(self):
         return sum(map(lambda x: x.winner_score + x.loser_score, self.games)) / (2 * len(self.games))
 
-    @cached_property
+    @fully_cached_property
     def average_margin(self):
         return sum(map(lambda x: x.margin, self.games)) / len(self.games)
 
-    @cached_property
+    @fully_cached_property
     def previous(self):
         if self.week == 1:
             prev_week = Week(self.year - 1, BLINGABOWL_WEEK)
@@ -678,7 +715,7 @@ class Week(object):
 
         return prev_week
 
-    @cached_property
+    @fully_cached_property
     def next(self):
         if self.week == BLINGABOWL_WEEK:
             next_week = Week(self.year + 1, 1)
@@ -690,19 +727,19 @@ class Week(object):
 
         return next_week
 
-    @cached_property
+    @fully_cached_property
     def blangums(self):
         if self.week > REGULAR_SEASON_WEEKS:
             return None
         return sorted(self.games, key=lambda x: x.winner_score, reverse=True)[0].winner
 
-    @cached_property
+    @fully_cached_property
     def slapped_heartbeat(self):
         if self.week > REGULAR_SEASON_WEEKS:
             return None
         return sorted(self.games, key=lambda x: x.loser_score)[0].loser
 
-    @cached_property
+    @fully_cached_property
     def headline(self):
         return "Team Blangums: %s / Slapped Heartbeat: %s" % (self.blangums, self.slapped_heartbeat)
 
@@ -724,32 +761,34 @@ class Matchup(object):
         self.team1 = Member.objects.get(id=team1_id)
         self.team2 = Member.objects.get(id=team2_id)
 
-    @cached_property
+        self.cache_key = "%s|%s" % (team1_id, team2_id)
+
+    @fully_cached_property
     def games(self):
         games = self.team1_wins + self.team2_wins
         return sorted(games, key=lambda x: (x.year, x.week), reverse=True)
 
-    @cached_property
+    @fully_cached_property
     def team1_wins(self):
         return list(Game.objects.filter(winner=self.team1, loser=self.team2))
 
-    @cached_property
+    @fully_cached_property
     def team2_wins(self):
         return list(Game.objects.filter(winner=self.team2, loser=self.team1))
 
-    @cached_property
+    @fully_cached_property
     def team1_count(self):
         return len(self.team1_wins)
 
-    @cached_property
+    @fully_cached_property
     def team2_count(self):
         return len(self.team2_wins)
 
-    @cached_property
+    @fully_cached_property
     def record(self):
         return "%s-%s" % (self.team1_count, self.team2_count)
 
-    @cached_property
+    @fully_cached_property
     def headline(self):
         if self.team1_count == self.team2_count:
             return "All-time series tied, %s-%s" % (self.team1_count, self.team2_count)
@@ -760,7 +799,7 @@ class Matchup(object):
             else:
                 return text % (self.team2, self.team2_count, self.team1_count)
 
-    @cached_property
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.matchup', args=(self.team1.id, self.team2.id))
 
@@ -774,3 +813,42 @@ class Matchup(object):
     def __repr__(self):
         return str(self)
 
+
+def build_object_cache(obj):
+    for attr in dir(obj):
+        # just getting the property will cache it if it isn't already
+        _ = getattr(obj, attr)
+
+
+def build_all_objects_cache():
+    try:
+        all_game_years = Game.objects.order_by('year').values_list('year', flat=True)
+        min_year = all_game_years.first()
+        max_year = all_game_years.last()
+
+        year_range = range(min_year, max_year + 1)
+
+        for member in Member.objects.all():
+            for year in year_range:
+                build_object_cache(TeamSeason(member.pk, year))
+
+            for other_member in Member.objects.all():
+                build_object_cache(Matchup(member.pk, other_member.pk))
+
+        for year in year_range:
+            build_object_cache(Standings(year))
+
+        build_object_cache(Standings(all_time=True))
+        build_object_cache(Standings(all_time=True, include_playoffs=True))
+
+    except Exception, e:
+        # print if we're in the shell, but don't actually raise
+        import traceback
+        print(traceback.format_exc())
+
+
+def rebuild_whole_cache():
+    CACHE.clear()
+
+    build_call = threading.Timer(1, build_all_objects_cache)
+    build_call.start()
