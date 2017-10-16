@@ -529,7 +529,8 @@ class TeamMultiSeasons(TeamSeason):
         self.include_playoffs = include_playoffs
         self.week_max = week_max
 
-        self.cache_key = '|'.join(map(str, (team_id, years, include_playoffs, week_max)))
+        years_string = ','.join(map(str, self.years))
+        self.cache_key = '|'.join(map(str, (team_id, years_string, include_playoffs, week_max)))
 
     @fully_cached_property
     def team_seasons(self):
