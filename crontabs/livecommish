@@ -1,0 +1,1 @@
+0 10 * * * /data/blingaleague/environ/bin/python /data/blingaleague/manage.py rebuild_cache > /data/blingaleague/logs/rebuild_cache.log
