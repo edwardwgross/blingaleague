@@ -1,7 +1,6 @@
 import datetime
 import decimal
 import itertools
-import threading
 
 from collections import defaultdict
 
@@ -63,7 +62,7 @@ class Member(models.Model):
 
     def save(self, *args, **kwargs):
         super(Member, self).save(*args, **kwargs)
-        rebuild_whole_cache()
+        CACHE.clear()
 
     def __str__(self):
         return self.full_name
@@ -170,7 +169,7 @@ class Game(models.Model):
             errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Loser score greater than winner score', code='loser_gt_winner'))
 
         if self.week > 1 and self.week <= 13:
-            previous_week_game = Game.objects.filter(year=self.year, week=self.week-1)
+            previous_week_games = Game.objects.filter(year=self.year, week=self.week-1)
             if (self.year >= 2012 and previous_week_games.count() < 7) or previous_week_games.count() < 6:
                 errors.setdefault(NON_FIELD_ERRORS, []).append(ValidationError(message='Previous week isn\'t done', code='previous_not_done'))
 
@@ -183,7 +182,7 @@ class Game(models.Model):
     def save(self, *args, **kwargs):
         super(Game, self).save(*args, **kwargs)
         if self.week_is_full():
-            rebuild_whole_cache()
+            CACHE.clear()
 
     def __str__(self):
         return "%s: %s def. %s" % (self.title, self.winner, self.loser)
@@ -254,7 +253,7 @@ class Season(models.Model):
 
     def save(self, *args, **kwargs):
         super(Season, self).save(*args, **kwargs)
-        rebuild_whole_cache()
+        CACHE.clear()
 
     def __str__(self):
         return str(self.year)
@@ -816,12 +815,14 @@ class Matchup(object):
 
 
 def build_object_cache(obj):
+    print("%s: building cache for %s" % (datetime.datetime.now(), obj))
     for attr in dir(obj):
         # just getting the property will cache it if it isn't already
         _ = getattr(obj, attr)
 
 
 def build_all_objects_cache():
+
     try:
         all_game_years = Game.objects.order_by('year').values_list('year', flat=True)
         min_year = all_game_years.first()
@@ -851,5 +852,4 @@ def build_all_objects_cache():
 def rebuild_whole_cache():
     CACHE.clear()
 
-    build_call = threading.Timer(1, build_all_objects_cache)
-    build_call.start()
+    build_all_objects_cache()
