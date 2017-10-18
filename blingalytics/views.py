@@ -49,7 +49,7 @@ class ExpectedWinsView(TemplateView):
             x_data = sorted(x_data + [score])
 
         x_data = map(float, x_data)
-        y_data = map(float, map(Game.expected_wins, x_data))
+        y_data = map(float, map(Game.expected_wins_for_scores, x_data))
 
         graph_series = [{'x': x_data, 'y': y_data}]
 
@@ -76,7 +76,7 @@ class ExpectedWinsView(TemplateView):
         score = request.GET.get('score', None)
         if score is not None:
             score = decimal.Decimal(score)
-            expected_wins = Game.expected_wins(score)
+            expected_wins = Game.expected_wins_for_scores(score)
 
         context = {
             'score': score,
