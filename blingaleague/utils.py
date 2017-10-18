@@ -18,10 +18,16 @@ class fully_cached_property(object):
             return self.func(obj)
 
         cache_key = "%s|%s:%s" % (cls.__name__, obj.cache_key, self.func.__name__)
+
+        if cache_key in obj.__dict__:
+            return obj.__dict__[cache_key]
+
         if cache_key in CACHE:
             return CACHE.get(cache_key)
 
         value = self.func(obj)
+
+        obj.__dict__[cache_key] = value
         CACHE.set(cache_key, value)
 
         return value
