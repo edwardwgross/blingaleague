@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url, include
 from django.contrib import admin
 from django.contrib.auth.views import login, logout
+from django.views.decorators.cache import cache_page
 
 from .views import HomeView, TeamDetailsView, TeamVsTeamView,\
                    StandingsYearView, StandingsCurrentView, StandingsAllTimeView,\
@@ -9,16 +10,18 @@ from .views import HomeView, TeamDetailsView, TeamVsTeamView,\
 
 admin.autodiscover()
 
+default_cache_timeout = 365 * 24 * 60 * 60
+
 urlpatterns = patterns('',
-    url(r'^$', HomeView.as_view(), name='blingaleague.home'),
-    url(r'^standings/$', StandingsCurrentView.as_view(), name='blingaleague.standings'),
-    url(r'^standings/(?P<year>\d{4})/$', StandingsYearView.as_view(), name='blingaleague.standings_year'),
-    url(r'^standings/all_time/$', StandingsAllTimeView.as_view(), name='blingaleague.standings_all_time'),
-    url(r'^matchup/(?P<team1>\d+)/(?P<team2>\d+)/$', MatchupView.as_view(), name='blingaleague.matchup'),
-    url(r'^week/(?P<year>\d{4})/(?P<week>\d+)/$', WeekView.as_view(), name='blingaleague.week'),
-    url(r'^team/(?P<team>\d+)/$', TeamDetailsView.as_view(), name='blingaleague.team'),
-    url(r'^team/(?P<team>\d+)/(?P<year>\d{4})/$', TeamSeasonView.as_view(), name='blingaleague.team_season'),
-    url(r'^team_vs_team/$', TeamVsTeamView.as_view(), name='blingaleague.team_vs_team'),
+    url(r'^$', cache_page(default_cache_timeout)(HomeView.as_view()), name='blingaleague.home'),
+    url(r'^standings/$', cache_page(default_cache_timeout)(StandingsCurrentView.as_view()), name='blingaleague.standings'),
+    url(r'^standings/(?P<year>\d{4})/$', cache_page(default_cache_timeout)(StandingsYearView.as_view()), name='blingaleague.standings_year'),
+    url(r'^standings/all_time/$', cache_page(default_cache_timeout)(StandingsAllTimeView.as_view()), name='blingaleague.standings_all_time'),
+    url(r'^matchup/(?P<team1>\d+)/(?P<team2>\d+)/$', cache_page(default_cache_timeout)(MatchupView.as_view()), name='blingaleague.matchup'),
+    url(r'^week/(?P<year>\d{4})/(?P<week>\d+)/$', cache_page(default_cache_timeout)(WeekView.as_view()), name='blingaleague.week'),
+    url(r'^team/(?P<team>\d+)/$', cache_page(default_cache_timeout)(TeamDetailsView.as_view()), name='blingaleague.team'),
+    url(r'^team/(?P<team>\d+)/(?P<year>\d{4})/$', cache_page(default_cache_timeout)(TeamSeasonView.as_view()), name='blingaleague.team_season'),
+    url(r'^team_vs_team/$', cache_page(default_cache_timeout)(TeamVsTeamView.as_view()), name='blingaleague.team_vs_team'),
 
     (r'^blingalytics/', include('blingalytics.urls')),
 
