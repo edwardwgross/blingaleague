@@ -5,7 +5,7 @@ from cached_property import cached_property
 from collections import defaultdict
 
 from django.core import urlresolvers
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
@@ -86,14 +86,9 @@ class StandingsCurrentView(StandingsView):
     )
 
     def get(self, request):
-        self.standings = Standings()
-        context = {
-            'standings': self.standings,
-            'links': self.links,
-            #'sub_templates': self.sub_templates,
-            #'expected_win_distribution_graph': self._expected_win_distribution_graph(self.standings.table),
-        }
-        return self.render_to_response(context)
+        max_year = Game.objects.all().order_by('-year').first().year
+        redirect_url = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(max_year,))
+        return HttpResponseRedirect(redirect_url)
 
 
 class StandingsYearView(StandingsView):

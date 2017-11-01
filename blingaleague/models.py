@@ -181,8 +181,7 @@ class Game(models.Model):
 
     def save(self, *args, **kwargs):
         super(Game, self).save(*args, **kwargs)
-        if self.week_is_full():
-            CACHE.clear()
+        CACHE.clear()
 
     def __str__(self):
         return "%s: %s def. %s" % (self.title, self.winner, self.loser)
