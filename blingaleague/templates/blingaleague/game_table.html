@@ -33,7 +33,7 @@
         <td style="text-align:left">
           <a href="{% url 'blingaleague.team_season' game.winner.id game.year %}">{{ game.winner }}</a>
         </td>
-        <td>{{ game.margin }}</td>
+        <td>-{{ game.margin }}</td>
         <td style="text-align:left">
           {% if game.playoff_title %}
             {{ game.playoff_title }}
