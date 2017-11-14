@@ -17,9 +17,7 @@
   {% if base_object.previous %}<a href="{{ base_object.previous.href }}" class="link previous">Previous</a>{% endif %}
   {% if base_object.next %}<a href="{{ base_object.next.href }}" class="link next">Next</a>{% endif %}
 
-  {% for game in base_object.games %}
-    {% include "blingaleague/single_game.html" %}
-  {% endfor %}
+  {% include games_sub_template %}
 </div>
 
 {% endblock content %}

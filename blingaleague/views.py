@@ -118,10 +118,15 @@ class StandingsAllTimeView(StandingsView):
 
 class GamesView(TemplateView):
     template_name = 'blingaleague/games.html'
-    sub_templates = []
+    sub_templates = tuple()
+    games_sub_template = 'blingaleague/game_list.html'
 
     def _context(self, base_object):
-        return {'base_object': base_object, 'sub_templates': self.sub_templates}
+        return {
+            'base_object': base_object,
+            'sub_templates': self.sub_templates,
+            'games_sub_template': self.games_sub_template,
+        }
 
 
 class MatchupView(GamesView):
@@ -145,6 +150,7 @@ class TeamSeasonView(GamesView):
         'blingaleague/expected_win_distribution_team.html',
         # TODO enable when more performant sub_templates 'blingaleague/similar_seasons.html',
     )
+    games_sub_template = 'blingaleague/game_table.html'
 
     def _expected_win_distribution_graph(self, expected_win_distribution):
         expected_win_distribution = sorted(expected_win_distribution.items())

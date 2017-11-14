@@ -189,6 +189,21 @@ table#team_vs_team_grid .empty {
     font-size: 18px;
 }
 
+table.game_table {
+    clear: both;
+    padding: 12px 24px;
+    width: 100%;
+}
+table.game_table tr.playoffs {
+    font-style: italic;
+}
+table.game_table th {
+    text-align: center;
+}
+table.game_table td {
+    text-align: right;  /* by default, since these are mostly numbers */
+}
+
 table.blingalytics_table tbody {
     counter-reset: blingalytics_tabletablescope;
 }

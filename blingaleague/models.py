@@ -103,8 +103,12 @@ class Game(models.Model):
         return str(self.week_object)
 
     @fully_cached_property
+    def is_playoffs(self):
+        return self.week > REGULAR_SEASON_WEEKS
+
+    @fully_cached_property
     def playoff_title(self):
-        if self.week > REGULAR_SEASON_WEEKS:
+        if self.is_playoffs:
             try:
                 season = Season.objects.get(year=self.year)
                 if self.week == BLINGABOWL_WEEK:
