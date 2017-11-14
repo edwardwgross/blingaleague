@@ -125,6 +125,10 @@ nav .icon-bar {
     height: 40px;
 }
 
+table.sortable th {
+    cursor: pointer;
+}
+
 table.standings_table th {
     text-align: center;
 }
@@ -185,21 +189,18 @@ table#team_vs_team_grid .empty {
     font-size: 18px;
 }
 
-table.sortable tbody {
-    counter-reset: sortabletablescope;
+table.blingalytics_table tbody {
+    counter-reset: blingalytics_tabletablescope;
 }
-table.sortable thead tr::before {
+table.blingalytics_table thead tr::before {
     content: "";
     display: table-cell;
 }
-table.sortable tbody tr::before {
-    content: counter(sortabletablescope);
-    counter-increment: sortabletablescope;
+table.blingalytics_table tbody tr::before {
+    content: counter(blingalytics_tabletablescope);
+    counter-increment: blingalytics_tabletablescope;
     display: table-cell;
     text-align: right;
-}
-table.sortable th {
-    cursor: pointer;
 }
 
 .blingalytics th,
