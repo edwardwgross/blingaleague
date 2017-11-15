@@ -1,24 +1,14 @@
 <table class="standings_table sortable">
-  <tr>
-    <th/> {# Place #}
-    <th/> {# Team #}
-    <th>W</th>
-    <th>L</th>
-    <th>W%</th>
-    <th>Points</th>
-    <th>Exp. W</th>
-    <th>Exp. %</th>
-    {% if standings.all_time %}<th>RobScore</th>{% endif %}
-    <th>Blangums</th>
-    <th/> {# Playoff Finish #}
-  </tr>
+  <tr>{% include "blingaleague/standings_table_header.html" %}</tr>
   {% for team_season in standings.table %}
     <tr>{% include "blingaleague/standings_table_row.html" %}</tr>
   {% endfor %}
+</table>
+
+<div><em>Defunct Teams</em></div>
+<table class="standings_table defunct_teams sortable">
   {% if standings.defunct_table %}
-    <tr class="defunct">
-      <th colspan="100%">Defunct Teams</th>
-    </tr>
+    <tr>{% include "blingaleague/standings_table_header.html" %}</tr>
     {% for team_season in standings.defunct_table %}
       <tr class="defunct">{% include "blingaleague/standings_table_row.html" %}</tr>
     {% endfor %}
