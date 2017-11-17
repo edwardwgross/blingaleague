@@ -172,7 +172,7 @@ table#team_vs_team_grid .empty {
     float: right;
 }
 
-#games .game:first {
+#games .game:first-of-type {
     border-top: 1px solid #a4c2f4;
 }
 
@@ -180,7 +180,7 @@ table#team_vs_team_grid .empty {
     font-size: 12px;
 }
 
-#games .game teams,
+#games .game .teams,
 #games .game .score {
     font-size: 18px;
 }
@@ -197,6 +197,7 @@ table.game_table th {
     text-align: center;
 }
 table.game_table td {
+    white-space: nowrap;
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
