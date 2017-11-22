@@ -1,0 +1,42 @@
+<table class="game_table sortable">
+  <tr>
+    <th>Year</th>
+    <th>Week</th>
+    <th>{{ base_object.team1 }}</th>
+    <th>W/L</th>
+    <th>PF</th>
+    <th>PA</th>
+    <th>{{ base_object.team2 }}</th>
+    <th>Margin</th>
+    <th/> {# Notes #}
+  </tr>
+  {% for game in base_object.games %}
+    <tr {% if game.is_playoffs %}class="playoffs"{% endif %}>
+      <td><a href="{% url 'blingaleague.standings_year' game.year %}">{{ game.year }}</a></td>
+      <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
+      <td><a href="{% url 'blingaleague.team_season' base_object.team1.id game.year %}">{{ base_object.team1 }}</a></td>
+      {% if base_object.team1 == game.winner %}
+        <td style="text-align:center">W</td>
+        <td>{{ game.winner_score }}</td>
+        <td>{{ game.loser_score }}</td>
+      {% else %}
+        <td style="text-align:center">L</td>
+        <td>{{ game.loser_score }}</td>
+        <td>{{ game.winner_score }}</td>
+      {% endif %}
+      <td><a href="{% url 'blingaleague.team_season' base_object.team2.id game.year %}">{{ base_object.team2 }}</a></td>
+      <td>{{ game.margin }}</td>
+        <td style="text-align:left">
+        {% if game.playoff_title %}
+          {{ game.playoff_title }}
+        {% else %}
+          {% if game.blangums %}
+            Team Blangums{% if game.slapped_heartbeat %}, Slapped Heartbeat{% endif %}
+          {% elif game.slapped_heartbeat %}
+            Slapped Heartbeat
+          {% endif %}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>

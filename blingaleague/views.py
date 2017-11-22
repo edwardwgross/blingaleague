@@ -119,7 +119,10 @@ class StandingsAllTimeView(StandingsView):
 class GamesView(TemplateView):
     template_name = 'blingaleague/games.html'
     sub_templates = tuple()
-    games_sub_template = 'blingaleague/game_list.html'
+
+    @property
+    def games_sub_template(self):
+        raise NotImplementedError('Must be defined by the subclass')
 
     def _context(self, base_object):
         return {
@@ -130,6 +133,7 @@ class GamesView(TemplateView):
 
 
 class MatchupView(GamesView):
+    games_sub_template = 'blingaleague/team_vs_team_games.html'
 
     def get(self, request, team1, team2):
         base_object = Matchup(team1, team2)
@@ -138,6 +142,8 @@ class MatchupView(GamesView):
 
 
 class WeekView(GamesView):
+    games_sub_template = 'blingaleague/weekly_games.html'
+
 
     def get(self, request, year, week):
         base_object = Week(year, week)
@@ -150,7 +156,7 @@ class TeamSeasonView(GamesView):
         'blingaleague/expected_win_distribution_team.html',
         # TODO enable when more performant sub_templates 'blingaleague/similar_seasons.html',
     )
-    games_sub_template = 'blingaleague/game_table.html'
+    games_sub_template = 'blingaleague/team_season_games.html'
 
     def _expected_win_distribution_graph(self, expected_win_distribution):
         expected_win_distribution = sorted(expected_win_distribution.items())
