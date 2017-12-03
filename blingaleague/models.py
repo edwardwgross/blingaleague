@@ -265,6 +265,33 @@ class Season(models.Model):
         return str(self)
 
 
+class Year(object):
+
+    def __init__(self, year):
+        self.year = int(year)
+        self.cache_key = str(self.year)
+
+    @fully_cached_property
+    def all_games(self):
+        return Game.objects.filter(year=self.year)
+
+    @fully_cached_property
+    def total_wins(self):
+        return self.all_games.count()
+
+    @fully_cached_property
+    def total_raw_expected_wins(self):
+        all_scores = []
+        for winner_score, loser_score in self.all_games.values_list('winner_score', 'loser_score'):
+            all_scores.extend([winner_score, loser_score])
+
+        return Game.expected_wins(*all_scores)
+
+    @fully_cached_property
+    def expected_wins_scaling_factor(self):
+        return decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
+
+
 class TeamSeason(object):
     is_single_season = True
 
@@ -282,6 +309,8 @@ class TeamSeason(object):
             self.season = Season.objects.get(year=self.year)
         except Season.DoesNotExist:
             self.season = None  # this is ok, it's the current season
+
+        self.year_object = Year(self.year)
 
         self.cache_key = '|'.join(map(str, (team_id, year, include_playoffs, week_max)))
 
@@ -373,8 +402,15 @@ class TeamSeason(object):
         return [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
 
     @fully_cached_property
+    def expected_wins_scaling_factor(self):
+        return self.year_object.expected_wins_scaling_factor
+
+    def expected_wins_function(self, *game_scores):
+        return self.expected_wins_scaling_factor * Game.expected_wins(*game_scores)
+
+    @fully_cached_property
     def expected_wins(self):
-        return Game.expected_wins(*self.game_scores)
+        return self.expected_wins_function(*self.game_scores)
 
     @fully_cached_property
     def expected_win_pct(self):
@@ -388,7 +424,7 @@ class TeamSeason(object):
             # too expensive to calculate for more than one season
             return None
 
-        expected_wins_by_game = map(Game.expected_wins, self.regular_season.game_scores)
+        expected_wins_by_game = map(self.expected_wins_function, self.regular_season.game_scores)
 
         num_games = len(expected_wins_by_game)
 
@@ -547,15 +583,19 @@ class TeamMultiSeasons(TeamSeason):
     def wins(self):
         wins = []
         for team_season in self:
-            wins += team_season.wins
+            wins.extend(team_season.wins)
         return wins
 
     @fully_cached_property
     def losses(self):
         losses = []
         for team_season in self:
-            losses += team_season.losses
+            losses.extend(team_season.losses)
         return losses
+
+    @fully_cached_property
+    def expected_wins(self):
+        return sum(team_season.expected_wins for team_season in self)
 
     @fully_cached_property
     def robscore(self):
