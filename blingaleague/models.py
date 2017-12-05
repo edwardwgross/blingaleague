@@ -273,7 +273,7 @@ class Year(object):
 
     @fully_cached_property
     def all_games(self):
-        return Game.objects.filter(year=self.year)
+        return Game.objects.filter(year=self.year, week__lte=REGULAR_SEASON_WEEKS)
 
     @fully_cached_property
     def total_wins(self):
