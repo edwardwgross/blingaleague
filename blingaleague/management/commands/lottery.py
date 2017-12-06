@@ -1,0 +1,97 @@
+import decimal
+import math
+import random
+
+from django.core.management.base import BaseCommand
+
+from blingaleague.models import Standings, PLAYOFF_TEAMS
+
+
+class Command(BaseCommand):
+    def handle(self, year, **kwargs):
+        # this changes each year
+        standings = Standings(int(year))
+
+        teams = [(ts.team.nickname, ts.loss_count, ts.points) for ts in standings.table[PLAYOFF_TEAMS:]]
+
+        losses_weight = decimal.Decimal(0.9)
+        points_weight = decimal.Decimal(0.1)
+
+        team_count = len(teams)
+
+        losses_array = []
+        points_array = []
+
+        for team in teams:
+            losses_array.append(team[1])
+            points_array.append(team[2])
+
+        losses_base = min(losses_array) - 1
+        points_base = max(points_array) + 50
+
+        total_losses = sum(losses_array) - (team_count * losses_base)
+        total_points = (team_count * points_base) - sum(points_array)
+
+        chances = []
+        print "Likelihood of getting first pick:"
+        for team in teams:
+            name = team[0]
+            losses = team[1]
+            points = team[2]
+            losses_chances = losses_weight * (losses - losses_base) / total_losses
+            points_chances = points_weight * (points_base - points) / total_points
+            overall_chances = round(losses_chances + points_chances, 4)
+            print "%s => %s%%" % (name.ljust(16), (100.00 * overall_chances))
+            chances.append([name, overall_chances])
+
+        print
+
+        i = 0
+        max_runs = 10000
+        run_to_use = int(math.ceil(max_runs * random.random()))
+        outcomes = []
+        while i < max_runs:
+            pick_index = 0
+            used_teams = {}
+            order = []
+            while pick_index < team_count:
+                pick_assigned = False
+                while not pick_assigned:
+                    random_value = random.random()
+                    total_level = 0
+                    for chance in chances:
+                        name = chance[0]
+                        level = chance[1]
+                        total_level = total_level + level
+                        if random_value < total_level:
+                            if name in used_teams:
+                                break  # don't move onto next team, instead re-generatezd random number
+                            else:
+                                used_teams[name] = 1
+                                order.append(name)
+                                pick_index = pick_index + 1
+                                pick_assigned = True
+                                break
+            outcomes.append(order)
+            i = i + 1
+
+        results_by_team = {}
+        for team in teams:
+            name = team[0]
+            results_by_team[name] = [0] * team_count
+
+        for order in outcomes:
+            pick_index = 0
+            for entry in order:
+                results_by_team[entry][pick_index] = results_by_team[entry][pick_index] + 1
+                pick_index = pick_index + 1
+
+        print "Actual results after %s runs:" % max_runs
+        for team in teams:
+            name = team[0]
+            print "%s %s" % (name.ljust(16), results_by_team[name])
+
+        print
+        print "RESULTS FOR RANDOMLY SELECTED RUN (#%s)" % (run_to_use)
+        print outcomes[run_to_use-1]
+
