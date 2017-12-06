@@ -16,6 +16,7 @@ from .utils import int_to_roman, fully_cached_property
 REGULAR_SEASON_WEEKS = 13
 BLINGABOWL_WEEK = 16
 BYE_TEAMS = 2
+PLAYOFF_TEAMS = 6
 FIRST_SEASON = 2008
 
 BLINGABOWL_TITLE_BASE = 'Blingabowl'
@@ -362,7 +363,6 @@ class TeamSeason(object):
     def place(self):
         if self.place_numeric is None:
             return '?'
-
         return ordinal(self.place_numeric)
 
     @fully_cached_property
@@ -381,15 +381,15 @@ class TeamSeason(object):
 
     @fully_cached_property
     def playoffs(self):
-        if self.season is None:
-            return False
-        return self.season.team_to_playoff_finish(self.team) is not None
+        regular_season_games = self.regular_season.games
+        regular_season_place = self.regular_season.place_numeric
+        return len(regular_season_games) == REGULAR_SEASON_WEEKS and regular_season_place <= PLAYOFF_TEAMS
 
     @fully_cached_property
     def bye(self):
-        if self.season is None:
-            return False
-        return self.place_numeric <= BYE_TEAMS
+        regular_season_games = self.regular_season.games
+        regular_season_place = self.regular_season.place_numeric
+        return len(regular_season_games) == REGULAR_SEASON_WEEKS and regular_season_place <= BYE_TEAMS
 
     @fully_cached_property
     def champion(self):

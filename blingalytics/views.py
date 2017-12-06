@@ -203,7 +203,7 @@ class SeasonFinderView(TemplateView):
 
         team_ids = form_data['teams']
         if len(team_ids) == 0:
-            team_ids = Member.objects.all().order_by('first_name', 'last_name').values_list('id', flat=True)
+            team_ids = Member.objects.all().order_by('nickname', 'first_name', 'last_name').values_list('id', flat=True)
 
         for year in range(year_min, year_max + 1):
             for team_id in team_ids:
@@ -245,9 +245,9 @@ class SeasonFinderView(TemplateView):
                     if team_season.points > form_data['points_max']:
                         continue
 
-                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and (team_season.season is None or not team_season.playoffs):
+                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not team_season.playoffs:
                     continue
-                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and (team_season.season is None or team_season.playoffs):
+                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and team_season.playoffs:
                     continue
 
                 if form_data['bye'] and not team_season.bye:
