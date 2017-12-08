@@ -136,7 +136,9 @@ class Game(models.Model):
         return self.winner_score - self.loser_score
 
     @classmethod
-    def expected_wins(cls, *game_scores):
+    def expected_wins(cls, *game_scores, **kwargs):
+        scaling_factor = kwargs.get('scaling_factor', 1)
+
         all_scores = []
         for winner_score, loser_score in Game.objects.all().values_list('winner_score', 'loser_score'):
             all_scores.extend([winner_score, loser_score])
@@ -145,7 +147,9 @@ class Game(models.Model):
 
         def _win_expectancy(score):
             win_count = len(filter(lambda x: x < score, all_scores))
-            return decimal.Decimal(win_count) / all_scores_count
+            raw_win_expectancy = decimal.Decimal(win_count) / all_scores_count
+            scaled_win_expectancy = scaling_factor * raw_win_expectancy
+            return min(1, scaled_win_expectancy)
 
         return sum(_win_expectancy(score) for score in game_scores)
 
@@ -268,13 +272,14 @@ class Season(models.Model):
 
 class Year(object):
 
-    def __init__(self, year):
+    def __init__(self, year, week_max=REGULAR_SEASON_WEEKS):
         self.year = int(year)
-        self.cache_key = str(self.year)
+        self.week_max = min(int(week_max), REGULAR_SEASON_WEEKS)
+        self.cache_key = '|'.join(map(str, (self.year, self.week_max)))
 
     @fully_cached_property
     def all_games(self):
-        return Game.objects.filter(year=self.year, week__lte=REGULAR_SEASON_WEEKS)
+        return Game.objects.filter(year=self.year, week__lte=self.week_max)
 
     @fully_cached_property
     def total_wins(self):
@@ -290,7 +295,10 @@ class Year(object):
 
     @fully_cached_property
     def expected_wins_scaling_factor(self):
-        return decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
+        raw_scaling_factor = decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
+        scaling_factor_weight = self.week_max * raw_scaling_factor
+        regression_weight = (REGULAR_SEASON_WEEKS - self.week_max) * 1
+        return (scaling_factor_weight + regression_weight) / REGULAR_SEASON_WEEKS
 
 
 class TeamSeason(object):
@@ -311,7 +319,7 @@ class TeamSeason(object):
         except Season.DoesNotExist:
             self.season = None  # this is ok, it's the current season
 
-        self.year_object = Year(self.year)
+        self.year_object = Year(self.year, week_max=self.week_max)
 
         self.cache_key = '|'.join(map(str, (team_id, year, include_playoffs, week_max)))
 
@@ -401,12 +409,8 @@ class TeamSeason(object):
     def game_scores(self):
         return [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
 
-    @fully_cached_property
-    def expected_wins_scaling_factor(self):
-        return self.year_object.expected_wins_scaling_factor
-
     def expected_wins_function(self, *game_scores):
-        return self.expected_wins_scaling_factor * Game.expected_wins(*game_scores)
+        return Game.expected_wins(*game_scores, scaling_factor=self.year_object.expected_wins_scaling_factor)
 
     @fully_cached_property
     def expected_wins(self):
