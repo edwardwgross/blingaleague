@@ -29,9 +29,9 @@
         </tr>
         {% for game in games %}
           <tr>
-            <td>{{ game.year}}</td>
-            <td>{{ game.week }}</td>
-            <td style="text-align:left">{{ game.team.nickname }}</td>
+            <td><a href="{% url 'blingaleague.standings_year' game.year %}">{{ game.year}}</a></td>
+            <td><a href="{% url 'blingaleague.week' game.year game.week %}">{{ game.week }}</a></td>
+            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' game.team.id game.year %}">{{ game.team.nickname }}</a></td>
             <td style="text-align:left">{{ game.outcome }}</td>
             <td>{{ game.score }}</td>
             <td style="text-align:center">&ndash;</td>
