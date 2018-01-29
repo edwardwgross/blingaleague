@@ -4,6 +4,18 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-size: inherit;
 }
 
+h1 {
+    margin: 16px 0;
+}
+
+h2 {
+    margin: 12px 0;
+}
+
+h3 {
+    margin: 8px 0;
+}
+
 ul {
     padding: 0 6px;
 }
