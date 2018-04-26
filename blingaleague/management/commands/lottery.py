@@ -12,7 +12,7 @@ class Command(BaseCommand):
         # this changes each year
         standings = Standings(int(year))
 
-        teams = [(ts.team.nickname, ts.loss_count, ts.points) for ts in standings.table[PLAYOFF_TEAMS:]]
+        teams = [(ts.team.nickname, ts.loss_count, ts.points) for ts in standings.table[PLAYOFF_TEAMS:]][::-1]
 
         losses_weight = decimal.Decimal(0.9)
         points_weight = decimal.Decimal(0.1)
