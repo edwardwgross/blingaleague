@@ -1,4 +1,3 @@
-import datetime
 import os
 
 SECRET_KEY = 's4nders0n'
