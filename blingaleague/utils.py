@@ -12,7 +12,7 @@ class fully_cached_property(object):
 
     def __get__(self, obj, cls):
         if obj is None:
-           return self
+            return self
 
         if not hasattr(obj, 'cache_key'):
             return self.func(obj)

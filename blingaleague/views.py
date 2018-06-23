@@ -2,12 +2,9 @@ import nvd3
 
 from cached_property import cached_property
 
-from collections import defaultdict
-
 from django.core import urlresolvers
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import Standings, Game, Member, TeamSeason, Week, Matchup
 
@@ -36,7 +33,10 @@ class StandingsView(TemplateView):
         for year in sorted(set(Game.objects.all().values_list('year', flat=True))):
             link_data = {'text': year, 'href': None}
             if year != self.standings.year:
-                link_data['href'] = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(year,))
+                link_data['href'] = urlresolvers.reverse_lazy(
+                    'blingaleague.standings_year',
+                    args=(year,),
+                )
             links.append(link_data)
 
         all_time_url = urlresolvers.reverse_lazy('blingaleague.standings_all_time')
@@ -79,11 +79,10 @@ class StandingsView(TemplateView):
         return graph
 
 
-
 class StandingsCurrentView(StandingsView):
-    sub_templates = (
-        #'blingaleague/expected_win_distribution_standings.html',
-    )
+    # would like to include 'blingaleague/expected_win_distribution_standings.html',
+    # but it's a performance nightmare
+    sub_templates = tuple()
 
     def get(self, request):
         max_year = Game.objects.all().order_by('-year').first().year
@@ -92,17 +91,15 @@ class StandingsCurrentView(StandingsView):
 
 
 class StandingsYearView(StandingsView):
-    sub_templates = (
-        #'blingaleague/expected_win_distribution_standings.html',
-    )
+    # would like to include 'blingaleague/expected_win_distribution_standings.html',
+    # but it's a performance nightmare
+    sub_templates = tuple()
 
     def get(self, request, year):
         self.standings = Standings(year=int(year))
         context = {
             'standings': self.standings,
             'links': self.links,
-            #'sub_templates': self.sub_templates,
-            #'expected_win_distribution_graph': self._expected_win_distribution_graph(self.standings.table),
         }
         return self.render_to_response(context)
 
@@ -144,7 +141,6 @@ class MatchupView(GamesView):
 class WeekView(GamesView):
     games_sub_template = 'blingaleague/weekly_games.html'
 
-
     def get(self, request, year, week):
         base_object = Week(year, week)
         context = self._context(base_object)
@@ -152,9 +148,10 @@ class WeekView(GamesView):
 
 
 class TeamSeasonView(GamesView):
+    # would like to include 'blingaleague/similar_seasons.html',
+    # but it's a performance nightmare
     sub_templates = (
         'blingaleague/expected_win_distribution_team.html',
-        # TODO enable when more performant sub_templates 'blingaleague/similar_seasons.html',
     )
     games_sub_template = 'blingaleague/team_season_games.html'
 
@@ -180,7 +177,9 @@ class TeamSeasonView(GamesView):
     def get(self, request, team, year):
         base_object = TeamSeason(team, year, include_playoffs=True)
         context = self._context(base_object)
-        context['expected_win_distribution_graph'] = self._expected_win_distribution_graph(base_object.expected_win_distribution)
+        context['expected_win_distribution_graph'] = self._expected_win_distribution_graph(
+            base_object.expected_win_distribution,
+        )
         return self.render_to_response(context)
 
 
@@ -197,8 +196,6 @@ class TeamVsTeamView(TemplateView):
     template_name = 'blingaleague/team_vs_team.html'
 
     def get(self, request):
-        matchups = []
-
         teams = Member.objects.all().order_by('defunct', 'first_name', 'last_name')
 
         grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
@@ -206,5 +203,3 @@ class TeamVsTeamView(TemplateView):
         context = {'grid': grid, 'teams': teams}
 
         return self.render_to_response(context)
-
-
