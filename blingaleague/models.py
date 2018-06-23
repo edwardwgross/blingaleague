@@ -1,8 +1,8 @@
 import datetime
 import decimal
 import itertools
-
 from collections import defaultdict
+from statistics import mean
 
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core import urlresolvers
@@ -850,13 +850,13 @@ class Week(object):
 
     @fully_cached_property
     def average_score(self):
-        sum_scores = sum([g.total_score for g in self.games])
-        return decimal.Decimal(sum_scores) / (2 * len(self.games))
+        # divide by two because the total_score attribute
+        # is made up of both scores in a game
+        return mean([g.total_score for g in self.games]) / 2
 
     @fully_cached_property
     def average_margin(self):
-        sum_margins = sum([g.margin for g in self.games])
-        return decimal.Decimal(sum_margins) / len(self.games)
+        return mean([g.margin for g in self.games])
 
     @fully_cached_property
     def previous(self):
