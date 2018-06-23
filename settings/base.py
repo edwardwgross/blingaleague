@@ -6,7 +6,11 @@ SECRET_KEY = 's4nders0n'
 INFO = False
 TEMPLATE_INFO = INFO
 
-ALLOWED_HOSTS = ('blingaleague.com',)
+ALLOWED_HOSTS = (
+    'www.blingaleague.com',
+    'blingaleague.com',
+    '34.221.179.171',
+)
 
 ROOT_URLCONF = 'blingaleague.urls'
 FORCE_SCRIPT_NAME = ''
