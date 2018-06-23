@@ -2,11 +2,10 @@ import datetime
 import decimal
 import nvd3
 
-from django import forms
-from django.db.models import Q, F
+from django.db.models import F
 from django.views.generic import TemplateView
 
-from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, BYE_TEAMS, \
+from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, \
                                 Game, Week, Member, TeamSeason
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
@@ -25,7 +24,8 @@ class WeeklyScoresView(TemplateView):
 
     def get(self, request):
         weeks = []
-        for year, week in Game.objects.filter(week__lte=REGULAR_SEASON_WEEKS).values_list('year', 'week').distinct():
+        games = Game.objects.filter(week__lte=REGULAR_SEASON_WEEKS)
+        for year, week in games.values_list('year', 'week').distinct():
             weeks.append(Week(year, week))
 
         context = {'weeks': sorted(weeks, key=lambda x: (x.year, x.week))}
@@ -108,7 +108,7 @@ class GameFinderView(TemplateView):
         elif form_data['week_type'] == CHOICE_PLAYOFFS:
             base_games = base_games.filter(week__gt=REGULAR_SEASON_WEEKS)
 
-        margin_min= form_data['margin_min']
+        margin_min = form_data['margin_min']
         margin_max = form_data['margin_max']
         if margin_min is not None:
             base_games = base_games.filter(loser_score__lte=F('winner_score') - margin_min)
@@ -170,9 +170,15 @@ class GameFinderView(TemplateView):
                 all_games.append(game_dict)
 
         if CHOICE_BLANGUMS in awards:
-            all_games = filter(lambda x: x['blangums'] and x['week'] <= REGULAR_SEASON_WEEKS, all_games)
+            all_games = filter(
+                lambda x: x['blangums'] and x['week'] <= REGULAR_SEASON_WEEKS,
+                all_games,
+            )
         if CHOICE_SLAPPED_HEARTBEAT in awards:
-            all_games = filter(lambda x: x['slapped_heartbeat'] and x['week'] <= REGULAR_SEASON_WEEKS, all_games)
+            all_games = filter(
+                lambda x: x['slapped_heartbeat'] and x['week'] <= REGULAR_SEASON_WEEKS,
+                all_games,
+            )
 
         return sorted(all_games, key=lambda x: (x['year'], x['week'], -x['score']))
 
@@ -203,7 +209,9 @@ class SeasonFinderView(TemplateView):
 
         team_ids = form_data['teams']
         if len(team_ids) == 0:
-            team_ids = Member.objects.all().order_by('nickname', 'first_name', 'last_name').values_list('id', flat=True)
+            team_ids = Member.objects.all().order_by(
+                'nickname', 'first_name', 'last_name',
+            ).values_list('id', flat=True)
 
         for year in range(year_min, year_max + 1):
             for team_id in team_ids:
@@ -214,7 +222,8 @@ class SeasonFinderView(TemplateView):
                     continue
 
                 if form_data['week_max'] is not None:
-                    # if the user specified the "Through X Weeks" field that is in the regular season,
+                    # if the user specified the "Through X Weeks" field,
+                    # and the value given is in the regular season,
                     # don't show seasons that haven't yet reached that week
                     # playoffs are special, though - teams with byes won't have the same logic
                     if form_data['week_max'] <= REGULAR_SEASON_WEEKS or not team_season.bye:
@@ -270,4 +279,3 @@ class SeasonFinderView(TemplateView):
         context = {'form': season_finder_form, 'seasons': seasons}
 
         return self.render_to_response(context)
-
