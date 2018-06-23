@@ -6,6 +6,9 @@
 <th>Points</th>
 <th>Exp. W</th>
 <th>Exp. %</th>
-{% if standings.all_time %}<th>RobScore</th>{% endif %}
 <th>Blangums</th>
-<th/> {# Playoff Finish #}
+{% if standings.all_time %}
+  <th>RobScore</th>
+{% else %}
+  <th/> {# Playoff Finish #}
+{% endif %}

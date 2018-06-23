@@ -25,7 +25,7 @@ class BaseFinderForm(forms.Form):
         # at least a reasonable amount of filters
         unfiltered_values = (None, False, '', [], [''])
         filtered_fields = filter(lambda x: x[1] not in unfiltered_values, self.cleaned_data.items())
-        if len(filtered_fields) < self.filter_threshold:
+        if len(list(filtered_fields)) < self.filter_threshold:
             self.add_error(None, "You must filter on at least %s fields to see results" % self.filter_threshold)
             return False
 

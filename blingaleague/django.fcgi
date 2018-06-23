@@ -4,7 +4,6 @@ from os import path
 import site
 
 this_dir = path.realpath(path.dirname(path.dirname(__file__)))
-print this_dir
 
 # Add a custom Python path.
 sys.path.insert(0, this_dir)
@@ -15,7 +14,7 @@ os.chdir(path.join(this_dir, '..'))
 # Set the DJANGO_SETTINGS_MODULE environment variable.
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
-site.addsitedir(path.join(this_dir,"..","environ","lib","python2.7","site-packages"))
+site.addsitedir(path.join(this_dir,"..","environ","lib","python3.6","site-packages"))
 
 from django.core.servers.fastcgi import runfastcgi
 runfastcgi(

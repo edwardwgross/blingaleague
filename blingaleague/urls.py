@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth.views import login, logout
 from django.views.decorators.cache import cache_page
@@ -12,7 +12,7 @@ admin.autodiscover()
 
 default_cache_timeout = 365 * 24 * 60 * 60
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', cache_page(default_cache_timeout)(HomeView.as_view()), name='blingaleague.home'),
     url(r'^standings/$', cache_page(default_cache_timeout)(StandingsCurrentView.as_view()), name='blingaleague.standings'),
     url(r'^standings/(?P<year>\d{4})/$', StandingsYearView.as_view(), name='blingaleague.standings_year'),
@@ -23,10 +23,9 @@ urlpatterns = patterns('',
     url(r'^team/(?P<team>\d+)/(?P<year>\d{4})/$', cache_page(default_cache_timeout)(TeamSeasonView.as_view()), name='blingaleague.team_season'),
     url(r'^team_vs_team/$', cache_page(default_cache_timeout)(TeamVsTeamView.as_view()), name='blingaleague.team_vs_team'),
 
-    (r'^blingalytics/', include('blingalytics.urls')),
+    url(r'^blingalytics/', include('blingalytics.urls')),
 
     url(r'^login/$', login, {'template_name': 'blingaleague/login.html'}, name='login'),
     url(r'^logout/$', logout, name='logout'),
     url(r'^admin/', include(admin.site.urls)),
-)
-
+]

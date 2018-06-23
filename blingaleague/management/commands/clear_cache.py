@@ -8,4 +8,4 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         default_cache = caches['default']
         default_cache.clear()
-        print("%s: cached cleared" % datetime.datetime.now())
+        print("{}: cached cleared".format(datetime.datetime.now()))

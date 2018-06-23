@@ -17,7 +17,7 @@ class fully_cached_property(object):
         if not hasattr(obj, 'cache_key'):
             return self.func(obj)
 
-        cache_key = "%s|%s:%s" % (cls.__name__, obj.cache_key, self.func.__name__)
+        cache_key = "{}|{}:{}".format(cls.__name__, obj.cache_key, self.func.__name__)
 
         if cache_key in obj.__dict__:
             return obj.__dict__[cache_key]

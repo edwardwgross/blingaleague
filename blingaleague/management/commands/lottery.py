@@ -2,14 +2,16 @@ import decimal
 import math
 import random
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import LabelCommand
 
 from blingaleague.models import Standings, PLAYOFF_TEAMS
 
 
-class Command(BaseCommand):
-    def handle(self, year, **kwargs):
-        # this changes each year
+class Command(LabelCommand):
+
+    label = 'year'
+
+    def handle_label(self, year, **kwargs):
         standings = Standings(int(year))
 
         teams = [(ts.team.nickname, ts.loss_count, ts.points) for ts in standings.table[PLAYOFF_TEAMS:]][::-1]
@@ -33,7 +35,7 @@ class Command(BaseCommand):
         total_points = (team_count * points_base) - sum(points_array)
 
         chances = []
-        print "Likelihood of getting first pick:"
+        print('Likelihood of getting first pick:')
         for team in teams:
             name = team[0]
             losses = team[1]
@@ -41,10 +43,10 @@ class Command(BaseCommand):
             losses_chances = losses_weight * (losses - losses_base) / total_losses
             points_chances = points_weight * (points_base - points) / total_points
             overall_chances = round(losses_chances + points_chances, 4)
-            print "%s => %s%%" % (name.ljust(16), (100.00 * overall_chances))
+            print("{} => {}%".format(name.ljust(16), (100 * overall_chances)))
             chances.append([name, overall_chances])
 
-        print
+        print()
 
         i = 0
         max_runs = 10000
@@ -86,12 +88,12 @@ class Command(BaseCommand):
                 results_by_team[entry][pick_index] = results_by_team[entry][pick_index] + 1
                 pick_index = pick_index + 1
 
-        print "Actual results after %s runs:" % max_runs
+        print("Actual results after {} runs:".format(max_runs))
         for team in teams:
             name = team[0]
-            print "%s %s" % (name.ljust(16), results_by_team[name])
+            print("{} {}".format(name.ljust(16), results_by_team[name]))
 
-        print
-        print "RESULTS FOR RANDOMLY SELECTED RUN (#%s)" % (run_to_use)
-        print outcomes[run_to_use-1]
+        print()
+        print("RESULTS FOR RANDOMLY SELECTED RUN (#{})".format(run_to_use))
+        print(outcomes[run_to_use-1])
 

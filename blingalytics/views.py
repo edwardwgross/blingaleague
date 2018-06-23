@@ -44,12 +44,12 @@ class ExpectedWinsView(TemplateView):
         max_x = int(5 * (max_score // 5)) + 10
         # add 5 to round up, another 5 because range() is exclusive at the high end
 
-        x_data = range(min_x, max_x, 5)
+        x_data = list(range(min_x, max_x, 5))
         if score is not None:
             x_data = sorted(x_data + [score])
 
-        x_data = map(float, x_data)
-        y_data = map(float, map(Game.expected_wins, x_data))
+        x_data = list(map(float, x_data))
+        y_data = list(map(float, map(Game.expected_wins, x_data)))
 
         graph_series = [{'x': x_data, 'y': y_data}]
 
