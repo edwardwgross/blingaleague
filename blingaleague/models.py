@@ -34,6 +34,7 @@ class Member(models.Model):
     last_name = models.CharField(max_length=50)
     nickname = models.CharField(max_length=50, blank=True, null=True)
     defunct = models.BooleanField(default=False)
+    email = models.EmailField(blank=True, null=True)
 
     @property
     def cache_key(self):
@@ -67,6 +68,22 @@ class Member(models.Model):
 
     def __str__(self):
         return self.full_name
+
+    def __repr__(self):
+        return str(self)
+
+
+class FakeMember(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        super(FakeMember, self).save(*args, **kwargs)
+        CACHE.clear()
+
+    def __str__(self):
+        return self.name
 
     def __repr__(self):
         return str(self)

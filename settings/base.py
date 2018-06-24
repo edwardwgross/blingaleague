@@ -42,6 +42,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'blingaleague.contenxt_processors.memes',
+)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
