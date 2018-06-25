@@ -29,13 +29,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">
+          <a class="navbar-brand" href="{% url 'blingaleague.home' %}">
             <img alt="Blingaleague" id="nav_shield" src="{% static 'blingaleague/img/shield.png' %}">
           </a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="{% url 'blingaleague.home' %}">Blingaleague</a></li>
             <li><a href="{% url 'blingaleague.standings' %}">Standings</a></li>
             <li><a href="{% url 'blingaleague.team_vs_team' %}">Team vs. Team</a></li>
             <li><a href="{% url 'blingacontent.gazette_list' %}">The Sanderson Gazette</a></li>
