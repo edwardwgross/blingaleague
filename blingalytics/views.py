@@ -51,8 +51,6 @@ class ExpectedWinsView(TemplateView):
         x_data = list(map(float, x_data))
         y_data = list(map(float, map(Game.expected_wins, x_data)))
 
-        graph_series = [{'x': x_data, 'y': y_data}]
-
         graph = nvd3.lineChart(
             name='expected_wins',
             width=600,
@@ -62,8 +60,11 @@ class ExpectedWinsView(TemplateView):
             show_legend=False,
         )
 
-        for serie in graph_series:
-            graph.add_serie(**serie)
+        graph.add_serie(**{
+            'x': x_data,
+            'y': y_data,
+            'name': 'Expected Wins',
+        })
 
         graph.buildcontent()
         graph.buildhtml()
