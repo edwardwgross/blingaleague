@@ -294,6 +294,10 @@ table.blingalytics_table tbody tr::before {
     font-size: 12px;
 }
 
+.blingacontent {
+    margin-bottom: 12px;
+}
+
 #gazette_detail p,
 #gazette_detail a,
 #gazette_detail li,

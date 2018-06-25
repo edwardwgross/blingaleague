@@ -1,12 +1,31 @@
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, FormView
 
+from .forms import GazetteSearchForm
 from .models import Gazette
 
 
-class GazetteListView(ListView):
+class GazetteListView(ListView, FormView):
     model = Gazette
+    form_class = GazetteSearchForm
     context_object_name = 'gazette_list'
-    ordering = ['-published_date', 'headline']
+
+    def get_queryset(self):
+        queryset = Gazette.objects.all()
+
+        self.form = self.form_class(self.request.GET)
+        if self.form.is_valid():
+            queryset = queryset.filter(
+                body__icontains=self.form.cleaned_data['search']
+            )
+
+        queryset = queryset.order_by('-published_date', 'headline')
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(GazetteListView, self).get_context_data()
+        context['form'] = self.form
+        return context
 
 
 class GazetteDetailView(DetailView):

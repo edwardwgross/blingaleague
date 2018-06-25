@@ -5,9 +5,19 @@
 {% block content %}
 <h1>The Sanderson Gazette</h1>
 
-<ul id="gazette_list" class="blingacontent">
-  {% for gazette in gazette_list %}
-    <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
-  {% endfor %}
-</ul>
+<div class="blingacontent">
+  <form {method="get">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit"/>
+  </form>
+</div>
+
+<div class="blingacontent">
+  <ul id="gazette_list" class="blingacontent">
+    {% for gazette in gazette_list %}
+      <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
 {% endblock content %}
