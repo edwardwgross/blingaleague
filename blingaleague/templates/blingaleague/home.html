@@ -6,6 +6,13 @@
 <h2>{% if standings.headline %}{{ standings.headline }}{% else %}Current standings{% endif %}</h2>
 {% include "blingaleague/standings_table.html" %}
 
+<div id="gazette">
+  <h2>Latest Sanderson Gazette</h2>
+  <ul>
+    <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
+  </ul>
+</div>
+
 <div id="games">
   <h2>Last week</h2>
   {% for game in week.games %}

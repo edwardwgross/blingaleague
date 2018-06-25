@@ -6,6 +6,8 @@ from django.core import urlresolvers
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 
+from blingacontent.models import Gazette
+
 from .models import Standings, Game, Member, TeamSeason, Week, Matchup
 
 
@@ -18,7 +20,9 @@ class HomeView(TemplateView):
         year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
         week = Week(year, week)
 
-        context = {'standings': standings, 'week': week}
+        gazette = Gazette.objects.all().order_by('-published_date').first()
+
+        context = {'standings': standings, 'week': week, 'gazette': gazette}
 
         return self.render_to_response(context)
 
