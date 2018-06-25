@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth.views import login, logout
@@ -10,7 +11,7 @@ from .views import HomeView, TeamDetailsView, TeamVsTeamView,\
 
 admin.autodiscover()
 
-default_cache_timeout = 365 * 24 * 60 * 60
+default_cache_timeout = settings.PAGE_CACHE_DEFAULT_TIMEOUT
 
 urlpatterns = [
     url(
@@ -61,7 +62,13 @@ urlpatterns = [
 
     url(
         r'^blingalytics/',
-        include('blingalytics.urls')),
+        include('blingalytics.urls'),
+    ),
+
+    url(
+        r'^blingacontent/',
+        include('blingacontent.urls'),
+    ),
 
     url(
         r'^login/$',

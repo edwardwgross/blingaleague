@@ -1,0 +1,11 @@
+{% load markdown_filter %}
+
+<h1>The Sanderson Gazette - {{ gazette }}<h1>
+
+<div id="gazette_detail" class="blingacontent">
+  {% if gazette.use_markdown %}
+    {{ gazette.body|markdown_filter|safe }}
+  {% else %}
+    {{ gazette.body|linebreaks }}
+  {% endif %}
+</div>

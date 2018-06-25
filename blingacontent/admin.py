@@ -4,7 +4,7 @@ from .models import Meme, Gazette
 
 
 class GazetteAdmin(admin.ModelAdmin):
-    readony_fields = ('slug_url,')
+    readony_fields = ('slug_url',)
 
 
 admin.site.register(Meme)

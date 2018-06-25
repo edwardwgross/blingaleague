@@ -58,13 +58,17 @@ class Command(BaseCommand):
                     done = False
                     while done is False:
                         status, done = downloader.next_chunk()
+                body_lines = []
                 with open('/data/blingaleague/data/gazettes/temp.txt', 'rb') as fh:
-                    body = fh.read().decode('utf-8')
+                    raw_lines = fh.readlines()
+                    for line in raw_lines[3:]:  # first three lines are boilerplate
+                        body_lines.append(line.decode('utf-8').strip())
                 gazette, _created = Gazette.objects.get_or_create(
                     headline=headline,
                     published_date=date_obj
                 )
-                gazette.body = body
+                gazette.body = '\n'.join(body_lines)
+                gazette.use_markdown = False
                 gazette.save()
                 print("SUCCESS: {}".format(gazette))
             except Exception as e:

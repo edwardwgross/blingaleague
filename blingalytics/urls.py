@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.conf.urls import url
 from django.views.decorators.cache import cache_page
 
 from .views import WeeklyScoresView, ExpectedWinsView, GameFinderView, SeasonFinderView
 
-default_cache_timeout = 365 * 24 * 60 * 60
+default_cache_timeout = settings.PAGE_CACHE_DEFAULT_TIMEOUT
 
 urlpatterns = [
     url(

@@ -293,3 +293,17 @@ table.blingalytics_table tbody tr::before {
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
     font-size: 12px;
 }
+
+#gazette_detail p,
+#gazette_detail a,
+#gazette_detail li,
+#gazette_detail h1,
+#gazette_detail h2,
+#gazette_detail h3 {
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+}
+
+#gazette_detail p,
+#gazette_detail li {
+    font-size: 14px;
+}
