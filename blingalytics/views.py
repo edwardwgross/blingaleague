@@ -14,7 +14,7 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_REGULAR_SEASON, CHOICE_PLAYOFFS, \
                    CHOICE_MADE_PLAYOFFS, CHOICE_MISSED_PLAYOFFS, \
                    GameFinderForm, SeasonFinderForm
-from .utils import top_seasons_by_stat
+from .utils import sorted_seasons_by_stat, sorted_expected_wins_odds
 
 
 PREFIX_WINNER = 'winner'
@@ -289,6 +289,8 @@ class TopSeasonsView(TemplateView):
     template_name = 'blingalytics/top_seasons.html'
 
     def get(self, request):
+        row_limit = int(request.GET.get('limit', 10))
+
         top_seasons_tables = []
 
         top_seasons_categories = (
@@ -302,10 +304,27 @@ class TopSeasonsView(TemplateView):
         )
 
         for title, stat_function, sort_desc in top_seasons_categories:
-            table_rows = top_seasons_by_stat(
+            table_rows = sorted_seasons_by_stat(
                 stat_function,
-                limit=10,
+                limit=row_limit,
                 sort_desc=sort_desc,
+            )
+            top_seasons_tables.append({
+                'title': title,
+                'rows': table_rows,
+            })
+
+        win_odds_categories = (
+            # title, win_count
+            ('Highest Undefeated Odds', 13),
+            ('Highest Winless Odds', 0),
+        )
+
+        for title, win_count in win_odds_categories:
+            table_rows = sorted_expected_wins_odds(
+                win_count,
+                limit=row_limit,
+                sort_desc=True,
             )
             top_seasons_tables.append({
                 'title': title,

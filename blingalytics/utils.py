@@ -1,28 +1,41 @@
 from blingaleague.models import TeamSeason
 
 
-def team_season_game_stat(team_season, stat_function):
-    return stat_function(team_season.game_scores)
-
-
-def top_seasons_by_stat(stat_function, limit=None, sort_desc=False):
+def sorted_seasons_by_stat(stat_function, limit=None, sort_desc=False):
     all_stats = {}
     for team_season in TeamSeason.all():
-        all_stats[team_season] = team_season_game_stat(
-            team_season,
-            stat_function,
-        )
+        all_stats[team_season] = stat_function(team_season.game_scores)
 
+    return build_ranked_seasons_table(
+        all_stats,
+        limit=limit,
+        sort_desc=sort_desc,
+    )
+
+
+def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
+    all_odds = {}
+    for team_season in TeamSeason.all():
+        win_odds = team_season.expected_win_distribution.get(win_count, 0)
+        if win_odds > 0:
+            # we'll format as a percent, so multiply here
+            all_odds[team_season] = 100 * win_odds
+
+    return build_ranked_seasons_table(
+        all_odds,
+        limit=limit,
+        sort_desc=sort_desc,
+        num_format='{:.2f}%'
+    )
+
+
+def build_ranked_seasons_table(seasons_stats, limit=None, sort_desc=False, num_format='{:.2f}'):
     sorted_seasons = sorted(
-        all_stats.items(),
+        seasons_stats.items(),
         key=lambda x: x[1],
         reverse=sort_desc,
     )
 
-    return build_ranked_seasons_table(sorted_seasons, limit=limit)
-
-
-def build_ranked_seasons_table(sorted_seasons, limit=None):
     seasons_list = []
     last_value = None
     rank = 1
@@ -37,7 +50,7 @@ def build_ranked_seasons_table(sorted_seasons, limit=None):
         season_dict = {
             'rank': rank,
             'team_season': team_season,
-            'value': stat_value,
+            'value': num_format.format(stat_value),
         }
 
         seasons_list.append(season_dict)
