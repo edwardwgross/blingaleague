@@ -4,6 +4,7 @@
 
 {% block content %}
 <h1>Blingalytics: Top Seasons</h1>
+<h2>(regular season games only)</h2>
 
 <div id="top_seasons" class="blingalytics">
   {% for table in top_seasons_tables %}
@@ -14,8 +15,8 @@
        {% for row in table.rows %}
          <tr>
            <td>{{ row.rank }}</td>
-           <td><a href="{{ team_season.href }}">{{ row.team_season.year }}</a></td>
-           <td style="text-align:left; width:auto"><a href="{{ team_season.href }}">{{ row.team_season.team.nickname }}</a></td>
+           <td><a href="{{ row.team_season.href }}">{{ row.team_season.year }}</a></td>
+           <td style="text-align:left; width:auto"><a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a></td>
            <td>{{ row.value }}</td>
          </tr>
        {% endfor %}

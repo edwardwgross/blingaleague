@@ -301,6 +301,8 @@ class TopSeasonsView(TemplateView):
             ('Lowest Median Score', statistics.median, False),
             ('Highest Minimum Score', min, True),
             ('Lowest Maximum Score', max, False),
+            ('Highest Standard Deviation', statistics.pstdev, True),
+            ('Lowest Standard Deviation', statistics.pstdev, False),
         )
 
         for title, stat_function, sort_desc in top_seasons_categories:

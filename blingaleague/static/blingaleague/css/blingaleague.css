@@ -113,6 +113,11 @@ nav .icon-bar {
     padding: 15px 12px;
 }
 
+.nav ul.dropdown-menu li a {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
 .nav li a:hover,
 .nav .open > a,
 .nav .open > a:hover,
@@ -297,6 +302,7 @@ table.blingalytics_table.sortable tbody tr::before {
 .blingalytics_form .errorlist {
     font-style: italic;
     color: red;
+    font-size: 16px;
 }
 
 .blingalytics_form .errorlist li {
