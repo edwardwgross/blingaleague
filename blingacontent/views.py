@@ -1,10 +1,10 @@
-from django.views.generic import ListView, DetailView, FormView
+from django.views.generic import ListView, DetailView
 
 from .forms import GazetteSearchForm
 from .models import Gazette
 
 
-class GazetteListView(ListView, FormView):
+class GazetteListView(ListView):
     model = Gazette
     form_class = GazetteSearchForm
     context_object_name = 'gazette_list'

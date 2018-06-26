@@ -215,18 +215,32 @@ table.game_table td {
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
-table.blingalytics_table tbody {
+table.blingalytics_table.sortable tbody {
     counter-reset: blingalytics_tabletablescope;
 }
-table.blingalytics_table thead tr::before {
+table.blingalytics_table.sortable thead tr::before {
     content: "";
     display: table-cell;
 }
-table.blingalytics_table tbody tr::before {
+table.blingalytics_table.sortable tbody tr::before {
     content: counter(blingalytics_tabletablescope);
     counter-increment: blingalytics_tabletablescope;
     display: table-cell;
     text-align: right;
+}
+
+#top_seasons table.blingalytics_table {
+    display: inline-block;
+    margin-right: 50px;
+    margin-bottom: 20px;
+}
+
+#top_seasons table.blingalytics_table th {
+    width: 400px;
+}
+
+#top_seasons table.blingalytics_table td {
+    width: 50px;
 }
 
 .blingalytics th,

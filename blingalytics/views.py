@@ -1,21 +1,24 @@
 import datetime
 import decimal
 import nvd3
+import statistics
 
 from django.db.models import F
 from django.views.generic import TemplateView
 
-from blingaleague.models import FIRST_SEASON, REGULAR_SEASON_WEEKS, \
-                                Game, Week, Member, TeamSeason
+from blingaleague.models import REGULAR_SEASON_WEEKS, \
+                                Game, Week, Member, TeamSeason, Year
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
                    CHOICE_REGULAR_SEASON, CHOICE_PLAYOFFS, \
                    CHOICE_MADE_PLAYOFFS, CHOICE_MISSED_PLAYOFFS, \
                    GameFinderForm, SeasonFinderForm
+from .utils import top_seasons_by_stat
 
 
 PREFIX_WINNER = 'winner'
+
 PREFIX_LOSER = 'loser'
 
 
@@ -201,8 +204,8 @@ class SeasonFinderView(TemplateView):
     template_name = 'blingalytics/season_finder.html'
 
     def filter_seasons(self, form_data):
-        year_min = FIRST_SEASON
-        year_max = datetime.datetime.today().year
+        year_min = Year.min()
+        year_max = Year.max()
         if form_data['year_min'] is not None:
             year_min = form_data['year_min']
         if form_data['year_max'] is not None:
@@ -278,5 +281,39 @@ class SeasonFinderView(TemplateView):
             seasons = list(self.filter_seasons(form_data))
 
         context = {'form': season_finder_form, 'seasons': seasons}
+
+        return self.render_to_response(context)
+
+
+class TopSeasonsView(TemplateView):
+    template_name = 'blingalytics/top_seasons.html'
+
+    def get(self, request):
+        top_seasons_tables = []
+
+        top_seasons_categories = (
+            # title, stat_function, sort_desc
+            ('Highest Average Score', statistics.mean, True),
+            ('Lowest Average Score', statistics.mean, False),
+            ('Highest Median Score', statistics.median, True),
+            ('Lowest Median Score', statistics.median, False),
+            ('Highest Minimum Score', min, True),
+            ('Lowest Maximum Score', max, False),
+        )
+
+        for title, stat_function, sort_desc in top_seasons_categories:
+            table_rows = top_seasons_by_stat(
+                stat_function,
+                limit=10,
+                sort_desc=sort_desc,
+            )
+            top_seasons_tables.append({
+                'title': title,
+                'rows': table_rows,
+            })
+
+        context = {
+            'top_seasons_tables': top_seasons_tables,
+        }
 
         return self.render_to_response(context)

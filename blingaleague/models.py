@@ -360,6 +360,18 @@ class Year(object):
         regression_weight = (REGULAR_SEASON_WEEKS - self.week_max) * 1
         return (scaling_factor_weight + regression_weight) / REGULAR_SEASON_WEEKS
 
+    @classmethod
+    def all(cls):
+        return set(Game.objects.all().values_list('year', flat=True))
+
+    @classmethod
+    def min(cls):
+        return sorted(cls.all())[0]
+
+    @classmethod
+    def max(cls):
+        return sorted(cls.all())[-1]
+
 
 class TeamSeason(object):
     is_single_season = True
@@ -415,8 +427,7 @@ class TeamSeason(object):
 
     @fully_cached_property
     def points(self):
-        all_scores = [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
-        return sum(all_scores)
+        return sum(self.game_scores)
 
     @fully_cached_property
     def standings(self):
@@ -645,6 +656,14 @@ class TeamSeason(object):
                 sim_score = base_season.similarity_score(team_season)
                 if sim_score >= threshold:
                     yield {'season': team_season, 'score': sim_score}
+
+    @classmethod
+    def all(cls):
+        for year in Year.all():
+            for team_id in Member.objects.all().values_list('id', flat=True):
+                team_season = cls(team_id, year)
+                if len(team_season.game_scores) > 0:
+                    yield team_season
 
     def __str__(self):
         return "{}, {}".format(self.team, self.year)

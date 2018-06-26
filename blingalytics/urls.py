@@ -2,7 +2,9 @@ from django.conf import settings
 from django.conf.urls import url
 from django.views.decorators.cache import cache_page
 
-from .views import WeeklyScoresView, ExpectedWinsView, GameFinderView, SeasonFinderView
+from .views import WeeklyScoresView, ExpectedWinsView, \
+                   GameFinderView, SeasonFinderView, \
+                   TopSeasonsView
 
 default_cache_timeout = settings.PAGE_CACHE_DEFAULT_TIMEOUT
 
@@ -26,5 +28,10 @@ urlpatterns = [
         r'season_finder/$',
         cache_page(default_cache_timeout)(SeasonFinderView.as_view()),
         name='blingalytics.season_finder',
+    ),
+    url(
+        r'top_seasons/$',
+        cache_page(default_cache_timeout)(TopSeasonsView.as_view()),
+        name='blingalytics.top_seasons',
     ),
 ]

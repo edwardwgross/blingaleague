@@ -1,0 +1,25 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Blingalytics: Top Seasons{% endblock %}
+
+{% block content %}
+<h1>Blingalytics: Top Seasons</h1>
+
+<div id="top_seasons" class="blingalytics">
+  {% for table in top_seasons_tables %}
+    <table class="blingalytics_table">
+      <tr>
+        <th colspan="100%">{{ table.title }}</th>
+      </tr>
+       {% for row in table.rows %}
+         <tr>
+           <td>{{ row.rank }}</td>
+           <td><a href="{{ team_season.href }}">{{ row.team_season.year }}</a></td>
+           <td style="text-align:left; width:auto"><a href="{{ team_season.href }}">{{ row.team_season.team.nickname }}</a></td>
+           <td>{{ row.value|floatformat:2 }}</td>
+         </tr>
+       {% endfor %}
+    </table>
+  {% endfor %}
+</div>
+{% endblock content %}

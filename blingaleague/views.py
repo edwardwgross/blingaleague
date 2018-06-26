@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
 
-from .models import Standings, Game, Member, TeamSeason, Week, Matchup
+from .models import Standings, Game, Member, TeamSeason, Week, Matchup, Year
 
 
 class HomeView(TemplateView):
@@ -34,7 +34,7 @@ class StandingsView(TemplateView):
     def links(self):
         links = []
 
-        for year in sorted(set(Game.objects.all().values_list('year', flat=True))):
+        for year in sorted(Year.all()):
             link_data = {'text': year, 'href': None}
             if year != self.standings.year:
                 link_data['href'] = urlresolvers.reverse_lazy(

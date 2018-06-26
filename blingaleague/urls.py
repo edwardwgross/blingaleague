@@ -66,7 +66,7 @@ urlpatterns = [
     ),
 
     url(
-        r'^blingacontent/',
+        r'^',
         include('blingacontent.urls'),
     ),
 
