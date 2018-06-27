@@ -22,4 +22,4 @@ class Command(LabelCommand):
                     "Cache {} does not exist".format(cache_name),
                 )
             cache.clear()
-            print("{} cached cleared".format(cache_name))i
+            print("{} cached cleared".format(cache_name))
