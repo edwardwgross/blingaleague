@@ -1,15 +1,9 @@
 from django.core.cache import caches
-from django.core.mail import send_mail
 from django.db import models
-from django.template.loader import render_to_string
 
 from slugify import slugify
 
-from blingaleague.models import Member, FakeMember
-from blingaleague.utils import fully_cached_property
-
-
-CACHE = caches['default']
+from blingaleague.utils import fully_cached_property, clear_cached_properties
 
 
 class Meme(models.Model):
@@ -18,7 +12,7 @@ class Meme(models.Model):
 
     def save(self, *args, **kwargs):
         super(Meme, self).save(*args, **kwargs)
-        CACHE.clear()
+        clear_cached_properties()
 
     def __str__(self):
         return self.name
@@ -41,6 +35,28 @@ class Gazette(models.Model):
 
         return self.published_date.strftime('%-m/%-d/%Y')
 
+    @fully_cached_property
+    def previous(self):
+        return Gazette.objects.filter(
+            published_date__lte=self.published_date,
+        ).order_by(
+            '-published_date',
+            '-headline',
+        ).exclude(
+            pk=self.pk,
+        ).first()
+
+    @fully_cached_property
+    def next(self):
+        return Gazette.objects.filter(
+            published_date__gte=self.published_date,
+        ).order_by(
+            'published_date',
+            'headline',
+        ).exclude(
+            pk=self.pk,
+        ).first()
+
     def save(self, *args, **kwargs):
         if self.published_date:
             self.slug = "{}-{}".format(
@@ -51,7 +67,7 @@ class Gazette(models.Model):
             self.slug = None
 
         super(Gazette, self).save(*args, **kwargs)
-        CACHE.clear()
+        clear_cached_properties()
 
     def __str__(self):
         return "{} - {}".format(

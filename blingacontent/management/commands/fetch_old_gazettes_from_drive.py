@@ -1,12 +1,10 @@
 import datetime
-import os
 
 from apiclient.discovery import build
 from apiclient.http import MediaIoBaseDownload
 from httplib2 import Http
 from oauth2client import file, client, tools
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from blingacontent.models import Gazette

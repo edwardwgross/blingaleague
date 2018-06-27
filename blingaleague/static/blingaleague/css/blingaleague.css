@@ -5,15 +5,19 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
 }
 
 h1 {
-    margin: 16px 0;
+    font-size: 28px;
 }
 
 h2 {
-    margin: 12px 0;
+    font-size: 20px;
 }
 
 h3 {
-    margin: 8px 0;
+    font-size: 16px;
+}
+
+small {
+    font-size: 10px;
 }
 
 ul {
@@ -64,6 +68,14 @@ th a, th a:hover, th a:visited, th a:focus {
     background-color: #a4c2f4;
 }
 
+.previous {
+    float: left;
+}
+
+.next {
+    float: right;
+}
+
 table.defunct_teams th,
 table.defunct_teams th a, table.defunct_teams th a:hover,
 table.defunct_teams th a:visited, table.defunct_teams th a:focus {
@@ -75,18 +87,6 @@ td.defunct,
 td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
     color: #a0a0a0;
     font-style: italic;
-}
-
-h1 {
-    font-size: 28px;
-}
-
-h2 {
-    font-size: 20px;
-}
-
-h3 {
-    font-size: 16px;
 }
 
 nav {
@@ -181,14 +181,6 @@ table#team_vs_team_grid .empty {
     padding: 12px 24px;
     text-align: center;
     border-bottom: 1px solid #a4c2f4;
-}
-
-#games .previous {
-    float: left;
-}
-
-#games .next {
-    float: right;
 }
 
 #games .game:first-of-type {
@@ -320,6 +312,10 @@ table.blingalytics_table.sortable tbody tr::before {
     margin-bottom: 12px;
 }
 
+#gazette_detail {
+    max-width: 900px;
+}
+
 #gazette_detail p,
 #gazette_detail a,
 #gazette_detail li,
@@ -332,4 +328,9 @@ table.blingalytics_table.sortable tbody tr::before {
 #gazette_detail p,
 #gazette_detail li {
     font-size: 14px;
+}
+
+#gazette_detail a.link {
+    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+    font-size: 16px;
 }

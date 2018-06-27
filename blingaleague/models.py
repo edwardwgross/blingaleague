@@ -10,7 +10,7 @@ from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
-from .utils import int_to_roman, fully_cached_property
+from .utils import int_to_roman, fully_cached_property, clear_cached_properties
 
 
 REGULAR_SEASON_WEEKS = 13
@@ -64,7 +64,7 @@ class Member(models.Model):
 
     def save(self, *args, **kwargs):
         super(Member, self).save(*args, **kwargs)
-        CACHE.clear()
+        clear_cached_properties()
 
     def __str__(self):
         return self.full_name
@@ -80,7 +80,7 @@ class FakeMember(models.Model):
 
     def save(self, *args, **kwargs):
         super(FakeMember, self).save(*args, **kwargs)
-        CACHE.clear()
+        clear_cached_properties()
 
     def __str__(self):
         return self.name
@@ -237,7 +237,7 @@ class Game(models.Model):
 
     def save(self, *args, **kwargs):
         super(Game, self).save(*args, **kwargs)
-        CACHE.clear()
+        clear_cached_properties()
 
     def __str__(self):
         return "{}: {} def. {}".format(self.title, self.winner, self.loser)
@@ -319,7 +319,7 @@ class Season(models.Model):
 
     def save(self, *args, **kwargs):
         super(Season, self).save(*args, **kwargs)
-        CACHE.clear()
+        clear_cached_properties()
 
     def __str__(self):
         return str(self.year)
@@ -485,6 +485,10 @@ class TeamSeason(object):
     @fully_cached_property
     def game_scores(self):
         return [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
+
+    @fully_cached_property
+    def is_partial(self):
+        return len(self.regular_season.games) < REGULAR_SEASON_WEEKS
 
     def expected_wins_function(self, *game_scores):
         return Game.expected_wins(
@@ -1057,6 +1061,6 @@ def build_all_objects_cache():
 
 
 def rebuild_whole_cache():
-    CACHE.clear()
+    clear_cached_properties()
 
     build_all_objects_cache()

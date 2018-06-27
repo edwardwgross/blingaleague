@@ -1,9 +1,19 @@
 from blingaleague.models import TeamSeason
 
 
+MIN_GAMES_THRESHOLD = 6
+
+
+def has_enough_games(team_season):
+    return len(team_season.regular_season.games) >= MIN_GAMES_THRESHOLD
+
+
 def sorted_seasons_by_stat(stat_function, limit=None, sort_desc=False):
     all_stats = {}
     for team_season in TeamSeason.all():
+        if not has_enough_games(team_season):
+            continue
+
         all_stats[team_season] = stat_function(team_season.game_scores)
 
     return build_ranked_seasons_table(
@@ -16,6 +26,9 @@ def sorted_seasons_by_stat(stat_function, limit=None, sort_desc=False):
 def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
     all_odds = {}
     for team_season in TeamSeason.all():
+        if not has_enough_games(team_season):
+            continue
+
         win_odds = team_season.expected_win_distribution.get(win_count, 0)
         if win_odds > 0:
             # we'll format as a percent, so multiply here
@@ -29,7 +42,12 @@ def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
     )
 
 
-def build_ranked_seasons_table(seasons_stats, limit=None, sort_desc=False, num_format='{:.2f}'):
+def build_ranked_seasons_table(
+    seasons_stats,
+    limit=None,
+    sort_desc=False,
+    num_format='{:.2f}',
+):
     sorted_seasons = sorted(
         seasons_stats.items(),
         key=lambda x: x[1],

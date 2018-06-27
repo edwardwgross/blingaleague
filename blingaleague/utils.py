@@ -33,6 +33,10 @@ class fully_cached_property(object):
         return value
 
 
+def clear_cached_properties():
+    CACHE.clear()
+
+
 def int_to_roman(integer):
     if integer <= 0:
         return '?'
