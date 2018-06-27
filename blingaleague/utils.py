@@ -1,7 +1,7 @@
 from django.core.cache import caches
 
 
-CACHE = caches['default']
+CACHE = caches['blingaleague']
 
 
 class fully_cached_property(object):
