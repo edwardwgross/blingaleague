@@ -1,19 +1,26 @@
-html, body, nav, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
+html, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
 span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
     font-size: inherit;
+    line-height: 1.5;
+}
+
+body, nav {
+    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
 h1 {
-    font-size: 28px;
+    font-size: 175%;
 }
 
 h2 {
-    font-size: 20px;
+    font-size: 125%;
 }
 
 h3 {
-    font-size: 16px;
+    font-size: 100%;
 }
 
 small {
@@ -109,7 +116,7 @@ nav .icon-bar {
     color: white;
     background-color: #a4c2f4;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 87.5%;
     padding: 15px 12px;
 }
 
@@ -152,10 +159,12 @@ table.sortable th {
 }
 
 table.standings_table th {
+    white-space: nowrap;
     text-align: center;
 }
 
 table.standings_table td {
+    white-space: nowrap;
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
@@ -165,7 +174,7 @@ table#team_vs_team_grid td {
     border: 1px solid black;
     text-align: center;
     vertical-align: middle;
-    font-size: 12px;
+    font-size: 75%;
 }
 
 table#team_vs_team_grid .empty {
@@ -188,12 +197,12 @@ table#team_vs_team_grid .empty {
 }
 
 #games .game .week {
-    font-size: 12px;
+    font-size: 75%;
 }
 
 #games .game .teams,
 #games .game .score {
-    font-size: 16px;
+    font-size: 100%;
 }
 
 table.game_table {
@@ -257,7 +266,7 @@ table.blingalytics_table.sortable tbody tr::before {
 }
 
 .blingalytics_form {
-    font-size: 12px;
+    font-size: 75%;
     max-width: 600px;
 }
 
@@ -294,7 +303,7 @@ table.blingalytics_table.sortable tbody tr::before {
 .blingalytics_form .errorlist {
     font-style: italic;
     color: red;
-    font-size: 16px;
+    font-size: 100%;
 }
 
 .blingalytics_form .errorlist li {
@@ -305,7 +314,7 @@ table.blingalytics_table.sortable tbody tr::before {
 #similar_seasons ol li,
 #similar_seasons a {
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-    font-size: 12px;
+    font-size: 75%;
 }
 
 .blingacontent {
@@ -327,10 +336,66 @@ table.blingalytics_table.sortable tbody tr::before {
 
 #gazette_detail p,
 #gazette_detail li {
-    font-size: 14px;
+    font-size: 87.5%;
 }
 
 #gazette_detail a.link {
     font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
-    font-size: 16px;
+    font-size: 100%;
+}
+
+@media screen and (max-width: 992px) {
+    body {
+        font-size: 32px;
+    }
+    nav {
+        font-size: 20px;
+    }
+    #main_outer {
+        overflow-x: scroll;
+    }
+    #gazette_detail p,
+    #gazette_detail a,
+    #gazette_detail li,
+    #gazette_detail h1,
+    #gazette_detail h2,
+    #gazette_detail h3 {
+        font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+    }
+    /*
+    .navbar-header {
+        float: none;
+    }
+    .navbar-left,.navbar-right {
+        float: none !important;
+    }
+    .navbar-toggle {
+        display: block;
+    }
+    .navbar-collapse {
+        border-top: 1px solid transparent;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .navbar-fixed-top {
+        top: 0;
+        border-width: 0 0 1px;
+    }
+    .navbar-collapse.collapse {
+        display: none!important;
+    }
+    .navbar-nav {
+        float: none!important;
+        margin-top: 7.5px;
+    }
+    .navbar-nav>li {
+        float: none;
+    }
+    .navbar-nav>li>a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .collapse.in{
+        display:block !important;
+    }
+    */
 }
