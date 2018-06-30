@@ -339,6 +339,10 @@ table.blingalytics_table.sortable tbody tr::before {
     font-size: 87.5%;
 }
 
+#gazette_detail p {
+    clear: both;
+}
+
 #gazette_detail a.link {
     font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
     font-size: 100%;

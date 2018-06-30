@@ -14,11 +14,16 @@
       {{ gazette.body|linebreaks }}
     {% endif %}
 
-    {% if gazette.previous %}
-      <a href="{% url 'blingacontent.gazette_detail' gazette.previous.slug %}" class="link previous">Previous</a>
-    {% endif %}
-    {% if gazette.next %}
-      <a href="{% url 'blingacontent.gazette_detail' gazette.next.slug %}" class="link next">Next</a>
-    {% endif %}
+    <p>
+      {% if gazette.previous %}
+        <a href="{% url 'blingacontent.gazette_detail' gazette.previous.slug %}" class="link previous">Previous</a>
+      {% endif %}
+      {% if gazette.next %}
+        <a href="{% url 'blingacontent.gazette_detail' gazette.next.slug %}" class="link next">Next</a>
+      {% endif %}
+    </p>
+    <p style="text-align:center">
+      <a href="{% url 'blingacontent.gazette_list' %}" class="link">All Sanderson Gazettes</a>
+    </p>
   </div>
 {% endblock content %}
