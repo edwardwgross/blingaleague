@@ -23,6 +23,21 @@ def sorted_seasons_by_stat(stat_function, limit=None, sort_desc=False):
     )
 
 
+def sorted_seasons_by_attr(attr, limit=None, sort_desc=False):
+    all_attrs = {}
+    for team_season in TeamSeason.all():
+        if not has_enough_games(team_season):
+            continue
+
+        all_attrs[team_season] = getattr(team_season, attr)
+
+    return build_ranked_seasons_table(
+        all_attrs,
+        limit=limit,
+        sort_desc=sort_desc,
+    )
+
+
 def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
     all_odds = {}
     for team_season in TeamSeason.all():
@@ -64,6 +79,10 @@ def build_ranked_seasons_table(
 
         if limit is not None and rank > limit:
             break
+
+        print((team_season, stat_value, type(stat_value)))
+        if type(stat_value) == int:
+            num_format = '{:.0f}'
 
         season_dict = {
             'rank': rank,

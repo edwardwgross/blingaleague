@@ -551,6 +551,15 @@ class TeamSeason(object):
         return len(blangums_list)
 
     @fully_cached_property
+    def slapped_heartbeat_count(self):
+        def _is_slapped_heartbeat(game):
+            return (game.week_object.slapped_heartbeat == self.team and
+                    game.week <= REGULAR_SEASON_WEEKS)
+
+        slapped_heartbeat_list = list(filter(_is_slapped_heartbeat, self.games))
+        return len(slapped_heartbeat_list)
+
+    @fully_cached_property
     def robscore(self):
         if self.season is None:
             return 0

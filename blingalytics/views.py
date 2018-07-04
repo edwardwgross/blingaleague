@@ -13,7 +13,9 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_REGULAR_SEASON, CHOICE_PLAYOFFS, \
                    CHOICE_MADE_PLAYOFFS, CHOICE_MISSED_PLAYOFFS, \
                    GameFinderForm, SeasonFinderForm
-from .utils import sorted_seasons_by_stat, sorted_expected_wins_odds
+from .utils import sorted_seasons_by_stat, \
+                   sorted_seasons_by_attr, \
+                   sorted_expected_wins_odds
 
 
 PREFIX_WINNER = 'winner'
@@ -292,7 +294,7 @@ class TopSeasonsView(TemplateView):
 
         top_seasons_tables = []
 
-        top_seasons_categories = (
+        top_stats_categories = (
             # title, stat_function, sort_desc
             ('Highest Average Score', statistics.mean, True),
             ('Lowest Average Score', statistics.mean, False),
@@ -304,9 +306,30 @@ class TopSeasonsView(TemplateView):
             ('Lowest Standard Deviation', statistics.pstdev, False),
         )
 
-        for title, stat_function, sort_desc in top_seasons_categories:
+        for title, stat_function, sort_desc in top_stats_categories:
             table_rows = sorted_seasons_by_stat(
                 stat_function,
+                limit=row_limit,
+                sort_desc=sort_desc,
+            )
+            top_seasons_tables.append({
+                'title': title,
+                'rows': table_rows,
+            })
+
+        top_attrs_categories = (
+            # title, attr, sort_desc
+            ('Most Points', 'points', True),
+            ('Fewest Points', 'points', False),
+            ('Most Expected Wins', 'expected_wins', True),
+            ('Fewest Expected Wins', 'expected_wins', False),
+            ('Most Team Blangums', 'blangums_count', True),
+            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True),
+        )
+
+        for title, attr, sort_desc in top_attrs_categories:
+            table_rows = sorted_seasons_by_attr(
+                attr,
                 limit=row_limit,
                 sort_desc=sort_desc,
             )

@@ -235,10 +235,18 @@ table.blingalytics_table.sortable tbody tr::before {
     text-align: right;
 }
 
+#top_seasons a {
+    white-space: nowrap;
+}
+
+#top_seasons small {
+    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+}
+
 #top_seasons table.blingalytics_table {
     display: inline-block;
+    vertical-align: top;
     margin-right: 50px;
-    margin-bottom: 20px;
 }
 
 #top_seasons table.blingalytics_table th {

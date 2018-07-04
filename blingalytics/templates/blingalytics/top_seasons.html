@@ -1,5 +1,7 @@
 {% extends "blingaleague/base.html" %}
 
+{% load humanize %}
+
 {% block title %}Blingalytics: Top Seasons{% endblock %}
 
 {% block content %}
@@ -7,8 +9,14 @@
 <h2>(regular season games only)</h2>
 
 <div id="top_seasons" class="blingalytics">
+  <div class="table_links">
+    {% for table in top_seasons_tables %}
+      <a href="#{{ table.title|slugify }}"><small>[{{ table.title }}]</small></a>
+    {% endfor %}
+  </div>
+
   {% for table in top_seasons_tables %}
-    <table class="blingalytics_table">
+    <table id="{{ table.title|slugify }}" class="blingalytics_table">
       <tr>
         <th colspan="100%">{{ table.title }}</th>
       </tr>
@@ -22,7 +30,7 @@
                <small>{{ row.team_season.regular_season.games|length }} game{{ row.team_season.regular_season.games|pluralize }}</small>
              {% endif %}
            </td>
-           <td>{{ row.value }}</td>
+           <td>{{ row.value|intcomma }}</td>
          </tr>
        {% endfor %}
     </table>
