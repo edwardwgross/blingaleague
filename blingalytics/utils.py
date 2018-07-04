@@ -65,7 +65,7 @@ def build_ranked_seasons_table(
 ):
     sorted_seasons = sorted(
         seasons_stats.items(),
-        key=lambda x: x[1],
+        key=lambda x: (x[1], x[0].year, x[0].team.nickname),
         reverse=sort_desc,
     )
 
