@@ -194,16 +194,3 @@ class TeamDetailsView(TemplateView):
         team = Member.objects.get(id=team)
         context = {'team': team}
         return self.render_to_response(context)
-
-
-class TeamVsTeamView(TemplateView):
-    template_name = 'blingaleague/team_vs_team.html'
-
-    def get(self, request):
-        teams = Member.objects.all().order_by('defunct', 'first_name', 'last_name')
-
-        grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
-
-        context = {'grid': grid, 'teams': teams}
-
-        return self.render_to_response(context)

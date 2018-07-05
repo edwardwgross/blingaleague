@@ -6,7 +6,7 @@ from django.db.models import F
 from django.views.generic import TemplateView
 
 from blingaleague.models import REGULAR_SEASON_WEEKS, \
-                                Game, Week, Member, TeamSeason, Year
+                                Game, Week, Member, TeamSeason, Year, Matchup
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
@@ -358,5 +358,18 @@ class TopSeasonsView(TemplateView):
         context = {
             'top_seasons_tables': top_seasons_tables,
         }
+
+        return self.render_to_response(context)
+
+
+class TeamVsTeamView(TemplateView):
+    template_name = 'blingalytics/team_vs_team.html'
+
+    def get(self, request):
+        teams = Member.objects.all().order_by('defunct', 'first_name', 'last_name')
+
+        grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
+
+        context = {'grid': grid, 'teams': teams}
 
         return self.render_to_response(context)

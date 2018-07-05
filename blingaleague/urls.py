@@ -2,9 +2,11 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth.views import login, logout
+from django.core.urlresolvers import reverse_lazy
 from django.views.decorators.cache import cache_page
+from django.views.generic import RedirectView
 
-from .views import HomeView, TeamDetailsView, TeamVsTeamView,\
+from .views import HomeView, TeamDetailsView,\
                    StandingsYearView, StandingsCurrentView, StandingsAllTimeView,\
                    MatchupView, WeekView, TeamSeasonView
 
@@ -54,10 +56,15 @@ urlpatterns = [
         cache_page(default_cache_timeout)(TeamSeasonView.as_view()),
         name='blingaleague.team_season',
     ),
+
+    # done this way so old links still work, even though this
+    # view was moved to the blingalytics app
     url(
         r'^team_vs_team/$',
-        cache_page(default_cache_timeout)(TeamVsTeamView.as_view()),
-        name='blingaleague.team_vs_team',
+        RedirectView.as_view(
+            pattern_name='blingalytics.team_vs_team',
+            permanent=True,
+        )
     ),
 
     url(

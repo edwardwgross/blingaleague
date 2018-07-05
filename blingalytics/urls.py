@@ -4,11 +4,16 @@ from django.views.decorators.cache import cache_page
 
 from .views import WeeklyScoresView, ExpectedWinsView, \
                    GameFinderView, SeasonFinderView, \
-                   TopSeasonsView
+                   TopSeasonsView, TeamVsTeamView
 
 default_cache_timeout = settings.PAGE_CACHE_DEFAULT_TIMEOUT
 
 urlpatterns = [
+    url(
+        r'team_vs_team/$',
+        cache_page(default_cache_timeout)(TeamVsTeamView.as_view()),
+        name='blingalytics.team_vs_team',
+    ),
     url(
         r'weekly_scores/$',
         cache_page(default_cache_timeout)(WeeklyScoresView.as_view()),
