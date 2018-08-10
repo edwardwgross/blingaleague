@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ ! -d "environ" ]; then
-    virtualenv environ
+    virtualenv environ --system-site-packages -p /usr/bin/python3.6
 fi
 
 ln -sf environ/bin/activate
@@ -9,4 +9,8 @@ ln -sf environ/bin/activate
 . ./activate
 
 pip install --upgrade setuptools
-pip install --upgrade -r requirements.pip
+pip install --upgrade -r requirements.pip --no-cache-dir
+
+#cd environ/lib/python3.6/
+#rm -rf site-packages
+#ln -s dist-packages site-packages
