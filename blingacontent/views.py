@@ -10,7 +10,7 @@ class GazetteListView(ListView):
     context_object_name = 'gazette_list'
 
     def get_queryset(self):
-        queryset = Gazette.objects.all()
+        queryset = Gazette.objects.filter(publish_flag=True)
 
         self.form = self.form_class(self.request.GET)
         if self.form.is_valid():

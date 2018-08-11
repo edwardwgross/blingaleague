@@ -20,7 +20,9 @@ class HomeView(TemplateView):
         year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
         week = Week(year, week)
 
-        gazette = Gazette.objects.all().order_by('-published_date').first()
+        gazette = Gazette.objects.filter(
+            publish_flag=True,
+        ).order_by('-published_date').first()
 
         context = {'standings': standings, 'week': week, 'gazette': gazette}
 

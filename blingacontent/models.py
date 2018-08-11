@@ -23,6 +23,7 @@ class Meme(models.Model):
 
 class Gazette(models.Model):
     headline = models.CharField(max_length=500)
+    publish_flag = models.BooleanField(default=False)
     published_date = models.DateField(default=None, blank=True, null=True)
     body = models.TextField(blank=True, null=True)
     slug = models.CharField(blank=True, null=True, max_length=200)
@@ -38,6 +39,7 @@ class Gazette(models.Model):
     @fully_cached_property
     def previous(self):
         return Gazette.objects.filter(
+            publish_flag=True,
             published_date__lte=self.published_date,
         ).order_by(
             '-published_date',
@@ -49,6 +51,7 @@ class Gazette(models.Model):
     @fully_cached_property
     def next(self):
         return Gazette.objects.filter(
+            publish_flag=True,
             published_date__gte=self.published_date,
         ).order_by(
             'published_date',
