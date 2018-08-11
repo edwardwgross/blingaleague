@@ -11,32 +11,32 @@ default_cache_timeout = settings.PAGE_CACHE_DEFAULT_TIMEOUT
 urlpatterns = [
     url(
         r'team_vs_team/$',
-        cache_page(default_cache_timeout)(TeamVsTeamView.as_view()),
+        TeamVsTeamView.as_view(),
         name='blingalytics.team_vs_team',
     ),
     url(
         r'weekly_scores/$',
-        cache_page(default_cache_timeout)(WeeklyScoresView.as_view()),
+        WeeklyScoresView.as_view(),
         name='blingalytics.weekly_scores',
     ),
     url(
         r'expected_wins/$',
-        cache_page(default_cache_timeout)(ExpectedWinsView.as_view()),
+        ExpectedWinsView.as_view(),
         name='blingalytics.expected_wins',
     ),
     url(
         r'game_finder/$',
-        cache_page(default_cache_timeout)(GameFinderView.as_view()),
+        GameFinderView.as_view(),
         name='blingalytics.game_finder',
     ),
     url(
         r'season_finder/$',
-        cache_page(default_cache_timeout)(SeasonFinderView.as_view()),
+        SeasonFinderView.as_view(),
         name='blingalytics.season_finder',
     ),
     url(
         r'top_seasons/$',
-        cache_page(default_cache_timeout)(TopSeasonsView.as_view()),
+        TopSeasonsView.as_view(),
         name='blingalytics.top_seasons',
     ),
 ]

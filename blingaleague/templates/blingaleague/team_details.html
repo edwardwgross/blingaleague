@@ -27,7 +27,7 @@
       {% for team_season in team.seasons reversed %}
         <tr>
           <td><a href="{{ team_season.standings.href }}">{{ team_season.standings.year }}</a></td>
-          <td><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
+          <td><a href="{{ team_season.standings.href }}">{{ team_season.place }}</a></td>
           <td><a href="{{ team_season.href }}">{{ team_season.win_count }}</a></td>
           <td><a href="{{ team_season.href }}">{{ team_season.loss_count }}</a></td>
           <td>{{ team_season.points|intcomma }}</td>

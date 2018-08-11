@@ -3,7 +3,6 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth.views import login, logout
 from django.core.urlresolvers import reverse_lazy
-from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
 from .views import HomeView, TeamDetailsView,\
@@ -13,17 +12,15 @@ from .views import HomeView, TeamDetailsView,\
 
 admin.autodiscover()
 
-default_cache_timeout = settings.PAGE_CACHE_DEFAULT_TIMEOUT
-
 urlpatterns = [
     url(
         r'^$',
-        cache_page(default_cache_timeout)(HomeView.as_view()),
+        HomeView.as_view(),
         name='blingaleague.home',
     ),
     url(
         r'^standings/$',
-        cache_page(default_cache_timeout)(StandingsCurrentView.as_view()),
+        StandingsCurrentView.as_view(),
         name='blingaleague.standings',
     ),
     url(
@@ -33,27 +30,27 @@ urlpatterns = [
     ),
     url(
         r'^standings/all_time/$',
-        cache_page(default_cache_timeout)(StandingsAllTimeView.as_view()),
+        StandingsAllTimeView.as_view(),
         name='blingaleague.standings_all_time',
     ),
     url(
         r'^matchup/(?P<team1>\d+)/(?P<team2>\d+)/$',
-        cache_page(default_cache_timeout)(MatchupView.as_view()),
+        MatchupView.as_view(),
         name='blingaleague.matchup',
     ),
     url(
         r'^week/(?P<year>\d{4})/(?P<week>\d+)/$',
-        cache_page(default_cache_timeout)(WeekView.as_view()),
+        WeekView.as_view(),
         name='blingaleague.week',
     ),
     url(
         r'^team/(?P<team>\d+)/$',
-        cache_page(default_cache_timeout)(TeamDetailsView.as_view()),
+        TeamDetailsView.as_view(),
         name='blingaleague.team',
     ),
     url(
         r'^team/(?P<team>\d+)/(?P<year>\d{4})/$',
-        cache_page(default_cache_timeout)(TeamSeasonView.as_view()),
+        TeamSeasonView.as_view(),
         name='blingaleague.team_season',
     ),
 
@@ -78,8 +75,13 @@ urlpatterns = [
     ),
 
     url(
+        r'^auth/',
+        include('social_django.urls', namespace='social'),
+    ),
+    url(
         r'^login/$',
-        login, {'template_name': 'blingaleague/login.html'},
+        login,
+        {'template_name': 'blingaleague/login.html'},
         name='login',
     ),
     url(

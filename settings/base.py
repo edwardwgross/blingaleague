@@ -19,9 +19,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
-LOGIN_URL = '/login'
-LOGOUT_URL = '/logout'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
+LOGIN_REDIRECT_URL = 'blingaleague.home'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '8735061745-nbbkebaqtd706bd6pkfo7opvsu3u61fd.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'ceIa4DpTNtL8cdcX_k68c9wP'
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -30,6 +33,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
+    'social_django',
     'markdown_filter',
     'blingacontent',
     'blingaleague',
@@ -46,7 +50,17 @@ MIDDLEWARE_CLASSES = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'blingacontent.context_processors.memes',
+    'blingaleague.context_processors.auth_member',
     'django.contrib.auth.context_processors.auth',
+    'social_django.context_processors.backends',
+    'social_django.context_processors.login_redirect',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.open_id.OpenIdAuth',
+    'social_core.backends.google.GoogleOpenId',
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 DATABASES = {

@@ -64,6 +64,17 @@
                 <li><a href="http://blingablog.wordpress.com" target="_blank">WojBloj</a></li>
               </ul>
             </li>
+            <li>
+              {% if user.is_authenticated %}
+                {% if auth_member %}
+                  <a href="{% url 'blingaleague.team' auth_member.pk %}">
+                    My Franchise Index
+                  </a>
+                {% endif %}
+              {% else %}
+                <a href="{% url 'social:begin' 'google-oauth2' %}">Log in</a>
+              {% endif %}
+            </li>
           </ul>
         </div>
       </div>

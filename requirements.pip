@@ -9,3 +9,4 @@ flake8
 google-api-python-client
 oauth2client
 django-markdown-filter
+social-auth-app-django
