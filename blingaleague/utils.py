@@ -3,6 +3,8 @@ from django.core.cache import caches
 
 CACHE = caches['blingaleague']
 
+MEMCACHE_KEY_LENGTH_LIMIT = 250
+
 
 class fully_cached_property(object):
 
@@ -18,6 +20,9 @@ class fully_cached_property(object):
             return self.func(obj)
 
         cache_key = "{}|{}:{}".format(cls.__name__, obj.cache_key, self.func.__name__)
+
+        if len(cache_key) > MEMCACHE_KEY_LENGTH_LIMIT:
+            return self.func(obj)
 
         if cache_key in obj.__dict__:
             return obj.__dict__[cache_key]

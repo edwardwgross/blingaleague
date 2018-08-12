@@ -260,7 +260,10 @@ class Game(models.Model):
         return str(self)
 
     class Meta:
-        ordering = ['-year', '-week', 'winner__first_name', 'winner__last_name']
+        # important note! do not add any ordering attribute to this Meta class,
+        # as that causes .distinct() to not actually return distinct values
+        # see https://stackoverflow.com/questions/2466496/select-distinct-values-from-a-table-field
+        pass
 
 
 def _place_field(related_name):
