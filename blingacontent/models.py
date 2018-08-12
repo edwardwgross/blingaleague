@@ -1,9 +1,20 @@
+import base64
+import os
+
+from django.conf import settings
+from django.core import urlresolvers
 from django.core.cache import caches
 from django.db import models
+from django.template.loader import render_to_string
+
+from email.mime.text import MIMEText
 
 from slugify import slugify
 
+from blingaleague.models import Member, FakeMember
 from blingaleague.utils import fully_cached_property, clear_cached_properties
+
+from .utils import get_gmail_service
 
 
 class Meme(models.Model):
@@ -20,6 +31,9 @@ class Meme(models.Model):
     def __repr__(self):
         return str(self)
 
+    class Meta:
+        ordering = ['name']
+
 
 class Gazette(models.Model):
     headline = models.CharField(max_length=500)
@@ -28,6 +42,7 @@ class Gazette(models.Model):
     body = models.TextField(blank=True, null=True)
     slug = models.CharField(blank=True, null=True, max_length=200)
     use_markdown = models.BooleanField(default=True)
+    email_sent = models.BooleanField(default=False)
 
     @fully_cached_property
     def published_date_str(self):
@@ -60,6 +75,69 @@ class Gazette(models.Model):
             pk=self.pk,
         ).first()
 
+    @fully_cached_property
+    def full_url(self):
+        return "{}{}".format(
+            settings.FULL_SITE_URL,
+            urlresolvers.reverse_lazy('blingacontent.gazette_detail', args=(self.slug,)),
+        )
+
+    def to_html(self, for_email=False):
+        html_str = render_to_string(
+            'blingacontent/gazette_body.html',
+            {
+                'gazette': self,
+                'for_email': for_email,
+            },
+        )
+
+        if for_email:
+            css_path = os.path.join(
+                settings.STATIC_ROOT,
+                'blingaleague',
+                'css',
+                'blingaleague.css',
+            )
+            css_fh = open(css_path, 'r')
+            html_str = "<html><head><style>{}</style></head><body style=\"font-size:16px\">{}</body></html>".format(
+                css_fh.read(),
+                html_str,
+            )
+            print(html_str)
+
+        return html_str
+
+    def send(self):
+        gmail_service = get_gmail_service()
+
+        recipients = []
+        for member in Member.objects.filter(defunct=False):
+            recipients.append("{} {} <{}>".format(
+                member.first_name,
+                member.last_name,
+                member.email,
+            ))
+
+        for fake_member in FakeMember.objects.filter(active=True):
+            recipients.append("{} <{}>".format(
+                fake_member.name,
+                fake_member.email,
+            ))
+
+        message = MIMEText(self.to_html(for_email=True), 'html')
+        message['to'] = ', '.join(recipients)
+        message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
+        message['subject'] = str(self)
+
+        message64 = base64.urlsafe_b64encode(message.as_string().encode())
+
+        gmail_service.users().messages().send(
+            userId='me',
+            body={
+                'raw': message64.decode(),
+            },
+        ).execute()
+
     def save(self, *args, **kwargs):
         if self.published_date:
             self.slug = "{}-{}".format(
@@ -69,6 +147,10 @@ class Gazette(models.Model):
         else:
             self.slug = None
 
+        if self.publish_flag and not self.email_sent:
+            self.send()
+            self.email_sent = True
+
         super(Gazette, self).save(*args, **kwargs)
         clear_cached_properties()
 
@@ -77,3 +159,9 @@ class Gazette(models.Model):
             self.published_date_str,
             self.headline,
         )
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        ordering = ['publish_flag', '-published_date']

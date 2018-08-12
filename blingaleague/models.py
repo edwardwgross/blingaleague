@@ -72,11 +72,22 @@ class Member(models.Model):
     def __repr__(self):
         return str(self)
 
+    class Meta:
+        ordering = ['first_name', 'last_name']
+
 
 class FakeMember(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
     active = models.BooleanField(default=True)
+    associated_member = models.ForeignKey(
+        Member,
+        db_index=True,
+        blank=True,
+        null=True,
+        default=None,
+        related_name='co_managers',
+    )
 
     def save(self, *args, **kwargs):
         super(FakeMember, self).save(*args, **kwargs)
@@ -87,6 +98,9 @@ class FakeMember(models.Model):
 
     def __repr__(self):
         return str(self)
+
+    class Meta:
+        ordering = ['name']
 
 
 class Game(models.Model):
@@ -245,6 +259,9 @@ class Game(models.Model):
     def __repr__(self):
         return str(self)
 
+    class Meta:
+        ordering = ['-year', '-week', 'winner__first_name', 'winner__last_name']
+
 
 def _place_field(related_name):
     return models.ForeignKey(
@@ -326,6 +343,9 @@ class Season(models.Model):
 
     def __repr__(self):
         return str(self)
+
+    class Meta:
+        ordering = ['-year']
 
 
 class Year(object):

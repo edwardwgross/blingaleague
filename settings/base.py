@@ -9,6 +9,7 @@ ALLOWED_HOSTS = (
     'www.blingaleague.com',
     'blingaleague.com',
     '34.221.179.171',
+    '34.216.141.213',
 )
 
 ROOT_URLCONF = 'blingaleague.urls'
@@ -22,6 +23,8 @@ STATIC_URL = '/static/'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'blingaleague.home'
+
+FULL_SITE_URL = 'http://blingaleague.com'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '8735061745-nbbkebaqtd706bd6pkfo7opvsu3u61fd.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'ceIa4DpTNtL8cdcX_k68c9wP'

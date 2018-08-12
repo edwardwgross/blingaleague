@@ -1,0 +1,31 @@
+{% load markdown_filter %}
+
+<div id="gazette_detail" class="blingacontent">
+  <h1 class="gazette_headline">The Sanderson Gazette - {{ gazette }}</h1>
+
+  {% if gazette.use_markdown %}
+    {{ gazette.body|markdown_filter|safe }}
+  {% else %}
+    {{ gazette.body|linebreaks }}
+  {% endif %}
+
+ {% if for_email %}
+   <p>
+     <a href="{{ gazette.full_url }}" class="link">
+       Read <em>{{ gazette.headline }}</em> online
+     </a>
+   </p>
+ {% else %}
+    <p>
+      {% if gazette.previous %}
+        <a href="{% url 'blingacontent.gazette_detail' gazette.previous.slug %}" class="link previous">Previous</a>
+      {% endif %}
+      {% if gazette.next %}
+        <a href="{% url 'blingacontent.gazette_detail' gazette.next.slug %}" class="link next">Next</a>
+      {% endif %}
+    </p>
+    <p style="text-align:center">
+      <a href="{% url 'blingacontent.gazette_list' %}" class="link">All Sanderson Gazettes</a>
+    </p>
+  {% endif %}
+</div>

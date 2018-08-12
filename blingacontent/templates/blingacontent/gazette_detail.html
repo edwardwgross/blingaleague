@@ -1,29 +1,7 @@
 {% extends "blingaleague/base.html" %}
 
-{% load markdown_filter %}
-
 {% block title %}The Sanderson Gazette - {{ gazette }}{% endblock %}
 
 {% block content %}
-  <h1>The Sanderson Gazette - {{ gazette }}</h1>
-
-  <div id="gazette_detail" class="blingacontent">
-    {% if gazette.use_markdown %}
-      {{ gazette.body|markdown_filter|safe }}
-    {% else %}
-      {{ gazette.body|linebreaks }}
-    {% endif %}
-
-    <p>
-      {% if gazette.previous %}
-        <a href="{% url 'blingacontent.gazette_detail' gazette.previous.slug %}" class="link previous">Previous</a>
-      {% endif %}
-      {% if gazette.next %}
-        <a href="{% url 'blingacontent.gazette_detail' gazette.next.slug %}" class="link next">Next</a>
-      {% endif %}
-    </p>
-    <p style="text-align:center">
-      <a href="{% url 'blingacontent.gazette_list' %}" class="link">All Sanderson Gazettes</a>
-    </p>
-  </div>
+  {{ gazette.to_html }}
 {% endblock content %}
