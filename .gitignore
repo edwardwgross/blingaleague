@@ -6,3 +6,5 @@ static/blingaleague
 logs/*
 cache/*
 settings/__init__.py
+*.json
+*/*.json
