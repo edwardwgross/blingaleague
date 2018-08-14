@@ -1,13 +1,14 @@
 import base64
-import os
+
+from email.mime.text import MIMEText
+
+from pathlib import Path
 
 from django.conf import settings
 from django.core import urlresolvers
 from django.core.cache import caches
 from django.db import models
 from django.template.loader import render_to_string
-
-from email.mime.text import MIMEText
 
 from slugify import slugify
 
@@ -92,18 +93,12 @@ class Gazette(models.Model):
         )
 
         if for_email:
-            css_path = os.path.join(
-                settings.STATIC_ROOT,
-                'blingaleague',
-                'css',
-                'blingaleague.css',
-            )
+            css_path = Path(settings.STATIC_ROOT) / 'blingaleague' / 'css' / 'blingaleague.css'
             css_fh = open(css_path, 'r')
             html_str = "<html><head><style>{}</style></head><body style=\"font-size:16px\">{}</body></html>".format(
                 css_fh.read(),
                 html_str,
             )
-            print(html_str)
 
         return html_str
 
@@ -125,7 +120,7 @@ class Gazette(models.Model):
             ))
 
         message = MIMEText(self.to_html(for_email=True), 'html')
-        message['to'] = ', '.join(recipients)
+        message['to'] = 'edward.w.gross@gmail.com' #', '.join(recipients)
         message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
         message['subject'] = str(self)
 

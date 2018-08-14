@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 SECRET_KEY = 's4nders0n'
 
@@ -15,9 +15,9 @@ ALLOWED_HOSTS = (
 ROOT_URLCONF = 'blingaleague.urls'
 FORCE_SCRIPT_NAME = ''
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = '/static/'
 
 LOGIN_URL = 'login'
@@ -105,7 +105,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'filename': BASE_DIR / 'logs' / 'django.log',
             'formatter': 'default',
         },
     },
