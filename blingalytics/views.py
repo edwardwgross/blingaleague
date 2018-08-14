@@ -2,6 +2,7 @@ import decimal
 import nvd3
 import statistics
 
+from django.core.cache import caches
 from django.db.models import F
 from django.views.generic import TemplateView
 
@@ -17,6 +18,8 @@ from .utils import sorted_seasons_by_stat, \
                    sorted_seasons_by_attr, \
                    sorted_expected_wins_odds
 
+
+CACHE = caches['blingaleague']
 
 PREFIX_WINNER = 'winner'
 
@@ -289,9 +292,7 @@ class SeasonFinderView(TemplateView):
 class TopSeasonsView(TemplateView):
     template_name = 'blingalytics/top_seasons.html'
 
-    def get(self, request):
-        row_limit = int(request.GET.get('limit', 10))
-
+    def generate_top_seasons_tables(self, row_limit):
         top_seasons_tables = []
 
         top_stats_categories = (
@@ -354,6 +355,19 @@ class TopSeasonsView(TemplateView):
                 'title': title,
                 'rows': table_rows,
             })
+
+        return top_seasons_tables
+
+    def get(self, request):
+        row_limit = int(request.GET.get('limit', 10))
+
+        cache_key = "blingalytics_top_seasons|{}".format(row_limit)
+
+        if cache_key in CACHE:
+            top_seasons_tables = CACHE.get(cache_key)
+        else:
+            top_seasons_tables = self.generate_top_seasons_tables(row_limit)
+            CACHE.set(cache_key, top_seasons_tables)
 
         context = {
             'top_seasons_tables': top_seasons_tables,
