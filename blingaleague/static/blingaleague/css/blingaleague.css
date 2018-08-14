@@ -175,7 +175,7 @@ table#team_vs_team_grid td {
     border: 1px solid black;
     text-align: center;
     vertical-align: middle;
-    font-size: 80%;
+    font-size: 90%;
 }
 
 table#team_vs_team_grid .empty {
@@ -371,6 +371,7 @@ table.blingalytics_table.sortable tbody tr::before {
     }
     #main_outer {
         overflow-x: scroll;
+        margin-top: 0;
     }
     #gazette_detail p,
     #gazette_detail a,
@@ -379,6 +380,10 @@ table.blingalytics_table.sortable tbody tr::before {
     #gazette_detail h2,
     #gazette_detail h3 {
         font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+    }
+
+    nav.navbar-fixed-top {
+        position: relative;
     }
     /*
     .navbar-header {
