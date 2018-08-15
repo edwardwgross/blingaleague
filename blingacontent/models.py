@@ -120,7 +120,7 @@ class Gazette(models.Model):
             ))
 
         message = MIMEText(self.to_html(for_email=True), 'html')
-        message['to'] = 'edward.w.gross@gmail.com' #', '.join(recipients)
+        message['to'] = ', '.join(recipients)
         message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
         message['subject'] = str(self)
 
@@ -150,10 +150,15 @@ class Gazette(models.Model):
         clear_cached_properties()
 
     def __str__(self):
-        return "{} - {}".format(
+        return_str = "{} - {}".format(
             self.published_date_str,
             self.headline,
         )
+
+        if not self.publish_flag:
+            return_str = "{} (not published)".format(return_str)
+
+        return return_str
 
     def __repr__(self):
         return str(self)

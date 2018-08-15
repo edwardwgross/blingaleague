@@ -1,6 +1,10 @@
-from googleapiclient.discovery import build
-
 from httplib2 import Http
+
+from pathlib import Path
+
+from django.conf import settings
+
+from googleapiclient.discovery import build
 
 from oauth2client import file, client, tools
 
@@ -13,10 +17,12 @@ SCOPES = [
 
 
 def get_gmail_service():
-    store = file.Storage('blingacontent/token.json')
+    token_path = Path(settings.BASE_DIR) / 'data' / 'gmail_token.json'
+    store = file.Storage(token_path)
     creds = store.get()
     if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('blingacontent/credentials.json', SCOPES)
+        credentials_path = Path(settings.BASE_DIR) / 'data' / 'gmail_credentials.json'
+        flow = client.flow_from_clientsecrets(credentials_path, SCOPES)
         creds = tools.run_flow(flow, store)
     service = build('gmail', 'v1', http=creds.authorize(Http()))
     return service
