@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
+    'request',
     'social_django',
     'markdown_filter',
     'blingacontent',
@@ -48,6 +49,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     # Django 1.7: 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'request.middleware.RequestMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
