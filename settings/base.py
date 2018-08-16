@@ -73,7 +73,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'blingaleague',
         'USER': 'livecommish',
-        'PASSWORD': 'Sanderson2008',
+        'PASSWORD': open(
+            BASE_DIR / 'settings' / 'mysql_password.txt',
+            'r',
+        ).read().strip(),
         'HOST': 'localhost',
     },
 }
