@@ -23,7 +23,7 @@
        {% for row in table.rows %}
          <tr>
            <td>{{ row.rank }}</td>
-           <td><a href="{{ row.team_season.href }}">{{ row.team_season.year }}</a></td>
+           <td><a href="{{ row.team_season.standings.href }}">{{ row.team_season.year }}</a></td>
            <td style="text-align:left; width:auto">
              <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
              {% if row.team_season.is_partial %}
