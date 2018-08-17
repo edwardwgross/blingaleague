@@ -7,6 +7,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core import urlresolvers
 from django.core.cache import caches
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 from django.template.loader import render_to_string
 
@@ -21,10 +22,6 @@ from .utils import get_gmail_service
 class Meme(models.Model):
     name = models.CharField(max_length=100)
     url = models.URLField()
-
-    def save(self, *args, **kwargs):
-        super(Meme, self).save(*args, **kwargs)
-        clear_cached_properties()
 
     def __str__(self):
         return self.name
@@ -50,10 +47,13 @@ class Gazette(models.Model):
         if self.published_date is None:
             return 'not published'
 
-        return self.published_date.strftime('%-m/%-d/%Y')
+        return self.published_date.strftime('%Y-%m-%d')
 
     @fully_cached_property
     def previous(self):
+        if not self.publish_flag:
+            return None
+
         return Gazette.objects.filter(
             publish_flag=True,
             published_date__lte=self.published_date,
@@ -66,6 +66,9 @@ class Gazette(models.Model):
 
     @fully_cached_property
     def next(self):
+        if not self.publish_flag:
+            return None
+
         return Gazette.objects.filter(
             publish_flag=True,
             published_date__gte=self.published_date,
@@ -133,21 +136,35 @@ class Gazette(models.Model):
             },
         ).execute()
 
-    def save(self, *args, **kwargs):
-        if self.published_date:
-            self.slug = "{}-{}".format(
-                self.published_date.strftime('%Y-%m-%d'),
-                slugify(self.headline),
+    def clean(self):
+        errors = {}
+
+        if self.publish_flag and not self.published_date:
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message='Published date required to publish',
+                    code='published_date_required',
+                ),
             )
-        else:
-            self.slug = None
+
+        if errors:
+            raise ValidationError(errors)
+
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(
+            "{}-{}".format(
+                self.published_date_str,
+                self.headline,
+            ),
+        )
 
         if self.publish_flag and not self.email_sent:
             self.send()
             self.email_sent = True
 
-        super(Gazette, self).save(*args, **kwargs)
-        clear_cached_properties()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return_str = "{} - {}".format(
@@ -155,7 +172,7 @@ class Gazette(models.Model):
             self.headline,
         )
 
-        if not self.publish_flag:
+        if self.published_date and not self.publish_flag:
             return_str = "{} (not published)".format(return_str)
 
         return return_str

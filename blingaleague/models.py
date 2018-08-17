@@ -62,8 +62,8 @@ class Member(models.Model):
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.id,))
 
-    def save(self, *args, **kwargs):
-        super(Member, self).save(*args, **kwargs)
+    def save(self, **kwargs):
+        super().save(**kwargs)
         clear_cached_properties()
 
     def __str__(self):
@@ -88,10 +88,6 @@ class FakeMember(models.Model):
         default=None,
         related_name='co_managers',
     )
-
-    def save(self, *args, **kwargs):
-        super(FakeMember, self).save(*args, **kwargs)
-        clear_cached_properties()
 
     def __str__(self):
         return self.name
@@ -201,7 +197,7 @@ class Game(models.Model):
 
         return False
 
-    def validate_unique(self, **kwargs):
+    def clean(self):
         errors = {}
 
         if self.week_is_full():
@@ -246,11 +242,10 @@ class Game(models.Model):
         if errors:
             raise ValidationError(errors)
 
-        # don't neglect the default validation
-        super(Game, self).validate_unique(**kwargs)
+        super().clean()
 
-    def save(self, *args, **kwargs):
-        super(Game, self).save(*args, **kwargs)
+    def save(self, **kwargs):
+        super().save(**kwargs)
         clear_cached_properties()
 
     def __str__(self):
@@ -337,8 +332,8 @@ class Season(models.Model):
                 return place + 1
         return None
 
-    def save(self, *args, **kwargs):
-        super(Season, self).save(*args, **kwargs)
+    def save(self, **kwargs):
+        super().save(**kwargs)
         clear_cached_properties()
 
     def __str__(self):

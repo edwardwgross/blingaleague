@@ -18,7 +18,7 @@ class BaseFinderForm(forms.Form):
     filter_threshold = 2
 
     def is_valid(self):
-        if not super(BaseFinderForm, self).is_valid():
+        if not super().is_valid():
             return False
 
         # if the values are valid, now we need to make sure we've provided
