@@ -384,11 +384,17 @@ class Year(object):
 
     @classmethod
     def min(cls):
-        return sorted(cls.all())[0]
+        return min(cls.all())
 
     @classmethod
     def max(cls):
-        return sorted(cls.all())[-1]
+        return max(cls.all())
+
+    def __str__(self):
+        return str(self.year)
+
+    def __repr__(self):
+        return str(self)
 
 
 class TeamSeason(object):
