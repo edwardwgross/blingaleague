@@ -167,9 +167,7 @@ class Game(models.Model):
         return self.winner_score + self.loser_score
 
     @classmethod
-    def expected_wins(cls, *game_scores, **kwargs):
-        scaling_factor = kwargs.get('scaling_factor', 1)
-
+    def expected_wins(cls, *game_scores, scaling_factor=1):
         all_scores = []
         game_results = Game.objects.all().values_list('winner_score', 'loser_score')
         for winner_score, loser_score in game_results:
