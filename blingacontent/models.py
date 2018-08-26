@@ -123,7 +123,7 @@ class Gazette(models.Model):
             ))
 
         message = MIMEText(self.to_html(for_email=True), 'html')
-        message['to'] = ', '.join(recipients)
+        message['to'] = ', '.join(sorted(recipients))
         message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
         message['subject'] = "The Sanderson Gazette - {}".format(self)
 
