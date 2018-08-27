@@ -340,12 +340,7 @@ table.blingalytics_table.sortable tbody tr::before {
 #gazette_detail h1,
 #gazette_detail h2,
 #gazette_detail h3 {
-    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
     font-weight: normal;
-}
-
-#gazette_detail h1.gazette_headline {
-    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
 }
 
 #gazette_detail p,
@@ -358,7 +353,6 @@ table.blingalytics_table.sortable tbody tr::before {
 }
 
 #gazette_detail a.link {
-    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
     font-size: 100%;
 }
 
@@ -372,14 +366,6 @@ table.blingalytics_table.sortable tbody tr::before {
     #main_outer {
         overflow-x: scroll;
         margin-top: 0;
-    }
-    #gazette_detail p,
-    #gazette_detail a,
-    #gazette_detail li,
-    #gazette_detail h1,
-    #gazette_detail h2,
-    #gazette_detail h3 {
-        font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
     }
 
     nav.navbar-fixed-top {
