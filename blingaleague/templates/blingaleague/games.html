@@ -5,7 +5,9 @@
 {% block content %}
 <h1>{{ base_object }}</h1>
 
-{% if base_object.level_up_link %}<h3><a href="{{ base_object.level_up_link.href }}">{{ base_object.level_up_link.description }}</a></h3>{% endif %}
+{% for level_up_link in base_object.level_up_links %}
+  <h3><a href="{{ level_up_link.href }}">{{ level_up_link.description }}</a></h3>
+{% endfor %}
 
 {% if base_object.headline %}<h2>{{ base_object.headline }}</h2>{% endif %}
 

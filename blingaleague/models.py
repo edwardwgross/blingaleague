@@ -626,8 +626,17 @@ class TeamSeason(object):
         return next_ts
 
     @fully_cached_property
-    def level_up_link(self):
-        return {'description': 'Franchise index', 'href': self.team.href}
+    def level_up_links(self):
+        return [
+            {
+                'description': 'Franchise index',
+                'href': self.team.href,
+            },
+            {
+                'description': str(self.standings),
+                'href': self.standings.href,
+            },
+        ]
 
     @fully_cached_property
     def regular_season(self):
