@@ -295,6 +295,29 @@ class TopSeasonsView(TemplateView):
     def generate_top_seasons_tables(self, row_limit):
         top_seasons_tables = []
 
+        top_attrs_categories = (
+            # title, attr, sort_desc
+            ('Most Wins', 'win_count', True),
+            ('Fewest Wins', 'win_count', False),
+            ('Most Points', 'points', True),
+            ('Fewest Points', 'points', False),
+            ('Most Expected Wins', 'expected_wins', True),
+            ('Fewest Expected Wins', 'expected_wins', False),
+            ('Most Team Blangums', 'blangums_count', True),
+            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True),
+        )
+
+        for title, attr, sort_desc in top_attrs_categories:
+            table_rows = sorted_seasons_by_attr(
+                attr,
+                limit=row_limit,
+                sort_desc=sort_desc,
+            )
+            top_seasons_tables.append({
+                'title': title,
+                'rows': table_rows,
+            })
+
         top_stats_categories = (
             # title, stat_function, sort_desc
             ('Highest Average Score', statistics.mean, True),
@@ -310,27 +333,6 @@ class TopSeasonsView(TemplateView):
         for title, stat_function, sort_desc in top_stats_categories:
             table_rows = sorted_seasons_by_stat(
                 stat_function,
-                limit=row_limit,
-                sort_desc=sort_desc,
-            )
-            top_seasons_tables.append({
-                'title': title,
-                'rows': table_rows,
-            })
-
-        top_attrs_categories = (
-            # title, attr, sort_desc
-            ('Most Points', 'points', True),
-            ('Fewest Points', 'points', False),
-            ('Most Expected Wins', 'expected_wins', True),
-            ('Fewest Expected Wins', 'expected_wins', False),
-            ('Most Team Blangums', 'blangums_count', True),
-            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True),
-        )
-
-        for title, attr, sort_desc in top_attrs_categories:
-            table_rows = sorted_seasons_by_attr(
-                attr,
                 limit=row_limit,
                 sort_desc=sort_desc,
             )

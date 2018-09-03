@@ -26,7 +26,7 @@ def sorted_seasons_by_stat(stat_function, limit=None, sort_desc=False):
 def sorted_seasons_by_attr(attr, limit=None, sort_desc=False):
     all_attrs = {}
     for team_season in TeamSeason.all():
-        if not has_enough_games(team_season):
+        if team_season.is_partial:
             continue
 
         all_attrs[team_season] = getattr(team_season, attr)
