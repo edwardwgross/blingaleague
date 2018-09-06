@@ -25,8 +25,7 @@ QUARTERFINALS_TITLE_BASE = 'Quarterfinals'
 THIRD_PLACE_TITLE_BASE = 'Third-place game'
 FIFTH_PLACE_TITLE_BASE = 'Fifth-place game'
 
-
-CACHE = caches['default']
+SEASON_START_MONTH = 9
 
 
 class Member(models.Model):
@@ -176,6 +175,8 @@ class Game(models.Model):
         all_scores_count = decimal.Decimal(len(all_scores))
 
         def _win_expectancy(score):
+            if all_scores_count == 0:
+                return 0
             win_list = list(filter(lambda x: x < score, all_scores))
             win_count = len(win_list)
             raw_win_expectancy = decimal.Decimal(win_count) / all_scores_count
@@ -369,16 +370,26 @@ class Year(object):
 
     @fully_cached_property
     def expected_wins_scaling_factor(self):
-        raw_scaling_factor = (
-            decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
-        )
+        raw_scaling_factor = 1
+        if self.total_raw_expected_wins > 0:
+            raw_scaling_factor = (
+                decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
+            )
+
         scaling_factor_weight = self.week_max * raw_scaling_factor
         regression_weight = (REGULAR_SEASON_WEEKS - self.week_max) * 1
+
         return (scaling_factor_weight + regression_weight) / REGULAR_SEASON_WEEKS
 
     @classmethod
     def all(cls):
-        return set(Game.objects.all().values_list('year', flat=True))
+        all_years = set(Game.objects.all().values_list('year', flat=True))
+
+        today = datetime.datetime.today()
+        if today.month >= SEASON_START_MONTH:
+            all_years.add(today.year)
+
+        return all_years
 
     @classmethod
     def min(cls):
@@ -445,6 +456,8 @@ class TeamSeason(object):
 
     @fully_cached_property
     def win_pct(self):
+        if len(self.games) == 0:
+            return 0
         return decimal.Decimal(self.win_count) / decimal.Decimal(len(self.games))
 
     @fully_cached_property
@@ -721,7 +734,7 @@ class TeamMultiSeasons(TeamSeason):
 
     def __init__(self, team_id, years=None, include_playoffs=False, week_max=None):
         if years is None:
-            years = Game.objects.all().values_list('year', flat=True).distinct()
+            years = Year.all()
 
         self.years = sorted(years)
         self.team = Member.objects.get(id=team_id)
@@ -800,7 +813,7 @@ class Standings(object):
         else:
             if self.year is None:
                 # if we didn't specify all_time, that means we need a current year
-                self.year = Week.latest().year
+                self.year = Year.max()
 
             try:
                 self.season = Season.objects.get(year=self.year)
@@ -830,23 +843,33 @@ class Standings(object):
                 week_max=self.week_max,
             )
 
-    def build_table(self, members):
+    def build_table(self, members, allow_zero_games=False):
         team_records = []
 
         for member in members:
             team_record = self.team_record(member)
 
-            if len(team_record.games) > 0:
+            if len(team_record.games) > 0 or allow_zero_games:
                 team_records.append(team_record)
 
         return sorted(team_records, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     @fully_cached_property
     def table(self):
-        members = Member.objects.all()
+        if self.year is not None and self.year > Year.max():
+            return []
+
+        members = Member.objects.order_by('first_name', 'last_name')
+        allow_zero_games = False
+
+        if self.year is not None and self.year > Week.latest().year:
+            members = members.filter(defunct=False)
+            allow_zero_games = True
+
         if self.all_time:
             members = members.filter(defunct=False)
-        return self.build_table(members)
+
+        return self.build_table(members, allow_zero_games=allow_zero_games)
 
     @fully_cached_property
     def defunct_table(self):

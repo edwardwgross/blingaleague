@@ -91,8 +91,7 @@ class StandingsCurrentView(StandingsView):
     sub_templates = tuple()
 
     def get(self, request):
-        max_year = Game.objects.all().order_by('-year').first().year
-        redirect_url = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(max_year,))
+        redirect_url = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(Year.max(),))
         return HttpResponseRedirect(redirect_url)
 
 
