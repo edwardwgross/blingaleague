@@ -377,7 +377,7 @@ class Year(object):
             )
 
         scaling_factor_weight = self.week_max * raw_scaling_factor
-        regression_weight = (REGULAR_SEASON_WEEKS - self.week_max) * 1
+        regression_weight = REGULAR_SEASON_WEEKS - self.week_max
 
         return (scaling_factor_weight + regression_weight) / REGULAR_SEASON_WEEKS
 
