@@ -245,7 +245,8 @@ table.blingalytics_table.sortable tbody tr::before {
 }
 
 #top_seasons .table_links {
-    margin-bottom: 40px;
+    /* need this padding so that tables' padding/margin doesn't cover up links */
+    padding-bottom: 60px;
 }
 
 #top_seasons table.blingalytics_table {
