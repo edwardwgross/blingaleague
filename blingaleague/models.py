@@ -976,6 +976,9 @@ class Week(object):
 
     @fully_cached_property
     def headline(self):
+        if len(self.games) == 0:
+            return 'No games yet'
+
         if self.week > REGULAR_SEASON_WEEKS:
             return self.games[0].title
 
