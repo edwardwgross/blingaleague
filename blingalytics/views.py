@@ -47,11 +47,12 @@ class ExpectedWinsView(TemplateView):
         min_score = Game.objects.all().order_by('loser_score')[0].loser_score
         max_score = Game.objects.all().order_by('-winner_score')[0].winner_score
 
-        min_x = int(5 * (min_score // 5))
-        max_x = int(5 * (max_score // 5)) + 10
-        # add 5 to round up, another 5 because range() is exclusive at the high end
+        interval = 5
+        min_x = interval * (min_score // interval)
+        max_x = interval * (max_score // interval) + interval  # add interval to round up
 
-        x_data = list(range(min_x, max_x, 5))
+        # add interval because range() is exclusive at the high end
+        x_data = list(range(int(min_x), int(max_x) + interval, interval))
         if score is not None:
             x_data = sorted(x_data + [score])
 
