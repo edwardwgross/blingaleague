@@ -98,7 +98,7 @@ class Gazette(models.Model):
         if for_email:
             css_path = Path(settings.STATIC_ROOT) / 'blingaleague' / 'css' / 'blingaleague.css'
             css_fh = open(css_path, 'r')
-            html_str = "<html><head><style>{}</style></head><body style=\"font-size:16px\">{}</body></html>".format(
+            html_str = "<html><head><style>{}</style></head><body style=\"font-size:14px\">{}</body></html>".format(
                 css_fh.read(),
                 html_str,
             )
