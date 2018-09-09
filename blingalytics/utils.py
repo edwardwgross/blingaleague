@@ -26,7 +26,7 @@ def sorted_seasons_by_stat(stat_function, limit=None, sort_desc=False):
 def sorted_seasons_by_attr(attr, limit=None, sort_desc=False):
     all_attrs = {}
     for team_season in TeamSeason.all():
-        if team_season.is_partial:
+        if team_season.is_partial and not sort_desc:
             continue
 
         all_attrs[team_season] = getattr(team_season, attr)
@@ -41,7 +41,7 @@ def sorted_seasons_by_attr(attr, limit=None, sort_desc=False):
 def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
     all_odds = {}
     for team_season in TeamSeason.all():
-        if not has_enough_games(team_season):
+        if team_season.is_partial:
             continue
 
         win_odds = team_season.expected_win_distribution.get(win_count, 0)
