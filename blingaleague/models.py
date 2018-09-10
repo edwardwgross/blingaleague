@@ -718,7 +718,7 @@ class TeamSeason(object):
         if self.clinched_bye:
             return ('b', 'clinched bye')
         elif self.clinched_playoffs:
-            return ('*', 'clinched playoff spot')
+            return ('x', 'clinched playoff spot')
         elif self.eliminated_early:
             return ('e', 'eliminated from playoff contention')
 
