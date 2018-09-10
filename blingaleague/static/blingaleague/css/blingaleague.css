@@ -169,6 +169,12 @@ table.standings_table td {
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
+.standings_note {
+    font-size: x-small;
+    vertical-align: top;
+    cursor: help;
+}
+
 table#team_vs_team_grid,
 table#team_vs_team_grid th,
 table#team_vs_team_grid td {

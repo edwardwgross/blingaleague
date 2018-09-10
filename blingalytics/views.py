@@ -13,6 +13,8 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
                    CHOICE_REGULAR_SEASON, CHOICE_PLAYOFFS, \
                    CHOICE_MADE_PLAYOFFS, CHOICE_MISSED_PLAYOFFS, \
+                   CHOICE_CLINCHED_BYE, CHOICE_CLINCHED_PLAYOFFS, \
+                   CHOICE_ELIMINATED_EARLY, \
                    GameFinderForm, SeasonFinderForm
 from .utils import sorted_seasons_by_stat, \
                    sorted_seasons_by_attr, \
@@ -266,6 +268,13 @@ class SeasonFinderView(TemplateView):
                 if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not team_season.playoffs:
                     continue
                 elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and team_season.playoffs:
+                    continue
+
+                if form_data['clinched'] == CHOICE_CLINCHED_BYE and not team_season.clinched_bye:
+                    continue
+                elif form_data['clinched'] == CHOICE_CLINCHED_PLAYOFFS and not team_season.clinched_playoffs:
+                    continue
+                elif form_data['clinched'] == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_early:
                     continue
 
                 if form_data['bye'] and not team_season.bye:

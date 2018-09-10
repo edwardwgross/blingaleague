@@ -1,6 +1,11 @@
 {% load humanize %}
 <td>{{ forloop.counter }}</td>
-<td style="text-align:left"><a href="{{ team_season.href }}">{{ team_season.team }}</a></td>
+<td style="text-align:left">
+  <a href="{{ team_season.href }}">{{ team_season.team }}</a>
+  {% if team_season.standings_note %}
+    <span class="standings_note" title="{{ team_season.standings_note.1 }}">{{ team_season.standings_note.0 }}</span>
+  {% endif %}
+</td>
 <td>{{ team_season.win_count }}</td>
 <td>{{ team_season.loss_count }}</td>
 <td>{{ team_season.win_pct|floatformat:3 }}</td>

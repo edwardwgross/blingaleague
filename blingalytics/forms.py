@@ -11,6 +11,9 @@ CHOICE_REGULAR_SEASON = 'regular'
 CHOICE_PLAYOFFS = 'playoffs'
 CHOICE_MADE_PLAYOFFS = 'made_playoffs'
 CHOICE_MISSED_PLAYOFFS = 'missed_playoffs'
+CHOICE_CLINCHED_BYE = 'clinched_bye'
+CHOICE_CLINCHED_PLAYOFFS = 'clinched_playoffs'
+CHOICE_ELIMINATED_EARLY = 'eliminated_early'
 
 
 class BaseFinderForm(forms.Form):
@@ -121,6 +124,17 @@ class SeasonFinderForm(BaseFinderForm):
             ('', 'Any finish'),
             (CHOICE_MADE_PLAYOFFS, 'Made playoffs'),
             (CHOICE_MISSED_PLAYOFFS, 'Missed playoffs'),
+        ],
+    )
+    clinched = forms.TypedChoiceField(
+        required=False,
+        label='Clinching Status (Through Chosen Week)',
+        widget=forms.RadioSelect,
+        choices=[
+            ('', 'Any status'),
+            (CHOICE_CLINCHED_PLAYOFFS, 'Clinched playoffs'),
+            (CHOICE_CLINCHED_BYE, 'Clinched bye'),
+            (CHOICE_ELIMINATED_EARLY, 'Eliminated early'),
         ],
     )
     bye = forms.BooleanField(required=False, label='Earned Bye')

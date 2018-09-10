@@ -18,6 +18,7 @@ BLINGABOWL_WEEK = 16
 BYE_TEAMS = 2
 PLAYOFF_TEAMS = 6
 FIRST_SEASON = 2008
+EXPANSION_SEASON = 2012
 
 BLINGABOWL_TITLE_BASE = 'Blingabowl'
 SEMIFINALS_TITLE_BASE = 'Semifinals'
@@ -26,6 +27,8 @@ THIRD_PLACE_TITLE_BASE = 'Third-place game'
 FIFTH_PLACE_TITLE_BASE = 'Fifth-place game'
 
 SEASON_START_MONTH = 9
+
+MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2
 
 
 class Member(models.Model):
@@ -64,6 +67,9 @@ class Member(models.Model):
     def save(self, **kwargs):
         super().save(**kwargs)
         clear_cached_properties()
+
+    def __gt__(self, member2):
+        return self.full_name > member2.full_name
 
     def __str__(self):
         return self.full_name
@@ -191,7 +197,7 @@ class Game(models.Model):
     def week_is_full(self):
         other_games_count = self.other_weekly_games().count()
 
-        if (self.year < 2012 and other_games_count >= 6) or other_games_count >= 7:
+        if (self.year < EXPANSION_SEASON and other_games_count >= 6) or other_games_count >= 7:
             return True
 
         return False
@@ -226,7 +232,7 @@ class Game(models.Model):
 
         if self.week > 1 and self.week <= 13:
             target_game_count = 7
-            if self.year < 2012:
+            if self.year < EXPANSION_SEASON:
                 target_game_count = 6
 
             previous_week_games = Game.objects.filter(year=self.year, week=self.week-1)
@@ -389,7 +395,7 @@ class Year(object):
         if today.month >= SEASON_START_MONTH:
             all_years.add(today.year)
 
-        return all_years
+        return sorted(all_years)
 
     @classmethod
     def min(cls):
@@ -515,7 +521,7 @@ class TeamSeason(object):
     def champion(self):
         if self.season is None:
             return False
-        return (self.team == self.season.place_1)
+        return self.team == self.season.place_1
 
     @fully_cached_property
     def game_scores(self):
@@ -523,7 +529,7 @@ class TeamSeason(object):
 
     @fully_cached_property
     def is_partial(self):
-        return len(self.regular_season.games) < REGULAR_SEASON_WEEKS
+        return len(self.games) < REGULAR_SEASON_WEEKS
 
     def expected_wins_function(self, *game_scores):
         return Game.expected_wins(
@@ -563,9 +569,8 @@ class TeamSeason(object):
         for outcome_combo in outcome_combos:
             win_count = 0
             running_prob = decimal.Decimal(1)
-            for i in range(num_games):
+            for i, outcome in enumerate(outcome_combo):
                 wp = expected_wins_by_game[i]
-                outcome = outcome_combo[i]
                 if outcome:
                     win_count += 1
                     running_prob *= wp
@@ -600,6 +605,121 @@ class TeamSeason(object):
             return 0
 
         return self.season.robscores.get(self.team, 0)
+
+    @fully_cached_property
+    def has_beaten(self):
+        return sorted([game.loser for game in self.wins])
+
+    @fully_cached_property
+    def has_lost_to(self):
+        return sorted([game.winner for game in self.losses])
+
+    @fully_cached_property
+    def has_played(self):
+        return sorted(self.has_beaten + self.has_lost_to)
+
+    @fully_cached_property
+    def yet_to_play(self):
+        yet_to_play = []
+
+        if self.year >= EXPANSION_SEASON:
+            full_season_opponents = self.standings.active_teams
+        else:
+            # we know this is in the past
+            full_season_opponents = TeamSeason(
+                self.team.id, self.year,
+            ).has_played
+
+        for opponent in set(full_season_opponents):
+            full_count = full_season_opponents.count(opponent)
+            this_count = self.has_played.count(opponent)
+            diff = full_count - this_count
+            if diff > 0:
+                yet_to_play.extend(diff * [opponent])
+
+        return sorted(yet_to_play)
+
+    @fully_cached_property
+    def weeks_remaining(self):
+        return max(0, REGULAR_SEASON_WEEKS - len(self.games))
+
+    @fully_cached_property
+    def clinched_playoffs(self):
+        if self.is_partial:
+            return self.clinched(PLAYOFF_TEAMS)
+
+        return self.playoffs
+
+    @fully_cached_property
+    def clinched_bye(self):
+        if self.is_partial:
+            return self.clinched(BYE_TEAMS)
+
+        return self.bye
+
+    @fully_cached_property
+    def eliminated_early(self):
+        if self.is_partial:
+            possible_outcomes = self.standings.possible_final_outcomes
+            if possible_outcomes:
+                for outcome in possible_outcomes:
+                    team_wins = outcome[self.team]
+                    sorted_wins = sorted(outcome.values(), reverse=True)
+
+                    if team_wins >= sorted_wins[PLAYOFF_TEAMS - 1]:
+                        return False
+
+            return self.eliminated_simple()
+
+        # if it's a complete season, it's not an early elimination
+        return False
+
+    def clinched(self, target_place):
+        standings_table = self.standings.table
+        if target_place >= len(standings_table):
+            # no matter what, every team has clinched at least last place
+            return True
+
+        possible_outcomes = self.standings.possible_final_outcomes
+        if possible_outcomes:
+            for outcome in possible_outcomes:
+                team_wins = outcome[self.team]
+                sorted_wins = sorted(outcome.values(), reverse=True)
+
+                # don't subtract one because we actually want to measure the place
+                # after the target; i.e. to make the playoffs, we need to have more
+                # wins than the 7th place team
+                if team_wins <= sorted_wins[target_place]:
+                    return False
+
+            return True
+
+        return self.clinched_simple(target_place)
+
+    def clinched_simple(self, target_place):
+        # don't subtract one because we actually want to measure the place
+        # after the target; i.e. to make the playoffs, we need to have more
+        # wins than the 7th place team
+        target_current_wins = self.standings.table[target_place].win_count
+        max_target_wins = target_current_wins + self.weeks_remaining
+
+        return self.win_count > max_target_wins
+
+    def eliminated_simple(self):
+        max_wins = self.win_count + self.weeks_remaining
+        last_playoff_team_wins = self.standings.table[PLAYOFF_TEAMS - 1].win_count
+        return max_wins < last_playoff_team_wins
+
+    @fully_cached_property
+    def standings_note(self):
+        if self.clinched_bye:
+            return ('b', 'clinched bye')
+        elif self.clinched_playoffs:
+            return ('*', 'clinched playoff spot')
+        elif self.eliminated_early:
+            return ('e', 'eliminated from playoff contention')
+
+        return None
 
     @fully_cached_property
     def headline(self):
@@ -719,7 +839,7 @@ class TeamSeason(object):
         for year in Year.all():
             for team_id in Member.objects.all().values_list('id', flat=True):
                 team_season = cls(team_id, year)
-                if len(team_season.game_scores) > 0:
+                if len(team_season.games) > 0:
                     yield team_season
 
     def __str__(self):
@@ -761,6 +881,13 @@ class TeamMultiSeasons(TeamSeason):
         return team_seasons
 
     @fully_cached_property
+    def games(self):
+        games = []
+        for team_season in self:
+            games.extend(team_season.games)
+        return games
+
+    @fully_cached_property
     def wins(self):
         wins = []
         for team_season in self:
@@ -783,12 +910,31 @@ class TeamMultiSeasons(TeamSeason):
         return sum(team_season.robscore for team_season in self)
 
     @fully_cached_property
+    def clinched_playoffs(self):
+        return None
+
+    @fully_cached_property
+    def clinched_bye(self):
+        return None
+
+    @fully_cached_property
+    def eliminated_early(self):
+        return None
+
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.team.id,))
 
     def __iter__(self):
         for team_season in self.team_seasons:
             yield team_season
+
+    @classmethod
+    def all(cls):
+        for team_id in Member.objects.all().values_list('id', flat=True):
+            team_multi_season = cls(team_id)
+            if len(team_multi_season.games) > 0:
+                yield team_multi_season
 
     def __str__(self):
         return "{} - {}".format(self.team, ', '.join(map(str, self.years)))
@@ -828,54 +974,107 @@ class Standings(object):
 
         self.cache_key = "|".join(map(str, (year, all_time, include_playoffs, week_max)))
 
-    def team_record(self, member):
+    def team_record(self, team):
         if self.all_time:
             return TeamMultiSeasons(
-                member.id,
+                team.id,
                 include_playoffs=self.include_playoffs,
                 week_max=self.week_max,
             )
         else:
             return TeamSeason(
-                member.id,
+                team.id,
                 self.year,
                 include_playoffs=self.include_playoffs,
                 week_max=self.week_max,
             )
 
-    def build_table(self, members, allow_zero_games=False):
+    def build_table(self, teams):
         team_records = []
 
-        for member in members:
-            team_record = self.team_record(member)
+        for team in teams:
+            team_record = self.team_record(team)
 
-            if len(team_record.games) > 0 or allow_zero_games:
+            if len(team_record.games) > 0 or self.is_upcoming_season:
                 team_records.append(team_record)
 
         return sorted(team_records, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     @fully_cached_property
     def table(self):
-        if self.year is not None and self.year > Year.max():
-            return []
-
-        members = Member.objects.order_by('first_name', 'last_name')
-        allow_zero_games = False
-
-        if self.year is not None and self.year > Week.latest().year:
-            members = members.filter(defunct=False)
-            allow_zero_games = True
-
-        if self.all_time:
-            members = members.filter(defunct=False)
-
-        return self.build_table(members, allow_zero_games=allow_zero_games)
+        return self.build_table(self.active_teams)
 
     @fully_cached_property
     def defunct_table(self):
         if not self.all_time:
             return []
+
         return self.build_table(Member.objects.filter(defunct=True))
+
+    @fully_cached_property
+    def active_teams(self):
+        if self.year is not None and self.year > Year.max():
+            return []
+
+        if self.is_upcoming_season or self.all_time:
+            return Member.objects.filter(defunct=False).order_by('first_name', 'last_name')
+
+        teams = set()
+        for game in Game.objects.filter(year=self.year):
+            teams.add(game.winner)
+            teams.add(game.loser)
+
+        return sorted(teams, key=lambda x: (x.first_name, x.last_name))
+
+    @fully_cached_property
+    def is_upcoming_season(self):
+        return self.year is not None and self.year > Week.latest().year
+
+    @fully_cached_property
+    def is_partial(self):
+        for team_season in self.table:
+            if team_season.is_partial:
+                return True
+
+        return False
+
+    @fully_cached_property
+    def possible_final_outcomes(self):
+        if self.is_upcoming_season or self.all_time:
+            return None
+
+        remaining_games = set()
+        current_win_counts = {}
+
+        for team_season in self.table:
+            current_win_counts[team_season.team] = team_season.win_count
+
+            for opponent in team_season.yet_to_play:
+                game_tuple = tuple(sorted((team_season.team, opponent)))
+                remaining_games.add(game_tuple)
+
+        remaining_games = list(remaining_games)
+
+        num_games = len(remaining_games)
+
+        max_games_to_run = MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES * len(self.table) / 2
+
+        if num_games > max_games_to_run:
+            return None
+
+        outcome_combos = itertools.product([0, 1], repeat=num_games)
+
+        possible_outcomes = []
+
+        for outcome_combo in outcome_combos:
+            win_counts = current_win_counts.copy()
+            for i, outcome in enumerate(outcome_combo):
+                winner = remaining_games[i][outcome]
+                win_counts[winner] += 1
+
+            possible_outcomes.append(win_counts)
+
+        return possible_outcomes
 
     @fully_cached_property
     def href(self):
