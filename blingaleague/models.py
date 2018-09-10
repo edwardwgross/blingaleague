@@ -663,6 +663,9 @@ class TeamSeason(object):
     @fully_cached_property
     def eliminated_early(self):
         if self.is_partial:
+            if self.eliminated_simple:
+                return True
+
             possible_outcomes = self.standings.possible_final_outcomes
             if possible_outcomes:
                 for outcome in possible_outcomes:
@@ -672,15 +675,19 @@ class TeamSeason(object):
                     if team_wins >= sorted_wins[PLAYOFF_TEAMS - 1]:
                         return False
 
-            return self.eliminated_simple()
+                return True
 
         # if it's a complete season, it's not an early elimination
         return False
 
     def clinched(self, target_place):
         standings_table = self.standings.table
+
         if target_place >= len(standings_table):
             # no matter what, every team has clinched at least last place
+            return True
+
+        if self.clinched_simple(target_place):
             return True
 
         possible_outcomes = self.standings.possible_final_outcomes
@@ -697,7 +704,7 @@ class TeamSeason(object):
 
             return True
 
-        return self.clinched_simple(target_place)
+        return False
 
     def clinched_simple(self, target_place):
         # don't subtract one because we actually want to measure the place
@@ -708,6 +715,7 @@ class TeamSeason(object):
 
         return self.win_count > max_target_wins
 
+    @fully_cached_property
     def eliminated_simple(self):
         max_wins = self.win_count + self.weeks_remaining
         last_playoff_team_wins = self.standings.table[PLAYOFF_TEAMS - 1].win_count
