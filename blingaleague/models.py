@@ -28,7 +28,7 @@ FIFTH_PLACE_TITLE_BASE = 'Fifth-place game'
 
 SEASON_START_MONTH = 9
 
-MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2
+MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
 
 
 class Member(models.Model):
@@ -631,6 +631,9 @@ class TeamSeason(object):
             ).has_played
 
         for opponent in set(full_season_opponents):
+            if opponent == self.team:
+                continue
+
             full_count = full_season_opponents.count(opponent)
             this_count = self.has_played.count(opponent)
             diff = full_count - this_count
