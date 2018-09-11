@@ -367,6 +367,10 @@ class Year(object):
         return self.all_games.count()
 
     @fully_cached_property
+    def weeks_with_games(self):
+        return max(self.all_games.values_list('week', flat=True))
+
+    @fully_cached_property
     def total_raw_expected_wins(self):
         all_scores = []
         for winner_score, loser_score in self.all_games.values_list('winner_score', 'loser_score'):
@@ -382,8 +386,8 @@ class Year(object):
                 decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
             )
 
-        scaling_factor_weight = self.week_max * raw_scaling_factor
-        regression_weight = REGULAR_SEASON_WEEKS - self.week_max
+        scaling_factor_weight = self.weeks_with_games * raw_scaling_factor
+        regression_weight = REGULAR_SEASON_WEEKS - self.weeks_with_games
 
         return (scaling_factor_weight + regression_weight) / REGULAR_SEASON_WEEKS
 
