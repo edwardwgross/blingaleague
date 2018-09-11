@@ -17,7 +17,7 @@
   {% for similar_season in base_object.most_similar %}
     <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ similar_season.score }}</td>
+      <td>{{ similar_season.score|floatformat:0 }}</td>
       <td><a href="{{ similar_season.season.standings.href }}">{{ similar_season.season.year }}</a></td>
       <td style="text-align:left"><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
       <td><a href="{{ similar_season.season.href }}">{{ similar_season.season.record }}</a></td>
