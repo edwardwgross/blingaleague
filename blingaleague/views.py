@@ -88,7 +88,7 @@ class StandingsView(TemplateView):
 class StandingsCurrentView(StandingsView):
     # would like to include 'blingaleague/expected_win_distribution_standings.html',
     # but it's a performance nightmare
-    sub_templates = tuple()
+    pre_games_sub_templates = tuple()
 
     def get(self, request):
         redirect_url = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(Year.max(),))
@@ -98,7 +98,7 @@ class StandingsCurrentView(StandingsView):
 class StandingsYearView(StandingsView):
     # would like to include 'blingaleague/expected_win_distribution_standings.html',
     # but it's a performance nightmare
-    sub_templates = tuple()
+    pre_games_sub_templates = tuple()
 
     def get(self, request, year):
         self.standings = Standings(year=int(year))
@@ -120,7 +120,7 @@ class StandingsAllTimeView(StandingsView):
 
 class GamesView(TemplateView):
     template_name = 'blingaleague/games.html'
-    sub_templates = tuple()
+    pre_games_sub_templates = tuple()
 
     @property
     def games_sub_template(self):
@@ -129,7 +129,8 @@ class GamesView(TemplateView):
     def _context(self, base_object):
         return {
             'base_object': base_object,
-            'sub_templates': self.sub_templates,
+            'pre_games_sub_templates': self.pre_games_sub_templates,
+            'post_games_sub_templates': self.post_games_sub_templates,
             'games_sub_template': self.games_sub_template,
         }
 
@@ -155,8 +156,11 @@ class WeekView(GamesView):
 class TeamSeasonView(GamesView):
     # would like to include 'blingaleague/similar_seasons.html',
     # but it's a performance nightmare
-    sub_templates = (
+    pre_games_sub_templates = (
         'blingaleague/expected_win_distribution_team.html',
+    )
+    post_games_sub_templates = (
+        'blingaleague/similar_seasons.html',
     )
     games_sub_template = 'blingaleague/team_season_games.html'
 

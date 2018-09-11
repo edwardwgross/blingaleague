@@ -1,12 +1,30 @@
+{% load humanize %}
+
 <h3>Most Similar Seasons</h3>
 
-<div id="similar_seasons">
-  <ol>
-    {% for similar_season in base_object.most_similar %}
-      <li>
-        <strong>{{ similar_season.score }}</strong>:
-        <a href="{{ similar_season.season.href }}">{{ similar_season.season }}: {{ similar_season.season.headline }}</a>
-      </li>
-    {% endfor %}
-  </ol>
+<table id="similar_seasons" class="standings_table">
+  <tr>
+    <th/>
+    <th>Score</th>
+    <th>Year</th>
+    <th>Team</th>
+    <th>Record</th>
+    <th>Points</th>
+    <th>Exp. W</th>
+    <th>Place</th>
+    <th>Playoff Finish</th>
+  </tr>
+  {% for similar_season in base_object.most_similar %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ similar_season.score }}</td>
+      <td><a href="{{ similar_season.season.standings.href }}">{{ similar_season.season.year }}</a></td>
+      <td style="text-align:left"><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
+      <td><a href="{{ similar_season.season.href }}">{{ similar_season.season.record }}</a></td>
+      <td>{{ similar_season.season.points|intcomma }}</td>
+      <td>{{ similar_season.season.expected_wins|floatformat:2 }}</td>
+      <td>{{ similar_season.season.place_numeric }}</td>
+      <td style="text-align:left">{{ similar_season.season.playoff_finish }}</td>
+    </tr>
+  {% endfor %}
 </div>

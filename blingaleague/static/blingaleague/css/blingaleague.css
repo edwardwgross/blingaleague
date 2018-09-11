@@ -333,13 +333,6 @@ table.blingalytics_table.sortable tbody tr::before {
     width: 100%;
 }
 
-#similar_seasons ol,
-#similar_seasons ol li,
-#similar_seasons a {
-    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-    font-size: 75%;
-}
-
 .blingacontent {
     margin-bottom: 12px;
 }

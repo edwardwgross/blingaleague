@@ -11,7 +11,7 @@
 
 {% if base_object.headline %}<h2>{{ base_object.headline }}</h2>{% endif %}
 
-{% for sub_template in sub_templates %}
+{% for sub_template in pre_games_sub_templates %}
   {% include sub_template %}
 {% endfor %}
 
@@ -21,5 +21,9 @@
 
   {% include games_sub_template %}
 </div>
+
+{% for sub_template in post_games_sub_templates %}
+  {% include sub_template %}
+{% endfor %}
 
 {% endblock content %}
