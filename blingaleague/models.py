@@ -788,7 +788,7 @@ class TeamSeason(object):
 
     @fully_cached_property
     def win_loss_sequence(self):
-        return map(lambda x: 'W' if self.team == x.winner else 'L', self.games)
+        return list(map(lambda x: 'W' if self.team == x.winner else 'L', self.games))
 
     @fully_cached_property
     def most_similar(self):
@@ -807,12 +807,12 @@ class TeamSeason(object):
             }
 
         sorted_seasons = sorted(similar_seasons, key=lambda x: x['score'], reverse=True)[:limit]
-        return map(_ss_display, sorted_seasons)
+        return list(map(_ss_display, sorted_seasons))
 
     def similarity_score(self, other_season):
         score = 1000
         score -= abs(self.win_count - other_season.win_count) * 100
-        score -= len(len(self.win_loss_differences(other_season))) * 10
+        score -= len(self.win_loss_differences(other_season)) * 10
         score -= int(abs(self.points - other_season.points))
         score -= int(abs(self.expected_wins - other_season.expected_wins) * 100)
         return max(score, 0)
@@ -821,7 +821,7 @@ class TeamSeason(object):
         def _ne(seq):
             return seq[0] != seq[1]
 
-        return filter(_ne, zip(self.win_loss_sequence, other_season.win_loss_sequence))
+        return list(filter(_ne, zip(self.win_loss_sequence, other_season.win_loss_sequence)))
 
     def _filter_similar_seasons(self, threshold):
         base_season = self
