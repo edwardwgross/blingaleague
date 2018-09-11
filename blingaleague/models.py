@@ -807,7 +807,7 @@ class TeamSeason(object):
 
     def similarity_score(self, other_season):
         score = 1000
-        score -= abs(self.win_count - other_season.win_count) * 100
+        #score -= abs(self.win_count - other_season.win_count) * 100
         score -= abs(self.points - other_season.points)
         score -= abs(self.expected_wins - other_season.expected_wins) * 100
         return max(score, 0)
