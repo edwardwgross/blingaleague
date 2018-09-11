@@ -16,7 +16,7 @@
     </tr>
     {% for week in weeks %}
       <tr>
-        <td><a href="{% url 'blingaleague.standings_year' week.year %}">{{ week.year }}</a></td>
+        <td><a href="{% url 'blingaleague.single_season' week.year %}">{{ week.year }}</a></td>
         <td><a href="{{ week.href }}">{{ week.week }}</a></td>
         <td>{{ week.average_score|floatformat:2 }}</td>
         <td>{{ week.average_margin|floatformat:2 }}</td>

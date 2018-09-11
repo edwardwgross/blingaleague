@@ -29,23 +29,23 @@ class HomeView(TemplateView):
         return self.render_to_response(context)
 
 
-class StandingsView(TemplateView):
-    template_name = 'blingaleague/standings.html'
+class SeasonView(TemplateView):
+    template_name = 'blingaleague/season.html'
 
     @cached_property
-    def links(self):
-        links = []
+    def season_links(self):
+        season_links = []
 
         for year in sorted(Year.all()):
             link_data = {'text': year, 'href': None}
             if year != self.standings.year:
                 link_data['href'] = urlresolvers.reverse_lazy(
-                    'blingaleague.standings_year',
+                    'blingaleague.single_season',
                     args=(year,),
                 )
-            links.append(link_data)
+            season_links.append(link_data)
 
-        all_time_url = urlresolvers.reverse_lazy('blingaleague.standings_all_time')
+        all_time_url = urlresolvers.reverse_lazy('blingaleague.all_time')
         including_playoffs_url = "{}?include_playoffs".format(all_time_url)
 
         if self.standings.all_time:
@@ -54,12 +54,17 @@ class StandingsView(TemplateView):
             else:
                 all_time_url = None
 
-        links.extend([
+        season_links.extend([
             {'text': 'All-time', 'href': all_time_url},
             {'text': '(including playoffs)', 'href': including_playoffs_url},
         ])
 
-        return links
+        return season_links
+
+    @cached_property
+    def week_links(self):
+        # only applies for single-season view
+        return []
 
     def _expected_win_distribution_graph(self, team_seasons):
         graph = nvd3.lineChart(
@@ -85,42 +90,73 @@ class StandingsView(TemplateView):
         return graph
 
 
-class StandingsCurrentView(StandingsView):
+class CurrentSeasonView(SeasonView):
     # would like to include 'blingaleague/expected_win_distribution_standings.html',
     # but it's a performance nightmare
     pre_games_sub_templates = tuple()
 
     def get(self, request):
-        redirect_url = urlresolvers.reverse_lazy('blingaleague.standings_year', args=(Year.max(),))
+        redirect_url = urlresolvers.reverse_lazy('blingaleague.single_season', args=(Year.max(),))
         return HttpResponseRedirect(redirect_url)
 
 
-class StandingsYearView(StandingsView):
+class SingleSeasonView(SeasonView):
     # would like to include 'blingaleague/expected_win_distribution_standings.html',
     # but it's a performance nightmare
     pre_games_sub_templates = tuple()
+
+    @cached_property
+    def week_links(self):
+        week_links = []
+
+        weeks_with_games = set(
+            Game.objects.filter(
+                year=self.standings.year,
+            ).values_list(
+                'week',
+                flat=True,
+            ),
+        )
+
+        for week in sorted(weeks_with_games):
+            link_data = {
+                'text': week,
+                'href': urlresolvers.reverse_lazy(
+                    'blingaleague.week',
+                    args=(self.standings.year, week,),
+                ),
+            }
+            week_links.append(link_data)
+
+        return week_links
 
     def get(self, request, year):
         self.standings = Standings(year=int(year))
         context = {
             'standings': self.standings,
-            'links': self.links,
+            'season_links': self.season_links,
+            'week_links': self.week_links,
         }
         return self.render_to_response(context)
 
 
-class StandingsAllTimeView(StandingsView):
+class AllTimeView(SeasonView):
 
     def get(self, request):
         include_playoffs = 'include_playoffs' in request.GET
         self.standings = Standings(all_time=True, include_playoffs=include_playoffs)
-        context = {'standings': self.standings, 'links': self.links}
+        context = {
+            'standings': self.standings,
+            'season_links': self.season_links,
+            'week_links': self.week_links,
+        }
         return self.render_to_response(context)
 
 
 class GamesView(TemplateView):
     template_name = 'blingaleague/games.html'
     pre_games_sub_templates = tuple()
+    post_games_sub_templates = tuple()
 
     @property
     def games_sub_template(self):

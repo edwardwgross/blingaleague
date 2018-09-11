@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
 
 from .views import HomeView, TeamDetailsView,\
-                   StandingsYearView, StandingsCurrentView, StandingsAllTimeView,\
+                   SingleSeasonView, CurrentSeasonView, AllTimeView,\
                    MatchupView, WeekView, TeamSeasonView
 
 
@@ -19,19 +19,19 @@ urlpatterns = [
         name='blingaleague.home',
     ),
     url(
-        r'^standings/$',
-        StandingsCurrentView.as_view(),
-        name='blingaleague.standings',
+        r'^season/$',
+        CurrentSeasonView.as_view(),
+        name='blingaleague.current_season',
     ),
     url(
-        r'^standings/(?P<year>\d{4})/$',
-        StandingsYearView.as_view(),
-        name='blingaleague.standings_year',
+        r'^season/(?P<year>\d{4})/$',
+        SingleSeasonView.as_view(),
+        name='blingaleague.single_season',
     ),
     url(
-        r'^standings/all_time/$',
-        StandingsAllTimeView.as_view(),
-        name='blingaleague.standings_all_time',
+        r'^season/all_time/$',
+        AllTimeView.as_view(),
+        name='blingaleague.all_time',
     ),
     url(
         r'^matchup/(?P<team1>\d+)/(?P<team2>\d+)/$',
@@ -62,6 +62,30 @@ urlpatterns = [
             pattern_name='blingalytics.team_vs_team',
             permanent=True,
         )
+    ),
+
+    url(
+        r'^standings/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.current_season',
+            permanent=True,
+        ),
+    ),
+
+    url(
+        r'^standings/(?P<year>\d{4})/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.single_season',
+            permanent=True,
+        ),
+    ),
+
+    url(
+        r'^standings/all_time/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.all_time',
+            permanent=True,
+        ),
     ),
 
     url(

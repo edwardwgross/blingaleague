@@ -329,7 +329,7 @@ class Season(models.Model):
 
     @fully_cached_property
     def href(self):
-        return urlresolvers.reverse_lazy('blingaleague.standings_year', args=(self.year,))
+        return urlresolvers.reverse_lazy('blingaleague.single_season', args=(self.year,))
 
     def team_to_playoff_finish(self, team):
         for place, finish_team in enumerate(self.playoff_results):
@@ -1083,14 +1083,14 @@ class Standings(object):
     @fully_cached_property
     def href(self):
         if self.year is not None:
-            return urlresolvers.reverse_lazy('blingaleague.standings_year', args=(self.year,))
+            return urlresolvers.reverse_lazy('blingaleague.single_season', args=(self.year,))
         elif self.all_time:
             getargs = ''
             if self.include_playoffs:
                 getargs = '?include_playoffs'
 
             return "{}{}".format(
-                urlresolvers.reverse_lazy('blingaleague.standings_all_time'),
+                urlresolvers.reverse_lazy('blingaleague.all_time'),
                 getargs,
             )
 

@@ -12,7 +12,7 @@
   </tr>
   {% for game in base_object.games %}
     <tr {% if game.is_playoffs %}class="playoffs"{% endif %}>
-      <td><a href="{% url 'blingaleague.standings_year' game.year %}">{{ game.year }}</a></td>
+      <td><a href="{% url 'blingaleague.single_season' game.year %}">{{ game.year }}</a></td>
       <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
       <td><a href="{% url 'blingaleague.team_season' base_object.team1.id game.year %}">{{ base_object.team1 }}</a></td>
       {% if base_object.team1 == game.winner %}
