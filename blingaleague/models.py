@@ -1103,9 +1103,9 @@ class Standings(object):
 
     def __str__(self):
         if self.year:
-            text = "{} standings".format(self.year)
+            text = "{} Standings".format(self.year)
         else:
-            text = 'All-time standings'
+            text = 'All-time Standings'
 
         if self.include_playoffs:
             text = "{} (including playoffs)".format(text)

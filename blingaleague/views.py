@@ -91,9 +91,6 @@ class SeasonView(TemplateView):
 
 
 class CurrentSeasonView(SeasonView):
-    # would like to include 'blingaleague/expected_win_distribution_standings.html',
-    # but it's a performance nightmare
-    pre_games_sub_templates = tuple()
 
     def get(self, request):
         redirect_url = urlresolvers.reverse_lazy('blingaleague.single_season', args=(Year.max(),))
@@ -101,9 +98,6 @@ class CurrentSeasonView(SeasonView):
 
 
 class SingleSeasonView(SeasonView):
-    # would like to include 'blingaleague/expected_win_distribution_standings.html',
-    # but it's a performance nightmare
-    pre_games_sub_templates = tuple()
 
     @cached_property
     def week_links(self):
