@@ -9,13 +9,13 @@
     {{ gazette.body|linebreaks }}
   {% endif %}
 
- {% if for_email %}
-   <p>
-     <a href="{{ gazette.full_url }}" class="link">
-       Read <em>{{ gazette.headline }}</em> online
-     </a>
-   </p>
- {% else %}
+  {% if for_email %}
+    <p>
+      <a href="{{ gazette.full_url }}" class="link">
+        Read <em>{{ gazette.headline }}</em> online
+      </a>
+    </p>
+  {% else %}
     <p>
       {% if gazette.previous %}
         <a href="{% url 'blingacontent.gazette_detail' gazette.previous.slug %}" class="link previous">Previous</a>
@@ -27,5 +27,5 @@
     <p style="text-align:center">
       <a href="{% url 'blingacontent.gazette_list' %}" class="link">All Sanderson Gazettes</a>
     </p>
-  {% endif %}
+   {% endif %}
 </div>
