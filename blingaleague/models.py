@@ -800,9 +800,8 @@ class TeamSeason(object):
             min_score -= 100
 
         def _ss_display(ss):
-            # we want to show the end result of the season
             return {
-                'season': ss['season'].regular_season,
+                'season': ss['season'],
                 'score': ss['score'],
             }
 
