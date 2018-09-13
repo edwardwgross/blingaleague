@@ -961,8 +961,7 @@ class Standings(object):
             self.year = None
         else:
             if self.year is None:
-                # if we didn't specify all_time, that means we need a current year
-                self.year = Year.max()
+                raise ValueError('Must specify a year or all_time must be True')
 
             try:
                 self.season = Season.objects.get(year=self.year)
@@ -1099,6 +1098,10 @@ class Standings(object):
                 return place + 1
 
         return None
+
+    @classmethod
+    def latest(cls):
+        return cls(year=Year.max())
 
     def __str__(self):
         if self.year:

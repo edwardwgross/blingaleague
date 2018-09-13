@@ -15,14 +15,11 @@ class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
 
     def get(self, request):
-        standings = Standings()
+        standings = Standings.latest()
 
-        year, week = Game.objects.all().order_by('-year', '-week').values_list('year', 'week')[0]
-        week = Week(year, week)
+        week = Week.latest()
 
-        gazette = Gazette.objects.filter(
-            publish_flag=True,
-        ).order_by('-published_date').first()
+        gazette = Gazette.latest()
 
         context = {'standings': standings, 'week': week, 'gazette': gazette}
 

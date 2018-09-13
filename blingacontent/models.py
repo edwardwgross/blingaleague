@@ -14,7 +14,6 @@ from django.template.loader import render_to_string
 from slugify import slugify
 
 from blingaleague.models import Member, FakeMember
-from blingaleague.utils import fully_cached_property, clear_cached_properties
 
 from .utils import get_gmail_service
 
@@ -42,14 +41,14 @@ class Gazette(models.Model):
     use_markdown = models.BooleanField(default=True)
     email_sent = models.BooleanField(default=False)
 
-    @fully_cached_property
+    @property
     def published_date_str(self):
         if self.published_date is None:
             return 'not published'
 
         return self.published_date.strftime('%Y-%m-%d')
 
-    @fully_cached_property
+    @property
     def previous(self):
         if not self.publish_flag:
             return None
@@ -64,7 +63,7 @@ class Gazette(models.Model):
             pk=self.pk,
         ).first()
 
-    @fully_cached_property
+    @property
     def next(self):
         if not self.publish_flag:
             return None
@@ -79,7 +78,7 @@ class Gazette(models.Model):
             pk=self.pk,
         ).first()
 
-    @fully_cached_property
+    @property
     def full_url(self):
         return "{}{}".format(
             settings.FULL_SITE_URL,
@@ -165,6 +164,12 @@ class Gazette(models.Model):
             self.email_sent = True
 
         super().save(*args, **kwargs)
+
+    @classmethod
+    def latest(cls):
+        return cls.objects.filter(
+            publish_flag=True,
+        ).order_by('-published_date').first()
 
     def __str__(self):
         return_str = "{} - {}".format(
