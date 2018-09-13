@@ -6,14 +6,16 @@
   <tr>
     <th/>
     <th>Score</th>
-    <th>Year</th>
-    <th>Team</th>
+    <th/> {# Year #}
+    <th/> {# Team #}
     <th>Record</th>
     <th>Points</th>
     <th>Exp. W</th>
     {% if base_object.is_partial %}
       <th>Final Record</th>
       <th>Final Place</th>
+    {% else %}
+      <th>Place</th>
     {% endif %}
     <th>Playoff Finish</th>
   </tr>
@@ -37,6 +39,8 @@
             {{ similar_season.season.regular_season.place_numeric }}
           {% endif%}
         </td>
+      {% else %}
+        <td>{{ similar_season.season.place_numeric }}</td>
       {% endif %}
       <td style="text-align:left">{{ similar_season.season.regular_season.playoff_finish }}</td>
     </tr>
