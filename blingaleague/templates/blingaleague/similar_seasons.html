@@ -20,7 +20,7 @@
       <td><strong>{{ similar_season.score|floatformat:0 }}</strong></td>
       <td><a href="{{ similar_season.season.standings.href }}">{{ similar_season.season.year }}</a></td>
       <td style="text-align:left"><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
-      <td><a href="{{ similar_season.season.href }}">{{ similar_season.season.record }}</a></td>
+      <td style="text-align:center"><a href="{{ similar_season.season.href }}">{{ similar_season.season.record }}</a></td>
       <td>{{ similar_season.season.points|intcomma }}</td>
       <td>{{ similar_season.season.expected_wins|floatformat:2 }}</td>
       <td>{{ similar_season.season.place_numeric }}</td>
