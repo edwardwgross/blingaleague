@@ -13,6 +13,8 @@ from django.db import models
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties
 
 
+CACHE = caches['blingaleague']
+
 REGULAR_SEASON_WEEKS = 13
 BLINGABOWL_WEEK = 16
 BYE_TEAMS = 2
@@ -172,17 +174,27 @@ class Game(models.Model):
         return self.winner_score + self.loser_score
 
     @classmethod
+    def all_scores(cls):
+        cache_key = 'blingaleague_game_all_scores'
+
+        all_scores = CACHE.get(cache_key)
+
+        if all_scores is None:
+            all_scores = []
+            game_results = Game.objects.all().values_list('winner_score', 'loser_score')
+            for winner_score, loser_score in game_results:
+                all_scores.extend([winner_score, loser_score])
+            CACHE.set(cache_key, all_scores)
+
+        return all_scores
+
+    @classmethod
     def expected_wins(cls, *game_scores, scaling_factor=1):
-        all_scores = []
-        game_results = Game.objects.all().values_list('winner_score', 'loser_score')
-        for winner_score, loser_score in game_results:
-            all_scores.extend([winner_score, loser_score])
+        all_scores = cls.all_scores()
 
         all_scores_count = decimal.Decimal(len(all_scores))
 
         def _win_expectancy(score):
-            if all_scores_count == 0:
-                return 0
             win_list = list(filter(lambda x: x < score, all_scores))
             win_count = len(win_list)
             raw_win_expectancy = decimal.Decimal(win_count) / all_scores_count
@@ -190,6 +202,24 @@ class Game(models.Model):
             return min(1, scaled_win_expectancy)
 
         return sum(_win_expectancy(score) for score in game_scores)
+
+    @classmethod
+    def simple_expected_wins(cls, *game_scores):
+        all_scores = sorted(cls.all_scores())
+
+        all_scores_count = len(all_scores)
+
+        loss_cutoff = all_scores[int(all_scores_count / 3)]
+        win_cutoff = all_scores[int(all_scores_count * 2 / 3)]
+
+        def _win_expectancy(score):
+            if score > win_cutoff:
+                return 1
+            elif score < loss_cutoff:
+                return 0
+            return 0.5
+
+        return decimal.Decimal(sum(_win_expectancy(score) for score in game_scores))
 
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
@@ -584,6 +614,10 @@ class TeamSeason(object):
             win_distribution[win_count] += running_prob
 
         return dict(win_distribution)
+
+    @fully_cached_property
+    def simple_expected_wins(self):
+        return Game.simple_expected_wins(*self.game_scores)
 
     @fully_cached_property
     def blangums_count(self):
