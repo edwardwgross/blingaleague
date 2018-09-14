@@ -844,8 +844,8 @@ class TeamSeason(object):
 
     def similarity_score(self, other_season):
         score = 1000
-        score -= abs(self.expected_wins - other_season.expected_wins) * 50
-        score -= abs(self.simple_expected_wins - other_season.simple_expected_wins) * 50
+        score -= abs(self.expected_wins - other_season.expected_wins) * 100
+        score -= abs(self.simple_expected_wins - other_season.simple_expected_wins) * 100
         return max(score, 0)
 
     def _filter_similar_seasons(self, threshold):
@@ -863,7 +863,7 @@ class TeamSeason(object):
 
                 team_season = TeamSeason(team_id, year, week_max=week_max)
 
-                if len(team_season.games) == 0:
+                if len(team_season.games) != week_max:
                     continue
 
                 sim_score = base_season.similarity_score(team_season)
