@@ -8,25 +8,10 @@ def has_enough_games(team_season):
     return len(team_season.regular_season.games) >= MIN_GAMES_THRESHOLD
 
 
-def sorted_seasons_by_stat(stat_function, limit=None, sort_desc=False):
-    all_stats = {}
-    for team_season in TeamSeason.all():
-        if not has_enough_games(team_season):
-            continue
-
-        all_stats[team_season] = stat_function(team_season.game_scores)
-
-    return build_ranked_seasons_table(
-        all_stats,
-        limit=limit,
-        sort_desc=sort_desc,
-    )
-
-
-def sorted_seasons_by_attr(attr, limit=None, sort_desc=False):
+def sorted_seasons_by_attr(attr, limit=None, sort_desc=False, min_games=1):
     all_attrs = {}
     for team_season in TeamSeason.all():
-        if team_season.is_partial and not sort_desc:
+        if len(team_season.games) < min_games:
             continue
 
         all_attrs[team_season] = getattr(team_season, attr)

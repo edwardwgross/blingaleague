@@ -16,8 +16,7 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_CLINCHED_BYE, CHOICE_CLINCHED_PLAYOFFS, \
                    CHOICE_ELIMINATED_EARLY, \
                    GameFinderForm, SeasonFinderForm
-from .utils import sorted_seasons_by_stat, \
-                   sorted_seasons_by_attr, \
+from .utils import sorted_seasons_by_attr, \
                    sorted_expected_wins_odds
 
 
@@ -26,6 +25,10 @@ CACHE = caches['blingaleague']
 PREFIX_WINNER = 'winner'
 
 PREFIX_LOSER = 'loser'
+
+# number of games to qualify for top seasons
+#leaderboard for non-counting stats
+TOP_SEASONS_STAT_THRESHOLD = 6
 
 
 class WeeklyScoresView(TemplateView):
@@ -306,45 +309,31 @@ class TopSeasonsView(TemplateView):
         top_seasons_tables = []
 
         top_attrs_categories = (
-            # title, attr, sort_desc
-            ('Most Wins', 'win_count', True),
-            ('Fewest Wins', 'win_count', False),
-            ('Most Points', 'points', True),
-            ('Fewest Points', 'points', False),
-            ('Most Expected Wins', 'expected_wins', True),
-            ('Fewest Expected Wins', 'expected_wins', False),
-            ('Most Team Blangums', 'blangums_count', True),
-            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True),
+            # title, attr, sort_desc, type, game_count_threshold
+            ('Most Wins', 'win_count', True, 1),
+            ('Fewest Wins', 'win_count', False, REGULAR_SEASON_WEEKS),
+            ('Most Points', 'points', True, 1),
+            ('Fewest Points', 'points', False, REGULAR_SEASON_WEEKS),
+            ('Most Expected Wins', 'expected_wins', True, 1),
+            ('Fewest Expected Wins', 'expected_wins', False, REGULAR_SEASON_WEEKS),
+            ('Most Team Blangums', 'blangums_count', True, 1),
+            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True, 1),
+            ('Highest Average Score', 'average_score', True, TOP_SEASONS_STAT_THRESHOLD),
+            ('Lowest Average Score', 'average_score', False, TOP_SEASONS_STAT_THRESHOLD),
+            ('Highest Median Score', 'median_score', True, TOP_SEASONS_STAT_THRESHOLD),
+            ('Lowest Median Score', 'median_score', False, TOP_SEASONS_STAT_THRESHOLD),
+            ('Highest Minimum Score', 'min_score', True, TOP_SEASONS_STAT_THRESHOLD),
+            ('Lowest Maximum Score', 'max_score', False, TOP_SEASONS_STAT_THRESHOLD),
+            ('Highest Standard Deviation', 'stdev', True, TOP_SEASONS_STAT_THRESHOLD),
+            ('Lowest Standard Deviation', 'stdev', False, TOP_SEASONS_STAT_THRESHOLD),
         )
 
-        for title, attr, sort_desc in top_attrs_categories:
+        for title, attr, sort_desc, min_games in top_attrs_categories:
             table_rows = sorted_seasons_by_attr(
                 attr,
                 limit=row_limit,
                 sort_desc=sort_desc,
-            )
-            top_seasons_tables.append({
-                'title': title,
-                'rows': table_rows,
-            })
-
-        top_stats_categories = (
-            # title, stat_function, sort_desc
-            ('Highest Average Score', statistics.mean, True),
-            ('Lowest Average Score', statistics.mean, False),
-            ('Highest Median Score', statistics.median, True),
-            ('Lowest Median Score', statistics.median, False),
-            ('Highest Minimum Score', min, True),
-            ('Lowest Maximum Score', max, False),
-            ('Highest Standard Deviation', statistics.pstdev, True),
-            ('Lowest Standard Deviation', statistics.pstdev, False),
-        )
-
-        for title, stat_function, sort_desc in top_stats_categories:
-            table_rows = sorted_seasons_by_stat(
-                stat_function,
-                limit=row_limit,
-                sort_desc=sort_desc,
+                min_games=min_games,
             )
             top_seasons_tables.append({
                 'title': title,

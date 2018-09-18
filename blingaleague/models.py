@@ -1,8 +1,9 @@
 import datetime
 import decimal
 import itertools
+import statistics
+
 from collections import defaultdict
-from statistics import mean
 
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core import urlresolvers
@@ -505,6 +506,26 @@ class TeamSeason(object):
         return sum(self.game_scores)
 
     @fully_cached_property
+    def average_score(self):
+        return statistics.mean(self.game_scores)
+
+    @fully_cached_property
+    def median_score(self):
+        return statistics.median(self.game_scores)
+
+    @fully_cached_property
+    def min_score(self):
+        return min(self.game_scores)
+
+    @fully_cached_property
+    def max_score(self):
+        return max(self.game_scores)
+
+    @fully_cached_property
+    def stdev(self):
+        return statistics.pstdev(self.game_scores)
+
+    @fully_cached_property
     def standings(self):
         return Standings(year=self.year, week_max=self.week_max)
 
@@ -847,6 +868,7 @@ class TeamSeason(object):
         score -= abs(self.points - other_season.points) / 5
         score -= abs(self.expected_wins - other_season.expected_wins) * 100
         score -= abs(self.simple_expected_wins - other_season.simple_expected_wins) * 100
+        score -= abs(self.stdev - other_season.stdev)
         return max(score, 0)
 
     def _filter_similar_seasons(self, threshold):
@@ -1194,11 +1216,11 @@ class Week(object):
     def average_score(self):
         # divide by two because the total_score attribute
         # is made up of both scores in a game
-        return mean([g.total_score for g in self.games]) / 2
+        return statistics.mean([g.total_score for g in self.games]) / 2
 
     @fully_cached_property
     def average_margin(self):
-        return mean([g.margin for g in self.games])
+        return statistics.mean([g.margin for g in self.games])
 
     @fully_cached_property
     def previous(self):
