@@ -5,6 +5,7 @@ import statistics
 
 from collections import defaultdict
 
+from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core import urlresolvers
 from django.core.cache import caches
@@ -283,6 +284,15 @@ class Game(models.Model):
     def save(self, **kwargs):
         super().save(**kwargs)
         clear_cached_properties()
+
+    @fully_cached_property
+    def gazette_str(self):
+        return "{} def. {}, {}-{}".format(
+            self.winner.nickname,
+            self.loser.nickname,
+            self.winner_score,
+            self.loser_score,
+        )
 
     def __str__(self):
         return "{}: {} def. {}".format(self.title, self.winner, self.loser)
@@ -901,6 +911,23 @@ class TeamSeason(object):
                 if len(team_season.games) > 0:
                     yield team_season
 
+    @fully_cached_property
+    def gazette_str(self):
+        gazette_str = "{}. {}, {}, {:.2f}".format(
+            self.place_numeric,
+            self.team.nickname,
+            self.record,
+            self.points,
+        )
+
+        if self.standings_note:
+            gazette_str = "{} ({})".format(
+                gazette_str,
+                self.standings_note[0],
+            )
+
+        return gazette_str
+
     def __str__(self):
         return "{}, {}".format(self.team, self.year)
 
@@ -1159,6 +1186,30 @@ class Standings(object):
     def latest(cls):
         return cls(year=Year.max())
 
+    @fully_cached_property
+    def gazette_str(self):
+        return '\n'.join(
+            [ts.gazette_str for ts in self.table],
+        )
+
+    @fully_cached_property
+    def gazette_link(self):
+        season_finder_url = urlresolvers.reverse_lazy('blingalytics.season_finder')
+
+        querystring = ''
+        if self.year is not None:
+            querystring = "?year_min={}&year_max={}&week_max={}".format(
+                self.year,
+                self.year,
+                len(self.table[0].games),
+            )
+
+        return "{}{}{}".format(
+            settings.FULL_SITE_URL,
+            season_finder_url,
+            querystring,
+        )
+
     def __str__(self):
         if self.year:
             text = "{} Standings".format(self.year)
@@ -1273,12 +1324,39 @@ class Week(object):
 
     @classmethod
     def latest(cls):
-        year, week = Game.objects.all().order_by(
-            '-year', '-week',
-        ).values_list(
+        return cls.all()[-1]
+
+    @classmethod
+    def all(cls):
+        all_weeks = []
+
+        year_week_combos = set(Game.objects.all().values_list(
             'year', 'week',
-        ).first()
-        return cls(year, week)
+        ))
+        for year, week in sorted(year_week_combos):
+            all_weeks.append(cls(year, week))
+
+        return all_weeks
+
+    @fully_cached_property
+    def gazette_str(self):
+        gazette_lines = []
+
+        return '\n\n'.join(
+            ["### {}:".format(game.gazette_str) for game in self.games],
+        )
+
+    @fully_cached_property
+    def gazette_link(self):
+        week_url = urlresolvers.reverse_lazy(
+            'blingaleague.week',
+            args=(self.year, self.week),
+        )
+
+        return "{}{}".format(
+            settings.FULL_SITE_URL,
+            week_url,
+        )
 
     def __str__(self):
         return "Week {}, {}".format(self.week, self.year)

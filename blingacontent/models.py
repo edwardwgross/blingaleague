@@ -15,7 +15,7 @@ from slugify import slugify
 
 from blingaleague.models import Member, FakeMember
 
-from .utils import get_gmail_service
+from .utils import get_gmail_service, new_gazette_body_template
 
 
 class Meme(models.Model):
@@ -36,7 +36,7 @@ class Gazette(models.Model):
     headline = models.CharField(max_length=500)
     publish_flag = models.BooleanField(default=False)
     published_date = models.DateField(default=None, blank=True, null=True)
-    body = models.TextField(blank=True, null=True)
+    body = models.TextField(blank=True, null=True, default=new_gazette_body_template)
     slug = models.CharField(blank=True, null=True, max_length=200)
     use_markdown = models.BooleanField(default=True)
     email_sent = models.BooleanField(default=False)

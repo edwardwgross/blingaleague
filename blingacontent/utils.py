@@ -8,6 +8,8 @@ from googleapiclient.discovery import build
 
 from oauth2client import file, client, tools
 
+from blingaleague.models import Week, Standings
+
 
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
@@ -26,3 +28,53 @@ def get_gmail_service():
         creds = tools.run_flow(flow, store)
     service = build('gmail', 'v1', http=creds.authorize(Http()))
     return service
+
+
+def new_gazette_body_template():
+    last_week = Week.latest()
+
+    current_standings = Standings.latest()
+
+    sections = []
+
+    sections.append([
+        "# [Week {}]({}) Recap".format(
+            last_week.week,
+            last_week.gazette_link,
+        ),
+        last_week.gazette_str,
+    ])
+
+    sections.append([
+        "# [Standings]({})".format(
+            current_standings.gazette_link,
+        ),
+        current_standings.gazette_str,
+    ])
+
+    sections.append([
+        '# Weekly Awards',
+        '### Team Blangums:',
+        '### Slapped Heartbeat:',
+        '### Weekly MVP:',
+        '### Dud of the Week:',
+        '### Start of the Week:',
+        '### Misplay of the Week:',
+        '### Pickup of the Week:',
+        '### Blessed Cahoots:',
+        '### Pryor Play of the Week:',
+    ])
+
+    sections.append([
+        "# Week {} Preview".format(
+            last_week.week + 1,
+        ),
+    ])
+
+    sections.append([
+        '# Closing Thoughts',
+    ])
+
+    return '\n\n\n'.join(
+        ['\n\n'.join(section) for section in sections],
+    )
