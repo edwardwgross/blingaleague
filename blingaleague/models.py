@@ -618,10 +618,14 @@ class TeamSeason(object):
             # too expensive to calculate for more than one season
             return None
 
+        game_scores = self.game_scores
+        if len(game_scores) > REGULAR_SEASON_WEEKS:
+            game_scores = self.regular_season.game_scores
+
         expected_wins_by_game = list(
             map(
                 self.expected_wins_function,
-                self.regular_season.game_scores
+                game_scores
             ),
         )
 

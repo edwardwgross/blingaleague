@@ -211,11 +211,21 @@ class TeamSeasonView(GamesView):
         return graph
 
     def get(self, request, team, year):
-        base_object = TeamSeason(team, year, include_playoffs=True)
+        week_max = None
+        if 'week_max' in request.GET:
+            try:
+                week_max = int(request.GET.get('week_max'))
+            except ValueError:
+                # user passed a non-int, just ignore the argument
+                pass
+
+        base_object = TeamSeason(team, year, include_playoffs=True, week_max=week_max
+)
         context = self._context(base_object)
         context['expected_win_distribution_graph'] = self._expected_win_distribution_graph(
             base_object.expected_win_distribution,
         )
+
         return self.render_to_response(context)
 
 
