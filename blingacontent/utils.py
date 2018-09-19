@@ -69,6 +69,8 @@ def new_gazette_body_template():
         "# Week {} Preview".format(
             last_week.week + 1,
         ),
+        '## Game of the Blingaweek',
+        '## Other Blingamatches',
     ])
 
     sections.append([
