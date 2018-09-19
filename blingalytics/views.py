@@ -2,6 +2,8 @@ import decimal
 import nvd3
 import statistics
 
+from collections import defaultdict
+
 from django.core.cache import caches
 from django.db.models import F
 from django.views.generic import TemplateView
@@ -159,6 +161,7 @@ class GameFinderView(TemplateView):
 
             for game in base_games.filter(**type_kwargs):
                 game_dict = {
+                    'id': game.id,
                     'year': game.year,
                     'week': game.week,
                     'team': getattr(game, team_prefix),
@@ -196,6 +199,34 @@ class GameFinderView(TemplateView):
 
         return sorted(all_games, key=lambda x: (x['year'], x['week'], -x['score']))
 
+    def build_summary(self, games):
+        games_counted = set()
+        summary_dict = defaultdict(lambda: defaultdict(int))
+        for game in games:
+            if game['id'] in games_counted:
+                continue
+
+            if game['outcome'] == 'W':
+                winner = game['team']
+                loser = game['opponent']
+            else:
+                winner = game['opponent']
+                loser = game['team']
+
+            summary_dict[winner]['wins'] += 1
+            summary_dict[loser]['losses'] += 1
+            summary_dict[winner]['total'] += 1
+            summary_dict[loser]['total'] += 1
+
+            games_counted.add(game['id'])
+
+        summary = []
+        for team, stats in sorted(summary_dict.items(), key=lambda x: x[0].nickname):
+            stats['team'] = team
+            summary.append(stats)
+
+        return summary
+
     def get(self, request):
         games = []
 
@@ -205,7 +236,11 @@ class GameFinderView(TemplateView):
 
             games = self.filter_games(form_data)
 
-        context = {'form': game_finder_form, 'games': games}
+        context = {
+            'form': game_finder_form,
+            'games': games,
+            'summary': self.build_summary(games),
+        }
 
         return self.render_to_response(context)
 

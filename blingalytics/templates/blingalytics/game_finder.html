@@ -13,7 +13,26 @@
   </div>
   <div id="games_found">
     {% if games %}
-      <h3>(click on the column headings to sort)</h3>
+      <h2>Summary</h2>
+      <table class="blingalytics_table table-striped">
+        <tr>
+          <th>Team</th>
+          <th>Total</th>
+          <th>Wins</th>
+          <th>Losses</th>
+        </tr>
+        {% for team_summary in summary %}
+          <tr>
+            <td style="text-align:left">{{ team_summary.team.nickname }}</td>
+            <td>{{ team_summary.total }}</td>
+            <td>{{ team_summary.wins }}</td>
+            <td>{{ team_summary.losses }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <h2>Games</h2>
+      <em>(click on the column headings to sort)</em>
       <table class="blingalytics_table sortable table-striped">
         <tr>
           <th>Year</th>
