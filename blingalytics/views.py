@@ -201,7 +201,7 @@ class GameFinderView(TemplateView):
 
     def build_summary(self, games):
         games_counted = set()
-        summary_dict = defaultdict(lambda: defaultdict(int))
+        game_dict = defaultdict(lambda: defaultdict(int))
         for game in games:
             if game['id'] in games_counted:
                 continue
@@ -213,19 +213,22 @@ class GameFinderView(TemplateView):
                 winner = game['opponent']
                 loser = game['team']
 
-            summary_dict[winner]['wins'] += 1
-            summary_dict[loser]['losses'] += 1
-            summary_dict[winner]['total'] += 1
-            summary_dict[loser]['total'] += 1
+            game_dict[winner]['wins'] += 1
+            game_dict[loser]['losses'] += 1
+            game_dict[winner]['total'] += 1
+            game_dict[loser]['total'] += 1
 
             games_counted.add(game['id'])
 
-        summary = []
-        for team, stats in sorted(summary_dict.items(), key=lambda x: x[0].nickname):
+        teams = []
+        for team, stats in sorted(game_dict.items(), key=lambda x: x[0].nickname):
             stats['team'] = team
-            summary.append(stats)
+            teams.append(stats)
 
-        return summary
+        return {
+            'teams': teams,
+            'total': len(games_counted),
+        }
 
     def get(self, request):
         games = []
