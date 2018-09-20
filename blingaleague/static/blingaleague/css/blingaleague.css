@@ -52,7 +52,7 @@ table {
 }
 
 .table-striped {
-    border: 1px solid black;
+    border: 1px solid #333333;
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
@@ -90,8 +90,8 @@ th a, th a:hover, th a:visited, th a:focus {
 table.defunct_teams th,
 table.defunct_teams th a, table.defunct_teams th a:hover,
 table.defunct_teams th a:visited, table.defunct_teams th a:focus {
-    color: black;
-    background-color: #eaeaea;
+    color: #333333;
+    background-color: #f4f4f4;
 }
 
 td.defunct,
@@ -182,7 +182,7 @@ table.standings_table td {
 table#team_vs_team_grid,
 table#team_vs_team_grid th,
 table#team_vs_team_grid td {
-    border: 1px solid black;
+    border: 1px solid #333333;
     text-align: center;
     vertical-align: middle;
     font-size: 90%;
