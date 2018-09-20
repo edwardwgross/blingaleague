@@ -242,6 +242,13 @@ table.blingalytics_table.sortable tbody tr::before {
     text-align: right;
 }
 
+table.finder_table {
+    border: 1px solid black;
+}
+table.finder_table.sortable tbody tr::before {
+    padding: 0 6px;
+}
+
 #top_seasons a {
     white-space: nowrap;
 }
