@@ -3,6 +3,7 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
     font-size: inherit;
     line-height: 1.5;
+    color: #333333;
 }
 
 body, nav {
@@ -122,6 +123,10 @@ nav .icon-bar {
     font-weight: bold;
     font-size: 87.5%;
     padding: 15px 12px;
+}
+
+.nav li a span {
+    color: white;
 }
 
 .nav ul.dropdown-menu li a {
