@@ -51,6 +51,10 @@ table {
     margin-bottom: 12px;
 }
 
+.table-striped {
+    border: 1px solid black;
+}
+
 .table-striped > tbody > tr:nth-of-type(odd) {
     background-color: #f4f4f4;
 }
@@ -241,10 +245,6 @@ table.blingalytics_table.sortable tbody tr::before {
     display: table-cell;
     text-align: right;
     padding: 0 6px;
-}
-
-table.finder_table {
-    border: 1px solid black;
 }
 
 #top_seasons a {
