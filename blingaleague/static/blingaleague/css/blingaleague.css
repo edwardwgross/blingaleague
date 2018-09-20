@@ -343,6 +343,10 @@ table.blingalytics_table.sortable tbody tr::before {
     width: 100%;
 }
 
+#form_toggle_button {
+    font-size: 60%;
+}
+
 .blingacontent {
     margin-bottom: 12px;
 }
