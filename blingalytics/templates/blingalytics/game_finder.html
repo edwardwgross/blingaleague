@@ -17,20 +17,22 @@
       <table class="blingalytics_table table-striped">
         <tr>
           <th>Team</th>
-          <th>Total</th>
           <th>Wins</th>
           <th>Losses</th>
+          <th>Total</th>
         </tr>
         {% for team_summary in summary.teams %}
           <tr>
             <td style="text-align:left">{{ team_summary.team.nickname }}</td>
-            <td>{{ team_summary.total }}</td>
             <td>{{ team_summary.wins }}</td>
             <td>{{ team_summary.losses }}</td>
+            <td>{{ team_summary.total }}</td>
           </tr>
         {% endfor %}
         <tr>
-          <th colspan="3" style="text-align:left">Total</th>
+          <th style="text-align:left">Total</th>
+          <th/>
+          <th/>
           <th style="text-align:right">{{ summary.total }}</th>
         </tr>
       </table>
