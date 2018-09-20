@@ -240,13 +240,11 @@ table.blingalytics_table.sortable tbody tr::before {
     counter-increment: blingalytics_tabletablescope;
     display: table-cell;
     text-align: right;
+    padding: 0 6px;
 }
 
 table.finder_table {
     border: 1px solid black;
-}
-table.finder_table.sortable tbody tr::before {
-    padding: 0 6px;
 }
 
 #top_seasons a {
