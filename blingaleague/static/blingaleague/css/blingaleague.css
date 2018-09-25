@@ -370,55 +370,87 @@ table.blingalytics_table.sortable tbody tr::before {
     font-size: 100%;
 }
 
-@media screen and (max-width: 992px) {
+@media screen and (max-device-width: 992px) {
     body {
         font-size: 32px;
     }
-    nav {
-        font-size: 20px;
-    }
+
     #main_outer {
         overflow-x: scroll;
         margin-top: 0;
     }
 
+    nav.navbar {
+        min-height: 100px;
+    }
+
+    #nav_shield {
+        width: 80px;
+        height: 80px;
+    }
+
+    .navbar-brand {
+        padding: 10px;
+    }
+
     nav.navbar-fixed-top {
         position: relative;
     }
-    /*
+
+    .navbar-toggle .icon-bar {
+        width: 44px;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px 0;
+    }
+
     .navbar-header {
         float: none;
     }
+
     .navbar-left,.navbar-right {
         float: none !important;
     }
+
     .navbar-toggle {
         display: block;
     }
+
     .navbar-collapse {
         border-top: 1px solid transparent;
         box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
     }
+
     .navbar-fixed-top {
         top: 0;
         border-width: 0 0 1px;
     }
+
     .navbar-collapse.collapse {
         display: none!important;
     }
+
     .navbar-nav {
         float: none!important;
         margin-top: 7.5px;
     }
+
     .navbar-nav>li {
         float: none;
     }
-    .navbar-nav>li>a {
+
+    .navbar-nav li a,
+    .nav ul.dropdown-menu li a,
+    .nav .open > a,
+    .nav .open > a:hover,
+    .nav .open > a:focus  {
+        font-size: 32px;
         padding-top: 10px;
         padding-bottom: 10px;
+        line-height: 1;
     }
+
     .collapse.in{
         display:block !important;
     }
-    */
 }
