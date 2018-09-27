@@ -590,7 +590,10 @@ class TeamSeason(object):
 
     @fully_cached_property
     def game_scores(self):
-        return [w.winner_score for w in self.wins] + [l.loser_score for l in self.losses]
+        win_tuples = [(w.year, w.week, w.winner_score) for w in self.wins]
+        loss_tuples = [(l.year, l.week, l.loser_score) for l in self.losses]
+        all_tuples = sorted(win_tuples + loss_tuples)
+        return list(map(lambda x: x[2], all_tuples))
 
     @fully_cached_property
     def is_partial(self):
@@ -603,8 +606,12 @@ class TeamSeason(object):
         )
 
     @fully_cached_property
+    def expected_wins_by_game(self):
+        return [self.expected_wins_function(gs) for gs in self.game_scores]
+
+    @fully_cached_property
     def expected_wins(self):
-        return self.expected_wins_function(*self.game_scores)
+        return sum(self.expected_wins_by_game)
 
     @fully_cached_property
     def expected_win_pct(self):
@@ -878,12 +885,19 @@ class TeamSeason(object):
         return list(map(_ss_display, sorted_seasons))
 
     def similarity_score(self, other_season):
-        score = 1000
-        score -= abs(self.points - other_season.points) / 5
-        score -= abs(self.expected_wins - other_season.expected_wins) * 100
-        score -= abs(self.simple_expected_wins - other_season.simple_expected_wins) * 100
-        score -= abs(self.stdev - other_season.stdev)
-        return max(score, 0)
+        week_by_week_score = aggregate_score = decimal.Decimal(1000)
+
+        game_count = len(self.games)
+
+        for i, xw in enumerate(self.expected_wins_by_game):
+            xw_diff = decimal.Decimal(abs(xw - other_season.expected_wins_by_game[i]))
+            week_by_week_score -= decimal.Decimal(xw_diff) * 500 / game_count
+
+        total_xw_diff = abs(self.expected_wins - other_season.expected_wins)
+        aggregate_score -= decimal.Decimal(total_xw_diff) * 100
+
+        combined_score = (week_by_week_score + aggregate_score) / 2
+        return max(combined_score, 0)
 
     def _filter_similar_seasons(self, threshold):
         base_season = self
