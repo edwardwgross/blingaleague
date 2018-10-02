@@ -1340,22 +1340,6 @@ class Week(object):
             self.slapped_heartbeat,
         )
 
-    @classmethod
-    def latest(cls):
-        return cls.all()[-1]
-
-    @classmethod
-    def all(cls):
-        all_weeks = []
-
-        year_week_combos = set(Game.objects.all().values_list(
-            'year', 'week',
-        ))
-        for year, week in sorted(year_week_combos):
-            all_weeks.append(cls(year, week))
-
-        return all_weeks
-
     @fully_cached_property
     def gazette_str(self):
         gazette_lines = []
@@ -1374,6 +1358,31 @@ class Week(object):
         return "{}{}".format(
             settings.FULL_SITE_URL,
             week_url,
+        )
+
+    @classmethod
+    def latest(cls):
+        return cls.all()[-1]
+
+    @classmethod
+    def all(cls):
+        all_weeks = []
+
+        year_week_combos = set(Game.objects.all().values_list(
+            'year', 'week',
+        ))
+        for year, week in sorted(year_week_combos):
+            all_weeks.append(cls(year, week))
+
+        return all_weeks
+
+    @classmethod
+    def regular_season_weeks(cls):
+        return list(
+            filter(
+                lambda x: x.week <= REGULAR_SEASON_WEEKS,
+                cls.all(),
+            ),
         )
 
     def __str__(self):

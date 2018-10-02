@@ -37,12 +37,12 @@ class WeeklyScoresView(TemplateView):
     template_name = 'blingalytics/weekly_scores.html'
 
     def get(self, request):
-        weeks = []
-        games = Game.objects.filter(week__lte=REGULAR_SEASON_WEEKS)
-        for year, week in games.values_list('year', 'week').distinct():
-            weeks.append(Week(year, week))
-
-        context = {'weeks': sorted(weeks, key=lambda x: (x.year, x.week))}
+        context = {
+            'weeks': sorted(
+                Week.regular_season_weeks(),
+                key=lambda x: (x.year, x.week),
+            ),
+        }
 
         return self.render_to_response(context)
 
