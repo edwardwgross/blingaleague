@@ -29,7 +29,7 @@ PREFIX_WINNER = 'winner'
 PREFIX_LOSER = 'loser'
 
 # number of games to qualify for top seasons
-#leaderboard for non-counting stats
+# leaderboard for non-counting stats
 TOP_SEASONS_STAT_THRESHOLD = 6
 
 
