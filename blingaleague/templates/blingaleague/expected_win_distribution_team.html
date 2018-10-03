@@ -1,4 +1,5 @@
-<h3>{{ base_object.regular_season.expected_wins|floatformat:2 }} expected wins ({{ base_object.regular_season.expected_win_pct|floatformat:3 }})</h3>
+<h3>{{ base_object.regular_season.expected_wins|floatformat:2 }} expected wins</h3>
+<h3>{{ base_object.regular_season.all_play_wins }}-{{ base_object.regular_season.all_play_losses }} all-play record</h3>
 
-<strong>Expected Win Distribution:</strong>
+<h3>Expected Win Distribution:</h3>
 {{ expected_win_distribution_graph.htmlcontent|safe }}
