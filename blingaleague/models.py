@@ -1,6 +1,7 @@
 import datetime
 import decimal
 import itertools
+import math
 import statistics
 
 from collections import defaultdict
@@ -431,6 +432,20 @@ class Year(object):
         regression_weight = REGULAR_SEASON_WEEKS - self.weeks_with_games
 
         return (scaling_factor_weight + regression_weight) / REGULAR_SEASON_WEEKS
+
+    def test_factor(self):
+        raw_scaling_factor = 1
+        if self.total_raw_expected_wins > 0:
+            raw_scaling_factor = (
+                decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
+            )
+
+        full_weight_week = math.ceil(REGULAR_SEASON_WEEKS / 2)
+
+        this_season_weight = min(self.weeks_with_games, full_weight_week)
+        regression_weight = max(full_weight_week - self.weeks_with_games, 0)
+
+        return ((this_season_weight * raw_scaling_factor) + regression_weight) / full_weight_week
 
     @classmethod
     def all(cls):
