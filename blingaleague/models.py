@@ -606,8 +606,22 @@ class TeamSeason(object):
         )
 
     @fully_cached_property
+    def raw_expected_wins_by_game(self):
+        return list(map(
+            lambda x: Game.expected_wins(x),
+            self.game_scores,
+        ))
+
+    @fully_cached_property
     def expected_wins_by_game(self):
-        return [self.expected_wins_function(gs) for gs in self.game_scores]
+        return list(map(
+            lambda x: self.year_object.expected_wins_scaling_factor * x,
+            self.raw_expected_wins_by_game,
+        ))
+
+    @fully_cached_property
+    def raw_expected_wins(self):
+        return sum(self.raw_expected_wins_by_game)
 
     @fully_cached_property
     def expected_wins(self):
@@ -625,18 +639,12 @@ class TeamSeason(object):
             # too expensive to calculate for more than one season
             return None
 
-        game_scores = self.game_scores
-        if len(game_scores) > REGULAR_SEASON_WEEKS:
-            game_scores = self.regular_season.game_scores
-
-        expected_wins_by_game = list(
-            map(
-                self.expected_wins_function,
-                game_scores
-            ),
-        )
-
+        expected_wins_by_game = self.expected_wins_by_game
         num_games = len(expected_wins_by_game)
+        if num_games > REGULAR_SEASON_WEEKS:
+            # we only care about this for the regular season
+            expected_wins_by_game = self.regular_season.expected_wins_by_game
+            num_games = REGULAR_SEASON_WEEKS
 
         outcome_combos = itertools.product([0, 1], repeat=num_games)
 
