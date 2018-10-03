@@ -614,12 +614,6 @@ class TeamSeason(object):
     def is_partial(self):
         return len(self.games) < REGULAR_SEASON_WEEKS
 
-    def expected_wins_function(self, *game_scores):
-        return Game.expected_wins(
-            *game_scores,
-            scaling_factor=self.year_object.expected_wins_scaling_factor,
-        )
-
     @fully_cached_property
     def raw_expected_wins_by_game(self):
         return list(map(
@@ -683,6 +677,77 @@ class TeamSeason(object):
     @fully_cached_property
     def simple_expected_wins(self):
         return Game.simple_expected_wins(*self.game_scores)
+
+    @fully_cached_property
+    def all_play_record(self):
+        all_play_record = defaultdict(int)
+
+        for week in range(1, len(self.games) + 1):
+            week_obj = Week(self.year, week)
+
+            rank = week_obj.team_to_rank.get(self.team)
+            if rank is None:
+                continue
+
+            team_total = len(week_obj.team_to_rank)
+
+            all_play_record['wins'] += team_total - rank
+            all_play_record['losses'] += rank - 1
+
+        return all_play_record
+
+    @fully_cached_property
+    def all_play_wins(self):
+        return self.all_play_record['wins']
+
+    @fully_cached_property
+    def all_play_losses(self):
+        return self.all_play_record['losses']
+
+    @fully_cached_property
+    def all_play_win_pct(self):
+        all_play_total = self.all_play_wins + self.all_play_losses
+        if all_play_total == 0:
+            return 0
+        return decimal.Decimal(self.all_play_wins) / decimal.Decimal(all_play_total)
+
+    @fully_cached_property
+    def double_play_record(self):
+        double_play_record = {
+            'wins': self.win_count,
+            'losses': self.loss_count,
+        }
+
+        for week in range(1, len(self.games) + 1):
+            week_obj = Week(self.year, week)
+
+            rank = week_obj.team_to_rank.get(self.team)
+            if rank is None:
+                continue
+
+            team_total = len(week_obj.team_to_rank)
+
+            if rank <= len(week_obj.team_to_rank) / 2:
+                double_play_record['wins'] += 1
+            else:
+                double_play_record['losses'] += 1
+
+        return double_play_record
+
+    @fully_cached_property
+    def double_play_wins(self):
+        return self.double_play_record['wins']
+
+    @fully_cached_property
+    def double_play_losses(self):
+        return self.double_play_record['losses']
+
+    @fully_cached_property
+    def double_play_win_pct(self):
+        double_play_total = self.double_play_wins + self.double_play_losses
+        if double_play_total == 0:
+            return 0
+        return decimal.Decimal(self.double_play_wins) / decimal.Decimal(double_play_total)
 
     @fully_cached_property
     def blangums_count(self):
@@ -1029,12 +1094,36 @@ class TeamMultiSeasons(TeamSeason):
         return losses
 
     @fully_cached_property
+    def raw_expected_wins(self):
+        return sum(ts.raw_expected_wins for ts in self)
+
+    @fully_cached_property
     def expected_wins(self):
-        return sum(team_season.expected_wins for team_season in self)
+        return sum(ts.expected_wins for ts in self)
+
+    @fully_cached_property
+    def simple_expected_wins(self):
+        return sum(ts.simple_expected_wins for ts in self)
+
+    @fully_cached_property
+    def all_play_wins(self):
+        return sum(ts.all_play_wins for ts in self)
+
+    @fully_cached_property
+    def all_play_losses(self):
+        return sum(ts.all_play_losses for ts in self)
+
+    @fully_cached_property
+    def double_play_wins(self):
+        return sum(ts.double_play_wins for ts in self)
+
+    @fully_cached_property
+    def double_play_losses(self):
+        return sum(ts.double_play_losses for ts in self)
 
     @fully_cached_property
     def robscore(self):
-        return sum(team_season.robscore for team_season in self)
+        return sum(ts.robscore for ts in self)
 
     @fully_cached_property
     def clinched_playoffs(self):
@@ -1339,16 +1428,49 @@ class Week(object):
         return next_week
 
     @fully_cached_property
+    def team_scores(self):
+        team_scores = []
+
+        for game in self.games:
+            team_scores.extend([
+                {
+                    'team': game.winner,
+                    'score': game.winner_score,
+                },
+                {
+                    'team': game.loser,
+                    'score': game.loser_score,
+                },
+            ])
+
+        return team_scores
+
+    @fully_cached_property
+    def team_scores_sorted(self):
+        return sorted(
+            self.team_scores,
+            key=lambda x: x['score'],
+            reverse=True,
+        )
+
+    @fully_cached_property
+    def team_to_rank(self):
+        team_to_rank = {}
+        for i, team_score in enumerate(self.team_scores_sorted):
+            team_to_rank[team_score['team']] = i + 1
+        return team_to_rank
+
+    @fully_cached_property
     def blangums(self):
         if self.week > REGULAR_SEASON_WEEKS:
             return None
-        return sorted(self.games, key=lambda x: x.winner_score, reverse=True)[0].winner
+        return self.team_scores_sorted[0]['team']
 
     @fully_cached_property
     def slapped_heartbeat(self):
         if self.week > REGULAR_SEASON_WEEKS:
             return None
-        return sorted(self.games, key=lambda x: x.loser_score)[0].loser
+        return self.team_scores_sorted[-1]['team']
 
     @fully_cached_property
     def headline(self):
