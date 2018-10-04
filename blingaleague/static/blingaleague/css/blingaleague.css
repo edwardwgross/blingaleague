@@ -179,7 +179,7 @@ table.standings_table td {
 }
 
 .standings_note {
-    font-size: x-small;
+    font-size: 60%;
     vertical-align: top;
     cursor: help;
 }
@@ -414,6 +414,7 @@ table.blingalytics_table.sortable tbody tr::before {
 
     .navbar-toggle {
         display: block;
+        margin-top: 15px;
     }
 
     .navbar-collapse {
@@ -435,8 +436,16 @@ table.blingalytics_table.sortable tbody tr::before {
         margin-top: 7.5px;
     }
 
+    .navbar-nav ul {
+        background-color: #a4c2f4;;
+    }
+
     .navbar-nav>li {
         float: none;
+    }
+
+    .navbar-nav li {
+        padding: 5px 0;
     }
 
     .navbar-nav li a,
@@ -452,5 +461,6 @@ table.blingalytics_table.sortable tbody tr::before {
 
     .collapse.in{
         display:block !important;
+        max-height: 500px;
     }
 }
