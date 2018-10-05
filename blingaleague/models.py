@@ -397,7 +397,17 @@ class Season(models.Model):
 class Year(object):
 
     def __init__(self, year, week_max=REGULAR_SEASON_WEEKS):
-        self.year = int(year)
+        year = int(year)
+
+        if not (Year.min() <= year <= Year.max()):
+            raise ValueError(
+                "Year must be between {} and {}".format(
+                    Year.min(),
+                    Year.max(),
+                ),
+            )
+
+        self.year = year
         self.week_max = min(int(week_max), REGULAR_SEASON_WEEKS)
         self.cache_key = '|'.join(map(str, (self.year, self.week_max)))
 
