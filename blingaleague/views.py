@@ -63,29 +63,6 @@ class SeasonView(TemplateView):
         # only applies for single-season view
         return []
 
-    def _expected_win_distribution_graph(self, team_seasons):
-        graph = nvd3.lineChart(
-            name='expected_wins',
-            width=600,
-            height=400,
-            y_axis_format='%',
-        )
-
-        x_data = None
-
-        for team_season in team_seasons:
-            expected_win_distribution = sorted(team_season.expected_win_distribution.items())
-            y_data = map(lambda x: float(x[1]), expected_win_distribution)
-            if x_data is None:
-                x_data = map(lambda x: x[0], expected_win_distribution)
-
-            graph.add_serie(x=x_data, y=y_data, name=team_season.team.nickname)
-
-        graph.buildcontent()
-        graph.buildhtml()
-
-        return graph
-
 
 class CurrentSeasonView(SeasonView):
 
@@ -166,8 +143,7 @@ class MatchupView(GamesView):
     games_sub_template = 'blingaleague/team_vs_team_games.html'
 
     def get(self, request, team1, team2):
-        base_object = Matchup(team1, team2)
-        context = self._context(base_object)
+        context = self._context(Matchup(team1, team2))
         return self.render_to_response(context)
 
 
@@ -175,8 +151,7 @@ class WeekView(GamesView):
     games_sub_template = 'blingaleague/weekly_games.html'
 
     def get(self, request, year, week):
-        base_object = Week(year, week)
-        context = self._context(base_object)
+        context = self._context(Week(year, week))
         return self.render_to_response(context)
 
 
@@ -191,32 +166,10 @@ class TeamSeasonView(GamesView):
     )
     games_sub_template = 'blingaleague/team_season_games.html'
 
-    def _expected_win_distribution_graph(self, expected_win_distribution):
-        expected_win_distribution = sorted(expected_win_distribution.items())
-        x_data = list(map(lambda x: x[0], expected_win_distribution))
-        y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
-
-        graph = nvd3.discreteBarChart(
-            name='expected_win_distribution',
-            width=600,
-            height=200,
-            y_axis_format='%',
-        )
-
-        graph.add_serie(x=x_data, y=y_data)
-
-        graph.buildcontent()
-        graph.buildhtml()
-
-        return graph
-
     def get(self, request, team, year):
-        base_object = TeamSeason(team, year, include_playoffs=True)
-        context = self._context(base_object)
-        context['expected_win_distribution_graph'] = self._expected_win_distribution_graph(
-            base_object.expected_win_distribution,
+        context = self._context(
+            TeamSeason(team, year, include_playoffs=True),
         )
-
         return self.render_to_response(context)
 
 

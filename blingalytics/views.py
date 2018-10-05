@@ -75,11 +75,11 @@ class ExpectedWinsView(TemplateView):
             show_legend=False,
         )
 
-        graph.add_serie(**{
-            'x': x_data,
-            'y': y_data,
-            'name': 'Expected Wins',
-        })
+        graph.add_serie(
+            x=x_data,
+            y=y_data,
+            name='Expected Wins',
+        )
 
         graph.buildcontent()
         graph.buildhtml()

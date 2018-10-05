@@ -2,6 +2,7 @@ import datetime
 import decimal
 import itertools
 import math
+import nvd3
 import statistics
 
 from collections import defaultdict
@@ -661,6 +662,26 @@ class TeamSeason(object):
             win_distribution[win_count] += running_prob
 
         return dict(win_distribution)
+
+    @fully_cached_property
+    def expected_win_distribution_graph_html(self):
+        expected_win_distribution = sorted(self.expected_win_distribution.items())
+        x_data = list(map(lambda x: x[0], expected_win_distribution))
+        y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
+
+        graph = nvd3.discreteBarChart(
+            name='expected_win_distribution',
+            width=600,
+            height=200,
+            y_axis_format='%',
+        )
+
+        graph.add_serie(x=x_data, y=y_data)
+
+        graph.buildcontent()
+        graph.buildhtml()
+
+        return graph.htmlcontent
 
     @fully_cached_property
     def simple_expected_wins(self):
