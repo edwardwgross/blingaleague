@@ -1352,6 +1352,8 @@ class Standings(object):
     def __str__(self):
         if self.year:
             text = "{} Standings".format(self.year)
+            if self.week_max:
+                text = "{} as of Week {}".format(text, self.week_max)
         else:
             text = 'All-time Standings'
 

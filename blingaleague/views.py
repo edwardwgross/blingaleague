@@ -8,7 +8,9 @@ from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
 
-from .models import Standings, Game, Member, TeamSeason, Week, Matchup, Year
+from .models import Standings, Game, Member, \
+                    TeamSeason, Week, Matchup, Year, \
+                    REGULAR_SEASON_WEEKS
 
 
 class HomeView(TemplateView):
@@ -151,9 +153,15 @@ class WeekView(GamesView):
     games_sub_template = 'blingaleague/weekly_games.html'
 
     def get(self, request, year, week):
+        year = int(year)
+        week = int(week)
+
         context = self._context(Week(year, week))
 
-        context['standings'] = Standings(year, week_max=week)
+        context['standings'] = Standings(
+            year,
+            week_max=min(week, REGULAR_SEASON_WEEKS),
+        )
 
         return self.render_to_response(context)
 
