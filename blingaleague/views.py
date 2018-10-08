@@ -152,6 +152,9 @@ class WeekView(GamesView):
 
     def get(self, request, year, week):
         context = self._context(Week(year, week))
+
+        context['standings'] = Standings(year, week_max=week)
+
         return self.render_to_response(context)
 
 
