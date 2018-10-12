@@ -11,3 +11,4 @@ oauth2client
 django-markdown-filter
 social-auth-app-django
 django-request
+numpy

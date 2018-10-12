@@ -635,7 +635,7 @@ class TeamSeason(object):
     def expected_win_distribution(self):
         if not self.is_single_season:
             # too expensive to calculate for more than one season
-            return None
+            return {}
 
         expected_wins_by_game = self.expected_wins_by_game
         num_games = len(expected_wins_by_game)
@@ -1099,6 +1099,20 @@ class TeamMultiSeasons(TeamSeason):
         for team_season in self:
             losses.extend(team_season.losses)
         return losses
+
+    @fully_cached_property
+    def raw_expected_wins_by_game(self):
+        raw_expected_wins_by_game = []
+        for ts in self:
+            raw_expected_wins_by_game.extend(ts.raw_expected_wins_by_game)
+        return raw_expected_wins_by_game
+
+    @fully_cached_property
+    def expected_wins_by_game(self):
+        expected_wins_by_game = []
+        for ts in self:
+            expected_wins_by_game.extend(ts.expected_wins_by_game)
+        return expected_wins_by_game
 
     @fully_cached_property
     def raw_expected_wins(self):
