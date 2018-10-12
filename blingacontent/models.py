@@ -6,7 +6,6 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core import urlresolvers
-from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 from django.template.loader import render_to_string
@@ -97,10 +96,9 @@ class Gazette(models.Model):
         if for_email:
             css_path = Path(settings.STATIC_ROOT) / 'blingaleague' / 'css' / 'blingaleague.css'
             css_fh = open(css_path, 'r')
-            html_str = "<html><head><style>{}</style></head><body style=\"font-size:14px\">{}</body></html>".format(
-                css_fh.read(),
-                html_str,
-            )
+            head_str = "<head><style>{}</style></head>".format(css_fh.read())
+            body_str = "<body style=\"font-size:14px\">{}</body>".format(html_str)
+            html_str = "<html>{}{}</html>".format(head_str, body_str)
 
         return html_str
 

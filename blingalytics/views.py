@@ -1,6 +1,5 @@
 import decimal
 import nvd3
-import statistics
 
 from collections import defaultdict
 
@@ -318,11 +317,12 @@ class SeasonFinderView(TemplateView):
                 elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and team_season.playoffs:
                     continue
 
-                if form_data['clinched'] == CHOICE_CLINCHED_BYE and not team_season.clinched_bye:
+                clinched = form_data['clinched']
+                if clinched == CHOICE_CLINCHED_BYE and not team_season.clinched_bye:
                     continue
-                elif form_data['clinched'] == CHOICE_CLINCHED_PLAYOFFS and not team_season.clinched_playoffs:
+                elif clinched == CHOICE_CLINCHED_PLAYOFFS and not team_season.clinched_playoffs:
                     continue
-                elif form_data['clinched'] == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_early:
+                elif clinched == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_early:
                     continue
 
                 if form_data['bye'] and not team_season.bye:

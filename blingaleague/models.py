@@ -734,8 +734,6 @@ class TeamSeason(object):
             if rank is None:
                 continue
 
-            team_total = len(week_obj.team_to_rank)
-
             if rank <= len(week_obj.team_to_rank) / 2:
                 double_play_record['wins'] += 1
             else:
@@ -1496,8 +1494,6 @@ class Week(object):
 
     @fully_cached_property
     def gazette_str(self):
-        gazette_lines = []
-
         return '\n\n'.join(
             ["### {}:".format(game.gazette_str) for game in self.games],
         )

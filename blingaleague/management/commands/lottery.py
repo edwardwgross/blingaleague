@@ -14,7 +14,15 @@ class Command(LabelCommand):
     def handle_label(self, year, **kwargs):
         standings = Standings(int(year))
 
-        teams = [(ts.team.nickname, ts.loss_count, ts.points) for ts in standings.table[PLAYOFF_TEAMS:]][::-1]
+        teams = []
+        for ts in standings.table[PLAYOFF_TEAMS:]:
+            team_tuple = (
+                ts.team.nickname,
+                ts.loss_count, ts.points,
+            )
+            teams.append(team_tuple)
+
+        teams = teams[::-1]  # order worst to best
 
         losses_weight = decimal.Decimal(0.9)
         points_weight = decimal.Decimal(0.1)
@@ -67,7 +75,8 @@ class Command(LabelCommand):
                         total_level = total_level + level
                         if random_value < total_level:
                             if name in used_teams:
-                                break  # don't move onto next team, instead re-generatezd random number
+                                # don't move onto next team, instead re-generatezd random number
+                                break
                             else:
                                 used_teams[name] = 1
                                 order.append(name)
@@ -96,4 +105,3 @@ class Command(LabelCommand):
         print()
         print("RESULTS FOR RANDOMLY SELECTED RUN (#{})".format(run_to_use))
         print(outcomes[run_to_use-1])
-

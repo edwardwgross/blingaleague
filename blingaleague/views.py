@@ -1,5 +1,3 @@
-import nvd3
-
 from cached_property import cached_property
 
 from django.core import urlresolvers

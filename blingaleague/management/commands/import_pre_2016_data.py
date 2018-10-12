@@ -9,6 +9,8 @@ RAW_NAME_TO_ID = {
     'Allen': 10, 'Katie': 11, 'Rabbit': 12, 'Pat': 13,
     'Richie': 14, 'Schertz': 15,
 }
+
+
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         Game.objects.filter(year__lte=2015).delete()
@@ -37,7 +39,6 @@ class Command(BaseCommand):
             game = Game(**game_kwargs)
             game.save()
 
-
         Season.objects.all().delete()
 
         seasons_filename = '/data/blingaleague/data/initial_finishes.csv'
@@ -60,4 +61,3 @@ class Command(BaseCommand):
 
         season = Season(year=2016)
         season.save()
-

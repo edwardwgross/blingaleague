@@ -21,8 +21,6 @@ class GazetteListView(ListView):
 
         self.form = self.form_class(self.request.GET)
         if self.form.is_valid():
-            full_filter = None
-
             for search_part in self.parse_full_search_term():
                 if not search_part:
                     continue  # take care of extra spaces
