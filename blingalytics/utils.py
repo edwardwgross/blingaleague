@@ -1,4 +1,4 @@
-from blingaleague.models import TeamSeason
+from blingaleague.models import TeamSeason, Week
 
 
 MIN_GAMES_THRESHOLD = 6
@@ -80,3 +80,45 @@ def build_ranked_seasons_table(
         last_value = stat_value
 
     return seasons_list
+
+
+def build_belt_holder_list():
+    holder = None
+    starting_game = None
+    defense_count = 0
+
+    sequence = []
+
+    for week in Week.all():
+        if holder is None:
+            holder = week.blangums
+
+        for game in week.games:
+            if game.loser == holder:
+                sequence.append({
+                    'holder': holder,
+                    'starting_game': starting_game,
+                    'defense_count': defense_count,
+                })
+
+                holder = game.winner
+                starting_game = game
+                defense_count = 0
+
+                break
+            elif game.winner == holder:
+                if starting_game is None:
+                    # it's the very first one
+                    starting_game = game
+                else:
+                    defense_count += 1
+
+                break
+
+    sequence.append({
+        'holder': holder,
+        'starting_game': starting_game,
+        'defense_count': defense_count,
+    })
+
+    return sequence

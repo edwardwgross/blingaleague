@@ -55,7 +55,7 @@
         {% for game in games %}
           <tr>
             <td><a href="{% url 'blingaleague.single_season' game.year %}">{{ game.year}}</a></td>
-            <td><a href="{% url 'blingaleague.week' game.year game.week %}">{{ game.week }}</a></td>
+            <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
             <td style="text-align:left"><a href="{% url 'blingaleague.team_season' game.team.id game.year %}">{{ game.team.nickname }}</a></td>
             <td style="text-align:center">{{ game.outcome }}</td>
             <td>{{ game.score }}</td>

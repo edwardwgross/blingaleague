@@ -18,7 +18,8 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_ELIMINATED_EARLY, \
                    GameFinderForm, SeasonFinderForm
 from .utils import sorted_seasons_by_attr, \
-                   sorted_expected_wins_odds
+                   sorted_expected_wins_odds, \
+                   build_belt_holder_list
 
 
 CACHE = caches['blingaleague']
@@ -431,5 +432,36 @@ class TeamVsTeamView(TemplateView):
         grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
 
         context = {'grid': grid, 'teams': teams}
+
+        return self.render_to_response(context)
+
+
+class BeltHolderView(TemplateView):
+    template_name = 'blingalytics/belt_holder.html'
+
+    def get(self, request):
+        belt_holder_list = build_belt_holder_list()
+
+        belt_stats = defaultdict(lambda: defaultdict(int))
+        for holder_data in belt_holder_list:
+            holder = holder_data['holder']
+            starting_game = holder_data['starting_game']
+            defense_count = holder_data['defense_count']
+
+            belt_stats[holder]['occurrences'] += 1
+            belt_stats[holder]['total_defense_count'] += defense_count
+
+        belt_holder_summary = []
+        for holder, stats in sorted(belt_stats.items(),key=lambda x: x[0].nickname):
+            belt_holder_summary.append({
+                'holder': holder,
+                'occurrences': stats['occurrences'],
+                'total_defense_count': stats['total_defense_count'],
+            })
+
+        context = {
+            'belt_holder_list': belt_holder_list,
+            'belt_holder_summary': belt_holder_summary,
+        }
 
         return self.render_to_response(context)

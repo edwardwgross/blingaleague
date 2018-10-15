@@ -1,0 +1,53 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Belt Holders{% endblock %}
+
+{% block content %}
+<h1>Belt Holders</h1>
+
+{% with belt_holder_list|last as current_belt_holder %}
+  <h2>Current Belt Holder: {{ current_belt_holder.holder }} (since {{ current_belt_holder.starting_game.week_object }})</h2>
+{% endwith %}
+
+<div class="blingalytics">
+  <h3>Summary</h3>
+  <table class="blingalytics_table table-striped">
+    <tr>
+      <th>Team</th>
+      <th>Times Won</th>
+      <th>Total Matches Defended</th>
+    </tr>
+    {% for team_summary in belt_holder_summary %}
+      <tr>
+        <td style="text-align:left">{{ team_summary.holder.nickname }}</td>
+        <td>{{ team_summary.occurrences }}</td>
+        <td>{{ team_summary.total_defense_count }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="blingalytics">
+  <h3>History</h3>
+  <table class="blingalytics_table table-striped">
+    <tr>
+      <th>Week</th>
+      <th>Team</th>
+      <th>Score</th>
+      <th>{# - #}</th>
+      <th>OppScore</th>
+      <th>Matches Defended</th>
+    </tr>
+    {% for belt_holder in belt_holder_list reversed %}
+      <tr>
+        <td style="text-align:left"><a href="{{ belt_holder.starting_game.week_object.href }}">{{ belt_holder.starting_game.week_object }}</a></td>
+        <td style="text-align:left"><a href="{% url 'blingaleague.team_season' belt_holder.holder.id belt_holder.starting_game.year %}">{{ belt_holder.holder.nickname }}</a></td>
+        <td>{{ belt_holder.starting_game.winner_score }}</td>
+        <td style="text-align:center">&ndash;</td>
+        <td>{{ belt_holder.starting_game.loser_score }}</td>
+        <td>{{ belt_holder.defense_count }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock content %}
