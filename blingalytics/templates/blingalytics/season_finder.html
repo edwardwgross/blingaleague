@@ -47,7 +47,11 @@
             <td>{{ season.expected_wins|floatformat:2 }}</td>
             <td>{{ season.expected_win_pct|floatformat:3 }}</td>
             <td>{{ season.place_numeric }}</td>
-            <td>{{ season.regular_season.place_numeric }}</td>
+            <td>
+              {% if not season.regular_season.is_partial %}
+                {{ season.regular_season.place_numeric }}
+              {% endif %}
+            </td>
             <td>{{ season.blangums_count }}</td>
             <td style="text-align:left">{{ season.playoff_finish }}</td>
           </tr>
