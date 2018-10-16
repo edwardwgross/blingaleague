@@ -11,7 +11,7 @@
       {% include "blingalytics/form.html" %}
     {% endwith %}
   </div>
-  <div id="games_found">
+  <div id="games_found" class="finder_results">
     {% if games %}
       <h2>Summary</h2>
       <table class="blingalytics_table table-striped">
@@ -39,6 +39,7 @@
 
       <h2>Games</h2>
       <em>(click on the column headings to sort)</em>
+      <a class="download_link" href="{{ request.get_full_path }}&csv">Download to CSV</a>
       <table class="blingalytics_table sortable table-striped">
         <tr>
           <th>Year</th>

@@ -57,6 +57,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'blingacontent.context_processors.memes',
     'blingaleague.context_processors.auth_member',
     'django.contrib.auth.context_processors.auth',
+    'django.template.context_processors.request',
     'social_django.context_processors.backends',
     'social_django.context_processors.login_redirect',
 )

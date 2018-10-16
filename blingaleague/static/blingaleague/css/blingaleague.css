@@ -285,6 +285,7 @@ table.blingalytics_table.sortable tbody tr::before {
 .blingalytics tbody tr::before,
 .blingalytics a {
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    white-space: nowrap;
 }
 
 .blingalytics th {
@@ -343,6 +344,14 @@ table.blingalytics_table.sortable tbody tr::before {
 #form_toggle_button {
     font-size: 60%;
 }
+
+.blingalytics .finder_results {
+    width: min-content;
+}
+.blingalytics a.download_link {
+    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+    float: right;
+ }
 
 .blingacontent {
     margin-bottom: 12px;

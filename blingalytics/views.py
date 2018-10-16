@@ -1,3 +1,5 @@
+import csv
+import datetime
 import decimal
 import nvd3
 
@@ -5,6 +7,7 @@ from collections import defaultdict
 
 from django.core.cache import caches
 from django.db.models import F
+from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from blingaleague.models import REGULAR_SEASON_WEEKS, \
@@ -32,6 +35,29 @@ PREFIX_LOSER = 'loser'
 # leaderboard for non-counting stats
 TOP_SEASONS_STAT_THRESHOLD = 6
 
+
+class CSVResponseMixin(object):
+
+    base_csv_filename = 'blingaleague_{}.csv'
+
+    @property
+    def filename(self):
+        return self.base_csv_filename.format(
+            datetime.datetime.now().strftime('%Y%m%d%H%M%S'),
+        )
+
+    def generate_csv_data(self, result_list):
+        raise NotImplementedError('Must be defined by the subclass')
+
+    def render_to_csv(self, result_list):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = "attachment; filename={}".format(self.filename)
+
+        csv_writer = csv.writer(response)
+        for row in self.generate_csv_data(result_list):
+            csv_writer.writerow(row)
+
+        return response
 
 class WeeklyScoresView(TemplateView):
     template_name = 'blingalytics/weekly_scores.html'
@@ -103,8 +129,10 @@ class ExpectedWinsView(TemplateView):
         return self.render_to_response(context)
 
 
-class GameFinderView(TemplateView):
+class GameFinderView(CSVResponseMixin, TemplateView):
     template_name = 'blingalytics/game_finder.html'
+
+    base_csv_filename = 'game_finder_{}.csv'
 
     def filter_games(self, form_data):
         base_games = Game.objects.all()
@@ -230,6 +258,36 @@ class GameFinderView(TemplateView):
             'total': len(games_counted),
         }
 
+    def generate_csv_data(self, games):
+        csv_data = [
+            [
+                'Year',
+                'Week',
+                'Team',
+                'W/L',
+                'Score',
+                'OppScore',
+                'Opponent',
+                'Margin',
+                'Notes',
+            ],
+        ]
+
+        for game in games:
+            csv_data.append([
+                game['year'],
+                game['week'],
+                game['team'].nickname,
+                game['outcome'],
+                game['score'],
+                game['opponent_score'],
+                game['opponent'].nickname,
+                game['margin'],
+                game['extra_description'],
+            ])
+
+        return csv_data
+
     def get(self, request):
         games = []
 
@@ -245,11 +303,16 @@ class GameFinderView(TemplateView):
             'summary': self.build_summary(games),
         }
 
+        if 'csv' in request.GET:
+            return self.render_to_csv(games)
+
         return self.render_to_response(context)
 
 
-class SeasonFinderView(TemplateView):
+class SeasonFinderView(CSVResponseMixin, TemplateView):
     template_name = 'blingalytics/season_finder.html'
+
+    base_csv_filename = 'season_finder_{}.csv'
 
     def filter_seasons(self, form_data):
         year_min = Year.min()
@@ -334,6 +397,46 @@ class SeasonFinderView(TemplateView):
 
                 yield team_season
 
+    def generate_csv_data(self, seasons):
+        csv_data = [
+            [
+                'Year',
+                'Team',
+                'Wins',
+                'Losses',
+                'W%',
+                'Points',
+                'Exp. W',
+                'Exp. %',
+                'Place',
+                'Final Place',
+                'Blangums',
+                'Playoff Finish',
+            ],
+        ]
+
+        for season in seasons:
+            final_place = season.regular_season.place_numeric
+            if season.regular_season.is_partial:
+                final_place = None
+
+            csv_data.append([
+                season.year,
+                season.team.nickname,
+                season.win_count,
+                season.loss_count,
+                season.win_pct,
+                season.points,
+                season.expected_wins,
+                season.expected_win_pct,
+                season.place_numeric,
+                final_place,
+                season.blangums_count,
+                season.playoff_finish,
+            ])
+
+        return csv_data
+
     def get(self, request):
         seasons = []
 
@@ -344,6 +447,9 @@ class SeasonFinderView(TemplateView):
             seasons = list(self.filter_seasons(form_data))
 
         context = {'form': season_finder_form, 'seasons': seasons}
+
+        if 'csv' in request.GET:
+            return self.render_to_csv(seasons)
 
         return self.render_to_response(context)
 
