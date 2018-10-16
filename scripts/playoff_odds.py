@@ -23,8 +23,8 @@ for week, week_outcomes in sorted(outcomes.items()):
 
 print('Record,Playoff Pct,Change with Loss,Change with Win')
 for week, week_outcomes in sorted(outcomes.items()):
-    #print('')
-    #print('Record,Playoff Pct,Change with Loss,Change with Win')
+    print('')
+    print('Record,Playoff Pct,Change with Loss,Change with Win')
     for win, results in sorted(week_outcomes.items()):
         wd = outcomes[week+1][win+1]['pct']
         ld = outcomes[week+1][win]['pct']

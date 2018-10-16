@@ -59,6 +59,7 @@ class CSVResponseMixin(object):
 
         return response
 
+
 class WeeklyScoresView(TemplateView):
     template_name = 'blingalytics/weekly_scores.html'
 
@@ -551,14 +552,13 @@ class BeltHolderView(TemplateView):
         belt_stats = defaultdict(lambda: defaultdict(int))
         for holder_data in belt_holder_list:
             holder = holder_data['holder']
-            starting_game = holder_data['starting_game']
             defense_count = holder_data['defense_count']
 
             belt_stats[holder]['occurrences'] += 1
             belt_stats[holder]['total_defense_count'] += defense_count
 
         belt_holder_summary = []
-        for holder, stats in sorted(belt_stats.items(),key=lambda x: x[0].nickname):
+        for holder, stats in sorted(belt_stats.items(), key=lambda x: x[0].nickname):
             belt_holder_summary.append({
                 'holder': holder,
                 'occurrences': stats['occurrences'],

@@ -2,8 +2,6 @@ import numpy
 import random
 import statistics
 
-from collections import defaultdict
-
 from blingaleague.models import TeamSeason, Game
 
 
