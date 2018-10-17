@@ -26,6 +26,10 @@ PLAYOFF_TEAMS = 6
 FIRST_SEASON = 2008
 EXPANSION_SEASON = 2012
 
+OUTCOME_WIN = 'W'
+OUTCOME_LOSS = 'L'
+OUTCOME_ANY = '*'
+
 BLINGABOWL_TITLE_BASE = 'Blingabowl'
 SEMIFINALS_TITLE_BASE = 'Semifinals'
 QUARTERFINALS_TITLE_BASE = 'Quarterfinals'
@@ -504,6 +508,16 @@ class TeamSeason(object):
     @fully_cached_property
     def loss_count(self):
         return len(self.losses)
+
+    def week_outcome(self, week):
+        if week < 1 or week > len(self.games):
+            return None
+
+        game = self.games[week - 1]
+        if game.winner == self.team:
+            return OUTCOME_WIN
+        else:
+            return OUTCOME_LOSS
 
     @fully_cached_property
     def record(self):

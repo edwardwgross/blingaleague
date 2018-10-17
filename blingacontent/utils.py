@@ -9,7 +9,8 @@ from googleapiclient.discovery import build
 
 from oauth2client import file, client, tools
 
-from blingaleague.models import Week, Standings, EXPANSION_SEASON, REGULAR_SEASON_WEEKS
+from blingaleague.models import Week, Standings, EXPANSION_SEASON, REGULAR_SEASON_WEEKS, \
+                                OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY
 
 from blingalytics.utils import get_playoff_odds
 
@@ -118,17 +119,18 @@ def playoff_odds_section(week_obj):
             querystring,
         )
 
-        with_win = next_week_odds[win_count + 1]
-        with_loss = next_week_odds[win_count]
+        with_win = next_week_odds[win_count + 1][OUTCOME_WIN]['pct']
+        with_loss = next_week_odds[win_count][OUTCOME_LOSS]['pct']
 
         playoff_odds_section.append(
-            "- [{}-{}]({}): {:.0f}% ({:.0f}% with win, {:.0f}% with loss)".format(
+            "- [{}-{}]({}): {:.0f}% ({:.0f}% with week {} win, {:.0f}% with loss)".format(
                 win_count,
                 loss_count,
                 season_finder_link,
-                100 * odds['pct'],
-                100 * next_week_odds[win_count + 1]['pct'],
-                100 * next_week_odds[win_count]['pct'],
+                100 * odds[OUTCOME_ANY]['pct'],
+                100 * with_win,
+                week_obj.week + 1,
+                100 * with_loss,
             ),
         )
 

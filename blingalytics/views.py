@@ -11,7 +11,8 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from blingaleague.models import REGULAR_SEASON_WEEKS, \
-                                Game, Week, Member, TeamSeason, Year, Matchup
+                                Game, Week, Member, TeamSeason, Year, Matchup, \
+                                OUTCOME_WIN, OUTCOME_LOSS
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
@@ -198,7 +199,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                     'opponent': getattr(game, opponent_prefix),
                     'opponent_score': getattr(game, "%s_score" % opponent_prefix),
                     'margin': game.margin,
-                    'outcome': 'W' if team_prefix == PREFIX_WINNER else 'L',
+                    'outcome': OUTCOME_WIN if team_prefix == PREFIX_WINNER else OUTCOME_LOSS,
                     'blangums': game.blangums,
                     'slapped_heartbeat': game.slapped_heartbeat,
                 }
@@ -235,7 +236,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             if game['id'] in games_counted:
                 continue
 
-            if game['outcome'] == 'W':
+            if game['outcome'] == OUTCOME_WIN:
                 winner = game['team']
                 loser = game['opponent']
             else:

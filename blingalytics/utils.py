@@ -2,7 +2,8 @@ from collections import defaultdict
 
 from blingaleague.models import TeamSeason, Week, Year, \
                                 Standings, REGULAR_SEASON_WEEKS, \
-                                EXPANSION_SEASON
+                                EXPANSION_SEASON, \
+                                OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY
 
 
 MIN_GAMES_THRESHOLD = 6
@@ -131,7 +132,7 @@ def build_belt_holder_list():
 def get_playoff_odds(week, min_year=EXPANSION_SEASON):
     week = min(week, REGULAR_SEASON_WEEKS)
 
-    playoff_odds = defaultdict(lambda: defaultdict(float))
+    playoff_odds = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
 
     for year in Year.all():
         if year < min_year:
@@ -143,25 +144,34 @@ def get_playoff_odds(week, min_year=EXPANSION_SEASON):
             continue
 
         for ts in standings.table:
-            playoff_odds[ts.win_count]['total'] += 1
+            outcomes = (OUTCOME_ANY, ts.week_outcome(week))
 
-            playoffs = ts.regular_season.playoffs
-            if playoffs:
-                playoff_odds[ts.win_count]['playoffs'] += 1
+            for outcome in outcomes:
+                playoff_odds[ts.win_count][outcome]['total'] += 1
 
-    previous_pct = 0.0
-    win_count = 0
-    while win_count <= week:
-        playoffs = playoff_odds[win_count]['playoffs']
-        total = playoff_odds[win_count]['total']
+                playoffs = ts.regular_season.playoffs
+                if playoffs:
+                    playoff_odds[ts.win_count][outcome]['playoffs'] += 1
 
-        pct = previous_pct
-        if total > 0:
-            pct = playoffs / total
+    # important to do'ANY first, since WIN and LOSS will use its pct
+    # if they don't have any occurrences
+    for outcome in (OUTCOME_ANY, OUTCOME_WIN, OUTCOME_LOSS):
+        previous_pct = 0.0
+        win_count = 0
+        while win_count <= week:
+            playoffs = playoff_odds[win_count][outcome]['playoffs']
+            total = playoff_odds[win_count][outcome]['total']
 
-        playoff_odds[win_count]['pct'] = pct
+            if total > 0:
+                pct = playoffs / total
+            elif outcome != OUTCOME_ANY:
+                pct = playoff_odds[win_count][OUTCOME_ANY]['pct']
+            else:
+                pct = previous_pct
 
-        previous_pct = pct
-        win_count += 1
+            playoff_odds[win_count][outcome]['pct'] = pct
+
+            previous_pct = pct
+            win_count += 1
 
     return playoff_odds
