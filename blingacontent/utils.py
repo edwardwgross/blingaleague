@@ -91,7 +91,7 @@ def new_gazette_body_template():
 def playoff_odds_section(week_obj):
     playoff_odds_section = [
         '# Playoff Odds',
-        'Since expansion, this is how often teams with each record have made the playoffs',
+        'Since expansion, this is how often teams with each record have made the playoffs:',
     ]
 
     current_odds = get_playoff_odds(week_obj.week)
