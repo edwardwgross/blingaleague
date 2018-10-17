@@ -150,7 +150,7 @@ def get_playoff_odds(week, min_year=EXPANSION_SEASON):
                 playoff_odds[ts.win_count]['playoffs'] += 1
 
     previous_pct = 0.0
-    win_count = 1
+    win_count = 0
     while win_count <= week:
         playoffs = playoff_odds[win_count]['playoffs']
         total = playoff_odds[win_count]['total']
