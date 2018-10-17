@@ -1,4 +1,8 @@
-from blingaleague.models import TeamSeason, Week
+from collections import defaultdict
+
+from blingaleague.models import TeamSeason, Week, Year, \
+                                Standings, REGULAR_SEASON_WEEKS, \
+                                EXPANSION_SEASON
 
 
 MIN_GAMES_THRESHOLD = 6
@@ -122,3 +126,42 @@ def build_belt_holder_list():
     })
 
     return sequence
+
+
+def get_playoff_odds(week, min_year=EXPANSION_SEASON):
+    week = min(week, REGULAR_SEASON_WEEKS)
+
+    playoff_odds = defaultdict(lambda: defaultdict(float))
+
+    for year in Year.all():
+        if year < min_year:
+            continue
+
+        standings = Standings(year, week_max=week)
+
+        if standings.end_of_season_standings.is_partial:
+            continue
+
+        for ts in standings.table:
+            playoff_odds[ts.win_count]['total'] += 1
+
+            playoffs = ts.regular_season.playoffs
+            if playoffs:
+                playoff_odds[ts.win_count]['playoffs'] += 1
+
+    previous_pct = 0.0
+    win_count = 1
+    while win_count <= week:
+        playoffs = playoff_odds[win_count]['playoffs']
+        total = playoff_odds[win_count]['total']
+
+        pct = previous_pct
+        if total > 0:
+            pct = playoffs / total
+
+        playoff_odds[win_count]['pct'] = pct
+
+        previous_pct = pct
+        win_count += 1
+
+    return playoff_odds

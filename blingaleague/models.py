@@ -1268,11 +1268,21 @@ class Standings(object):
 
     @fully_cached_property
     def is_partial(self):
+        if self.all_time:
+            return True
+
         for team_season in self.table:
             if team_season.is_partial:
                 return True
 
         return False
+
+    @fully_cached_property
+    def end_of_season_standings(self):
+        if self.all_time:
+            return None
+
+        return Standings(self.year)
 
     @fully_cached_property
     def possible_final_outcomes(self):

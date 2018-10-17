@@ -10,6 +10,8 @@ from oauth2client import file, client, tools
 
 from blingaleague.models import Week, Standings
 
+from blingalytics.utils import get_playoff_odds
+
 
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
@@ -64,6 +66,27 @@ def new_gazette_body_template():
         '### Blessed Cahoots:',
         '### Pryor Play of the Week:',
     ])
+
+    if current_standings.is_partial:
+        playoff_odds_section = [
+            '# Playoff Odds',
+            'Since expansion, this is how often teams with each record have made the playoffs',
+        ]
+
+        playoff_odds = get_playoff_odds(last_week.week)
+        next_week_odds = get_playoff_odds(last_week.week + 1)
+        for win_count, odds in sorted(playoff_odds.items()):
+            playoff_odds_section.append(
+                "- {}-{}: {:.0f}% ({:.0f}% with win, {:.0f}% with loss)".format(
+                    win_count,
+                    last_week.week - win_count,
+                    100 * odds['pct'],
+                    100 * next_week_odds[win_count + 1]['pct'],
+                    100 * next_week_odds[win_count]['pct'],
+                ),
+            )
+
+        sections.append(playoff_odds_section)
 
     sections.append([
         "# Week {} Preview".format(
