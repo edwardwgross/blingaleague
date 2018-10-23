@@ -1,10 +1,14 @@
-from collections import defaultdict
+import statistics
+
+from django.core.cache import caches
 
 from blingaleague.models import TeamSeason, Week, Year, \
                                 Standings, REGULAR_SEASON_WEEKS, \
                                 EXPANSION_SEASON, \
                                 OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY
 
+
+CACHE = caches['blingaleague']
 
 MIN_GAMES_THRESHOLD = 6
 
@@ -130,9 +134,29 @@ def build_belt_holder_list():
 
 
 def get_playoff_odds(week, min_year=EXPANSION_SEASON):
+    cache_key = "blingalytics_playoff_odds|{}|{}".format(
+        week,
+        min_year,
+    )
+
+    if cache_key in CACHE:
+        return CACHE.get(cache_key)
+
     week = min(week, REGULAR_SEASON_WEEKS)
 
-    playoff_odds = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+    # don't use defaultdict, because we can't pickle it for caching
+    playoff_odds = {}
+    win_count = 0
+    while win_count <= week:
+        playoff_odds[win_count] = {}
+
+        for outcome in (OUTCOME_ANY, OUTCOME_WIN, OUTCOME_LOSS):
+            playoff_odds[win_count][outcome] = {
+                'total': 0,
+                'playoffs': 0,
+            }
+
+        win_count += 1
 
     for year in Year.all():
         if year < min_year:
@@ -153,25 +177,41 @@ def get_playoff_odds(week, min_year=EXPANSION_SEASON):
                 if playoffs:
                     playoff_odds[ts.win_count][outcome]['playoffs'] += 1
 
-    # important to do'ANY first, since WIN and LOSS will use its pct
-    # if they don't have any occurrences
     for outcome in (OUTCOME_ANY, OUTCOME_WIN, OUTCOME_LOSS):
-        previous_pct = 0.0
         win_count = 0
-        while win_count <= week:
+
+        max_wins = week
+        if outcome == OUTCOME_LOSS:
+            max_wins = week - 1
+
+        while win_count <= max_wins:
             playoffs = playoff_odds[win_count][outcome]['playoffs']
             total = playoff_odds[win_count][outcome]['total']
 
             if total > 0:
                 pct = playoffs / total
-            elif outcome != OUTCOME_ANY:
-                pct = playoff_odds[win_count][OUTCOME_ANY]['pct']
             else:
-                pct = previous_pct
+                # use whatever we were at last week as the default if we don't
+                # have any history for this week/win_count/outcome combo
+                if week > 1:
+                    last_week_odds = get_playoff_odds(week - 1, min_year=min_year)
+
+                    if outcome == OUTCOME_WIN:
+                        pct = last_week_odds[max(0, win_count - 1)][OUTCOME_ANY]['pct']
+                    elif outcome == OUTCOME_LOSS:
+                        pct = last_week_odds[win_count][OUTCOME_ANY]['pct']
+                    else:
+                        pct = statistics.mean([
+                            last_week_odds[max(0, win_count - 1)][OUTCOME_ANY]['pct'],
+                            last_week_odds[min(week - 1, win_count)][OUTCOME_ANY]['pct'],
+                        ])
+                else:
+                    pct = 0
 
             playoff_odds[win_count][outcome]['pct'] = pct
 
-            previous_pct = pct
             win_count += 1
+
+    CACHE.set(cache_key, playoff_odds)
 
     return playoff_odds
