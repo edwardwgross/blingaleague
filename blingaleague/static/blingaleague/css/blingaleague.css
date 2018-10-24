@@ -347,11 +347,16 @@ table.blingalytics_table.sortable tbody tr::before {
 
 .blingalytics .finder_results {
     width: min-content;
+    padding-right: 60px;
 }
 .blingalytics a.download_link {
     font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
     float: right;
  }
+
+h3.no_results_message {
+    white-space: nowrap;
+}
 
 .blingacontent {
     margin-bottom: 12px;
