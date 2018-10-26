@@ -74,7 +74,6 @@ def build_ranked_seasons_table(
         if limit is not None and rank > limit:
             break
 
-        print((team_season, stat_value, type(stat_value)))
         if type(stat_value) == int:
             num_format = '{:.0f}'
 
