@@ -587,18 +587,19 @@ class TeamSeason(object):
         return ''
 
     @fully_cached_property
-    def playoffs(self):
-        regular_season_games = self.regular_season.games
-        regular_season_place = self.regular_season.place_numeric
-        return (len(regular_season_games) == REGULAR_SEASON_WEEKS and
-                regular_season_place <= PLAYOFF_TEAMS)
+    def made_playoffs(self):
+        regular_season = self.regular_season
+        return regular_season.place_numeric <= PLAYOFF_TEAMS and not regular_season.is_partial
+
+    @fully_cached_property
+    def missed_playoffs(self):
+        regular_season = self.regular_season
+        return regular_season.place_numeric > PLAYOFF_TEAMS and not regular_season.is_partial
 
     @fully_cached_property
     def bye(self):
-        regular_season_games = self.regular_season.games
-        regular_season_place = self.regular_season.place_numeric
-        return (len(regular_season_games) == REGULAR_SEASON_WEEKS and
-                regular_season_place <= BYE_TEAMS)
+        regular_season = self.regular_season
+        return regular_season.place_numeric <= BYE_TEAMS and not regular_season.is_partial
 
     @fully_cached_property
     def champion(self):
@@ -840,7 +841,7 @@ class TeamSeason(object):
         if self.is_partial:
             return self.clinched(PLAYOFF_TEAMS)
 
-        return self.playoffs
+        return self.made_playoffs
 
     @fully_cached_property
     def clinched_bye(self):

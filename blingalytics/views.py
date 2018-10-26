@@ -332,9 +332,9 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 
         for year in range(year_min, year_max + 1):
             for team_id in team_ids:
-                team_season = TeamSeason(team_id, year, week_max=form_data['week_max'])
+                ts = TeamSeason(team_id, year, week_max=form_data['week_max'])
 
-                game_count = len(team_season.games)
+                game_count = len(ts.games)
                 if game_count == 0:
                     continue
 
@@ -343,61 +343,61 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
                     # and the value given is in the regular season,
                     # don't show seasons that haven't yet reached that week
                     # playoffs are special, though - teams with byes won't have the same logic
-                    if form_data['week_max'] <= REGULAR_SEASON_WEEKS or not team_season.bye:
+                    if form_data['week_max'] <= REGULAR_SEASON_WEEKS or not ts.bye:
                         if game_count < form_data['week_max']:
                             continue
-                    elif team_season.bye:
+                    elif ts.bye:
                         if game_count < (form_data['week_max'] - 1):
                             continue
 
                 if form_data['wins_min'] is not None:
-                    if team_season.win_count < form_data['wins_min']:
+                    if ts.win_count < form_data['wins_min']:
                         continue
                 if form_data['wins_max'] is not None:
-                    if team_season.win_count > form_data['wins_max']:
+                    if ts.win_count > form_data['wins_max']:
                         continue
 
                 if form_data['expected_wins_min'] is not None:
-                    if team_season.expected_wins < form_data['expected_wins_min']:
+                    if ts.expected_wins < form_data['expected_wins_min']:
                         continue
                 if form_data['expected_wins_max'] is not None:
-                    if team_season.expected_wins > form_data['expected_wins_max']:
+                    if ts.expected_wins > form_data['expected_wins_max']:
                         continue
 
                 if form_data['points_min'] is not None:
-                    if team_season.points < form_data['points_min']:
+                    if ts.points < form_data['points_min']:
                         continue
                 if form_data['points_max'] is not None:
-                    if team_season.points > form_data['points_max']:
+                    if ts.points > form_data['points_max']:
                         continue
 
                 if form_data['place_min'] is not None:
-                    if team_season.place_numeric < form_data['place_min']:
+                    if ts.place_numeric < form_data['place_min']:
                         continue
                 if form_data['place_max'] is not None:
-                    if team_season.place_numeric > form_data['place_max']:
+                    if ts.place_numeric > form_data['place_max']:
                         continue
 
-                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not team_season.playoffs:
+                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not ts.made_playoffs:
                     continue
-                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and team_season.playoffs:
+                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and not ts.missed_playoffs:
                     continue
 
                 clinched = form_data['clinched']
-                if clinched == CHOICE_CLINCHED_BYE and not team_season.clinched_bye:
+                if clinched == CHOICE_CLINCHED_BYE and not ts.clinched_bye:
                     continue
-                elif clinched == CHOICE_CLINCHED_PLAYOFFS and not team_season.clinched_playoffs:
+                elif clinched == CHOICE_CLINCHED_PLAYOFFS and not ts.clinched_playoffs:
                     continue
-                elif clinched == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_early:
-                    continue
-
-                if form_data['bye'] and not team_season.bye:
+                elif clinched == CHOICE_ELIMINATED_EARLY and not ts.eliminated_early:
                     continue
 
-                if form_data['champion'] and not team_season.champion:
+                if form_data['bye'] and not ts.bye:
                     continue
 
-                yield team_season
+                if form_data['champion'] and not ts.champion:
+                    continue
+
+                yield ts
 
     def generate_csv_data(self, seasons):
         csv_data = [

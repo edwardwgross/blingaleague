@@ -173,7 +173,7 @@ def get_playoff_odds(week, min_year=EXPANSION_SEASON):
             for outcome in outcomes:
                 playoff_odds[ts.win_count][outcome]['total'] += 1
 
-                playoffs = ts.regular_season.playoffs
+                playoffs = ts.regular_season.made_playoffs
                 if playoffs:
                     playoff_odds[ts.win_count][outcome]['playoffs'] += 1
 
