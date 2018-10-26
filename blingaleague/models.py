@@ -197,17 +197,16 @@ class Game(models.Model):
         return all_scores
 
     @classmethod
-    def expected_wins(cls, *game_scores, scaling_factor=1):
+    def expected_wins(cls, *game_scores):
         all_scores = cls.all_scores()
 
         all_scores_count = decimal.Decimal(len(all_scores))
 
         def _win_expectancy(score):
             win_list = list(filter(lambda x: x < score, all_scores))
-            win_count = len(win_list)
-            raw_win_expectancy = decimal.Decimal(win_count) / all_scores_count
-            scaled_win_expectancy = scaling_factor * raw_win_expectancy
-            return min(1, scaled_win_expectancy)
+            tie_list = list(filter(lambda x: x == score, all_scores))
+            win_count = len(win_list) + 0.5 * len(tie_list)
+            return decimal.Decimal(win_count) / all_scores_count
 
         return sum(_win_expectancy(score) for score in game_scores)
 
@@ -631,6 +630,20 @@ class TeamSeason(object):
             lambda x: self.year_object.expected_wins_scaling_factor * x,
             self.raw_expected_wins_by_game,
         ))
+
+    @fully_cached_property
+    def www(self):
+        expected_wins_by_game = []
+
+        for week, raw_xw in enumerate(self.raw_expected_wins_by_game, 1):
+            week_obj = Week(self.year, week)
+            expected_wins_by_game.append(raw_xw * week_obj.expected_wins_scaling_factor)
+
+        return sum(expected_wins_by_game)
+
+    @fully_cached_property
+    def xxx(self):
+        return self.all_play_win_pct * len(self.games)
 
     @fully_cached_property
     def raw_expected_wins(self):
@@ -1448,6 +1461,14 @@ class Week(object):
     @fully_cached_property
     def average_margin(self):
         return statistics.mean([g.margin for g in self.games])
+
+    @fully_cached_property
+    def expected_wins_scaling_factor(self):
+        raw_expected_wins = 0
+        for game in self.games:
+            raw_expected_wins += Game.expected_wins(game.winner_score, game.loser_score)
+
+        return len(self.games) / raw_expected_wins
 
     @fully_cached_property
     def previous(self):
