@@ -347,9 +347,13 @@ class Season(models.Model):
             self.place_6,
         )
 
+    @classmethod
+    def year_to_blingabowl(cls, year):
+        return int_to_roman(year + 1 - FIRST_SEASON)
+
     @fully_cached_property
     def blingabowl(self):
-        return int_to_roman(self.year + 1 - FIRST_SEASON)
+        return Season.year_to_blingabowl(self.year)
 
     @fully_cached_property
     def robscores(self):
@@ -1551,6 +1555,21 @@ class Week(object):
             self.blangums,
             self.slapped_heartbeat,
         )
+
+    @classmethod
+    def week_to_title(self, year, week):
+        special_weeks = {
+            14: 'Quarterfinals',
+            15: 'Semifinals',
+            16: "Blingabowl {}".format(
+                Season.year_to_blingabowl(year),
+            ),
+        }
+
+        if week in special_weeks:
+            return special_weeks[week]
+
+        return "Week {}".format(week)
 
     @fully_cached_property
     def gazette_str(self):

@@ -42,8 +42,8 @@ def new_gazette_body_template():
     sections = []
 
     sections.append([
-        "# [Week {}]({}) Recap".format(
-            last_week.week,
+        "# [{}]({}) Recap".format(
+            Week.week_to_title(last_week.year, last_week.week),
             last_week.gazette_link,
         ),
         last_week.gazette_str,
@@ -73,8 +73,8 @@ def new_gazette_body_template():
         sections.append(playoff_odds_section(last_week))
 
     sections.append([
-        "# Week {} Preview".format(
-            last_week.week + 1,
+        "# {} Preview".format(
+            Week.week_to_title(last_week.year, last_week.week + 1),
         ),
         '## Game of the Blingaweek',
         '## Other Blingamatches',
