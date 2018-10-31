@@ -129,6 +129,10 @@ nav .icon-bar {
     color: white;
 }
 
+.nav li a:hover span {
+    color: red;
+}
+
 .nav ul.dropdown-menu li a {
     padding-top: 6px;
     padding-bottom: 6px;
