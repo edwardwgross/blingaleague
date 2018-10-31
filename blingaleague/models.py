@@ -527,6 +527,43 @@ class TeamSeason(object):
         return "{}-{}".format(self.win_count, self.loss_count)
 
     @fully_cached_property
+    def current_streak(self):
+        count = 1
+        last_outcome = self.week_outcome(len(self.games))
+
+        for game in self.games[::-1][1:]:
+            outcome = self.week_outcome(game.week)
+            if outcome != last_outcome:
+                break
+
+            count += 1
+
+        return "{}{}".format(last_outcome, count)
+
+    def longest_streak(self, outcome_to_match):
+        longest_streak = 0
+        running_streak = 0
+        for game in self.games:
+            outcome = self.week_outcome(game.week)
+            if outcome == outcome_to_match:
+                running_streak += 1
+            else:
+                # update longest streak, if necessary
+                longest_streak = max(longest_streak, running_streak)
+                running_streak = 0
+
+        # one more max() call in case the longest streak ended the season
+        return max(longest_streak, running_streak)
+
+    @fully_cached_property
+    def longest_winning_streak(self):
+        return self.longest_streak(OUTCOME_WIN)
+
+    @fully_cached_property
+    def longest_losing_streak(self):
+        return self.longest_streak(OUTCOME_LOSS)
+
+    @fully_cached_property
     def win_pct(self):
         if len(self.games) == 0:
             return 0

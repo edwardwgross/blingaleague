@@ -463,7 +463,7 @@ class TopSeasonsView(TemplateView):
         top_seasons_tables = []
 
         top_attrs_categories = (
-            # title, attr, sort_desc, type, game_count_threshold
+            # title, attr, sort_desc, game_count_threshold
             ('Most Wins', 'win_count', True, 1),
             ('Fewest Wins', 'win_count', False, REGULAR_SEASON_WEEKS),
             ('Most Points', 'points', True, 1),
@@ -472,6 +472,8 @@ class TopSeasonsView(TemplateView):
             ('Fewest Expected Wins', 'expected_wins', False, REGULAR_SEASON_WEEKS),
             ('Most Team Blangums', 'blangums_count', True, 1),
             ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True, 1),
+            ('Longest Winning Streak (single season)', 'longest_winning_streak', True, 1),
+            ('Longest Losing Streak (single season)', 'longest_losing_streak', True, 1),
             ('Highest Average Score', 'average_score', True, TOP_SEASONS_STAT_THRESHOLD),
             ('Lowest Average Score', 'average_score', False, TOP_SEASONS_STAT_THRESHOLD),
             ('Highest Median Score', 'median_score', True, TOP_SEASONS_STAT_THRESHOLD),
