@@ -9,8 +9,11 @@ from googleapiclient.discovery import build
 
 from oauth2client import file, client, tools
 
-from blingaleague.models import Week, Standings, EXPANSION_SEASON, REGULAR_SEASON_WEEKS, \
-                                OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY
+from blingaleague.models import Week, Standings, TeamSeason, \
+                                EXPANSION_SEASON, REGULAR_SEASON_WEEKS, \
+                                OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY, PLAYOFF_TEAMS, \
+                                SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
+                                BLINGABOWL_TITLE_BASE
 
 from blingalytics.utils import get_playoff_odds
 
@@ -70,7 +73,14 @@ def new_gazette_body_template():
     ])
 
     if current_standings.is_partial:
-        sections.append(playoff_odds_section(last_week))
+        if last_week.week >= 8:
+            sections.append([
+                '# Playoff Scenarios',
+            ])
+        else:
+            sections.append(playoff_odds_section(last_week))
+    else:
+        sections.append(postmortems_section(last_week, current_standings))
 
     sections.append([
         "# {} Preview".format(
@@ -135,3 +145,35 @@ def playoff_odds_section(week_obj):
         )
 
     return playoff_odds_section
+
+
+def postmortems_section(week_obj, standings):
+    postmortems_section = ['# Season Postmortems']
+
+    dead_teams = set()
+
+    if week_obj.week == REGULAR_SEASON_WEEKS:
+        # show them in reverse order
+        dead_teams = set(standings.table[PLAYOFF_TEAMS:])
+    else:
+        for game in week_obj.games:
+            for special_title in (QUARTERFINALS_TITLE_BASE, SEMIFINALS_TITLE_BASE):
+                if game.playoff_title.startswith(special_title):
+                    dead_teams.add(TeamSeason(game.loser.id, week_obj.year))
+
+            if game.playoff_title.startswith(BLINGABOWL_TITLE_BASE):
+                dead_teams.update(map(
+                    lambda x: TeamSeason(x.id, week_obj.year),
+                    [game.winner, game.loser],
+                ))
+
+    dead_teams = sorted(
+        dead_teams,
+        key=lambda x: (x.playoff_finish_numeric, x.place_numeric),
+        reverse=True,
+    )
+
+    for team_season in dead_teams:
+        postmortems_section.append(team_season.gazette_postmortem_str)
+
+    return postmortems_section

@@ -610,19 +610,22 @@ class TeamSeason(object):
         return ordinal(self.place_numeric)
 
     @fully_cached_property
-    def playoff_finish(self):
+    def playoff_finish_numeric(self):
         if not self.is_single_season:
-            return ''
+            return None
 
         if self.season is None:
-            return ''
+            return None
 
-        if self.team == self.season.place_1:
+        return self.season.team_to_playoff_finish(self.team)
+
+    @fully_cached_property
+    def playoff_finish(self):
+        if self.playoff_finish_numeric == 1:
             return "Blingabowl {} champion".format(self.season.blingabowl)
 
-        playoff_finish = self.season.team_to_playoff_finish(self.team)
-        if playoff_finish is not None:
-            return ordinal(playoff_finish)
+        if self.playoff_finish_numeric is not None:
+            return ordinal(self.playoff_finish_numeric)
 
         return ''
 
@@ -1094,7 +1097,7 @@ class TeamSeason(object):
                     yield team_season
 
     @fully_cached_property
-    def gazette_str(self):
+    def gazette_standings_str(self):
         gazette_str = "{}. {}, {}, {:.2f}".format(
             self.place_numeric,
             self.team.nickname,
@@ -1109,6 +1112,18 @@ class TeamSeason(object):
             )
 
         return gazette_str
+
+    @fully_cached_property
+    def gazette_postmortem_str(self):
+        return "### [{}, {}]({})".format(
+            self.team,
+            self.headline,
+            self.gazette_link,
+        )
+
+    @fully_cached_property
+    def gazette_link(self):
+        return "{}{}".format(settings.FULL_SITE_URL, self.href)
 
     def __str__(self):
         return "{}, {}".format(self.team, self.year)
@@ -1419,7 +1434,7 @@ class Standings(object):
     @fully_cached_property
     def gazette_str(self):
         return '\n'.join(
-            [ts.gazette_str for ts in self.table],
+            [ts.gazette_standings_str for ts in self.table],
         )
 
     @fully_cached_property
