@@ -11,5 +11,7 @@
   <th>RobScore</th>
 {% else %}
   <th>Streak</th>
-  <th/> {# Playoff Finish #}
+  {% if not standings.is_partial %}
+    <th/> {# Playoff Finish #}
+  {% endif %}
 {% endif %}
