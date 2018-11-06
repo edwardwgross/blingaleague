@@ -197,6 +197,15 @@ table#team_vs_team_grid td {
     font-size: 90%;
 }
 
+table#team_vs_team_grid {
+    width: 100%;
+}
+
+table#team_vs_team_grid th,
+table#team_vs_team_grid th a {
+    white-space: normal;
+}
+
 table#team_vs_team_grid .empty {
     background-color: #eaeaea;
 }
