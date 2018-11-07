@@ -47,6 +47,7 @@ class Member(models.Model):
     nickname = models.CharField(max_length=50, blank=True, null=True)
     defunct = models.BooleanField(default=False)
     email = models.EmailField(blank=True, null=True)
+    use_nickname = models.BooleanField(default=False)
 
     @property
     def cache_key(self):
@@ -54,6 +55,13 @@ class Member(models.Model):
 
     @fully_cached_property
     def full_name(self):
+        if self.use_nickname:
+            return "{} \"{}\" {}".format(
+                self.first_name,
+                self.nickname,
+                self.last_name,
+            )
+
         return "{} {}".format(self.first_name, self.last_name)
 
     @fully_cached_property
