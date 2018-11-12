@@ -168,6 +168,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
         score_min = form_data['score_min']
         score_max = form_data['score_max']
         awards = form_data['awards']
+        streak_min = form_data['streak_min']
 
         team_prefixes = (PREFIX_WINNER, PREFIX_LOSER)
         if wins_only:
@@ -190,6 +191,24 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             opponent_prefix = PREFIX_LOSER if team_prefix == PREFIX_WINNER else PREFIX_WINNER
 
             for game in base_games.filter(**type_kwargs):
+                if CHOICE_BLANGUMS in awards and not game.blangums:
+                    continue
+
+                if CHOICE_SLAPPED_HEARTBEAT in awards and not game.slapped_heartbeat:
+                    continue
+
+                if streak_min is not None:
+                    if team_prefix == PREFIX_WINNER and game.winner_streak < streak_min:
+                        continue
+                    if team_prefix == PREFIX_LOSER and game.loser_streak < streak_min:
+                        continue
+
+                outcome = OUTCOME_WIN
+                streak = game.winner_streak
+                if team_prefix == PREFIX_LOSER:
+                    outcome = OUTCOME_LOSS
+                    streak = game.loser_streak
+
                 game_dict = {
                     'id': game.id,
                     'year': game.year,
@@ -199,9 +218,8 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                     'opponent': getattr(game, opponent_prefix),
                     'opponent_score': getattr(game, "%s_score" % opponent_prefix),
                     'margin': game.margin,
-                    'outcome': OUTCOME_WIN if team_prefix == PREFIX_WINNER else OUTCOME_LOSS,
-                    'blangums': game.blangums,
-                    'slapped_heartbeat': game.slapped_heartbeat,
+                    'outcome': outcome,
+                    'streak': streak,
                 }
 
                 extra_description = ''
@@ -215,17 +233,6 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                 game_dict['extra_description'] = extra_description
 
                 all_games.append(game_dict)
-
-        if CHOICE_BLANGUMS in awards:
-            all_games = filter(
-                lambda x: x['blangums'] and x['week'] <= REGULAR_SEASON_WEEKS,
-                all_games,
-            )
-        if CHOICE_SLAPPED_HEARTBEAT in awards:
-            all_games = filter(
-                lambda x: x['slapped_heartbeat'] and x['week'] <= REGULAR_SEASON_WEEKS,
-                all_games,
-            )
 
         return sorted(all_games, key=lambda x: (x['year'], x['week'], -x['score']))
 

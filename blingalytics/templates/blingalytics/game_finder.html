@@ -51,6 +51,7 @@
           <th>OppScore</th>
           <th>Opponent</th>
           <th>Margin</th>
+          <th>Streak</th>
           <th>{# Extra Description #}</th>
         </tr>
         {% for game in games %}
@@ -64,6 +65,7 @@
             <td>{{ game.opponent_score }}</td>
             <td style="text-align:left">{{ game.opponent.nickname }}</td>
             <td>{{ game.margin }}</td>
+            <td>{{ game.streak }}</td>
             <td style="text-align:left">{{ game.extra_description }}</td>
           </tr>
         {% endfor %}

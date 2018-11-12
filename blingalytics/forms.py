@@ -87,6 +87,7 @@ class GameFinderForm(BaseFinderForm):
             (CHOICE_LOSSES, 'Loser only'),
         ],
     )
+    streak_min = forms.IntegerField(required=False, label='Minimum W/L Streak')
 
 
 class SeasonFinderForm(BaseFinderForm):
