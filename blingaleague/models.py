@@ -218,24 +218,6 @@ class Game(models.Model):
 
         return sum(_win_expectancy(score) for score in game_scores)
 
-    @classmethod
-    def simple_expected_wins(cls, *game_scores):
-        all_scores = sorted(cls.all_scores())
-
-        all_scores_count = len(all_scores)
-
-        loss_cutoff = all_scores[int(all_scores_count / 3)]
-        win_cutoff = all_scores[int(all_scores_count * 2 / 3)]
-
-        def _win_expectancy(score):
-            if score > win_cutoff:
-                return 1
-            elif score < loss_cutoff:
-                return 0
-            return 0.5
-
-        return decimal.Decimal(sum(_win_expectancy(score) for score in game_scores))
-
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
@@ -764,10 +746,6 @@ class TeamSeason(object):
         return graph.htmlcontent
 
     @fully_cached_property
-    def simple_expected_wins(self):
-        return Game.simple_expected_wins(*self.game_scores)
-
-    @fully_cached_property
     def all_play_record(self):
         all_play_record = defaultdict(int)
 
@@ -1213,10 +1191,6 @@ class TeamMultiSeasons(TeamSeason):
     @fully_cached_property
     def expected_wins(self):
         return sum(ts.expected_wins for ts in self)
-
-    @fully_cached_property
-    def simple_expected_wins(self):
-        return sum(ts.simple_expected_wins for ts in self)
 
     @fully_cached_property
     def all_play_wins(self):
