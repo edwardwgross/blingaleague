@@ -218,6 +218,65 @@ class Game(models.Model):
 
         return sum(_win_expectancy(score) for score in game_scores)
 
+    def sequential_team_game(self, team, backwards=False):
+        sequential_team_game = None
+
+        week_obj = self.week_object
+
+        while sequential_team_game is None:
+            if backwards:
+                week_obj = week_obj.previous
+            else:
+                week_obj = week_obj.next
+
+            if week_obj is None:
+                return None
+
+            sequential_team_game = week_obj.team_to_game.get(team)
+
+        return sequential_team_game
+
+    @fully_cached_property
+    def winner_previous(self):
+        return self.sequential_team_game(self.winner, backwards=True)
+
+    @fully_cached_property
+    def winner_next(self):
+        return self.sequential_team_game(self.winner)
+
+    @fully_cached_property
+    def loser_previous(self):
+        return self.sequential_team_game(self.loser, backwards=True)
+
+    @fully_cached_property
+    def loser_next(self):
+        return self.sequential_team_game(self.loser)
+
+    def outcome_streak(self, winner=True):
+        outcome_attr = 'winner' if winner else 'loser'
+        previous_attr = "{}_previous".format(outcome_attr)
+
+        streak = 1
+
+        previous = getattr(self, previous_attr)
+
+        def _get_team(obj):
+            return getattr(obj, outcome_attr)
+
+        while previous is not None and (_get_team(self) == _get_team(previous)):
+            streak += 1
+            previous = getattr(previous, previous_attr)
+
+        return streak
+
+    @fully_cached_property
+    def winner_streak(self):
+        return self.outcome_streak(winner=True)
+
+    @fully_cached_property
+    def loser_streak(self):
+        return self.outcome_streak(winner=False)
+
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
@@ -518,17 +577,16 @@ class TeamSeason(object):
 
     @fully_cached_property
     def current_streak(self):
-        count = 1
-        last_outcome = self.week_outcome(len(self.games))
+        last_game = self.games[-1]
 
-        for game in self.games[::-1][1:]:
-            outcome = self.week_outcome(game.week)
-            if outcome != last_outcome:
-                break
+        if self.team == last_game.winner:
+            outcome = OUTCOME_WIN
+            streak = last_game.winner_streak
+        else:
+            outcome = OUTCOME_LOSS
+            streak = last_game.loser_streak
 
-            count += 1
-
-        return "{}{}".format(last_outcome, count)
+        return "{}{}".format(outcome, streak)
 
     def longest_streak(self, outcome_to_match):
         longest_streak = 0
@@ -1564,6 +1622,14 @@ class Week(object):
         for i, team_score in enumerate(self.team_scores_sorted):
             team_to_rank[team_score['team']] = i + 1
         return team_to_rank
+
+    @fully_cached_property
+    def team_to_game(self):
+        team_to_game = {}
+        for game in self.games:
+            team_to_game[game.winner] = game
+            team_to_game[game.loser] = game
+        return team_to_game
 
     @fully_cached_property
     def blangums(self):
