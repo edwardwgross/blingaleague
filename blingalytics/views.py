@@ -278,6 +278,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                 'OppScore',
                 'Opponent',
                 'Margin',
+                'Streak',
                 'Notes',
             ],
         ]
@@ -292,6 +293,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                 game['opponent_score'],
                 game['opponent'].nickname,
                 game['margin'],
+                game['streak'],
                 game['extra_description'],
             ])
 
