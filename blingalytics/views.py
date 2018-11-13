@@ -239,6 +239,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
     def build_summary(self, games):
         games_counted = set()
         game_dict = defaultdict(lambda: defaultdict(int))
+
         for game in games:
             if game['id'] in games_counted:
                 continue
@@ -408,6 +409,22 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 
                 yield ts
 
+    def build_summary_tables(self, seasons):
+        team_dict = defaultdict(int)
+        year_dict = defaultdict(int)
+
+        for season in seasons:
+            team_dict[season.team] += 1
+            year_dict[season.year] += 1
+
+        team_table = sorted(team_dict.items(), key=lambda x: x[0].nickname)
+        year_table = sorted(year_dict.items())
+
+        return {
+            'teams': team_table,
+            'years': year_table,
+        }
+
     def generate_csv_data(self, seasons):
         csv_data = [
             [
@@ -457,7 +474,11 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 
             seasons = list(self.filter_seasons(form_data))
 
-        context = {'form': season_finder_form, 'seasons': seasons}
+        context = {
+            'form': season_finder_form,
+            'seasons': seasons,
+            'summary_tables': self.build_summary_tables(seasons),
+        }
 
         if 'csv' in request.GET:
             return self.render_to_csv(seasons)

@@ -15,6 +15,33 @@
   </div>
   <div id="seasons_found" class="finder_results">
     {% if seasons %}
+      <h2>Summary</h2>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
+          <th>Team</th>
+          <th>{# Total #}</th>
+        </tr>
+        {% for team, total in summary_tables.teams %}
+          <tr>
+            <td style="text-align:left">{{ team.nickname }}</td>
+            <td>{{ total }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
+          <th>Year</th>
+          <th>{# Total #}</th>
+        </tr>
+        {% for year, total in summary_tables.years %}
+          <tr>
+            <td style="text-align:left">{{ year }}</td>
+            <td>{{ total }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <h2>Seasons</h2>
       <em>(click on the column headings to sort)</em>
       <a class="download_link" href="{{ request.get_full_path }}&csv">Download to CSV</a>
       <table class="blingalytics_table sortable table-striped">
