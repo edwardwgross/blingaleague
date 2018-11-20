@@ -586,6 +586,8 @@ class TeamSeason(object):
             outcome = OUTCOME_LOSS
             streak = last_game.loser_streak
 
+        streak = min(streak, len(self.games))
+
         return "{}{}".format(outcome, streak)
 
     def longest_streak(self, outcome_to_match):
