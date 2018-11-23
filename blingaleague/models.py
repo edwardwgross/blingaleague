@@ -1336,7 +1336,7 @@ class Standings(object):
 
         self.cache_key = "|".join(map(str, (year, all_time, include_playoffs, week_max)))
 
-    def team_record(self, team):
+    def team_season(self, team):
         if self.all_time:
             return TeamMultiSeasons(
                 team.id,
@@ -1352,15 +1352,22 @@ class Standings(object):
             )
 
     def build_table(self, teams):
-        team_records = []
+        team_seasons = []
 
         for team in teams:
-            team_record = self.team_record(team)
+            team_season = self.team_season(team)
 
-            if len(team_record.games) > 0 or self.is_upcoming_season:
-                team_records.append(team_record)
+            if len(team_season.games) > 0 or self.is_upcoming_season:
+                team_seasons.append(team_season)
 
-        return sorted(team_records, key=lambda x: (x.win_pct, x.points), reverse=True)
+        if self.week_max is not None and self.week_max > REGULAR_SEASON_WEEKS:
+            return sorted(
+                team_seasons,
+                key=lambda x: (x.regular_season.win_pct, x.regular_season.points),
+                reverse=True,
+            )
+
+        return sorted(team_seasons, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     @fully_cached_property
     def table(self):
@@ -1463,8 +1470,8 @@ class Standings(object):
             )
 
     def team_to_place(self, team):
-        for place, team_record in enumerate(self.table):
-            if team == team_record.team:
+        for place, team_season in enumerate(self.table):
+            if team == team_season.team:
                 return place + 1
 
         return None

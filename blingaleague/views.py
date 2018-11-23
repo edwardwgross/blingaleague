@@ -158,7 +158,7 @@ class WeekView(GamesView):
 
         context['standings'] = Standings(
             year,
-            week_max=min(week, REGULAR_SEASON_WEEKS),
+            week_max=week,
         )
 
         return self.render_to_response(context)
