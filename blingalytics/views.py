@@ -546,7 +546,13 @@ class TopSeasonsView(TemplateView):
         return top_seasons_tables
 
     def get(self, request):
-        row_limit = int(request.GET.get('limit', 10))
+        row_limit = 10
+
+        try:
+            row_limit = int(request.GET.get('limit', row_limit))
+        except ValueError:
+            # ignore if user passed in a non-int
+            pass
 
         cache_key = "blingalytics_top_seasons|{}".format(row_limit)
 

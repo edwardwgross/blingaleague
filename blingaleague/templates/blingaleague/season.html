@@ -3,7 +3,12 @@
 {% block title %}{{ standings }}{% endblock %}
 
 {% block content %}
-<h1>{{ standings }}</h1>
+<h1>
+  {{ standings }}
+  {% if week_max %}
+    (through week {{ week_max }})
+  {% endif %}
+</h1>
 
 {% if standings.headline %}<h2>{{ standings.headline }}</h2>{% endif %}
 

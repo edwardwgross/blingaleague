@@ -99,12 +99,28 @@ class SingleSeasonView(SeasonView):
         return week_links
 
     def get(self, request, year):
-        self.standings = Standings(year=int(year))
+        standings_kwargs = {
+            'year': int(year),
+        }
+
+        week_max = None
+        if 'week_max' in request.GET:
+            try:
+                week_max = int(request.GET.get('week_max', REGULAR_SEASON_WEEKS))
+                standings_kwargs['week_max'] = week_max
+            except ValueError:
+                # ignore if user passed in a non-int
+                pass
+
+        self.standings = Standings(**standings_kwargs)
+
         context = {
             'standings': self.standings,
             'season_links': self.season_links,
             'week_links': self.week_links,
+            'week_max': week_max,
         }
+
         return self.render_to_response(context)
 
 
