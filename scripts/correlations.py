@@ -2,7 +2,7 @@ import numpy
 import random
 import statistics
 
-from blingaleague.models import TeamSeason, Game
+from blingaleague.models import TeamSeason, Game, Standings
 
 
 def two_stat_correl(attr1, attr2):
@@ -28,6 +28,13 @@ def in_season_correl(attr, week):
         list_part.append(float(attr_part))
         list_remain.append(float(wins_remain))
     return numpy.corrcoef(list_part, list_remain)[0][1]
+
+
+def full_season_correl(year, attr1, attr2):
+    standings = Standings(year)
+    list1 = [float(getattr(ts, attr1)) for ts in standings.table]
+    list2 = [float(getattr(ts, attr2)) for ts in standings.table]
+    return numpy.corrcoef(list1, list2)[0][1]
 
 
 def generate_score(low, high):
