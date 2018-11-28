@@ -759,6 +759,9 @@ class TeamSeason(object):
             # too expensive to calculate for more than one season
             return {}
 
+        if len(self.games) == 0:
+            return {}
+
         expected_wins_by_game = self.expected_wins_by_game
         num_games = len(expected_wins_by_game)
         if num_games > REGULAR_SEASON_WEEKS:
@@ -1081,6 +1084,9 @@ class TeamSeason(object):
 
     @fully_cached_property
     def most_similar(self):
+        if len(self.games) == 0:
+            return []
+
         limit = 10
         similar_seasons = []
         min_score = 900

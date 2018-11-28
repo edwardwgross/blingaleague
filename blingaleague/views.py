@@ -73,31 +73,6 @@ class CurrentSeasonView(SeasonView):
 
 class SingleSeasonView(SeasonView):
 
-    @cached_property
-    def week_links(self):
-        week_links = []
-
-        weeks_with_games = set(
-            Game.objects.filter(
-                year=self.standings.year,
-            ).values_list(
-                'week',
-                flat=True,
-            ),
-        )
-
-        for week in sorted(weeks_with_games):
-            link_data = {
-                'text': week,
-                'href': urlresolvers.reverse_lazy(
-                    'blingaleague.week',
-                    args=(self.standings.year, week,),
-                ),
-            }
-            week_links.append(link_data)
-
-        return week_links
-
     def get(self, request, year):
         standings_kwargs = {
             'year': int(year),
@@ -114,11 +89,20 @@ class SingleSeasonView(SeasonView):
 
         self.standings = Standings(**standings_kwargs)
 
+        weeks_with_games = sorted(set(
+            Game.objects.filter(
+                year=self.standings.year,
+            ).values_list(
+                'week',
+                flat=True,
+            ),
+        ))
+
         context = {
             'standings': self.standings,
             'season_links': self.season_links,
-            'week_links': self.week_links,
             'week_max': week_max,
+            'weeks_with_games': weeks_with_games,
         }
 
         return self.render_to_response(context)

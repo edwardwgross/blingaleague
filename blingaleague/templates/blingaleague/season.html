@@ -14,11 +14,11 @@
 
 {% include "blingaleague/standings_table.html" %}
 
-{% if week_links %}
+{% if weeks_with_games %}
   <div>
     Week:
-    {% for link in week_links %}
-      <a href="{{ link.href }}">{{ link.text }}</a>
+    {% for week in weeks_with_games %}
+      <a href="{% url 'blingaleague.week' standings.year week %}">{{ week }}</a>
     {% endfor %}
   </div>
 {% endif %}
