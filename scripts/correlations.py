@@ -16,17 +16,17 @@ def two_stat_correl(attr1, attr2):
     return numpy.corrcoef(list1, list2)[0][1]
 
 
-def in_season_correl(attr, week):
+def in_season_correl(attr1, attr2, cutoff_week):
     list_remain = []
     list_part = []
     for ts_full in TeamSeason.all():
         if ts_full.is_partial:
             continue
-        ts_part = TeamSeason(ts_full.team.id, ts_full.year, week_max=week)
-        attr_part = getattr(ts_part, attr)
-        wins_remain = ts_full.win_count - ts_part.win_count
-        list_part.append(float(attr_part))
-        list_remain.append(float(wins_remain))
+        ts_part = TeamSeason(ts_full.team.id, ts_full.year, week_max=cutoff_week)
+        attr1_part = getattr(ts_part, attr1)
+        attr2_remain = getattr(ts_full, attr2) - getattr(ts_part, attr2)
+        list_part.append(float(attr1_part))
+        list_remain.append(float(attr2_remain))
     return numpy.corrcoef(list_part, list_remain)[0][1]
 
 
