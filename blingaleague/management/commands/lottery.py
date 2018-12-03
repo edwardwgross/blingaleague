@@ -50,8 +50,8 @@ class Command(LabelCommand):
             points = team[2]
             losses_chances = losses_weight * (losses - losses_base) / total_losses
             points_chances = points_weight * (points_base - points) / total_points
-            overall_chances = round(losses_chances + points_chances, 4)
-            print("{} => {}%".format(name.ljust(16), (100 * overall_chances)))
+            overall_chances = losses_chances + points_chances
+            print("{} => {:.2f}%".format(name.ljust(16), (100 * overall_chances)))
             chances.append([name, overall_chances])
 
         print()
