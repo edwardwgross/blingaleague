@@ -148,6 +148,9 @@ class MatchupView(GamesView):
 
 
 class WeekView(GamesView):
+    post_games_sub_templates = (
+        'blingaleague/standings_sub_page.html',
+    )
     games_sub_template = 'blingaleague/weekly_games.html'
 
     def get(self, request, year, week):
@@ -165,8 +168,6 @@ class WeekView(GamesView):
 
 
 class TeamSeasonView(GamesView):
-    # would like to include 'blingaleague/similar_seasons.html',
-    # but it's a performance nightmare
     pre_games_sub_templates = (
         'blingaleague/expected_win_distribution_team.html',
     )

@@ -211,7 +211,7 @@ table#team_vs_team_grid .empty {
 }
 
 #games {
-    max-width: 600px;
+    width: fit-content;
 }
 
 #games .game {
@@ -219,6 +219,7 @@ table#team_vs_team_grid .empty {
     padding: 12px 24px;
     text-align: center;
     border-bottom: 1px solid #a4c2f4;
+    width: 600px;
 }
 
 #games .game:first-of-type {
