@@ -1167,9 +1167,10 @@ class TeamSeason(object):
 
     @fully_cached_property
     def gazette_postmortem_str(self):
-        return "### [{}, {}]({})".format(
+        return "### [{}, {}, {:.2f} expected wins]({})".format(
             self.team,
             self.headline,
+            self.expected_wins,
             self.gazette_link,
         )
 
@@ -1464,7 +1465,15 @@ class Standings(object):
     @fully_cached_property
     def href(self):
         if self.year is not None:
-            return urlresolvers.reverse_lazy('blingaleague.single_season', args=(self.year,))
+            getargs = ''
+            if self.week_max is not None:
+                getargs = "?week_max={}".format(self.week_max)
+
+            return "{}{}".format(
+                urlresolvers.reverse_lazy('blingaleague.single_season', args=(self.year,)),
+                getargs,
+            )
+
         elif self.all_time:
             getargs = ''
             if self.include_playoffs:
@@ -1504,10 +1513,9 @@ class Standings(object):
                 len(self.table[0].games),
             )
 
-        return "{}{}{}".format(
+        return "{}{}".format(
             settings.FULL_SITE_URL,
-            season_finder_url,
-            querystring,
+            self.href,
         )
 
     def __str__(self):
