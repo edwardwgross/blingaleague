@@ -1492,8 +1492,8 @@ class Standings(object):
         return None
 
     @classmethod
-    def latest(cls):
-        return cls(year=Year.max())
+    def latest(cls, week_max=None):
+        return cls(year=Year.max(), week_max=week_max)
 
     @fully_cached_property
     def gazette_str(self):
