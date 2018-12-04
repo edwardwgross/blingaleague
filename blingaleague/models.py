@@ -786,6 +786,11 @@ class TeamSeason(object):
 
             win_distribution[win_count] += running_prob
 
+        # for low enough values, it can sometimes dip below zero
+        for win_count, probability in win_distribution.items():
+            if probability < 0:
+                win_distribution[win_count] = 0
+
         return dict(win_distribution)
 
     @fully_cached_property
