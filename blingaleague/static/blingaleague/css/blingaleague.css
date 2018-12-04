@@ -242,7 +242,7 @@ table#team_vs_team_grid .empty {
 table.game_table {
     clear: both;
     padding: 12px 24px;
-    width: 100%;
+    width: 600px;
 }
 table.game_table tr.playoffs {
     background-color: #f4f4f4;
@@ -411,6 +411,7 @@ h3.no_results_message {
     #main_outer {
         overflow-x: scroll;
         margin-top: 0;
+        padding: 0 30px 60px 30px;
     }
 
     nav.navbar {
