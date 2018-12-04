@@ -245,6 +245,7 @@ table.game_table {
     width: 100%;
 }
 table.game_table tr.playoffs {
+    background-color: #f4f4f4;
 }
 table.game_table th {
     white-space: nowrap;
