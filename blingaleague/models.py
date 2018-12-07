@@ -726,20 +726,6 @@ class TeamSeason(object):
         ))
 
     @fully_cached_property
-    def www(self):
-        expected_wins_by_game = []
-
-        for week, raw_xw in enumerate(self.raw_expected_wins_by_game, 1):
-            week_obj = Week(self.year, week)
-            expected_wins_by_game.append(raw_xw * week_obj.expected_wins_scaling_factor)
-
-        return sum(expected_wins_by_game)
-
-    @fully_cached_property
-    def xxx(self):
-        return self.all_play_win_pct * len(self.games)
-
-    @fully_cached_property
     def raw_expected_wins(self):
         return sum(self.raw_expected_wins_by_game)
 
@@ -1471,7 +1457,7 @@ class Standings(object):
     def href(self):
         if self.year is not None:
             getargs = ''
-            if self.week_max is not None:
+            if self.week_max is not None and self.week_max != REGULAR_SEASON_WEEKS:
                 getargs = "?week_max={}".format(self.week_max)
 
             return "{}{}".format(
