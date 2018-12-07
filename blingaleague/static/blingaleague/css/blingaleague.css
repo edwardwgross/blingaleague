@@ -367,6 +367,7 @@ table.blingalytics_table.sortable tbody tr::before {
 .blingalytics a.download_link {
     font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     float: right;
+    font-size: 80%;
  }
 
 h3.no_results_message {
