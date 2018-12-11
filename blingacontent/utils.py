@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 from oauth2client import file, client, tools
 
 from blingaleague.models import Week, Standings, TeamSeason, \
-                                EXPANSION_SEASON, REGULAR_SEASON_WEEKS, \
+                                EXPANSION_SEASON, REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK, \
                                 OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY, PLAYOFF_TEAMS, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
                                 BLINGABOWL_TITLE_BASE
@@ -38,7 +38,7 @@ def get_gmail_service():
 
 
 def new_gazette_body_template():
-    last_week = Week.latest()
+    last_week = Week(2018,16)#.latest()
 
     current_standings = Standings.latest(week_max=last_week.week)
 
@@ -52,12 +52,20 @@ def new_gazette_body_template():
         last_week.gazette_str,
     ])
 
-    sections.append([
-        "# [Standings]({})".format(
-            current_standings.gazette_link,
-        ),
-        current_standings.gazette_str,
-    ])
+    if last_week.week <= REGULAR_SEASON_WEEKS:
+        sections.append([
+            "# [Standings]({})".format(
+                current_standings.gazette_link,
+            ),
+            current_standings.gazette_str,
+        ])
+    elif last_week.week == BLINGABOWL_WEEK:
+        sections.append([
+            "# [Final Standings]({})".format(
+                current_standings.gazette_link,
+            ),
+        ])
+        sections.append(['# Final Payouts']),
 
     sections.append([
         '# Weekly Awards',
@@ -82,13 +90,17 @@ def new_gazette_body_template():
     else:
         sections.append(postmortems_section(last_week, current_standings))
 
-    sections.append([
-        "# {} Preview".format(
-            Week.week_to_title(last_week.year, last_week.week + 1),
-        ),
-        '## Game of the Blingaweek',
-        '## Other Blingamatches',
-    ])
+    if last_week.week == BLINGABOWL_WEEK:
+        sections.append(['# Blingapower Rankings'])
+        sections.append(['# Draft Lottery'])
+    else:
+        sections.append([
+            "# {} Preview".format(
+                Week.week_to_title(last_week.year, last_week.week + 1),
+            ),
+            '## Game of the Blingaweek',
+            '## Other Blingamatches',
+        ])
 
     sections.append([
         '# Closing Thoughts',
