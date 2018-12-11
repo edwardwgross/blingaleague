@@ -160,24 +160,30 @@ class Game(models.Model):
     @fully_cached_property
     def playoff_title(self):
         if self.is_playoffs:
-            try:
-                season = Season.objects.get(year=self.year)
-                if self.week == BLINGABOWL_WEEK:
-                    if self.winner == season.place_1:
-                        playoff_title = "{} {}".format(BLINGABOWL_TITLE_BASE, season.blingabowl)
-                    else:
-                        playoff_title = THIRD_PLACE_TITLE_BASE
-                elif self.week == (BLINGABOWL_WEEK - 1):
-                    if self.winner == season.place_5:
-                        playoff_title = FIFTH_PLACE_TITLE_BASE
-                    else:
-                        playoff_title = SEMIFINALS_TITLE_BASE
-                else:
-                    playoff_title = QUARTERFINALS_TITLE_BASE
+            previous_week = self.week_object.previous
 
-                return "{}, {}".format(playoff_title, self.year)
-            except Season.DoesNotExist:
-                pass  # current season won't have one
+            winner_last_game = previous_week.team_to_game.get(self.winner)
+            loser_last_game = previous_week.team_to_game.get(self.loser)
+
+            if self.week == BLINGABOWL_WEEK:
+                if self.winner == winner_last_game.winner:
+                    # blingabowl participants must have won their last game
+                    playoff_title = "{} {}".format(
+                        BLINGABOWL_TITLE_BASE,
+                        Season.year_to_blingabowl(self.year),
+                    )
+                else:
+                    playoff_title = THIRD_PLACE_TITLE_BASE
+            elif self.week == (BLINGABOWL_WEEK - 1):
+                if winner_last_game is None or self.winner == winner_last_game.winner:
+                    # semifinal participants either won their last game or had a bye
+                    playoff_title = SEMIFINALS_TITLE_BASE
+                else:
+                    playoff_title = FIFTH_PLACE_TITLE_BASE
+            else:
+                playoff_title = QUARTERFINALS_TITLE_BASE
+
+            return "{}, {}".format(playoff_title, self.year)
 
         return ''
 
@@ -190,23 +196,30 @@ class Game(models.Model):
         return self.winner_score + self.loser_score
 
     @classmethod
-    def all_scores(cls):
-        cache_key = 'blingaleague_game_all_scores'
+    def all_scores(cls, include_playoffs=False):
+        cache_key = "blingaleague_game_all_scores|{}".format(include_playoffs)
 
         all_scores = CACHE.get(cache_key)
 
         if all_scores is None:
             all_scores = []
-            game_results = Game.objects.all().values_list('winner_score', 'loser_score')
+
+            games = Game.objects.all()
+            if not include_playoffs:
+                games = games.filter(week__lte=REGULAR_SEASON_WEEKS)
+
+            game_results = games.values_list('winner_score', 'loser_score')
+
             for winner_score, loser_score in game_results:
                 all_scores.extend([winner_score, loser_score])
+
             CACHE.set(cache_key, all_scores)
 
         return all_scores
 
     @classmethod
-    def expected_wins(cls, *game_scores):
-        all_scores = cls.all_scores()
+    def expected_wins(cls, *game_scores, include_playoffs=False):
+        all_scores = cls.all_scores(include_playoffs=include_playoffs)
 
         all_scores_count = decimal.Decimal(len(all_scores))
 
@@ -1673,9 +1686,10 @@ class Week(object):
     @classmethod
     def week_to_title(self, year, week):
         special_weeks = {
-            14: 'Quarterfinals',
-            15: 'Semifinals',
-            16: "Blingabowl {}".format(
+            BLINGABOWL_WEEK - 2: QUARTERFINALS_TITLE_BASE,
+            BLINGABOWL_WEEK - 1: SEMIFINALS_TITLE_BASE,
+            BLINGABOWL_WEEK: "{} {}".format(
+                BLINGABOWL_TITLE_BASE,
                 Season.year_to_blingabowl(year),
             ),
         }
