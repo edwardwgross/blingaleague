@@ -1078,7 +1078,7 @@ class TeamSeason(object):
             },
             {
                 'description': str(self.standings),
-                'href': self.standings.href,
+                'href': self.regular_season.standings.href,
             },
         ]
 
