@@ -38,7 +38,7 @@ def get_gmail_service():
 
 
 def new_gazette_body_template():
-    last_week = Week(2018,16)#.latest()
+    last_week = Week.latest()
 
     current_standings = Standings.latest(week_max=last_week.week)
 
