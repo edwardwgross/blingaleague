@@ -1742,6 +1742,15 @@ class Week(object):
             ),
         )
 
+    @classmethod
+    def playoff_weeks(cls):
+        return list(
+            filter(
+                lambda x: x.week > REGULAR_SEASON_WEEKS,
+                cls.all(),
+            ),
+        )
+
     def __str__(self):
         return "Week {}, {}".format(self.week, self.year)
 
