@@ -44,6 +44,10 @@ INSTALLED_APPS = (
     'blingalytics',
 )
 
+TEMPLATE_DIRS = (
+    BASE_DIR / 'blingaleague' / 'templates' / 'blingaleague',
+)
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
