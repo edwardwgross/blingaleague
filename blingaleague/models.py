@@ -1218,6 +1218,15 @@ class TeamMultiSeasons(TeamSeason):
         years_string = ','.join(map(str, self.years))
         self.cache_key = '|'.join(map(str, (team_id, years_string, include_playoffs, week_max)))
 
+    def _sum_seasonal_values(self, prop_name):
+        return sum(getattr(ts, prop_name, 0) for ts in self)
+
+    def _extend_seasonal_values(self, prop_name):
+        full_list = []
+        for team_season in self:
+            full_list.extend(getattr(team_season, prop_name, []))
+        return full_list
+
     @fully_cached_property
     def team_seasons(self):
         team_seasons = []
@@ -1236,80 +1245,59 @@ class TeamMultiSeasons(TeamSeason):
 
     @fully_cached_property
     def games(self):
-        games = []
-        for team_season in self:
-            games.extend(team_season.games)
-        return games
+        return self._extend_seasonal_values('games')
 
     @fully_cached_property
     def wins(self):
-        wins = []
-        for team_season in self:
-            wins.extend(team_season.wins)
-        return wins
+        return self._extend_seasonal_values('wins')
 
     @fully_cached_property
     def losses(self):
-        losses = []
-        for team_season in self:
-            losses.extend(team_season.losses)
-        return losses
+        return self._extend_seasonal_values('losses')
 
     @fully_cached_property
     def blangums_games(self):
-        blangums_games = []
-        for team_season in self:
-            blangums_games.extend(team_season.blangums_games)
-        return blangums_games
+        return self._extend_seasonal_values('blangums_games')
 
     @fully_cached_property
     def slapped_heartbeat_games(self):
-        slapped_heartbeat_games = []
-        for team_season in self:
-            slapped_heartbeat_games.extend(team_season.slapped_heartbeat_games)
-        return slapped_heartbeat_games
+        return self._extend_seasonal_values('slapped_heartbeat_games')
 
     @fully_cached_property
     def raw_expected_wins_by_game(self):
-        raw_expected_wins_by_game = []
-        for ts in self:
-            raw_expected_wins_by_game.extend(ts.raw_expected_wins_by_game)
-        return raw_expected_wins_by_game
+        return self._extend_seasonal_values('raw_expected_wins_by_game')
 
     @fully_cached_property
     def expected_wins_by_game(self):
-        expected_wins_by_game = []
-        for ts in self:
-            expected_wins_by_game.extend(ts.expected_wins_by_game)
-        return expected_wins_by_game
+        return self._extend_seasonal_values('expected_wins_by_game')
 
     @fully_cached_property
     def raw_expected_wins(self):
-        return sum(ts.raw_expected_wins for ts in self)
+        return self._sum_seasonal_values('raw_expected_wins')
 
     @fully_cached_property
     def expected_wins(self):
-        return sum(ts.expected_wins for ts in self)
+        return self._sum_seasonal_values('expected_wins')
 
     @fully_cached_property
     def all_play_wins(self):
-        return sum(ts.all_play_wins for ts in self)
+        return self._sum_seasonal_values('all_play_wins')
 
     @fully_cached_property
     def all_play_losses(self):
-        return sum(ts.all_play_losses for ts in self)
+        return self._sum_seasonal_values('all_play_losses')
 
     @fully_cached_property
     def double_play_wins(self):
-        return sum(ts.double_play_wins for ts in self)
+        return self._sum_seasonal_values('double_play_wins')
 
     @fully_cached_property
     def double_play_losses(self):
-        return sum(ts.double_play_losses for ts in self)
+        return self._sum_seasonal_values('double_play_losses')
 
     @fully_cached_property
     def robscore(self):
-        return sum(ts.robscore for ts in self)
+        return self._sum_seasonal_values('robscore')
 
     @fully_cached_property
     def clinched_playoffs(self):
