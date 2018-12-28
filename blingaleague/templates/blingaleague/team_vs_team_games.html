@@ -26,7 +26,7 @@
       {% endif %}
       <td><a href="{% url 'blingaleague.team_season' base_object.team2.id game.year %}">{{ base_object.team2 }}</a></td>
       <td>{{ game.margin }}</td>
-        <td style="text-align:left">
+      <td style="text-align:left">
         {% if game.playoff_title %}
           {{ game.playoff_title }}
         {% else %}

@@ -9,36 +9,48 @@
 <h1>{{ team }}</h1>
 
 <div id="team_details">
-  <div><h2>Overall record:</h2> {{ team.all_time_record }} ({{ team.all_time_record_with_playoffs }} including playoffs)</div>
+  <h2>Overall record:</h2>
   <div>
-    <h2>Seasons</h2>
-    <table class="standings_table">
-      <tr>
-        <th/> {# Year #}
-        <th>Place</th>
-        <th>W</th>
-        <th>L</th>
-        <th>Points</th>
-        <th>Exp. W</th>
-        <th>Exp. %</th>
-        <th>Blangums</th>
-        <th/>{# Playoff Finish #}
-      </tr>
-      {% for team_season in team.seasons reversed %}
-        <tr>
-          <td><a href="{{ team_season.standings.href }}">{{ team_season.standings.year }}</a></td>
-          <td><a href="{{ team_season.standings.href }}">{{ team_season.place }}</a></td>
-          <td><a href="{{ team_season.href }}">{{ team_season.win_count }}</a></td>
-          <td><a href="{{ team_season.href }}">{{ team_season.loss_count }}</a></td>
-          <td>{{ team_season.points|intcomma }}</td>
-          <td>{{ team_season.expected_wins|floatformat:2 }}</td>
-          <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
-          <td>{{ team_season.blangums_count }}</td>
-          <td style="text-align:left">{{ team_season.playoff_finish }}</td>
-        </tr>
-      {% endfor %}
-    </ul>
+    {{ team.all_time_record }} ({{ team.all_time_record_with_playoffs }} including playoffs)
   </div>
+
+  <h2>Seasons</h2>
+  <table class="standings_table">
+    <tr>
+      <th/> {# Year #}
+      <th>Place</th>
+      <th>W</th>
+      <th>L</th>
+      <th>Points</th>
+      <th>Exp. W</th>
+      <th>Exp. %</th>
+      <th>Blangums</th>
+      <th/>{# Playoff Finish #}
+    </tr>
+    {% for team_season in team.seasons reversed %}
+      <tr>
+        <td><a href="{{ team_season.standings.href }}">{{ team_season.standings.year }}</a></td>
+        <td><a href="{{ team_season.standings.href }}">{{ team_season.place }}</a></td>
+        <td><a href="{{ team_season.href }}">{{ team_season.win_count }}</a></td>
+        <td><a href="{{ team_season.href }}">{{ team_season.loss_count }}</a></td>
+        <td>{{ team_season.points|intcomma }}</td>
+        <td>{{ team_season.expected_wins|floatformat:2 }}</td>
+        <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
+        <td>{{ team_season.blangums_count }}</td>
+        <td style="text-align:left">{{ team_season.playoff_finish }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Team Blangums ({{ team.blangums_games|length }})</h2>
+  {% with team.blangums_games as games %}
+    {% include "blingaleague/awards_games.html" %}
+  {% endwith %}
+
+  <h2>Slapped Heartbeats ({{ team.slapped_heartbeat_games|length }})</h2>
+  {% with team.slapped_heartbeat_games as games %}
+    {% include "blingaleague/awards_games.html" %}
+  {% endwith %}
 </div>
 
 {% endblock content %}

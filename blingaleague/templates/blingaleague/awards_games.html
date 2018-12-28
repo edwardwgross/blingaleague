@@ -1,0 +1,30 @@
+<table class="game_table sortable">
+  <tr>
+    <th>Year</th>
+    <th>Week</th>
+    <th>PF</th>
+    <th>PA</th>
+    <th>Opponent</th>
+    <th>Margin</th>
+  </tr>
+  {% for game in games reversed %}
+    <tr {% if game.is_playoffs %}class="playoffs"{% endif %}>
+      <td><a href="{% url 'blingaleague.single_season' game.year %}">{{ game.year }}</a></td>
+      <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
+      {% if team == game.winner %}
+        <td>{{ game.winner_score }}</td>
+        <td>{{ game.loser_score }}</td>
+        <td style="text-align:left">
+          <a href="{% url 'blingaleague.team_season' game.loser.id game.year %}">{{ game.loser }}</a>
+        </td>
+      {% else %}
+        <td>{{ game.loser_score }}</td>
+        <td>{{ game.winner_score }}</td>
+        <td style="text-align:left">
+          <a href="{% url 'blingaleague.team_season' game.winner.id game.year %}">{{ game.winner }}</a>
+        </td>
+      {% endif %}
+      <td>{{ game.margin }}</td>
+    </tr>
+  {% endfor %}
+</table>

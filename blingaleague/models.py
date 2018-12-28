@@ -79,6 +79,14 @@ class Member(models.Model):
         return TeamMultiSeasons(self.id)
 
     @fully_cached_property
+    def blangums_games(self):
+        return self.seasons.blangums_games
+
+    @fully_cached_property
+    def slapped_heartbeat_games(self):
+        return self.seasons.slapped_heartbeat_games
+
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.id,))
 
@@ -882,22 +890,28 @@ class TeamSeason(object):
         return decimal.Decimal(self.double_play_wins) / decimal.Decimal(double_play_total)
 
     @fully_cached_property
-    def blangums_count(self):
+    def blangums_games(self):
         def _is_blangums(game):
             return (game.week_object.blangums == self.team and
                     game.week <= REGULAR_SEASON_WEEKS)
 
-        blangums_list = list(filter(_is_blangums, self.games))
-        return len(blangums_list)
+        return list(filter(_is_blangums, self.games))
 
     @fully_cached_property
-    def slapped_heartbeat_count(self):
+    def blangums_count(self):
+        return len(self.blangums_games)
+
+    @fully_cached_property
+    def slapped_heartbeat_games(self):
         def _is_slapped_heartbeat(game):
             return (game.week_object.slapped_heartbeat == self.team and
                     game.week <= REGULAR_SEASON_WEEKS)
 
-        slapped_heartbeat_list = list(filter(_is_slapped_heartbeat, self.games))
-        return len(slapped_heartbeat_list)
+        return list(filter(_is_slapped_heartbeat, self.games))
+
+    @fully_cached_property
+    def slapped_heartbeat_count(self):
+        return len(slapped_heartbeat_games)
 
     @fully_cached_property
     def robscore(self):
@@ -1240,6 +1254,20 @@ class TeamMultiSeasons(TeamSeason):
         for team_season in self:
             losses.extend(team_season.losses)
         return losses
+
+    @fully_cached_property
+    def blangums_games(self):
+        blangums_games = []
+        for team_season in self:
+            blangums_games.extend(team_season.blangums_games)
+        return blangums_games
+
+    @fully_cached_property
+    def slapped_heartbeat_games(self):
+        slapped_heartbeat_games = []
+        for team_season in self:
+            slapped_heartbeat_games.extend(team_season.slapped_heartbeat_games)
+        return slapped_heartbeat_games
 
     @fully_cached_property
     def raw_expected_wins_by_game(self):
@@ -1646,8 +1674,8 @@ class Week(object):
     @fully_cached_property
     def team_to_rank(self):
         team_to_rank = {}
-        for i, team_score in enumerate(self.team_scores_sorted):
-            team_to_rank[team_score['team']] = i + 1
+        for i, team_score in enumerate(self.team_scores_sorted, 1):
+            team_to_rank[team_score['team']] = i
         return team_to_rank
 
     @fully_cached_property
