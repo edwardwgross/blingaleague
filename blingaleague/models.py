@@ -911,7 +911,7 @@ class TeamSeason(object):
 
     @fully_cached_property
     def slapped_heartbeat_count(self):
-        return len(slapped_heartbeat_games)
+        return len(self.slapped_heartbeat_games)
 
     @fully_cached_property
     def robscore(self):
