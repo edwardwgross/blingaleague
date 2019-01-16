@@ -8,7 +8,7 @@ import statistics
 from collections import defaultdict
 
 from django.conf import settings
-from django.contrib.humanize.templatetags.humanize import ordinal
+from django.contrib.humanize.templatetags.humanize import ordinal, intcomma
 from django.core import urlresolvers
 from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
@@ -1052,7 +1052,7 @@ class TeamSeason(object):
         text = "{}-{}, {} points, {}".format(
             regular_season.win_count,
             regular_season.loss_count,
-            regular_season.points,
+            intcomma(regular_season.points),
             regular_season.place,
         )
 
@@ -1168,11 +1168,11 @@ class TeamSeason(object):
 
     @fully_cached_property
     def gazette_standings_str(self):
-        gazette_str = "{}. {}, {}, {:.2f}".format(
+        gazette_str = "{}. {}, {}, {}".format(
             self.place_numeric,
             self.team.nickname,
             self.record,
-            self.points,
+            intcomma(self.points),
         )
 
         if self.standings_note:
