@@ -661,8 +661,20 @@ class TeamSeason(object):
         return max(self.game_scores)
 
     @fully_cached_property
-    def stdev(self):
+    def stdev_score(self):
         return statistics.pstdev(self.game_scores)
+
+    @fully_cached_property
+    def average_margin(self):
+        return statistics.mean(self.game_margins)
+
+    @fully_cached_property
+    def average_margin_win(self):
+        return statistics.mean(self.win_margins)
+
+    @fully_cached_property
+    def average_margin_loss(self):
+        return statistics.mean(self.loss_margins)
 
     @fully_cached_property
     def standings(self):
@@ -727,6 +739,18 @@ class TeamSeason(object):
         loss_tuples = [(l.year, l.week, l.loser_score) for l in self.losses]
         all_tuples = sorted(win_tuples + loss_tuples)
         return list(map(lambda x: x[2], all_tuples))
+
+    @fully_cached_property
+    def win_margins(self):
+        return sorted(map(lambda x: x.margin, self.wins))
+
+    @fully_cached_property
+    def loss_margins(self):
+        return sorted(map(lambda x: x.margin, self.losses))
+
+    @fully_cached_property
+    def game_margins(self):
+        return sorted(self.win_margins + self.loss_margins)
 
     @fully_cached_property
     def is_partial(self):
