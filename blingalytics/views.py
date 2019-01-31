@@ -510,6 +510,12 @@ class TopSeasonsView(TemplateView):
             ('Lowest Maximum Score', 'max_score', False, TOP_SEASONS_STAT_THRESHOLD),
             ('Highest Standard Deviation', 'stdev_score', True, TOP_SEASONS_STAT_THRESHOLD),
             ('Lowest Standard Deviation', 'stdev_score', False, TOP_SEASONS_STAT_THRESHOLD),
+            ('Highest Average Margin', 'average_margin', True, TOP_SEASONS_STAT_THRESHOLD),
+            ('Lowest Average Margin', 'average_margin', False, TOP_SEASONS_STAT_THRESHOLD),
+            ('Highest Average Margin in Wins', 'average_margin_win', True, TOP_SEASONS_STAT_THRESHOLD),
+            ('Lowest Average Margin in Wins', 'average_margin_win', False, TOP_SEASONS_STAT_THRESHOLD),
+            ('Highest Average Margin in Losses', 'average_margin_loss', True, TOP_SEASONS_STAT_THRESHOLD),
+            ('Lowest Average Margin in Losses', 'average_margin_loss', False, TOP_SEASONS_STAT_THRESHOLD),
             ('Longest Winning Streak (single season)', 'longest_winning_streak', True, 1),
             ('Longest Losing Streak (single season)', 'longest_losing_streak', True, 1),
         )

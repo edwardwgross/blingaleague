@@ -287,7 +287,8 @@ table.blingalytics_table.sortable tbody tr::before {
 }
 
 #top_seasons table.blingalytics_table th {
-    width: 400px;
+    width: 20em;
+    white-space: normal;
 }
 
 #top_seasons table.blingalytics_table td {
