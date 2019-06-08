@@ -466,22 +466,22 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
         return csv_data
 
     def get(self, request):
-        seasons = []
+        team_seasons = []
 
         season_finder_form = SeasonFinderForm(request.GET)
         if season_finder_form.is_valid():
             form_data = season_finder_form.cleaned_data
 
-            seasons = list(self.filter_seasons(form_data))
+            team_seasons = list(self.filter_seasons(form_data))
 
         context = {
             'form': season_finder_form,
-            'seasons': seasons,
-            'summary_tables': self.build_summary_tables(seasons),
+            'team_seasons': team_seasons,
+            'summary_tables': self.build_summary_tables(team_seasons),
         }
 
         if 'csv' in request.GET:
-            return self.render_to_csv(seasons)
+            return self.render_to_csv(team_seasons)
 
         return self.render_to_response(context)
 

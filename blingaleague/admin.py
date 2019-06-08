@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.forms.widgets import NumberInput
 
-from .models import Member, Game, Season, FakeMember
+from .models import Member, Game, Postseason, FakeMember
 
 
 class GameAdmin(admin.ModelAdmin):
@@ -15,5 +15,5 @@ class GameAdmin(admin.ModelAdmin):
 
 admin.site.register(Member)
 admin.site.register(Game, GameAdmin)
-admin.site.register(Season)
+admin.site.register(Postseason)
 admin.site.register(FakeMember)

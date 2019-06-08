@@ -14,7 +14,7 @@
     {% endwith %}
   </div>
   <div id="seasons_found" class="finder_results">
-    {% if seasons %}
+    {% if team_seasons %}
       <h2>Summary</h2>
       <table class="blingalytics_table table-striped" style="display:inline-table">
         <tr>
@@ -59,29 +59,29 @@
           <th>Blangums</th>
           <th>Playoff Finish</th>
         </tr>
-        {% for season in seasons %}
+        {% for team_season in team_seasons %}
           <tr>
-            <td><a href="{{ season.regular_season.standings.href }}">{{ season.year }}</a></td>
+            <td><a href="{{ team_season.regular_season.standings.href }}">{{ team_season.year }}</a></td>
             <td style="text-align:left">
-              <a href="{{ season.href }}">{{ season.team.nickname }}</a>
-              {% if season.standings_note %}
-                <span class="standings_note" title="{{ season.standings_note.1 }}">{{ season.standings_note.0 }}</span>
+              <a href="{{ team_season.href }}">{{ team_season.team.nickname }}</a>
+              {% if team_season.standings_note %}
+                <span class="standings_note" title="{{ team_season.standings_note.1 }}">{{ team_season.standings_note.0 }}</span>
               {% endif %}
             </td>
-            <td>{{ season.win_count }}</td>
-            <td>{{ season.loss_count }}</td>
-            <td>{{ season.win_pct|floatformat:3 }}</td>
-            <td>{{ season.points|intcomma }}</td>
-            <td>{{ season.expected_wins|floatformat:2 }}</td>
-            <td>{{ season.expected_win_pct|floatformat:3 }}</td>
-            <td>{{ season.place_numeric }}</td>
+            <td>{{ team_season.win_count }}</td>
+            <td>{{ team_season.loss_count }}</td>
+            <td>{{ team_season.win_pct|floatformat:3 }}</td>
+            <td>{{ team_season.points|intcomma }}</td>
+            <td>{{ team_season.expected_wins|floatformat:2 }}</td>
+            <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
+            <td>{{ team_season.place_numeric }}</td>
             <td>
-              {% if not season.regular_season.is_partial %}
-                {{ season.regular_season.place_numeric }}
+              {% if not team_season.regular_season.is_partial %}
+                {{ team_season.regular_season.place_numeric }}
               {% endif %}
             </td>
-            <td>{{ season.blangums_count }}</td>
-            <td style="text-align:left">{{ season.playoff_finish }}</td>
+            <td>{{ team_season.blangums_count }}</td>
+            <td style="text-align:left">{{ team_season.playoff_finish }}</td>
           </tr>
         {% endfor %}
       </table>

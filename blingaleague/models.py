@@ -178,7 +178,7 @@ class Game(models.Model):
                     # blingabowl participants must have won their last game
                     playoff_title = "{} {}".format(
                         BLINGABOWL_TITLE_BASE,
-                        Season.year_to_blingabowl(self.year),
+                        Postseason.year_to_blingabowl(self.year),
                     )
                 else:
                     playoff_title = THIRD_PLACE_TITLE_BASE
@@ -393,7 +393,7 @@ def _place_field(related_name):
     )
 
 
-class Season(models.Model):
+class Postseason(models.Model):
     year = models.IntegerField(primary_key=True)
     place_1 = _place_field('first_place_finishes')
     place_2 = _place_field('second_place_finishes')
@@ -423,7 +423,7 @@ class Season(models.Model):
 
     @fully_cached_property
     def blingabowl(self):
-        return Season.year_to_blingabowl(self.year)
+        return Postseason.year_to_blingabowl(self.year)
 
     @fully_cached_property
     def robscores(self):
@@ -552,9 +552,9 @@ class TeamSeason(object):
         self.week_max = week_max
 
         try:
-            self.season = Season.objects.get(year=self.year)
-        except Season.DoesNotExist:
-            self.season = None  # this is ok, it's the current season
+            self.postseason = Postseason.objects.get(year=self.year)
+        except Postseason.DoesNotExist:
+            self.postseason = None  # this is ok, it's the current season
 
         self.year_object = Year(self.year, week_max=self.week_max)
 
@@ -697,15 +697,15 @@ class TeamSeason(object):
         if not self.is_single_season:
             return None
 
-        if self.season is None:
+        if self.postseason is None:
             return None
 
-        return self.season.team_to_playoff_finish(self.team)
+        return self.postseason.team_to_playoff_finish(self.team)
 
     @fully_cached_property
     def playoff_finish(self):
         if self.playoff_finish_numeric == 1:
-            return "Blingabowl {} champion".format(self.season.blingabowl)
+            return "Blingabowl {} champion".format(self.postseason.blingabowl)
 
         if self.playoff_finish_numeric is not None:
             return ordinal(self.playoff_finish_numeric)
@@ -729,9 +729,9 @@ class TeamSeason(object):
 
     @fully_cached_property
     def champion(self):
-        if self.season is None:
+        if self.postseason is None:
             return False
-        return self.team == self.season.place_1
+        return self.team == self.postseason.place_1
 
     @fully_cached_property
     def game_scores(self):
@@ -939,10 +939,10 @@ class TeamSeason(object):
 
     @fully_cached_property
     def robscore(self):
-        if self.season is None:
+        if self.postseason is None:
             return 0
 
-        return self.season.robscores.get(self.team, 0)
+        return self.postseason.robscores.get(self.team, 0)
 
     @fully_cached_property
     def has_beaten(self):
@@ -1365,7 +1365,7 @@ class Standings(object):
         self.include_playoffs = include_playoffs
         self.week_max = week_max
 
-        self.season = None
+        self.postseason = None
         self.headline = None
 
         if self.all_time:
@@ -1375,14 +1375,14 @@ class Standings(object):
                 raise ValueError('Must specify a year or all_time must be True')
 
             try:
-                self.season = Season.objects.get(year=self.year)
-                if self.season.place_1:
+                self.postseason = Postseason.objects.get(year=self.year)
+                if self.postseason.place_1:
                     self.headline = "Blingabowl {}: {} def. {}".format(
-                        self.season.blingabowl,
-                        self.season.place_1,
-                        self.season.place_2,
+                        self.postseason.blingabowl,
+                        self.postseason.place_1,
+                        self.postseason.place_2,
                     )
-            except Season.DoesNotExist:
+            except Postseason.DoesNotExist:
                 pass  # won't exist for the current season
 
         self.cache_key = "|".join(map(str, (year, all_time, include_playoffs, week_max)))
@@ -1730,7 +1730,7 @@ class Week(object):
             BLINGABOWL_WEEK - 1: SEMIFINALS_TITLE_BASE,
             BLINGABOWL_WEEK: "{} {}".format(
                 BLINGABOWL_TITLE_BASE,
-                Season.year_to_blingabowl(year),
+                Postseason.year_to_blingabowl(year),
             ),
         }
 
