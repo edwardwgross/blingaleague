@@ -9,7 +9,7 @@ for line in sys.stdin.readlines():
 
     buyer_list = [b.strip() for b in buyers.split(',')]
 
-    buyer_share = "=1/%i" % len(buyer_list)
+    buyer_share = str(len(buyer_list))
 
     for buyer in buyer_list:
         output_lines.append(','.join((buyer, team, price, buyer_share)))
