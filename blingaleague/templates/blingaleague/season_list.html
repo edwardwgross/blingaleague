@@ -1,5 +1,7 @@
 {% extends "blingaleague/base.html" %}
 
+{% load humanize %}
+
 {% block title %}Seasons{% endblock %}
 
 {% block content %}
@@ -22,7 +24,7 @@
       </td>
       <td>
         <a href="{{ season.champion.href }}">
-          {{ season.champion }}
+          {{ season.champion.team }}
         </a>
       </td>
       <td>
@@ -31,7 +33,7 @@
       </td>
       <td>
         <a href="{{ season.most_points.href }}">
-          {{ season.most_points }} ({{ season.most_points.points }})
+          {{ season.most_points }} ({{ season.most_points.points|intcomma }})
         </a>
       </td>
       <td>
