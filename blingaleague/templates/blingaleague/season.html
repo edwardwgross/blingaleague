@@ -10,28 +10,30 @@
   {% endif %}
 </h1>
 
-{% if standings.headline %}<h2>{{ standings.headline }}</h2>{% endif %}
+<div id="season_details">
+  {% if standings.headline %}<h2>{{ standings.headline }}</h2>{% endif %}
 
-{% include "blingaleague/standings_table.html" %}
+  {% include "blingaleague/standings_table.html" %}
 
-{% if weeks_with_games %}
-  <div>
-    Week:
-    {% for week in weeks_with_games %}
-      <a href="{% url 'blingaleague.week' standings.year week %}">{{ week }}</a>
-    {% endfor %}
+  {% if weeks_with_games %}
+    <div class="center">
+      Week:
+      {% for week in weeks_with_games %}
+        <a href="{% url 'blingaleague.week' standings.year week %}">{{ week }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if standings.season_object.previous %}
+    <a href="{{ standings.season_object.previous.href }}" class="link previous">Previous</a>
+  {% endif %}
+  {% if standings.season_object.next %}
+    <a href="{{ standings.season_object.next.href }}" class="link next">Next</a>
+  {% endif %}
+
+  <div class="center">
+    <a href="{% url 'blingaleague.seasons' %}">All seasons</a>
   </div>
-{% endif %}
-
-<div>
-  Season:
-  {% for link in season_links %}
-    {% if link.href %}
-      <a href="{{ link.href }}">{{ link.text }}</a>
-    {% else %}
-      <strong>{{ link.text }}</strong>
-    {% endif %}
-  {% endfor %}
 </div>
 
 {% endblock %}

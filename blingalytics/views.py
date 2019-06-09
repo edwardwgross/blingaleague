@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from blingaleague.models import REGULAR_SEASON_WEEKS, \
-                                Game, Week, Member, TeamSeason, Year, Matchup, \
+                                Game, Week, Member, TeamSeason, Season, Matchup, \
                                 OUTCOME_WIN, OUTCOME_LOSS
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
@@ -327,8 +327,8 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
     base_csv_filename = 'season_finder_{}.csv'
 
     def filter_seasons(self, form_data):
-        year_min = Year.min()
-        year_max = Year.max()
+        year_min = Season.min().year
+        year_max = Season.max().year
         if form_data['year_min'] is not None:
             year_min = form_data['year_min']
         if form_data['year_max'] is not None:

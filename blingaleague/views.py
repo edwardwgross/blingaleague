@@ -7,7 +7,7 @@ from django.views.generic import TemplateView
 from blingacontent.models import Gazette
 
 from .models import Standings, Game, Member, \
-                    TeamSeason, Week, Matchup, Year, \
+                    TeamSeason, Week, Matchup, Season, \
                     REGULAR_SEASON_WEEKS
 
 
@@ -15,60 +15,26 @@ class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
 
     def get(self, request):
-        standings = Standings.latest()
+        context = {
+            'standings': Standings.latest(),
+            'week': Week.latest(),
+            'gazette': Gazette.latest(),
+        }
+        return self.render_to_response(context)
 
-        week = Week.latest()
 
-        gazette = Gazette.latest()
+class SeasonListView(TemplateView):
+    template_name = 'blingaleague/season_list.html'
 
-        context = {'standings': standings, 'week': week, 'gazette': gazette}
-
+    def get(self, request):
+        context = {
+            'season_list': sorted(Season.all(), reverse=True),
+        }
         return self.render_to_response(context)
 
 
 class SeasonView(TemplateView):
     template_name = 'blingaleague/season.html'
-
-    @cached_property
-    def season_links(self):
-        season_links = []
-
-        for year in sorted(Year.all()):
-            link_data = {'text': year, 'href': None}
-            if year != self.standings.year:
-                link_data['href'] = urlresolvers.reverse_lazy(
-                    'blingaleague.single_season',
-                    args=(year,),
-                )
-            season_links.append(link_data)
-
-        all_time_url = urlresolvers.reverse_lazy('blingaleague.all_time')
-        including_playoffs_url = "{}?include_playoffs".format(all_time_url)
-
-        if self.standings.all_time:
-            if self.standings.include_playoffs:
-                including_playoffs_url = None
-            else:
-                all_time_url = None
-
-        season_links.extend([
-            {'text': 'All-time', 'href': all_time_url},
-            {'text': '(including playoffs)', 'href': including_playoffs_url},
-        ])
-
-        return season_links
-
-    @cached_property
-    def week_links(self):
-        # only applies for single-season view
-        return []
-
-
-class CurrentSeasonView(SeasonView):
-
-    def get(self, request):
-        redirect_url = urlresolvers.reverse_lazy('blingaleague.single_season', args=(Year.max(),))
-        return HttpResponseRedirect(redirect_url)
 
 
 class SingleSeasonView(SeasonView):
@@ -100,7 +66,6 @@ class SingleSeasonView(SeasonView):
 
         context = {
             'standings': self.standings,
-            'season_links': self.season_links,
             'week_max': week_max,
             'weeks_with_games': weeks_with_games,
         }
@@ -108,15 +73,13 @@ class SingleSeasonView(SeasonView):
         return self.render_to_response(context)
 
 
-class AllTimeView(SeasonView):
+class AllTimeStandingsView(SeasonView):
 
     def get(self, request):
         include_playoffs = 'include_playoffs' in request.GET
         self.standings = Standings(all_time=True, include_playoffs=include_playoffs)
         context = {
             'standings': self.standings,
-            'season_links': self.season_links,
-            'week_links': self.week_links,
         }
         return self.render_to_response(context)
 

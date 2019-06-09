@@ -2,7 +2,7 @@ import statistics
 
 from django.core.cache import caches
 
-from blingaleague.models import TeamSeason, Week, Year, \
+from blingaleague.models import TeamSeason, Week, Season, \
                                 Standings, REGULAR_SEASON_WEEKS, \
                                 EXPANSION_SEASON, \
                                 OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY
@@ -157,11 +157,11 @@ def get_playoff_odds(week, min_year=EXPANSION_SEASON):
 
         win_count += 1
 
-    for year in Year.all():
-        if year < min_year:
+    for season in Season.all():
+        if season.year < min_year:
             continue
 
-        standings = Standings(year, week_max=week)
+        standings = Standings(year=season.year, week_max=week)
 
         if standings.end_of_season_standings.is_partial:
             continue

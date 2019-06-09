@@ -4,7 +4,7 @@ from django.contrib.auth.views import login, logout
 from django.views.generic import RedirectView
 
 from .views import HomeView, TeamDetailsView,\
-                   SingleSeasonView, CurrentSeasonView, AllTimeView,\
+                   SeasonListView, SingleSeasonView, AllTimeStandingsView,\
                    MatchupView, WeekView, TeamSeasonView
 
 
@@ -17,9 +17,9 @@ urlpatterns = [
         name='blingaleague.home',
     ),
     url(
-        r'^season/$',
-        CurrentSeasonView.as_view(),
-        name='blingaleague.current_season',
+        r'^seasons/$',
+        SeasonListView.as_view(),
+        name='blingaleague.seasons',
     ),
     url(
         r'^season/(?P<year>\d{4})/$',
@@ -28,7 +28,7 @@ urlpatterns = [
     ),
     url(
         r'^season/all_time/$',
-        AllTimeView.as_view(),
+        AllTimeStandingsView.as_view(),
         name='blingaleague.all_time',
     ),
     url(
@@ -62,6 +62,7 @@ urlpatterns = [
         )
     ),
 
+    # more deprecated urls
     url(
         r'^standings/$',
         RedirectView.as_view(
@@ -85,6 +86,15 @@ urlpatterns = [
             permanent=True,
         ),
     ),
+
+    url(
+        r'^season/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.seasons',
+            permanent=True,
+        ),
+    ),
+    # end deprecated urls
 
     url(
         r'^blingalytics/',

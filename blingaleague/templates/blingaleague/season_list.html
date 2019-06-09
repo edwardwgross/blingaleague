@@ -1,0 +1,49 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Seasons{% endblock %}
+
+{% block content %}
+<h1>Seasons</h1>
+
+<table id="season_list" class="table-striped">
+  <tr>
+    <th>Year</th>
+    <th>Champion</th>
+    <th>Best Record</th>
+    <th>Most Points</th>
+    <th>Most Expected Wins</th>
+  </tr>
+  {% for season in season_list %}
+    <tr>
+      <td>
+        <a href="{{ season.href }}">
+          {{ season.year }}
+        </a>
+      </td>
+      <td>
+        <a href="{{ season.champion.href }}">
+          {{ season.champion }}
+        </a>
+      </td>
+      <td>
+        <a href="{{ season.first_place.href }}">
+          {{ season.first_place }} ({{ season.first_place.record }})
+      </td>
+      <td>
+        <a href="{{ season.most_points.href }}">
+          {{ season.most_points }} ({{ season.most_points.points }})
+        </a>
+      </td>
+      <td>
+        <a href="{{ season.most_expected_wins.href }}">
+          {{ season.most_expected_wins }} ({{ season.most_expected_wins.expected_wins|floatformat:2 }})
+        </a>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+<a href="{% url 'blingaleague.all_time' %}">All-time standings</a>
+(<a href="{% url 'blingaleague.all_time' %}?include_playoffs">including playoffs</a>)
+
+{% endblock %}

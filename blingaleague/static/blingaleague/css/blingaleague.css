@@ -88,6 +88,12 @@ th a, th a:hover, th a:visited, th a:focus {
     float: right;
 }
 
+.center {
+    clear: both;
+    text-align: center;
+    margin: 0 auto;
+}
+
 table.defunct_teams th,
 table.defunct_teams th a, table.defunct_teams th a:hover,
 table.defunct_teams th a:visited, table.defunct_teams th a:focus {
@@ -210,7 +216,12 @@ table#team_vs_team_grid .empty {
     background-color: #eaeaea;
 }
 
-#games {
+table#season_list {
+    font-size: 90%;
+}
+
+#games,
+#season_details {
     width: fit-content;
 }
 
