@@ -29,16 +29,16 @@
       </td>
       <td>
         <a href="{{ season.first_place.href }}">
-          {{ season.first_place }} ({{ season.first_place.record }})
+          {{ season.first_place.team }} ({{ season.first_place.record }})
       </td>
       <td>
         <a href="{{ season.most_points.href }}">
-          {{ season.most_points }} ({{ season.most_points.points|intcomma }})
+          {{ season.most_points.team }} ({{ season.most_points.points|intcomma }})
         </a>
       </td>
       <td>
         <a href="{{ season.most_expected_wins.href }}">
-          {{ season.most_expected_wins }} ({{ season.most_expected_wins.expected_wins|floatformat:2 }})
+          {{ season.most_expected_wins.team }} ({{ season.most_expected_wins.expected_wins|floatformat:2 }})
         </a>
       </td>
     </tr>
