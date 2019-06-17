@@ -44,12 +44,12 @@ MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
 class ComparableObject(object):
 
     @property
-    def comparison_attr(self):
+    def _comparison_attr(self):
         return NotImplementedError('Must be defined by the subclass')
 
     @fully_cached_property
     def _comparison_val(self):
-        return getattr(self, self.comparison_attr)
+        return getattr(self, self._comparison_attr)
 
     def __gt__(self, obj2):
         return self._comparison_val > obj2._comparison_val
@@ -78,7 +78,7 @@ class Member(models.Model, ComparableObject):
     email = models.EmailField(blank=True, null=True)
     use_nickname = models.BooleanField(default=False)
 
-    comparison_attr = 'full_name'
+    _comparison_attr = 'full_name'
 
     @property
     def cache_key(self):
@@ -1325,7 +1325,7 @@ class TeamMultiSeasons(TeamSeason):
 
 
 class Season(ComparableObject):
-    comparison_attr = 'year'
+    _comparison_attr = 'year'
 
     def __init__(self, year=None, all_time=False, include_playoffs=False, week_max=None):
         self.year = year
@@ -1653,7 +1653,7 @@ class Season(ComparableObject):
 
 
 class Week(ComparableObject):
-    comparison_attr = 'year_week'
+    _comparison_attr = 'year_week'
 
     def __init__(self, year, week):
         self.year = int(year)
