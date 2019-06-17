@@ -165,15 +165,13 @@ def postmortems_section(week_obj, season):
     dead_teams = set()
 
     if week_obj.week == REGULAR_SEASON_WEEKS:
-        # show them in reverse order
-        dead_teams = set(season.table[PLAYOFF_TEAMS:])
+        dead_teams = set(season.standings_table[PLAYOFF_TEAMS:])
     else:
         for game in week_obj.games:
-            for special_title in (QUARTERFINALS_TITLE_BASE, SEMIFINALS_TITLE_BASE):
-                if game.playoff_title.startswith(special_title):
-                    dead_teams.add(TeamSeason(game.loser.id, week_obj.year))
+            if game.playoff_title in (QUARTERFINALS_TITLE_BASE, SEMIFINALS_TITLE_BASE):
+                dead_teams.add(TeamSeason(game.loser.id, week_obj.year))
 
-            if game.playoff_title.startswith(BLINGABOWL_TITLE_BASE):
+            if game.playoff_title_base == BLINGABOWL_TITLE_BASE:
                 dead_teams.update(map(
                     lambda x: TeamSeason(x.id, week_obj.year),
                     [game.winner, game.loser],

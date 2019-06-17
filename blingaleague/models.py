@@ -36,6 +36,14 @@ QUARTERFINALS_TITLE_BASE = 'Quarterfinals'
 THIRD_PLACE_TITLE_BASE = 'Third-Place Game'
 FIFTH_PLACE_TITLE_BASE = 'Fifth-Place Game'
 
+PLAYOFF_TITLE_ORDER = [
+    BLINGABOWL_TITLE_BASE,
+    SEMIFINALS_TITLE_BASE,
+    THIRD_PLACE_TITLE_BASE,
+    QUARTERFINALS_TITLE_BASE,
+    FIFTH_PLACE_TITLE_BASE,
+]
+
 SEASON_START_MONTH = 9
 
 MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
@@ -194,7 +202,7 @@ class Game(models.Model):
         return self.week > REGULAR_SEASON_WEEKS
 
     @fully_cached_property
-    def playoff_title(self):
+    def playoff_title_base(self):
         if self.is_playoffs:
             previous_week = self.week_object.previous
 
@@ -204,22 +212,34 @@ class Game(models.Model):
             if self.week == BLINGABOWL_WEEK:
                 if self.winner == winner_last_game.winner:
                     # blingabowl participants must have won their last game
-                    playoff_title = "{} {}".format(
-                        BLINGABOWL_TITLE_BASE,
-                        Postseason.year_to_blingabowl(self.year),
-                    )
+                    return BLINGABOWL_TITLE_BASE
                 else:
-                    playoff_title = THIRD_PLACE_TITLE_BASE
+                    return THIRD_PLACE_TITLE_BASE
             elif self.week == (BLINGABOWL_WEEK - 1):
                 if winner_last_game is None or self.winner == winner_last_game.winner:
                     # semifinal participants either won their last game or had a bye
-                    playoff_title = SEMIFINALS_TITLE_BASE
+                    return SEMIFINALS_TITLE_BASE
                 else:
-                    playoff_title = FIFTH_PLACE_TITLE_BASE
+                    return FIFTH_PLACE_TITLE_BASE
             else:
-                playoff_title = QUARTERFINALS_TITLE_BASE
+                return QUARTERFINALS_TITLE_BASE
 
-            return "{}, {}".format(playoff_title, self.year)
+        return ''
+
+    @fully_cached_property
+    def playoff_title(self):
+        if self.playoff_title_base:
+            if self.playoff_title_base == BLINGABOWL_TITLE_BASE:
+                return "{} {}, {}".format(
+                    self.playoff_title,
+                    Postseason.year_to_blingabowl(self.year),
+                    self.year,
+                )
+            else:
+                return "{}, {}".format(
+                    self.playoff_title_base,
+                    self.year,
+                )
 
         return ''
 
@@ -267,7 +287,7 @@ class Game(models.Model):
 
         return sum(_win_expectancy(score) for score in game_scores)
 
-    def sequential_team_game(self, team, backwards=False):
+    def _sequential_team_game(self, team, backwards=False):
         sequential_team_game = None
 
         week_obj = self.week_object
@@ -287,21 +307,21 @@ class Game(models.Model):
 
     @fully_cached_property
     def winner_previous(self):
-        return self.sequential_team_game(self.winner, backwards=True)
+        return self._sequential_team_game(self.winner, backwards=True)
 
     @fully_cached_property
     def winner_next(self):
-        return self.sequential_team_game(self.winner)
+        return self._sequential_team_game(self.winner)
 
     @fully_cached_property
     def loser_previous(self):
-        return self.sequential_team_game(self.loser, backwards=True)
+        return self._sequential_team_game(self.loser, backwards=True)
 
     @fully_cached_property
     def loser_next(self):
-        return self.sequential_team_game(self.loser)
+        return self._sequential_team_game(self.loser)
 
-    def outcome_streak(self, winner=True):
+    def _outcome_streak(self, winner=True):
         outcome_attr = 'winner' if winner else 'loser'
         previous_attr = "{}_previous".format(outcome_attr)
 
@@ -320,11 +340,11 @@ class Game(models.Model):
 
     @fully_cached_property
     def winner_streak(self):
-        return self.outcome_streak(winner=True)
+        return self._outcome_streak(winner=True)
 
     @fully_cached_property
     def loser_streak(self):
-        return self.outcome_streak(winner=False)
+        return self._outcome_streak(winner=False)
 
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
@@ -435,6 +455,10 @@ class Postseason(models.Model):
         return str(self.pk)
 
     @fully_cached_property
+    def regular_season(self):
+        return Season(year=self.year)
+
+    @fully_cached_property
     def playoff_results(self):
         return (
             self.place_1,
@@ -469,9 +493,8 @@ class Postseason(models.Model):
                 robscores[team] += 0.25
 
         # regular-season winner and runner-up also get something
-        season = Season(year=self.year)
-        robscores[season.standings_table[0].team] += 0.5
-        robscores[season.standings_table[1].team] += 0.25
+        robscores[self.regular_season.standings_table[0].team] += 0.5
+        robscores[self.regular_season.standings_table[1].team] += 0.25
 
         return dict(robscores)
 
@@ -1424,7 +1447,7 @@ class Season(ComparableObject):
     def most_expected_wins(self):
         return self._most_by_attr('expected_wins')
 
-    def team_season(self, team):
+    def _team_season(self, team):
         if self.all_time:
             return TeamMultiSeasons(
                 team.id,
@@ -1443,7 +1466,7 @@ class Season(ComparableObject):
         team_seasons = []
 
         for team in teams:
-            team_season = self.team_season(team)
+            team_season = self._team_season(team)
 
             if len(team_season.games) > 0 or self.is_upcoming_season:
                 team_seasons.append(team_season)
@@ -1670,26 +1693,20 @@ class Week(ComparableObject):
         games = Game.objects.filter(year=self.year, week=self.week)
 
         def _sort(game):
-            playoff_title_order = {
-                BLINGABOWL_TITLE_BASE: 100,
-                SEMIFINALS_TITLE_BASE: 90,
-                THIRD_PLACE_TITLE_BASE: 80,
-                QUARTERFINALS_TITLE_BASE: 70,
-                FIFTH_PLACE_TITLE_BASE: 60,
-            }
+            try:
+                return PLAYOFF_TITLE_ORDER.index(game.playoff_title_base)
+            except ValueError:
+                return len(PLAYOFF_TITLE_ORDER)
 
-            sorted_titles = sorted(
-                playoff_title_order.items(),
-                key=lambda x: x[1],
-                reverse=True,
-            )
-            for playoff_title, sort_val in sorted_titles:
-                if game.playoff_title.startswith(playoff_title):
-                    return sort_val
-
-            return 0
-
-        return sorted(games, key=lambda x: (_sort(x), x.winner_score, x.loser_score), reverse=True)
+        return sorted(
+            games,
+            key=lambda x: (
+                -1 * _sort(x),  # _sort defined to support ascending sort
+                x.winner_score,
+                x.loser_score,
+            ),
+            reverse=True,
+        )
 
     @fully_cached_property
     def href(self):
