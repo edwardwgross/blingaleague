@@ -123,7 +123,7 @@ class WeekView(GamesView):
         context = self._context(Week(year, week))
 
         context['season'] = Season(
-            year,
+            year=year,
             week_max=week,
         )
 

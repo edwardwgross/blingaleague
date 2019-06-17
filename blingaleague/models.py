@@ -1526,7 +1526,7 @@ class Season(ComparableObject):
         if self.all_time:
             return None
 
-        return Season(self.year)
+        return Season(year=self.year)
 
     @fully_cached_property
     def possible_final_outcomes(self):
@@ -1597,7 +1597,7 @@ class Season(ComparableObject):
         if prev_year < Season.min().year:
             return None
 
-        return Season(prev_year)
+        return Season(year=prev_year)
 
     @fully_cached_property
     def next(self):
@@ -1606,7 +1606,7 @@ class Season(ComparableObject):
         if next_year > Season.max().year:
             return None
 
-        return Season(next_year)
+        return Season(year=next_year)
 
     @fully_cached_property
     def href(self):
