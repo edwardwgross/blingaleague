@@ -1,17 +1,17 @@
 {% extends "blingaleague/base.html" %}
 
-{% block title %}{{ standings }}{% endblock %}
+{% block title %}{{ season }}{% endblock %}
 
 {% block content %}
 <h1>
-  {{ standings }}
+  {{ season }}
   {% if week_max %}
     (through week {{ week_max }})
   {% endif %}
 </h1>
 
 <div id="season_details">
-  {% if standings.headline %}<h2>{{ standings.headline }}</h2>{% endif %}
+  {% if season.headline %}<h2>{{ season.headline }}</h2>{% endif %}
 
   {% include "blingaleague/standings_table.html" %}
 
@@ -19,16 +19,16 @@
     <div class="center">
       Week:
       {% for week in weeks_with_games %}
-        <a href="{% url 'blingaleague.week' standings.year week %}">{{ week }}</a>
+        <a href="{% url 'blingaleague.week' season.year week %}">{{ week }}</a>
       {% endfor %}
     </div>
   {% endif %}
 
-  {% if standings.season_object.previous %}
-    <a href="{{ standings.season_object.previous.href }}" class="link previous">Previous</a>
+  {% if season.previous %}
+    <a href="{{ season.previous.href }}" class="link previous">Previous</a>
   {% endif %}
-  {% if standings.season_object.next %}
-    <a href="{{ standings.season_object.next.href }}" class="link next">Next</a>
+  {% if season.next %}
+    <a href="{{ season.next.href }}" class="link next">Next</a>
   {% endif %}
 
   <div class="center">

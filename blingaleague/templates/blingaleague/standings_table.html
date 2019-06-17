@@ -1,15 +1,15 @@
 <table class="standings_table sortable">
   <tr>{% include "blingaleague/standings_table_header.html" %}</tr>
-  {% for team_season in standings.table %}
+  {% for team_season in season.standings_table %}
     <tr>{% include "blingaleague/standings_table_row.html" %}</tr>
   {% endfor %}
 </table>
 
-{% if standings.defunct_table %}
+{% if season.defunct_table %}
   <div><em>Defunct Teams</em></div>
   <table class="standings_table defunct_teams sortable">
     <tr>{% include "blingaleague/standings_table_header.html" %}</tr>
-    {% for team_season in standings.defunct_table %}
+    {% for team_season in season.defunct_standings_table %}
       <tr class="defunct">{% include "blingaleague/standings_table_row.html" %}</tr>
     {% endfor %}
   </table>

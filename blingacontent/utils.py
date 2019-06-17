@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 
 from oauth2client import file, client, tools
 
-from blingaleague.models import Week, Standings, TeamSeason, \
+from blingaleague.models import Week, Season, TeamSeason, \
                                 EXPANSION_SEASON, REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK, \
                                 OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY, PLAYOFF_TEAMS, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
@@ -40,7 +40,7 @@ def get_gmail_service():
 def new_gazette_body_template():
     last_week = Week.latest()
 
-    current_standings = Standings.latest(week_max=last_week.week)
+    current_season = Season.latest(week_max=last_week.week)
 
     sections = []
 
@@ -55,14 +55,14 @@ def new_gazette_body_template():
     if last_week.week <= REGULAR_SEASON_WEEKS:
         sections.append([
             "# [Standings]({})".format(
-                current_standings.gazette_link,
+                current_season.gazette_link,
             ),
-            current_standings.gazette_str,
+            current_season.gazette_str,
         ])
     elif last_week.week == BLINGABOWL_WEEK:
         sections.append([
             "# [Final Standings]({})".format(
-                current_standings.gazette_link,
+                current_season.gazette_link,
             ),
         ])
         sections.append(['# Final Payouts']),
@@ -80,7 +80,7 @@ def new_gazette_body_template():
         '### Pryor Play of the Week:',
     ])
 
-    if current_standings.is_partial:
+    if current_season.is_partial:
         if last_week.week >= 8:
             sections.append([
                 '# Playoff Scenarios',
@@ -88,7 +88,7 @@ def new_gazette_body_template():
         else:
             sections.append(playoff_odds_section(last_week))
     else:
-        sections.append(postmortems_section(last_week, current_standings))
+        sections.append(postmortems_section(last_week, current_season))
 
     if last_week.week == BLINGABOWL_WEEK:
         sections.append(['# Blingapower Rankings'])
@@ -159,14 +159,14 @@ def playoff_odds_section(week_obj):
     return playoff_odds_section
 
 
-def postmortems_section(week_obj, standings):
+def postmortems_section(week_obj, season):
     postmortems_section = ['# Season Postmortems']
 
     dead_teams = set()
 
     if week_obj.week == REGULAR_SEASON_WEEKS:
         # show them in reverse order
-        dead_teams = set(standings.table[PLAYOFF_TEAMS:])
+        dead_teams = set(season.table[PLAYOFF_TEAMS:])
     else:
         for game in week_obj.games:
             for special_title in (QUARTERFINALS_TITLE_BASE, SEMIFINALS_TITLE_BASE):

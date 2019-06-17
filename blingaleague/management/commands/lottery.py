@@ -4,7 +4,7 @@ import random
 
 from django.core.management.base import LabelCommand
 
-from blingaleague.models import Standings, PLAYOFF_TEAMS
+from blingaleague.models import Season, PLAYOFF_TEAMS
 
 
 class Command(LabelCommand):
@@ -12,10 +12,10 @@ class Command(LabelCommand):
     label = 'year'
 
     def handle_label(self, year, **kwargs):
-        standings = Standings(int(year))
+        season = Season(int(year))
 
         teams = []
-        for ts in standings.table[PLAYOFF_TEAMS:]:
+        for ts in season.standings_table[PLAYOFF_TEAMS:]:
             team_tuple = (
                 ts.team.nickname,
                 ts.loss_count, ts.points,

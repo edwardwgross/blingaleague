@@ -13,11 +13,11 @@
 <td>{{ team_season.expected_wins|floatformat:2 }}</td>
 <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
 <td>{{ team_season.blangums_count }}</td>
-{% if standings.all_time %}
+{% if season.all_time %}
   <td>{{ team_season.robscore|floatformat:2 }}</td>
 {% else %}
   <td style="text-align:center">{{ team_season.current_streak }}</td>
-  {% if not standings.is_partial %}
+  {% if not season.is_partial %}
     <td style="text-align:left">{{ team_season.playoff_finish }}</td>
   {% endif %}
 {% endif %}

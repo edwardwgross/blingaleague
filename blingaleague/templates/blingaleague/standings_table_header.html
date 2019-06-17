@@ -7,11 +7,11 @@
 <th>Exp. W</th>
 <th>Exp. %</th>
 <th>Blangums</th>
-{% if standings.all_time %}
+{% if season.all_time %}
   <th>RobScore</th>
 {% else %}
   <th>Streak</th>
-  {% if not standings.is_partial %}
+  {% if not season.is_partial %}
     <th/> {# Playoff Finish #}
   {% endif %}
 {% endif %}

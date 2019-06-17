@@ -469,9 +469,9 @@ class Postseason(models.Model):
                 robscores[team] += 0.25
 
         # regular-season winner and runner-up also get something
-        standings = Standings(year=self.year)
-        robscores[standings.table[0].team] += 0.5
-        robscores[standings.table[1].team] += 0.25
+        season = Season(year=self.year)
+        robscores[season.standings_table[0].team] += 0.5
+        robscores[season.standings_table[1].team] += 0.25
 
         return dict(robscores)
 
@@ -499,132 +499,6 @@ class Postseason(models.Model):
         ordering = ['-year']
 
 
-class Season(ComparableObject):
-    comparison_attr = 'year'
-
-    def __init__(self, year, week_max=REGULAR_SEASON_WEEKS):
-        self.year = int(year)
-
-        if week_max is None:
-            self.week_max = REGULAR_SEASON_WEEKS
-        else:
-            self.week_max = min(int(week_max), REGULAR_SEASON_WEEKS)
-
-        self.cache_key = '|'.join(map(str, (self.year, self.week_max)))
-
-    @fully_cached_property
-    def all_games(self):
-        return Game.objects.filter(year=self.year, week__lte=self.week_max)
-
-    @fully_cached_property
-    def total_wins(self):
-        return self.all_games.count()
-
-    @fully_cached_property
-    def weeks_with_games(self):
-        return max(self.all_games.values_list('week', flat=True))
-
-    @fully_cached_property
-    def total_raw_expected_wins(self):
-        all_scores = []
-        for winner_score, loser_score in self.all_games.values_list('winner_score', 'loser_score'):
-            all_scores.extend([winner_score, loser_score])
-
-        return Game.expected_wins(*all_scores)
-
-    @fully_cached_property
-    def expected_wins_scaling_factor(self):
-        raw_scaling_factor = 1
-        if self.total_raw_expected_wins > 0:
-            raw_scaling_factor = (
-                decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
-            )
-
-        full_weight_week = math.ceil(REGULAR_SEASON_WEEKS / 2)
-
-        this_season_weight = min(self.weeks_with_games, full_weight_week)
-        regression_weight = max(full_weight_week - self.weeks_with_games, 0)
-
-        return ((this_season_weight * raw_scaling_factor) + regression_weight) / full_weight_week
-
-    @fully_cached_property
-    def standings(self):
-        return Standings(year=self.year, week_max=self.week_max)
-
-    @fully_cached_property
-    def champion(self):
-        try:
-            postseason = Postseason.objects.get(year=self.year)
-            return TeamSeason(postseason.place_1.id, self.year)
-        except Postseason.DoesNotExist:
-            return None
-
-    @fully_cached_property
-    def first_place(self):
-        return self.standings.table[0]
-
-    def _most_by_attr(self, attr):
-        return sorted(
-            self.standings.table,
-            key=lambda x: getattr(x, attr),
-            reverse=True,
-        )[0]
-
-    @fully_cached_property
-    def most_points(self):
-        return self._most_by_attr('points')
-
-    @fully_cached_property
-    def most_expected_wins(self):
-        return self._most_by_attr('expected_wins')
-
-    @classmethod
-    def all(cls):
-        all_years = set(Game.objects.all().values_list('year', flat=True))
-
-        today = datetime.datetime.today()
-        if today.month >= SEASON_START_MONTH:
-            all_years.add(today.year)
-
-        return [cls(year) for year in all_years]
-
-    @classmethod
-    def min(cls):
-        return min(cls.all())
-
-    @classmethod
-    def max(cls):
-        return max(cls.all())
-
-    @fully_cached_property
-    def previous(self):
-        prev_year = self.year - 1
-
-        if prev_year < Season.min().year:
-            return None
-
-        return Season(prev_year)
-
-    @fully_cached_property
-    def next(self):
-        next_year = self.year + 1
-
-        if next_year > Season.max().year:
-            return None
-
-        return Season(next_year)
-
-    @fully_cached_property
-    def href(self):
-        return urlresolvers.reverse_lazy('blingaleague.single_season', args=(self.year,))
-
-    def __str__(self):
-        return "{} season".format(str(self.year))
-
-    def __repr__(self):
-        return str(self)
-
-
 class TeamSeason(object):
     is_single_season = True
 
@@ -642,8 +516,6 @@ class TeamSeason(object):
             self.postseason = Postseason.objects.get(year=self.year)
         except Postseason.DoesNotExist:
             self.postseason = None  # this is ok, it's the current season
-
-        self.season_object = Season(self.year, week_max=self.week_max)
 
         self.cache_key = '|'.join(map(str, (team_id, year, include_playoffs, week_max)))
 
@@ -764,14 +636,14 @@ class TeamSeason(object):
         return statistics.mean(self.loss_margins)
 
     @fully_cached_property
-    def standings(self):
-        return Standings(year=self.year, week_max=self.week_max)
+    def season_object(self):
+        return Season(year=self.year, week_max=self.week_max)
 
     @fully_cached_property
     def place_numeric(self):
         if self.week_max > REGULAR_SEASON_WEEKS:
             return self.regular_season.place_numeric
-        return self.standings.team_to_place(self.team)
+        return self.season_object.team_to_place(self.team)
 
     @fully_cached_property
     def place(self):
@@ -1048,7 +920,7 @@ class TeamSeason(object):
         yet_to_play = []
 
         if self.year >= EXPANSION_SEASON:
-            full_season_opponents = self.standings.active_teams
+            full_season_opponents = self.season_object.active_teams
         else:
             # we know this is in the past
             full_season_opponents = TeamSeason(
@@ -1091,7 +963,7 @@ class TeamSeason(object):
             if self.eliminated_simple:
                 return True
 
-            possible_outcomes = self.standings.possible_final_outcomes
+            possible_outcomes = self.season_object.possible_final_outcomes
             if possible_outcomes:
                 for outcome in possible_outcomes:
                     team_wins = outcome[self.team]
@@ -1106,7 +978,7 @@ class TeamSeason(object):
         return False
 
     def clinched(self, target_place):
-        standings_table = self.standings.table
+        standings_table = self.season_object.standings_table
 
         if target_place >= len(standings_table):
             # no matter what, every team has clinched at least last place
@@ -1115,7 +987,7 @@ class TeamSeason(object):
         if self.clinched_simple(target_place):
             return True
 
-        possible_outcomes = self.standings.possible_final_outcomes
+        possible_outcomes = self.season_object.possible_final_outcomes
         if possible_outcomes:
             for outcome in possible_outcomes:
                 team_wins = outcome[self.team]
@@ -1135,7 +1007,7 @@ class TeamSeason(object):
         # don't subtract one because we actually want to measure the place
         # after the target; i.e. to make the playoffs, we need to have more
         # wins than the 7th place team
-        target_current_wins = self.standings.table[target_place].win_count
+        target_current_wins = self.season_object.standings_table[target_place].win_count
         max_target_wins = target_current_wins + self.weeks_remaining
 
         return self.win_count > max_target_wins
@@ -1143,7 +1015,7 @@ class TeamSeason(object):
     @fully_cached_property
     def eliminated_simple(self):
         max_wins = self.win_count + self.weeks_remaining
-        last_playoff_team_wins = self.standings.table[PLAYOFF_TEAMS - 1].win_count
+        last_playoff_team_wins = self.season_object.standings_table[PLAYOFF_TEAMS - 1].win_count
         return max_wins < last_playoff_team_wins
 
     @fully_cached_property
@@ -1411,6 +1283,14 @@ class TeamMultiSeasons(TeamSeason):
         return self._sum_seasonal_values('robscore')
 
     @fully_cached_property
+    def season_object(self):
+        return Season(
+            all_time=True,
+            include_playoffs=self.include_playoffs,
+            week_max=self.week_max,
+        )
+
+    @fully_cached_property
     def clinched_playoffs(self):
         return None
 
@@ -1444,7 +1324,8 @@ class TeamMultiSeasons(TeamSeason):
         return str(self)
 
 
-class Standings(object):
+class Season(ComparableObject):
+    comparison_attr = 'year'
 
     def __init__(self, year=None, all_time=False, include_playoffs=False, week_max=None):
         self.year = year
@@ -1475,10 +1356,73 @@ class Standings(object):
         self.cache_key = "|".join(map(str, (year, all_time, include_playoffs, week_max)))
 
     @fully_cached_property
-    def season_object(self):
-        if self.all_time:
+    def all_games(self):
+        all_games = Game.objects.all()
+
+        if self.year is not None:
+            all_games = all_games.filter(year=self.year)
+
+        if self.week_max is not None:
+            all_games = all_games.filter(week__lte=self.week_max)
+
+        return all_games
+
+    @fully_cached_property
+    def total_wins(self):
+        return self.all_games.count()
+
+    @fully_cached_property
+    def weeks_with_games(self):
+        return max(self.all_games.values_list('week', flat=True))
+
+    @fully_cached_property
+    def total_raw_expected_wins(self):
+        all_scores = []
+        for winner_score, loser_score in self.all_games.values_list('winner_score', 'loser_score'):
+            all_scores.extend([winner_score, loser_score])
+
+        return Game.expected_wins(*all_scores)
+
+    @fully_cached_property
+    def expected_wins_scaling_factor(self):
+        raw_scaling_factor = 1
+        if self.total_raw_expected_wins > 0:
+            raw_scaling_factor = (
+                decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
+            )
+
+        full_weight_week = math.ceil(REGULAR_SEASON_WEEKS / 2)
+
+        this_season_weight = min(self.weeks_with_games, full_weight_week)
+        regression_weight = max(full_weight_week - self.weeks_with_games, 0)
+
+        return ((this_season_weight * raw_scaling_factor) + regression_weight) / full_weight_week
+
+    @fully_cached_property
+    def champion(self):
+        if self.postseason is None:
             return None
-        return Season(self.year, week_max=self.week_max)
+
+        return TeamSeason(self.postseason.place_1.id, self.year)
+
+    @fully_cached_property
+    def first_place(self):
+        return self.standings_table[0]
+
+    def _most_by_attr(self, attr):
+        return sorted(
+            self.standings_table,
+            key=lambda x: getattr(x, attr),
+            reverse=True,
+        )[0]
+
+    @fully_cached_property
+    def most_points(self):
+        return self._most_by_attr('points')
+
+    @fully_cached_property
+    def most_expected_wins(self):
+        return self._most_by_attr('expected_wins')
 
     def team_season(self, team):
         if self.all_time:
@@ -1495,7 +1439,7 @@ class Standings(object):
                 week_max=self.week_max,
             )
 
-    def build_table(self, teams):
+    def _build_standings_table(self, teams):
         team_seasons = []
 
         for team in teams:
@@ -1514,15 +1458,15 @@ class Standings(object):
         return sorted(team_seasons, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     @fully_cached_property
-    def table(self):
-        return self.build_table(self.active_teams)
+    def standings_table(self):
+        return self._build_standings_table(self.active_teams)
 
     @fully_cached_property
-    def defunct_table(self):
+    def defunct_standings_table(self):
         if not self.all_time:
             return []
 
-        return self.build_table(Member.objects.filter(defunct=True))
+        return self._build_standings_table(Member.objects.filter(defunct=True))
 
     @fully_cached_property
     def active_teams(self):
@@ -1548,18 +1492,18 @@ class Standings(object):
         if self.all_time:
             return True
 
-        for team_season in self.table:
+        for team_season in self.standings_table:
             if team_season.is_partial:
                 return True
 
         return False
 
     @fully_cached_property
-    def end_of_season_standings(self):
+    def regular_season(self):
         if self.all_time:
             return None
 
-        return Standings(self.year)
+        return Season(self.year)
 
     @fully_cached_property
     def possible_final_outcomes(self):
@@ -1569,7 +1513,7 @@ class Standings(object):
         remaining_games = set()
         current_win_counts = {}
 
-        for team_season in self.table:
+        for team_season in self.standings_table:
             current_win_counts[team_season.team] = team_season.win_count
 
             for opponent in team_season.yet_to_play:
@@ -1580,7 +1524,7 @@ class Standings(object):
 
         num_games = len(remaining_games)
 
-        max_games_to_run = MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES * len(self.table) / 2
+        max_games_to_run = MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES * len(self.standings_table) / 2
 
         if num_games > max_games_to_run:
             return None
@@ -1598,6 +1542,48 @@ class Standings(object):
             possible_outcomes.append(win_counts)
 
         return possible_outcomes
+
+    @classmethod
+    def all(cls, **kwargs):
+        all_years = set(Game.objects.all().values_list('year', flat=True))
+
+        today = datetime.datetime.today()
+        if today.month >= SEASON_START_MONTH:
+            all_years.add(today.year)
+
+        return [
+            cls(year=year, **kwargs) for year in all_years
+        ]
+
+    @classmethod
+    def min(cls):
+        return min(cls.all())
+
+    @classmethod
+    def max(cls):
+        return max(cls.all())
+
+    @classmethod
+    def latest(cls, week_max=None):
+        return cls.max()
+
+    @fully_cached_property
+    def previous(self):
+        prev_year = self.year - 1
+
+        if prev_year < Season.min().year:
+            return None
+
+        return Season(prev_year)
+
+    @fully_cached_property
+    def next(self):
+        next_year = self.year + 1
+
+        if next_year > Season.max().year:
+            return None
+
+        return Season(next_year)
 
     @fully_cached_property
     def href(self):
@@ -1622,20 +1608,16 @@ class Standings(object):
             )
 
     def team_to_place(self, team):
-        for place, team_season in enumerate(self.table):
+        for place, team_season in enumerate(self.standings_table):
             if team == team_season.team:
                 return place + 1
 
         return None
 
-    @classmethod
-    def latest(cls, week_max=None):
-        return cls(year=Season.max().year, week_max=week_max)
-
     @fully_cached_property
     def gazette_str(self):
         return '\n'.join(
-            [ts.gazette_standings_str for ts in self.table],
+            [ts.gazette_standings_str for ts in self.standings_table],
         )
 
     @fully_cached_property
@@ -1647,7 +1629,7 @@ class Standings(object):
             querystring = "?year_min={}&year_max={}&week_max={}".format(
                 self.year,
                 self.year,
-                len(self.table[0].games),
+                len(self.standings_table[0].games),
             )
 
         return "{}{}".format(
@@ -1657,9 +1639,9 @@ class Standings(object):
 
     def __str__(self):
         if self.year:
-            text = "{} Standings".format(self.year)
+            text = "{} season".format(self.year)
         else:
-            text = 'All-time Standings'
+            text = 'All-time'
 
         if self.include_playoffs:
             text = "{} (including playoffs)".format(text)

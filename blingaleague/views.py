@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
 
-from .models import Standings, Game, Member, \
+from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, Season, \
                     REGULAR_SEASON_WEEKS
 
@@ -16,7 +16,7 @@ class HomeView(TemplateView):
 
     def get(self, request):
         context = {
-            'standings': Standings.latest(),
+            'season': Season.latest(),
             'week': Week.latest(),
             'gazette': Gazette.latest(),
         }
@@ -40,7 +40,7 @@ class SeasonView(TemplateView):
 class SingleSeasonView(SeasonView):
 
     def get(self, request, year):
-        standings_kwargs = {
+        season_kwargs = {
             'year': int(year),
         }
 
@@ -48,16 +48,16 @@ class SingleSeasonView(SeasonView):
         if 'week_max' in request.GET:
             try:
                 week_max = int(request.GET.get('week_max', REGULAR_SEASON_WEEKS))
-                standings_kwargs['week_max'] = week_max
+                season_kwargs['week_max'] = week_max
             except ValueError:
                 # ignore if user passed in a non-int
                 pass
 
-        self.standings = Standings(**standings_kwargs)
+        self.season = Season(**season_kwargs)
 
         weeks_with_games = sorted(set(
             Game.objects.filter(
-                year=self.standings.year,
+                year=self.season.year,
             ).values_list(
                 'week',
                 flat=True,
@@ -65,7 +65,7 @@ class SingleSeasonView(SeasonView):
         ))
 
         context = {
-            'standings': self.standings,
+            'season': self.season,
             'week_max': week_max,
             'weeks_with_games': weeks_with_games,
         }
@@ -77,9 +77,9 @@ class AllTimeStandingsView(SeasonView):
 
     def get(self, request):
         include_playoffs = 'include_playoffs' in request.GET
-        self.standings = Standings(all_time=True, include_playoffs=include_playoffs)
+        self.season = Season(all_time=True, include_playoffs=include_playoffs)
         context = {
-            'standings': self.standings,
+            'season': self.season,
         }
         return self.render_to_response(context)
 
@@ -122,7 +122,7 @@ class WeekView(GamesView):
 
         context = self._context(Week(year, week))
 
-        context['standings'] = Standings(
+        context['season'] = Season(
             year,
             week_max=week,
         )
