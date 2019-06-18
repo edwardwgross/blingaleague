@@ -231,7 +231,7 @@ class Game(models.Model):
         if self.playoff_title_base:
             if self.playoff_title_base == BLINGABOWL_TITLE_BASE:
                 return "{} {}, {}".format(
-                    self.playoff_title,
+                    self.playoff_title_base,
                     Postseason.year_to_blingabowl(self.year),
                     self.year,
                 )
