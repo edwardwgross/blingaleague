@@ -4,6 +4,7 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-size: inherit;
     line-height: 1.5;
     color: #333333;
+    margin-top: 0;
 }
 
 body, nav {
@@ -167,6 +168,10 @@ nav .icon-bar {
 
 #main_inner {
     background-color: white;
+}
+
+#inner_footer {
+    clear: both;
 }
 
 #nav_shield {
@@ -389,7 +394,7 @@ h3.no_results_message {
     margin-bottom: 12px;
 }
 
-.blingacontent h1 {
+h1.gazette_headline {
     font-weight: normal;
 }
 

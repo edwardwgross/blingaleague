@@ -82,11 +82,24 @@ class Gazette(models.Model):
             pk=self.pk,
         ).first()
 
+    @classmethod
+    def latest(cls):
+        return cls.objects.filter(
+            publish_flag=True,
+        ).order_by('-published_date').first()
+
     @property
     def full_url(self):
         return "{}{}".format(
             settings.FULL_SITE_URL,
             urlresolvers.reverse_lazy('blingacontent.gazette_detail', args=(self.slug,)),
+        )
+
+    @property
+    def edit_url(self):
+        return urlresolvers.reverse_lazy(
+            "admin:{}_{}_change".format(self._meta.app_label, self._meta.model_name),
+            args=(self.id,),
         )
 
     def to_html(self, for_email=False):
@@ -167,12 +180,6 @@ class Gazette(models.Model):
             self.email_sent = True
 
         super().save(*args, **kwargs)
-
-    @classmethod
-    def latest(cls):
-        return cls.objects.filter(
-            publish_flag=True,
-        ).order_by('-published_date').first()
 
     def __str__(self):
         return_str = "{} - {}".format(
