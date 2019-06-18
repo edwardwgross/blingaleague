@@ -393,6 +393,10 @@ h3.no_results_message {
     font-weight: normal;
 }
 
+.blingacontent form #id_search {
+    margin-left: 4px;
+}
+
 .blingacontent_section {
     display: inline-block;
     float: left;
