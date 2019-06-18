@@ -43,9 +43,12 @@ ol li {
 
 a, a:hover, a:visited, a:focus {
     color: #3344dd;
+    font-size: inherit;
+    font-weight: inherit;
+    font-family: inherit;
 }
 
-table, tr, th, td, table a {
+table, tr, th, td {
     font-size: inherit;
 }
 
@@ -412,6 +415,10 @@ h1.gazette_headline {
     max-width: 900px;
 }
 
+#gazette_tags {
+    text-align: center;
+}
+
 #gazette_tags li {
     font-size: 80%;
 }
@@ -433,12 +440,23 @@ h1.gazette_headline {
 }
 
 #gazette_detail p,
-#gazette_detail a,
-#gazette_detail li,
+#gazette_detail li {
+    font-weight: normal;
+}
+
 #gazette_detail h1,
 #gazette_detail h2,
 #gazette_detail h3 {
-    font-weight: normal;
+    font-weight: bold;
+    font-family: "Courier New", Courier, monospace;
+}
+
+#gazette_detail h1 {
+    font-size: 160%;
+}
+
+#gazette_detail h2,
+#gazette_detail h3 {
 }
 
 #gazette_detail p,
