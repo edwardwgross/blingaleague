@@ -1,22 +1,38 @@
 {% extends "blingaleague/base.html" %}
 
+{% load tagging_tags %}
+
 {% block title %}The Sanderson Gazette{% endblock %}
 
 {% block content %}
 <h1>The Sanderson Gazette</h1>
 
 <div class="blingacontent">
-  <form {method="get">
+  <form method="get">
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit"/>
   </form>
+  {% if tags %}
+    <strong>Tag:</strong> {{ tags|join:" | " }}
+  {% endif %}
 </div>
 
-<div class="blingacontent">
-  <ul id="gazette_list" class="blingacontent">
+<div id="all_gazettes" class="blingacontent">
+  <ul id="gazette_list" class="blingacontent_section">
     {% for gazette in gazette_list %}
       <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
+    {% endfor %}
+  </ul>
+  <ul id="gazette_tags" class="blingacontent_section">
+    Tags:
+    {% tags_for_model blingacontent.Gazette as gazette_tags with counts %}
+    {% for tag in gazette_tags %}
+      <li>
+        <a href="{% url 'blingacontent.gazette_list' %}?tag={{ tag.name }}">
+          {{ tag.name }} ({{ tag.count }})
+        </a>
+      </li>
     {% endfor %}
   </ul>
 </div>

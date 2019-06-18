@@ -2,6 +2,7 @@ Django==1.8
 cached_property==1.2.0
 django-markdown-filter
 django-request
+django-tagging
 flake8
 flup
 google-api-python-client

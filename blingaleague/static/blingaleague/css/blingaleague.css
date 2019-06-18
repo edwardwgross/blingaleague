@@ -389,8 +389,38 @@ h3.no_results_message {
     margin-bottom: 12px;
 }
 
+.blingacontent h1 {
+    font-weight: normal;
+}
+
+.blingacontent_section {
+    display: inline-block;
+    float: left;
+}
+
+#gazette_list,
 #gazette_detail {
     max-width: 900px;
+}
+
+#gazette_tags li {
+    font-size: 80%;
+}
+
+#all_gazettes #gazette_list {
+    width: 60%;
+}
+
+#all_gazettes #gazette_tags {
+    width: 35%;
+}
+
+#single_gazette #gazette_detail {
+    width: 80%;
+}
+
+#single_gazette #gazette_tags {
+    width: 15%;
 }
 
 #gazette_detail p,

@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'request',
     'social_django',
     'markdown_filter',
+    'tagging',
     'blingacontent',
     'blingaleague',
     'blingalytics',
@@ -146,3 +147,5 @@ MARKDOWN_FILTER_WHITELIST_TAGS = [
     'em',
     'strong',
 ]
+
+FORCE_LOWERCASE_TAGS = True

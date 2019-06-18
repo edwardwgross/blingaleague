@@ -12,6 +12,9 @@ from django.template.loader import render_to_string
 
 from slugify import slugify
 
+from tagging.fields import TagField
+from tagging.registry import register
+
 from blingaleague.models import Member, FakeMember
 
 from .utils import get_gmail_service, new_gazette_body_template
@@ -39,6 +42,8 @@ class Gazette(models.Model):
     slug = models.CharField(blank=True, null=True, max_length=200)
     use_markdown = models.BooleanField(default=True)
     email_sent = models.BooleanField(default=False)
+
+    tags = TagField()
 
     @property
     def published_date_str(self):
