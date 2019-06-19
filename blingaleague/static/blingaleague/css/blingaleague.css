@@ -1,10 +1,11 @@
-html, body, nav {
+html, body {
     font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     font-size: 16px;
     line-height: 1.5;
+    height: 100%;
 }
 
-div, p, a, img, h1, h2, h3, h4, h5, h6, form,
+nav, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
 span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-family: inherit;
     font-size: inherit;
@@ -27,6 +28,7 @@ h3 {
 
 small {
     font-size: 60%;
+    font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
 }
 
 ul {
@@ -111,11 +113,28 @@ td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
     font-style: italic;
 }
 
-nav {
+nav, #footer {
     background-color: #a4c2f4;
     border-width: none !important;
     border-radius: 0 !important;
+}
+
+nav {
     border-bottom: 3px solid red !important;
+}
+
+footer {
+    border-top: 3px solid red !important;
+    color: white;
+    text-align: center;
+    padding: 4px 8px;
+    font-size: 75%;
+}
+
+#footer a,
+#footer a:focus,
+#footer a:visited {
+    color: white;
 }
 
 .navbar-brand {
@@ -169,13 +188,14 @@ nav .icon-bar {
 #main_outer {
     padding: 0 60px 60px 60px;
     margin-top: 60px;
+    min-height: 100%;
 }
 
 #main_inner {
     background-color: white;
 }
 
-#inner_footer {
+#main_bottom {
     clear: both;
 }
 
@@ -295,10 +315,6 @@ table.blingalytics_table.sortable tbody tr::before {
     white-space: nowrap;
 }
 
-#top_seasons small {
-    font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
-}
-
 #top_seasons table.blingalytics_table {
     display: inline-block;
     vertical-align: top;
@@ -397,10 +413,6 @@ h3.no_results_message {
 
 .blingacontent {
     margin-bottom: 12px;
-}
-
-h1.gazette_headline {
-    font-weight: normal;
 }
 
 .blingacontent form #id_search {
