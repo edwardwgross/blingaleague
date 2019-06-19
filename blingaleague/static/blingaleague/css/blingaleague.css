@@ -1,16 +1,16 @@
-html, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
-span, label, input, textarea, table, tr, th, td, ul, ol, li {
+html, body, nav {
     font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+div, p, a, img, h1, h2, h3, h4, h5, h6, form,
+span, label, input, textarea, table, tr, th, td, ul, ol, li {
+    font-family: inherit;
     font-size: inherit;
     line-height: 1.5;
     color: #333333;
     margin-top: 0;
-}
-
-body, nav {
-    font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
 }
 
 h1 {
@@ -113,8 +113,9 @@ td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
 
 nav {
     background-color: #a4c2f4;
-    border: none !important;
+    border-width: none !important;
     border-radius: 0 !important;
+    border-bottom: 3px solid red !important;
 }
 
 .navbar-brand {
@@ -162,6 +163,7 @@ nav .icon-bar {
 
 .dropdown-menu {
     padding: 0;
+    border-width: 0;
 }
 
 #main_outer {
@@ -403,6 +405,7 @@ h1.gazette_headline {
 
 .blingacontent form #id_search {
     margin-left: 4px;
+    border: 1px solid;
 }
 
 .blingacontent_section {
