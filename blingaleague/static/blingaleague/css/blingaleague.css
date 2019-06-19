@@ -348,48 +348,52 @@ table.blingalytics_table.sortable tbody tr::before {
     text-align: right;
 }
 
-.blingalytics_form {
+form.blingalytics_form {
     font-size: 75%;
     max-width: 600px;
 }
 
-.blingalytics_form input[type=submit] {
+form input[type=submit] {
     clear: both;
-    margin-left: 150px;
 }
 
-.blingalytics_form input[type=checkbox],
-.blingalytics_form input[type=radio] {
+form input[type=checkbox],
+form input[type=radio] {
     vertical-align: top;
     margin-top: 2px;
 }
 
-.blingalytics_form label {
+form input[type=text],
+form input[type=number] {
+    border: 1px solid #ababab;
+}
+
+form label {
     width: 200px;
 }
 
-.blingalytics_form ul li {
+form ul li {
     display: block;
     clear: both;
 }
 
-.blingalytics_form ul li ul li {
+form ul li ul li {
     width: 150px;
     float: left;
     clear: none;
 }
 
-.blingalytics_form ul li ul li label {
+form ul li ul li label {
     font-weight: normal;
 }
 
-.blingalytics_form .errorlist {
+form .errorlist li {
     font-style: italic;
     color: red;
     font-size: 100%;
 }
 
-.blingalytics_form .errorlist li {
+form .errorlist li {
     width: 100%;
 }
 
@@ -413,11 +417,6 @@ h3.no_results_message {
 
 .blingacontent {
     margin-bottom: 12px;
-}
-
-.blingacontent form #id_search {
-    margin-left: 4px;
-    border: 1px solid;
 }
 
 .blingacontent_section {

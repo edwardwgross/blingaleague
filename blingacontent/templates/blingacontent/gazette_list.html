@@ -10,12 +10,9 @@
 <div class="blingacontent">
   <form method="get">
     {% csrf_token %}
-    {{ form }}
+    {{ form.as_ul }}
     <input type="submit" value="Submit"/>
   </form>
-  {% if tags %}
-    <strong>Tag:</strong> {{ tags|join:" | " }}
-  {% endif %}
 </div>
 
 <div id="all_gazettes" class="blingacontent">
