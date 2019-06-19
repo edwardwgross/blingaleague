@@ -435,6 +435,7 @@ h3.no_results_message {
 
 #gazette_tags li {
     font-size: 80%;
+    overflow-x: visible;
 }
 
 #all_gazettes #gazette_list {
