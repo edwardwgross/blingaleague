@@ -5,9 +5,9 @@
   <h1 class="gazette_headline">The Sanderson Gazette - {{ gazette }}</h1>
   <div id="gazette_detail" class="blingacontent_section" {% if for_email %}style="width:90%"{% endif %}>
     {% if gazette.use_markdown %}
-      {{ gazette.body|markdown_filter|safe }}
+      {{ gazette.body.strip|markdown_filter|safe }}
     {% else %}
-      {{ gazette.body|linebreaks }}
+      {{ gazette.body.strip|linebreaks }}
     {% endif %}
 
     {% if for_email %}
