@@ -19,10 +19,10 @@
     {% else %}
       <p>
         {% if gazette.previous %}
-          <a href="{% url 'blingacontent.gazette_detail' gazette.previous.slug %}" class="link previous">Previous</a>
+          <a href="{% url 'blingacontent.gazette_detail' gazette.previous.slug %}" class="link previous" title="{{ gazette.previous.headline }}">Previous</a>
         {% endif %}
         {% if gazette.next %}
-          <a href="{% url 'blingacontent.gazette_detail' gazette.next.slug %}" class="link next">Next</a>
+          <a href="{% url 'blingacontent.gazette_detail' gazette.next.slug %}" class="link next" title="{{ gazette.next.headline }}">Next</a>
         {% endif %}
       </p>
       <p class="center">
