@@ -120,11 +120,11 @@ nav, #footer {
 }
 
 nav {
-    border-bottom: 3px solid red !important;
+    border-bottom: 4px solid red !important;
 }
 
 footer {
-    border-top: 3px solid red !important;
+    border-top: 2px solid red !important;
     color: white;
     text-align: center;
     padding: 4px 8px;
