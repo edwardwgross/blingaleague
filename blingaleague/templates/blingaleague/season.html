@@ -15,7 +15,15 @@
 
   {% include "blingaleague/standings_table.html" %}
 
-  {% if weeks_with_games %}
+  {% if season.all_time %}
+    <div class="center">
+      {% if season.include_playoffs %}
+        <a href="{% url 'blingaleague.all_time' %}">Exclude playoffs</a>
+      {% else %}
+        <a href="{% url 'blingaleague.all_time' %}?include_playoffs">Include playoffs</a>
+      {% endif %}
+    </div>
+  {% elif weeks_with_games %}
     <div class="center">
       Week:
       {% for week in weeks_with_games %}
