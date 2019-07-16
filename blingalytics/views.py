@@ -494,34 +494,34 @@ class TopSeasonsView(TemplateView):
 
         top_attrs_categories = (
             # title, attr, sort_desc, game_count_threshold
-            ('Most Wins', 'win_count', True, 1),
-            ('Fewest Wins', 'win_count', False, REGULAR_SEASON_WEEKS),
-            ('Most Points', 'points', True, 1),
-            ('Fewest Points', 'points', False, REGULAR_SEASON_WEEKS),
-            ('Most Expected Wins', 'expected_wins', True, 1),
-            ('Fewest Expected Wins', 'expected_wins', False, REGULAR_SEASON_WEEKS),
-            ('Most Team Blangums', 'blangums_count', True, 1),
-            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True, 1),
-            ('Highest Average Score', 'average_score', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Lowest Average Score', 'average_score', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Highest Median Score', 'median_score', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Lowest Median Score', 'median_score', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Highest Minimum Score', 'min_score', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Lowest Maximum Score', 'max_score', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Highest Standard Deviation', 'stdev_score', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Lowest Standard Deviation', 'stdev_score', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Standard Deviations Above Average Points', 'zscore_points', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Standard Deviations Below Average Points', 'zscore_points', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Standard Deviations Above Average Expected Wins', 'zscore_expected_wins', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Standard Deviations Below Average Expected Wins', 'zscore_expected_wins', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Highest Average Margin', 'average_margin', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Lowest Average Margin', 'average_margin', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Highest Average Margin in Wins', 'average_margin_win', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Lowest Average Margin in Wins', 'average_margin_win', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Highest Average Margin in Losses', 'average_margin_loss', True, TOP_SEASONS_STAT_THRESHOLD),
-            ('Lowest Average Margin in Losses', 'average_margin_loss', False, TOP_SEASONS_STAT_THRESHOLD),
-            ('Longest Winning Streak (single season)', 'longest_winning_streak', True, 1),
-            ('Longest Losing Streak (single season)', 'longest_losing_streak', True, 1),
+            ('Most Wins', 'win_count', True, 1),  # noqa: E501
+            ('Fewest Wins', 'win_count', False, REGULAR_SEASON_WEEKS),  # noqa: E501
+            ('Most Points', 'points', True, 1),  # noqa: E501
+            ('Fewest Points', 'points', False, REGULAR_SEASON_WEEKS),  # noqa: E501
+            ('Most Expected Wins', 'expected_wins', True, 1),  # noqa: E501
+            ('Fewest Expected Wins', 'expected_wins', False, REGULAR_SEASON_WEEKS),  # noqa: E501
+            ('Most Team Blangums', 'blangums_count', True, 1),  # noqa: E501
+            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True, 1),  # noqa: E501
+            ('Highest Average Score', 'average_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Lowest Average Score', 'average_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Highest Median Score', 'median_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Lowest Median Score', 'median_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Highest Minimum Score', 'min_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Lowest Maximum Score', 'max_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Highest Standard Deviation', 'stdev_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Lowest Standard Deviation', 'stdev_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Standard Deviations Above Average Points', 'zscore_points', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Standard Deviations Below Average Points', 'zscore_points', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Standard Deviations Above Average Expected Wins', 'zscore_expected_wins', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Standard Deviations Below Average Expected Wins', 'zscore_expected_wins', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Highest Average Margin', 'average_margin', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Lowest Average Margin', 'average_margin', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Highest Average Margin in Wins', 'average_margin_win', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Lowest Average Margin in Wins', 'average_margin_win', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Highest Average Margin in Losses', 'average_margin_loss', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Lowest Average Margin in Losses', 'average_margin_loss', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
+            ('Longest Winning Streak (single season)', 'longest_winning_streak', True, 1),  # noqa: E501
+            ('Longest Losing Streak (single season)', 'longest_losing_streak', True, 1),  # noqa: E501
         )
 
         for title, attr, sort_desc, min_games in top_attrs_categories:

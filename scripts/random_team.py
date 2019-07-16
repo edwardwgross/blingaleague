@@ -6,7 +6,7 @@ team_rows = list(csv.reader(
     delimiter='\t',
 ))[1:]
 
-output_order =[]
+output_order = []
 
 try:
     output_fh = open('random_order.txt', 'r')
@@ -47,4 +47,3 @@ for i, team_str in enumerate(output_order, 1):
     print('')
     i += 1
     input("(Hit enter for next team)\n")
-

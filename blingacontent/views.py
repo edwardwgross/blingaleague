@@ -1,5 +1,3 @@
-import csv
-
 from django.views.generic import ListView, DetailView
 
 from tagging.models import TaggedItem

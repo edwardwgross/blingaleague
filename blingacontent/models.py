@@ -13,7 +13,6 @@ from django.template.loader import render_to_string
 from slugify import slugify
 
 from tagging.fields import TagField
-from tagging.registry import register
 
 from blingaleague.models import Member, FakeMember
 

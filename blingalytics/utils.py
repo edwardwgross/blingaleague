@@ -3,7 +3,7 @@ import statistics
 from django.core.cache import caches
 
 from blingaleague.models import TeamSeason, Week, Season, \
-                                Season, REGULAR_SEASON_WEEKS, \
+                                REGULAR_SEASON_WEEKS, \
                                 EXPANSION_SEASON, \
                                 OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY
 

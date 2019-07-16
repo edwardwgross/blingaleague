@@ -1,13 +1,9 @@
-from cached_property import cached_property
-
-from django.core import urlresolvers
-from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
 
 from .models import Season, Game, Member, \
-                    TeamSeason, Week, Matchup, Season, \
+                    TeamSeason, Week, Matchup, \
                     REGULAR_SEASON_WEEKS
 
 

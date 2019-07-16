@@ -207,7 +207,6 @@ class Game(models.Model):
             previous_week = self.week_object.previous
 
             winner_last_game = previous_week.team_to_game.get(self.winner)
-            loser_last_game = previous_week.team_to_game.get(self.loser)
 
             if self.week == BLINGABOWL_WEEK:
                 if self.winner == winner_last_game.winner:
@@ -1723,16 +1722,6 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def gazette_link(self):
-        season_finder_url = urlresolvers.reverse_lazy('blingalytics.season_finder')
-
-        querystring = ''
-        if self.year is not None:
-            querystring = "?year_min={}&year_max={}&week_max={}".format(
-                self.year,
-                self.year,
-                len(self.standings_table[0].games),
-            )
-
         return "{}{}".format(
             settings.FULL_SITE_URL,
             self.href,
@@ -2062,12 +2051,12 @@ def build_all_objects_cache():
                 build_object_cache(Matchup(member.pk, other_member.pk))
 
         for year in year_range:
-            build_object_cache(Standings(year))
+            build_object_cache(Season(year))
 
-        build_object_cache(Standings(all_time=True))
-        build_object_cache(Standings(all_time=True, include_playoffs=True))
+        build_object_cache(Season(all_time=True))
+        build_object_cache(Season(all_time=True, include_playoffs=True))
 
-    except Exception as e:
+    except Exception:
         # print if we're in the shell, but don't actually raise
         import traceback
         print(traceback.format_exc())
