@@ -658,6 +658,26 @@ class TeamSeason(object):
     def average_margin_loss(self):
         return statistics.mean(self.loss_margins)
 
+    @classmethod
+    def _zscore(cls, value, average, stdev):
+        return (value - average) / stdev
+
+    @fully_cached_property
+    def zscore_points(self):
+        return self._zscore(
+            self.points,
+            self.season_object.average_team_points,
+            self.season_object.stdev_team_points,
+        )
+
+    @fully_cached_property
+    def zscore_expected_wins(self):
+        return self._zscore(
+            self.expected_wins,
+            self.season_object.average_team_expected_wins,
+            self.season_object.stdev_team_expected_wins,
+        )
+
     @fully_cached_property
     def season_object(self):
         return Season(year=self.year, week_max=self.week_max)
@@ -1399,12 +1419,39 @@ class Season(ComparableObject):
         return max(self.all_games.values_list('week', flat=True))
 
     @fully_cached_property
-    def total_raw_expected_wins(self):
+    def all_game_scores(self):
         all_scores = []
         for winner_score, loser_score in self.all_games.values_list('winner_score', 'loser_score'):
             all_scores.extend([winner_score, loser_score])
+        return all_scores
 
-        return Game.expected_wins(*all_scores)
+    @fully_cached_property
+    def average_game_score(self):
+        return statistics.mean(self.all_game_scores)
+
+    @fully_cached_property
+    def stdev_game_score(self):
+        return statistics.pstdev(self.all_game_scores)
+
+    @fully_cached_property
+    def average_team_points(self):
+        return statistics.mean(map(lambda x: x.points, self.standings_table))
+
+    @fully_cached_property
+    def stdev_team_points(self):
+        return statistics.pstdev(map(lambda x: x.points, self.standings_table))
+
+    @fully_cached_property
+    def average_team_expected_wins(self):
+        return statistics.mean(map(lambda x: x.expected_wins, self.standings_table))
+
+    @fully_cached_property
+    def stdev_team_expected_wins(self):
+        return statistics.pstdev(map(lambda x: x.expected_wins, self.standings_table))
+
+    @fully_cached_property
+    def total_raw_expected_wins(self):
+        return Game.expected_wins(*self.all_game_scores)
 
     @fully_cached_property
     def expected_wins_scaling_factor(self):
