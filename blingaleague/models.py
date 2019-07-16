@@ -1613,6 +1613,37 @@ class Season(ComparableObject):
 
         return possible_outcomes
 
+    @fully_cached_property
+    def expected_win_distribution_graph_html(self):
+        if self.all_time:
+            return ''
+
+        graph = nvd3.lineChart(
+            name='expected_win_distribution',
+            width=1200,
+            height=300,
+            y_axis_format='%',
+        )
+
+        x_data = None
+
+        for team_season in self.standings_table:
+            expected_win_distribution = sorted(
+                team_season.expected_win_distribution.items(),
+            )
+
+            if x_data is None:
+                x_data = list(map(lambda x: x[0], expected_win_distribution))
+
+            y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
+
+            graph.add_serie(x=x_data, y=y_data, name=team_season.team.nickname)
+
+        graph.buildcontent()
+        graph.buildhtml()
+
+        return graph.htmlcontent
+
     @classmethod
     def all(cls, **kwargs):
         all_years = set(Game.objects.all().values_list('year', flat=True))
