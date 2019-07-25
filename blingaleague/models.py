@@ -1373,7 +1373,12 @@ class Season(ComparableObject):
         self.year = year
         self.all_time = all_time
         self.include_playoffs = include_playoffs
+
         self.week_max = week_max
+        if self.week_max is None and not self.include_playoffs:
+            # only time we don't want a week_max is if
+            # playoffs are explicitly included
+            self.week_max = REGULAR_SEASON_WEEKS
 
         self.postseason = None
         self.headline = None
@@ -1454,6 +1459,10 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def expected_wins_scaling_factor(self):
+        # make sure we aren't including playoff games in the normalization
+        if self.weeks_with_games > REGULAR_SEASON_WEEKS:
+            return self.regular_season.expected_wins_scaling_factor
+
         raw_scaling_factor = 1
         if self.total_raw_expected_wins > 0:
             raw_scaling_factor = (
