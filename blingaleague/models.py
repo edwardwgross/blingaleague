@@ -879,10 +879,10 @@ class TeamSeason(object):
         return decimal.Decimal(self.all_play_wins) / decimal.Decimal(all_play_total)
 
     @fully_cached_property
-    def double_play_record(self):
-        double_play_record = {
-            'wins': self.win_count,
-            'losses': self.loss_count,
+    def weekly_rank_record(self):
+        weekly_rank_record = {
+            'wins': 0,
+            'losses': 0,
         }
 
         for week in range(1, len(self.games) + 1):
@@ -893,26 +893,26 @@ class TeamSeason(object):
                 continue
 
             if rank <= len(week_obj.team_to_rank) / 2:
-                double_play_record['wins'] += 1
+                weekly_rank_record['wins'] += 1
             else:
-                double_play_record['losses'] += 1
+                weekly_rank_record['losses'] += 1
 
-        return double_play_record
-
-    @fully_cached_property
-    def double_play_wins(self):
-        return self.double_play_record['wins']
+        return weekly_rank_record
 
     @fully_cached_property
-    def double_play_losses(self):
-        return self.double_play_record['losses']
+    def weekly_rank_wins(self):
+        return self.weekly_rank_record['wins']
 
     @fully_cached_property
-    def double_play_win_pct(self):
-        double_play_total = self.double_play_wins + self.double_play_losses
-        if double_play_total == 0:
+    def weekly_rank_losses(self):
+        return self.weekly_rank_record['losses']
+
+    @fully_cached_property
+    def weekly_rank_win_pct(self):
+        weekly_rank_total = self.weekly_rank_wins + self.weekly_rank_losses
+        if weekly_rank_total == 0:
             return 0
-        return decimal.Decimal(self.double_play_wins) / decimal.Decimal(double_play_total)
+        return decimal.Decimal(self.weekly_rank_wins) / decimal.Decimal(weekly_rank_total)
 
     @fully_cached_property
     def blangums_games(self):
@@ -1313,12 +1313,12 @@ class TeamMultiSeasons(TeamSeason):
         return self._sum_seasonal_values('all_play_losses')
 
     @fully_cached_property
-    def double_play_wins(self):
-        return self._sum_seasonal_values('double_play_wins')
+    def weekly_rank_wins(self):
+        return self._sum_seasonal_values('weekly_rank_wins')
 
     @fully_cached_property
-    def double_play_losses(self):
-        return self._sum_seasonal_values('double_play_losses')
+    def weekly_rank_losses(self):
+        return self._sum_seasonal_values('weekly_rank_losses')
 
     @fully_cached_property
     def robscore(self):
