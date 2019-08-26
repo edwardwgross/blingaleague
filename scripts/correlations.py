@@ -2,14 +2,18 @@ import numpy
 import random
 import statistics
 
-from blingaleague.models import TeamSeason, Game, Standings
+from collections import defaultdict
+
+from blingaleague.models import TeamSeason, Game, Season
 
 
-def two_stat_correl(attr1, attr2):
+def two_stat_correl(attr1, attr2, min_year=None):
     list1 = []
     list2 = []
     for ts in TeamSeason.all():
         if ts.is_partial:
+            continue
+        if min_year is not None and ts.year < min_year:
             continue
         list1.append(float(getattr(ts, attr1)))
         list2.append(float(getattr(ts, attr2)))
@@ -31,10 +35,27 @@ def in_season_correl(attr1, attr2, cutoff_week):
 
 
 def full_season_correl(year, attr1, attr2):
-    standings = Standings(year)
+    standings = Season(year)
     list1 = [float(getattr(ts, attr1)) for ts in standings.table]
     list2 = [float(getattr(ts, attr2)) for ts in standings.table]
     return numpy.corrcoef(list1, list2)[0][1]
+
+
+def one_stat_to_all(base_attr, min_year=None):
+    correlations = defaultdict(list)
+
+    for attribute in dir(TeamSeason):
+        try:
+            correl = two_stat_correl(attribute, base_attr, min_year=min_year)
+            if -1 <= correl <= 1:
+                # sometimes, 'nan' is returned, it's a number-y type
+                # but we still want to ignore it
+                correlations[correl].append(attribute)
+        except Exception:
+            # some attributes aren't numeric
+            pass
+
+    return correlations
 
 
 def generate_score(low, high):
