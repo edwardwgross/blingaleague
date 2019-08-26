@@ -259,7 +259,7 @@ class Game(models.Model):
         if all_scores is None:
             all_scores = []
 
-            games = Game.objects.all()
+            games = cls.objects.all()
             if not include_playoffs:
                 games = games.filter(week__lte=REGULAR_SEASON_WEEKS)
 
@@ -778,6 +778,10 @@ class TeamSeason(object):
     @fully_cached_property
     def expected_wins(self):
         return sum(self.expected_wins_by_game)
+
+    @fully_cached_property
+    def expected_wins_luck(self):
+        return self.win_count - self.expected_wins
 
     @fully_cached_property
     def expected_win_pct(self):
