@@ -2015,9 +2015,9 @@ class Matchup(object):
         else:
             text = "{} leads all-time series, {}-{}"
             if self.team1_count > self.team2_count:
-                return text.format(self.team1, self.team1_count, self.team2_count)
+                return text.format(self.team1.nickname, self.team1_count, self.team2_count)
             else:
-                return text.format(self.team2, self.team2_count, self.team1_count)
+                return text.format(self.team2.nickname, self.team2_count, self.team1_count)
 
     @fully_cached_property
     def href(self):
