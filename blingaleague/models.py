@@ -44,8 +44,6 @@ PLAYOFF_TITLE_ORDER = [
     FIFTH_PLACE_TITLE_BASE,
 ]
 
-SEASON_START_MONTH = 9
-
 MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
 
 
@@ -1659,11 +1657,6 @@ class Season(ComparableObject):
     @classmethod
     def all(cls, **kwargs):
         all_years = set(Game.objects.all().values_list('year', flat=True))
-
-        today = datetime.datetime.today()
-        if today.month >= SEASON_START_MONTH:
-            all_years.add(today.year)
-
         return [
             cls(year=year, **kwargs) for year in all_years
         ]
