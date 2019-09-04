@@ -795,6 +795,19 @@ class TeamSeason(ComparableObject):
         return scaling_factor * raw_expected_wins_against
 
     @fully_cached_property
+    def strength_of_schedule(self):
+        xw_pct_against = self.expected_wins_against / len(self.games)
+        half = decimal.Decimal(0.5)
+        return (xw_pct_against - half) / half
+
+    @fully_cached_property
+    def strength_of_schedule_str(self):
+        prefix = ''
+        if self.strength_of_schedule > 0:
+            prefix = '+'
+        return "{}{:.1f}%".format(prefix, 100 * self.strength_of_schedule)
+
+    @fully_cached_property
     def expected_wins_luck(self):
         return self.win_count - self.expected_wins
 

@@ -75,7 +75,7 @@
             <td>{{ team_season.points|intcomma }}</td>
             <td>{{ team_season.expected_wins|floatformat:2 }}</td>
             <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
-            <td>{{ team_season.expected_wins_against|floatformat:2 }}</td>
+            <td>{{ team_season.strength_of_schedule_str }}</td>
             <td>{{ team_season.place_numeric }}</td>
             <td>
               {% if not team_season.regular_season.is_partial %}
