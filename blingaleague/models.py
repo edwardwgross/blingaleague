@@ -102,16 +102,6 @@ class Member(models.Model, ComparableObject):
         return "{} {}".format(self.first_name, self.last_name)
 
     @fully_cached_property
-    def all_time_record(self):
-        wins = self.games_won.filter(week__lte=REGULAR_SEASON_WEEKS).count()
-        losses = self.games_lost.filter(week__lte=REGULAR_SEASON_WEEKS).count()
-        return "{}-{}".format(wins, losses)
-
-    @fully_cached_property
-    def all_time_record_with_playoffs(self):
-        return "{}-{}".format(self.games_won.count(), self.games_lost.count())
-
-    @fully_cached_property
     def seasons(self):
         return TeamMultiSeasons(self.id)
 
@@ -519,7 +509,9 @@ class Postseason(models.Model):
         ordering = ['-year']
 
 
-class TeamSeason(object):
+class TeamSeason(ComparableObject):
+    _comparison_attr = 'year_team'
+
     is_single_season = True
 
     def __init__(self, team_id, year, include_playoffs=False, week_max=None):
@@ -538,6 +530,10 @@ class TeamSeason(object):
             self.postseason = None  # this is ok, it's the current season
 
         self.cache_key = '|'.join(map(str, (team_id, year, include_playoffs, week_max)))
+
+    @fully_cached_property
+    def year_team(self):
+        return (self.year, self.team)
 
     @fully_cached_property
     def games(self):
@@ -622,6 +618,10 @@ class TeamSeason(object):
     @fully_cached_property
     def points(self):
         return sum(self.game_scores)
+
+    @fully_cached_property
+    def points_against(self):
+        return sum(self.game_scores_against)
 
     @fully_cached_property
     def average_score(self):
@@ -740,6 +740,13 @@ class TeamSeason(object):
         return list(map(lambda x: x[2], all_tuples))
 
     @fully_cached_property
+    def game_scores_against(self):
+        win_tuples = [(w.year, w.week, w.winner_score) for w in self.losses]
+        loss_tuples = [(l.year, l.week, l.loser_score) for l in self.wins]
+        all_tuples = sorted(win_tuples + loss_tuples)
+        return list(map(lambda x: x[2], all_tuples))
+
+    @fully_cached_property
     def win_margins(self):
         return sorted(map(lambda x: x.margin, self.wins))
 
@@ -776,6 +783,16 @@ class TeamSeason(object):
     @fully_cached_property
     def expected_wins(self):
         return sum(self.expected_wins_by_game)
+
+    @fully_cached_property
+    def raw_expected_wins_against(self):
+        return Game.expected_wins(*self.game_scores_against)
+
+    @fully_cached_property
+    def expected_wins_against(self):
+        scaling_factor = self.season_object.expected_wins_scaling_factor
+        raw_expected_wins_against = self.raw_expected_wins_against
+        return scaling_factor * raw_expected_wins_against
 
     @fully_cached_property
     def expected_wins_luck(self):
@@ -1231,6 +1248,8 @@ class TeamSeason(object):
 
 
 class TeamMultiSeasons(TeamSeason):
+    _comparison_attr = 'team'
+
     is_single_season = False
 
     def __init__(self, team_id, years=None, include_playoffs=False, week_max=None):
@@ -1269,6 +1288,22 @@ class TeamMultiSeasons(TeamSeason):
                 team_seasons.append(team_season)
 
         return team_seasons
+
+    @fully_cached_property
+    def first_active_year(self):
+        for team_season in sorted(self):
+            if len(team_season.games) > 0:
+                return team_season.year
+
+        return None
+
+    @fully_cached_property
+    def last_active_year(self):
+        for team_season in sorted(self, reverse=True):
+            if len(team_season.games) > 0:
+                return team_season.year
+
+        return None
 
     @fully_cached_property
     def games(self):
@@ -1362,7 +1397,11 @@ class TeamMultiSeasons(TeamSeason):
                 yield team_multi_season
 
     def __str__(self):
-        return "{} - {}".format(self.team, ', '.join(map(str, self.years)))
+        return "{}, {}-{}".format(
+            self.team,
+            self.first_active_year,
+            self.last_active_year,
+        )
 
     def __repr__(self):
         return str(self)

@@ -126,6 +126,16 @@ class WeekView(GamesView):
         return self.render_to_response(context)
 
 
+class TeamListView(TemplateView):
+    template_name = 'blingaleague/team_list.html'
+
+    def get(self, request):
+        context = {
+            'team_list': Member.objects.all(),
+        }
+        return self.render_to_response(context)
+
+
 class TeamSeasonView(GamesView):
     pre_games_sub_templates = (
         'blingaleague/expected_win_distribution_team.html',

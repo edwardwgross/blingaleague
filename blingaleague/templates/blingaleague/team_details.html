@@ -9,10 +9,7 @@
 <h1>{{ team }}</h1>
 
 <div id="team_details">
-  <h2>Overall record:</h2>
-  <div>
-    {{ team.all_time_record }} ({{ team.all_time_record_with_playoffs }} including playoffs)
-  </div>
+  <h2>Overall record: {{ team.seasons.record }}</h2>
 
   <h2>Seasons</h2>
   <table class="standings_table">
@@ -30,9 +27,9 @@
     {% for team_season in team.seasons reversed %}
       <tr>
         <td><a href="{{ team_season.season_object.href }}">{{ team_season.season_object.year }}</a></td>
-        <td><a href="{{ team_season.season_object.href }}">{{ team_season.place }}</a></td>
-        <td><a href="{{ team_season.href }}">{{ team_season.win_count }}</a></td>
-        <td><a href="{{ team_season.href }}">{{ team_season.loss_count }}</a></td>
+        <td><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
+        <td>{{ team_season.win_count }}</td>
+        <td>{{ team_season.loss_count }}</td>
         <td>{{ team_season.points|intcomma }}</td>
         <td>{{ team_season.expected_wins|floatformat:2 }}</td>
         <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>

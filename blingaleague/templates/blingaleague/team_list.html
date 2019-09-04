@@ -1,0 +1,43 @@
+{% extends "blingaleague/base.html" %}
+
+{% load humanize %}
+
+{% block title %}Franchises{% endblock %}
+
+{% block content %}
+<h1>Franchises</h1>
+
+<table id="team_list" class="table-striped sortable">
+  <tr>
+    <th/> {# Team #}
+    <th>Start</th>
+    <th>End</th>
+    <th>W</th>
+    <th>L</th>
+    <th>W%</th>
+    <th>Points</th>
+    <th>Exp. W</th>
+    <th>Exp. %</th>
+    <th>Blangums</th>
+    <th>RobScore</th>
+  </tr>
+  {% for team in team_list %}
+    <tr {% if team.defunct %}class="defunct"{% endif %}>
+      <td style="text-align:left">
+        <a href="{{ team.href }}">{{ team.full_name }}</a>
+      </td>
+      <td>{{ team.seasons.first_active_year }}</td>
+      <td>{% if team.defunct %}{{ team.seasons.last_active_year }}{% endif %}</td>
+      <td>{{ team.seasons.win_count }}</td>
+      <td>{{ team.seasons.loss_count }}</td>
+      <td>{{ team.seasons.win_pct|floatformat:3 }}</td>
+      <td>{{ team.seasons.points|intcomma }}</td>
+      <td>{{ team.seasons.expected_wins|floatformat:2 }}</td>
+      <td>{{ team.seasons.expected_win_pct|floatformat:3 }}</td>
+      <td>{{ team.seasons.blangums_count }}</td>
+      <td>{{ team.seasons.robscore|floatformat:2 }}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+{% endblock content %}

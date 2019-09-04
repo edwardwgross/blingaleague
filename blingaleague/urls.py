@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.views import login, logout
 from django.views.generic import RedirectView
 
-from .views import HomeView, TeamDetailsView,\
+from .views import HomeView, TeamDetailsView, TeamListView,\
                    SeasonListView, SingleSeasonView, AllTimeStandingsView,\
                    MatchupView, WeekView, TeamSeasonView
 
@@ -27,11 +27,6 @@ urlpatterns = [
         name='blingaleague.single_season',
     ),
     url(
-        r'^season/all_time/$',
-        AllTimeStandingsView.as_view(),
-        name='blingaleague.all_time',
-    ),
-    url(
         r'^matchup/(?P<team1>\d+)/(?P<team2>\d+)/$',
         MatchupView.as_view(),
         name='blingaleague.matchup',
@@ -40,6 +35,11 @@ urlpatterns = [
         r'^week/(?P<year>\d{4})/(?P<week>\d+)/$',
         WeekView.as_view(),
         name='blingaleague.week',
+    ),
+    url(
+        r'^teams/$',
+        TeamListView.as_view(),
+        name='blingaleague.teams',
     ),
     url(
         r'^team/(?P<team>\d+)/$',
@@ -80,9 +80,17 @@ urlpatterns = [
     ),
 
     url(
+        r'^season/all_time/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.teams',
+            permanent=True,
+        ),
+    ),
+
+    url(
         r'^standings/all_time/$',
         RedirectView.as_view(
-            pattern_name='blingaleague.all_time',
+            pattern_name='blingaleague.teams',
             permanent=True,
         ),
     ),

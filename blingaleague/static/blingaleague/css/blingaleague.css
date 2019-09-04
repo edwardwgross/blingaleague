@@ -151,8 +151,8 @@ nav .icon-bar {
     color: white;
     background-color: #a4c2f4;
     font-weight: bold;
-    font-size: 87.5%;
-    padding: 15px 12px;
+    font-size: 75%;
+    padding: 15px 10px;
 }
 
 .nav li a span {
@@ -247,6 +247,13 @@ table#team_vs_team_grid .empty {
 }
 
 table#season_list {
+}
+
+table#team_list {
+}
+
+table#team_list td {
+    text-align: right;
 }
 
 #games,
