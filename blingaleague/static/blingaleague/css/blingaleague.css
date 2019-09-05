@@ -252,6 +252,10 @@ table#season_list {
 table#team_list {
 }
 
+table#team_list th {
+    text-align: center;
+}
+
 table#team_list td {
     text-align: right;
 }
