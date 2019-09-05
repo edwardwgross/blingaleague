@@ -224,7 +224,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
 
                 extra_description = ''
                 if game.playoff_title:
-                    extra_description = game.playoff_title
+                    extra_description = game.playoff_title_base
                 elif team_prefix == PREFIX_WINNER and game.blangums:
                     extra_description = 'Team Blangums'
                 elif team_prefix == PREFIX_LOSER and game.slapped_heartbeat:
