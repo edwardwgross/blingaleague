@@ -1,7 +1,5 @@
 {% extends "blingaleague/base.html" %}
 
-{% load humanize %}
-
 {% block title %}Franchises{% endblock %}
 
 {% block content %}
@@ -26,18 +24,26 @@
       <td style="text-align:left">
         <a href="{{ team.href }}">{{ team.full_name }}</a>
       </td>
-      <td>{{ team.seasons.first_active_year }}</td>
-      <td>{% if team.defunct %}{{ team.seasons.last_active_year }}{% endif %}</td>
-      <td>{{ team.seasons.win_count }}</td>
-      <td>{{ team.seasons.loss_count }}</td>
-      <td>{{ team.seasons.win_pct|floatformat:3 }}</td>
-      <td>{{ team.seasons.points|intcomma }}</td>
-      <td>{{ team.seasons.expected_wins|floatformat:2 }}</td>
-      <td>{{ team.seasons.expected_win_pct|floatformat:3 }}</td>
-      <td>{{ team.seasons.blangums_count }}</td>
-      <td>{{ team.seasons.robscore|floatformat:2 }}</td>
+      {% if include_playoffs %}
+        {% with team.seasons_including_playoffs as season_list %}
+          {% include 'blingaleague/team_list_aggregate_data.html' %}
+        {% endwith %}
+      {% else %}
+        {% with team.seasons as season_list %}
+          {% include 'blingaleague/team_list_aggregate_data.html' %}
+        {% endwith %}
+      {% endif %}
     </tr>
   {% endfor %}
 </table>
+
+<small>
+  <em>
+    Team records {% if not include_playoffs %}do not {% endif %}include playoff games.
+    <a href={% url 'blingaleague.teams' %}{% if not include_playoffs %}?include_playoffs{% endif %}>
+      {% if include_playoffs %}Show regular season records only{% else %}Include playoff games{% endif %}
+    </a>
+  </em>
+</small>
 
 {% endblock content %}

@@ -132,6 +132,7 @@ class TeamListView(TemplateView):
     def get(self, request):
         context = {
             'team_list': Member.objects.all(),
+            'include_playoffs': 'include_playoffs' in request.GET,
         }
         return self.render_to_response(context)
 

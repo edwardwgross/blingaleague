@@ -106,6 +106,10 @@ class Member(models.Model, ComparableObject):
         return TeamMultiSeasons(self.id)
 
     @fully_cached_property
+    def seasons_including_playoffs(self):
+        return TeamMultiSeasons(self.id, include_playoffs=True)
+
+    @fully_cached_property
     def blangums_games(self):
         return self.seasons.blangums_games
 

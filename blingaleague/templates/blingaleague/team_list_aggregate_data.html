@@ -1,0 +1,12 @@
+{% load humanize %}
+
+<td>{{ season_list.first_active_year }}</td>
+<td>{% if team.defunct %}{{ season_list.last_active_year }}{% endif %}</td>
+<td>{{ season_list.win_count }}</td>
+<td>{{ season_list.loss_count }}</td>
+<td>{{ season_list.win_pct|floatformat:3 }}</td>
+<td>{{ season_list.points|intcomma }}</td>
+<td>{{ season_list.expected_wins|floatformat:2 }}</td>
+<td>{{ season_list.expected_win_pct|floatformat:3 }}</td>
+<td>{{ season_list.blangums_count }}</td>
+<td>{{ season_list.robscore|floatformat:2 }}</td>
