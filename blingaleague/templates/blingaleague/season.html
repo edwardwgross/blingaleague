@@ -30,8 +30,6 @@
         <a href="{% url 'blingaleague.week' season.year week %}">{{ week }}</a>
       {% endfor %}
     </div>
-    <h3>Expected Win Distribution:</h3>
-    {{ season.expected_win_distribution_graph_html|safe }}
   {% endif %}
 
   {% if season.previous %}
