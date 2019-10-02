@@ -18,12 +18,12 @@ def has_enough_games(team_season):
 
 
 def sorted_seasons_by_attr(attr, limit=None, sort_desc=False, min_games=1):
-    all_attrs = {}
+    all_attrs = []
     for team_season in TeamSeason.all():
         if len(team_season.games) < min_games:
             continue
 
-        all_attrs[team_season] = getattr(team_season, attr)
+        all_attrs.append((team_season, getattr(team_season, attr)))
 
     return build_ranked_seasons_table(
         all_attrs,
@@ -33,7 +33,7 @@ def sorted_seasons_by_attr(attr, limit=None, sort_desc=False, min_games=1):
 
 
 def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
-    all_odds = {}
+    all_odds = []
     for team_season in TeamSeason.all():
         if team_season.is_partial:
             continue
@@ -41,7 +41,7 @@ def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
         win_odds = team_season.expected_win_distribution.get(win_count, 0)
         if win_odds > 0:
             # we'll format as a percent, so multiply here
-            all_odds[team_season] = 100 * win_odds
+            all_odds.append((team_season, 100 * win_odds))
 
     return build_ranked_seasons_table(
         all_odds,
@@ -52,13 +52,13 @@ def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
 
 
 def build_ranked_seasons_table(
-    seasons_stats,
+    season_stat_tuples,
     limit=None,
     sort_desc=False,
     num_format='{:.2f}',
 ):
     sorted_seasons = sorted(
-        seasons_stats.items(),
+        season_stat_tuples,
         key=lambda x: (x[1], x[0].year, x[0].team.nickname),
         reverse=sort_desc,
     )
