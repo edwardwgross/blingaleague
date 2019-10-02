@@ -54,7 +54,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     # Django 1.7: 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'request.middleware.RequestMiddleware',
+    #'request.middleware.RequestMiddleware',  # 2019-10-02 request/models.py having issues with user model
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
