@@ -247,20 +247,30 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             if game['outcome'] == OUTCOME_WIN:
                 winner = game['team']
                 loser = game['opponent']
+                winner_score = game['score']
+                loser_score = game['opponent_score']
             else:
                 winner = game['opponent']
                 loser = game['team']
+                winner_score = game['opponent_score']
+                loser_score = game['score']
 
             game_dict[winner]['wins'] += 1
             game_dict[loser]['losses'] += 1
             game_dict[winner]['total'] += 1
             game_dict[loser]['total'] += 1
+            game_dict[winner]['points_for'] += winner_score
+            game_dict[loser]['points_for'] += loser_score
+            game_dict[winner]['points_against'] += loser_score
+            game_dict[loser]['points_against'] += winner_score
 
             games_counted.add(game['id'])
 
         teams = []
         for team, stats in sorted(game_dict.items(), key=lambda x: x[0].nickname):
             stats['team'] = team
+            stats['avg_points_for'] = stats['points_for'] / stats['total']
+            stats['avg_points_against'] = stats['points_against'] / stats['total']
             teams.append(stats)
 
         return {
