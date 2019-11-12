@@ -158,7 +158,7 @@ class FakeMember(models.Model):
         ordering = ['name']
 
 
-class Game(models.Model):
+class Game(models.Model, ComparableObject):
     year = models.IntegerField(db_index=True)
     week = models.IntegerField(db_index=True)
     winner = models.ForeignKey(Member, db_index=True, related_name='games_won')
@@ -167,9 +167,15 @@ class Game(models.Model):
     loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
     notes = models.TextField(blank=True, null=True)
 
+    _comparison_attr = 'year_week_id'
+
     @property
     def cache_key(self):
         return str(self.pk)
+
+    @fully_cached_property
+    def year_week_id(self):
+        return (self.year, self.week, self.pk)
 
     @fully_cached_property
     def week_object(self):
@@ -1307,19 +1313,27 @@ class TeamMultiSeasons(TeamSeason):
         return team_seasons
 
     @fully_cached_property
-    def first_active_year(self):
-        for team_season in sorted(self):
-            if len(team_season.games) > 0:
-                return team_season.year
+    def first_active_week(self):
+        if len(self.games) > 0:
+            return min(self.games).week_object
+        return None
 
+    @fully_cached_property
+    def last_active_week(self):
+        if len(self.games) > 0:
+            return max(self.games).week_object
+        return None
+
+    @fully_cached_property
+    def first_active_year(self):
+        if self.first_active_week:
+            return self.first_active_week.year
         return None
 
     @fully_cached_property
     def last_active_year(self):
-        for team_season in sorted(self, reverse=True):
-            if len(team_season.games) > 0:
-                return team_season.year
-
+        if self.last_active_week:
+            return self.last_active_week.year
         return None
 
     @fully_cached_property
@@ -1815,7 +1829,7 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def year_week(self):
-        return 100 * self.year + self.week
+        return (self.year, self.week)
 
     @fully_cached_property
     def games(self):
