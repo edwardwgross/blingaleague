@@ -18,7 +18,7 @@
   <td>{{ team_season.robscore|floatformat:2 }}</td>
 {% else %}
   <td style="text-align:center">{{ team_season.current_streak }}</td>
-  {% if not season.is_partial %}
+  {% if not hide_playoff_finish %}
     <td style="text-align:left">{{ team_season.playoff_finish }}</td>
   {% endif %}
 {% endif %}

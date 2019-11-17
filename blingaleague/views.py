@@ -4,7 +4,7 @@ from blingacontent.models import Gazette
 
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
-                    REGULAR_SEASON_WEEKS
+                    REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK
 
 
 class HomeView(TemplateView):
@@ -122,6 +122,8 @@ class WeekView(GamesView):
             year=year,
             week_max=week,
         )
+
+        context['hide_playoff_finish'] = week < BLINGABOWL_WEEK
 
         return self.render_to_response(context)
 

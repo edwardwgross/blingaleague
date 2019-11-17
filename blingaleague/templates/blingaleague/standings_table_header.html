@@ -12,7 +12,7 @@
   <th>RobScore</th>
 {% else %}
   <th>Streak</th>
-  {% if not season.is_partial %}
+  {% if not hide_playoff_finish %}
     <th/> {# Playoff Finish #}
   {% endif %}
 {% endif %}
