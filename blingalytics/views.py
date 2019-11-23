@@ -156,9 +156,13 @@ class GameFinderView(CSVResponseMixin, TemplateView):
 
         margin_min = form_data['margin_min']
         margin_max = form_data['margin_max']
+        # F() returns a float (I think),
+        # so we need to give some wiggle room to the input margins
         if margin_min is not None:
+            margin_min -= decimal.Decimal('0.001')
             base_games = base_games.filter(loser_score__lte=F('winner_score') - margin_min)
         if margin_max is not None:
+            margin_max += decimal.Decimal('0.001')
             base_games = base_games.filter(loser_score__gte=F('winner_score') - margin_max)
 
         wins_only = form_data['outcome'] == CHOICE_WINS
