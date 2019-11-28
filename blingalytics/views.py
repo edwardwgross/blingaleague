@@ -6,7 +6,7 @@ import nvd3
 from collections import defaultdict
 
 from django.core.cache import caches
-from django.db.models import F
+from django.db.models import F, ExpressionWrapper, DecimalField
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 
@@ -156,14 +156,18 @@ class GameFinderView(CSVResponseMixin, TemplateView):
 
         margin_min = form_data['margin_min']
         margin_max = form_data['margin_max']
-        # F() returns a float (I think),
-        # so we need to give some wiggle room to the input margins
-        if margin_min is not None:
-            margin_min -= decimal.Decimal('0.001')
-            base_games = base_games.filter(loser_score__lte=F('winner_score') - margin_min)
-        if margin_max is not None:
-            margin_max += decimal.Decimal('0.001')
-            base_games = base_games.filter(loser_score__gte=F('winner_score') - margin_max)
+        if margin_min is not None or margin_max is not None:
+            base_games = base_games.annotate(
+                margin=ExpressionWrapper(
+                    F('winner_score') - F('loser_score'),
+                    output_field=DecimalField(max_digits=6, decimal_places=2),
+                ),
+            )
+            fg = base_games.first()
+            if margin_min is not None:
+                base_games = base_games.filter(margin__gte=margin_min)
+            if margin_max is not None:
+                base_games = base_games.filter(margin__lte=margin_max)
 
         wins_only = form_data['outcome'] == CHOICE_WINS
         losses_only = form_data['outcome'] == CHOICE_LOSSES
@@ -185,12 +189,12 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             type_kwargs = {}
 
             if len(teams) > 0:
-                type_kwargs["%s__id__in" % team_prefix] = teams
+                type_kwargs["{}__id__in".format(team_prefix)] = teams
 
             if score_min is not None:
-                type_kwargs["%s_score__gte" % team_prefix] = score_min
+                type_kwargs["{}_score__gte".format(team_prefix)] = score_min
             if score_max is not None:
-                type_kwargs["%s_score__lte" % team_prefix] = score_max
+                type_kwargs["{}_score__lte".format(team_prefix)] = score_max
 
             opponent_prefix = PREFIX_LOSER if team_prefix == PREFIX_WINNER else PREFIX_WINNER
 
@@ -218,9 +222,9 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                     'year': game.year,
                     'week': game.week,
                     'team': getattr(game, team_prefix),
-                    'score': getattr(game, "%s_score" % team_prefix),
+                    'score': getattr(game, "{}_score".format(team_prefix)),
                     'opponent': getattr(game, opponent_prefix),
-                    'opponent_score': getattr(game, "%s_score" % opponent_prefix),
+                    'opponent_score': getattr(game, "{}_score".format(opponent_prefix)),
                     'margin': game.margin,
                     'outcome': outcome,
                     'streak': streak,
