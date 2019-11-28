@@ -23,6 +23,9 @@
     <tr {% if team.defunct %}class="defunct"{% endif %}>
       <td style="text-align:left">
         <a href="{{ team.href }}">{{ team.full_name }}</a>
+        {% if team.defunct %}
+          <span class="standings_note" title="Franchise is defunct">RIP in Peace</span>
+        {% endif %}
       </td>
       {% if include_playoffs %}
         {% with team.seasons_including_playoffs as season_list %}
@@ -37,13 +40,15 @@
   {% endfor %}
 </table>
 
-<small>
-  <em>
-    Team records {% if not include_playoffs %}do not {% endif %}include playoff games.
-    <a href={% url 'blingaleague.teams' %}{% if not include_playoffs %}?include_playoffs{% endif %}>
-      {% if include_playoffs %}Show regular season records only{% else %}Include playoff games{% endif %}
-    </a>
-  </em>
-</small>
+<p>
+  <small>
+    <em>
+    Team records {% if include_playoffs %}include playoff games{% else %}are for regular season games only{% endif %}.
+      <a href={% url 'blingaleague.teams' %}{% if not include_playoffs %}?include_playoffs{% endif %}>
+        {% if include_playoffs %}Show regular season records only{% else %}Include playoff games{% endif %}.
+      </a>
+    </em>
+  </small>
+</p>
 
 {% endblock content %}
