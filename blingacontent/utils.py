@@ -163,17 +163,17 @@ def playoff_odds_section(week_obj):
 def postmortems_section(week_obj, season):
     postmortems_section = ['# Season Postmortems']
 
-    dead_teams = set()
+    dead_teams = []
 
     if week_obj.week == REGULAR_SEASON_WEEKS:
-        dead_teams = set(season.standings_table[PLAYOFF_TEAMS:])
+        dead_teams = season.standings_table[PLAYOFF_TEAMS:]
     else:
         for game in week_obj.games:
             if game.playoff_title in (QUARTERFINALS_TITLE_BASE, SEMIFINALS_TITLE_BASE):
-                dead_teams.add(TeamSeason(game.loser.id, week_obj.year))
+                dead_teams.append(TeamSeason(game.loser.id, week_obj.year))
 
             if game.playoff_title_base == BLINGABOWL_TITLE_BASE:
-                dead_teams.update(map(
+                dead_teams.extend(map(
                     lambda x: TeamSeason(x.id, week_obj.year),
                     [game.winner, game.loser],
                 ))
