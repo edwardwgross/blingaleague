@@ -18,22 +18,22 @@
         <tr>
           <th>Team</th>
           <th>Trades</th>
-          <th>Players Sent</th>
-          <th>Players Received</th>
+          <th>Assets Sent</th>
+          <th>Assets Received</th>
         </tr>
         {% for team_summary in summary.teams %}
           <tr>
             <td style="text-align:left">{{ team_summary.team.nickname }}</td>
             <td>{{ team_summary.count }}</td>
-            <td>{{ team_summary.players_sent }}</td>
-            <td>{{ team_summary.players_received }}</td>
+            <td>{{ team_summary.assets_sent }}</td>
+            <td>{{ team_summary.assets_received }}</td>
           </tr>
         {% endfor %}
         <tr>
           <th style="text-align:left">Total</th>
           <th style="text-align:right">{{ summary.total }}</th>
-          <th/> {# players sent #}
-          <th/> {# players received #}
+          <th/> {# assets sent #}
+          <th/> {# assets received #}
         </tr>
       </table>
 
@@ -44,7 +44,7 @@
           <th>Year</th>
           <th>Week</th>
           <th>Receiver</td>
-          <th>Player / Pick</th>
+          <th>Asset</th>
           <th>Keeper Cost</th>
           <th>Sender</th>
         </tr>

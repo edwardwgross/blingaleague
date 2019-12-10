@@ -559,8 +559,8 @@ class TradeFinderView(TemplateView):
                 trade_dict[team]['count'] += 1
 
             for asset in trade.traded_assets.all():
-                trade_dict[asset.sender]['players_sent'] += 1
-                trade_dict[asset.receiver]['players_received'] += 1
+                trade_dict[asset.sender]['assets_sent'] += 1
+                trade_dict[asset.receiver]['assets_received'] += 1
 
             trades_counted.add(trade.id)
 

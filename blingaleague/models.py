@@ -1225,6 +1225,36 @@ class TeamSeason(ComparableObject):
                 if sim_score >= threshold:
                     yield {'season': team_season, 'score': sim_score}
 
+    @fully_cached_property
+    def trades(self):
+        trade_dict = {}
+
+        filter_kwargs = {
+            'trade__year': self.year,
+            'trade__week__lte': self.week_max,
+        }
+
+        assets_received = self.team.assets_received.filter(**filter_kwargs)
+        assets_sent = self.team.assets_sent.filter(**filter_kwargs)
+
+        for asset in assets_received:
+            if asset.trade.id not in trade_dict:
+                trade_dict[asset.trade.id] = {
+                    'trade': asset.trade,
+                    'received': [],
+                    'sent': [],
+                }
+
+            trade_dict[asset.trade.id]['received'].append(asset)
+
+        for asset in assets_sent:
+            trade_dict[asset.trade.id]['sent'].append(asset)
+
+        return sorted(
+            trade_dict.values(),
+            key=lambda x: x['trade'],
+        )
+
     @classmethod
     def all(cls):
         for season in Season.all():
@@ -2103,18 +2133,26 @@ class Matchup(object):
         return str(self)
 
 
-# don't cache any properties for Trade-related models,
-# due to the two-part data entry process
-class Trade(models.Model):
+class Trade(models.Model, ComparableObject):
     year = models.IntegerField(db_index=True)
     week = models.IntegerField(db_index=True)
     date = models.DateField(default=None, db_index=True)
 
-    @property
+    _comparison_attr = 'year_week_date'
+
+    @fully_cached_property
+    def year_week_date(self):
+        return (
+            self.year,
+            self.week,
+            self.date,
+        )
+
+    @fully_cached_property
     def week_object(self):
         return Week(self.year, self.week)
 
-    @property
+    @fully_cached_property
     def teams(self):
         teams = set()
         for asset in self.traded_assets.all():
@@ -2122,11 +2160,11 @@ class Trade(models.Model):
             teams.add(asset.sender)
         return teams
 
-    @property
+    @fully_cached_property
     def team_ids(self):
         return set(map(lambda x: x.id, self.teams))
 
-    @property
+    @fully_cached_property
     def teams_str(self):
         if self.teams:
             return ' and '.join(
@@ -2136,6 +2174,10 @@ class Trade(models.Model):
             )
 
         return 'unknown teams'
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        clear_cached_properties()
 
     def __str__(self):
         return "Trade between {}, {} ({})".format(
@@ -2153,11 +2195,15 @@ class Trade(models.Model):
 
 class TradedAsset(models.Model):
     trade = models.ForeignKey(Trade, db_index=True, related_name='traded_assets')
-    sender = models.ForeignKey(Member, db_index=True, related_name='traded_away')
-    receiver = models.ForeignKey(Member, db_index=True, related_name='traded_for')
+    sender = models.ForeignKey(Member, db_index=True, related_name='assets_sent')
+    receiver = models.ForeignKey(Member, db_index=True, related_name='assets_received')
     name = models.CharField(max_length=200)
     keeper_cost = models.IntegerField(blank=True, null=True)
     is_draft_pick = models.BooleanField(default=False)
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        clear_cached_properties()
 
     def __str__(self):
         return "{}, Traded from {} to {}, {} ({})".format(
