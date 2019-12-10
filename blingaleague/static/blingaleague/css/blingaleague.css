@@ -208,7 +208,8 @@ table.sortable th {
     cursor: pointer;
 }
 
-table.standings_table th {
+table.standings_table th,
+table.trades th {
     white-space: nowrap;
     text-align: center;
 }
@@ -216,6 +217,11 @@ table.standings_table th {
 table.standings_table td {
     white-space: nowrap;
     text-align: right;  /* by default, since these are mostly numbers */
+}
+
+table.trades td {
+    white-space: nowrap;
+    vertical-align: top;
 }
 
 .standings_note {
