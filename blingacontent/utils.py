@@ -169,7 +169,7 @@ def postmortems_section(week_obj, season):
         dead_teams = season.standings_table[PLAYOFF_TEAMS:]
     else:
         for game in week_obj.games:
-            if game.playoff_title in (QUARTERFINALS_TITLE_BASE, SEMIFINALS_TITLE_BASE):
+            if game.playoff_title_base in (QUARTERFINALS_TITLE_BASE, SEMIFINALS_TITLE_BASE):
                 dead_teams.append(TeamSeason(game.loser.id, week_obj.year))
 
             if game.playoff_title_base == BLINGABOWL_TITLE_BASE:
