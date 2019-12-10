@@ -34,7 +34,7 @@
                 {{ asset.name }}
                 <small>
                   - to <a href="{%url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a>
-                  {% if asset.keeper_cost and not asset.is_draft_pick %} - keeper cost: {{ asset.keeper_cost }}{% endif %}
+                  {% if asset.keeper_cost and not asset.is_draft_pick %} - keeper cost: {{ asset.keeper_cost|ordinal }}{% endif %}
                 </small>
               </li>
             {% endfor %}
