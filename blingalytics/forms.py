@@ -142,3 +142,21 @@ class SeasonFinderForm(BaseFinderForm):
     )
     bye = forms.BooleanField(required=False, label='Earned Bye')
     champion = forms.BooleanField(required=False, label='Won Sanderson Cup')
+
+
+class TradeFinderForm(forms.Form):
+    year_min = forms.IntegerField(required=False, label='Start Year')
+    year_max = forms.IntegerField(required=False, label='End Year')
+    week_min = forms.IntegerField(required=False, label='Start Week')
+    week_max = forms.IntegerField(required=False, label='End Week')
+    teams = forms.TypedMultipleChoiceField(
+        required=False,
+        label='Teams',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[
+            (m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')
+        ],
+        coerce=int,
+    )
+
+    filter_threshold = 0

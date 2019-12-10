@@ -1,0 +1,75 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Trade Finder{% endblock %}
+
+{% block content %}
+<h1>Trade Finder</h1>
+
+<div id="trade_finder" class="blingalytics">
+  <div id="trade_finder_controls">
+    {% with "trade_finder_form" as form_id %}
+      {% include "blingalytics/form.html" %}
+    {% endwith %}
+  </div>
+  <div id="trades_found" class="finder_results">
+    {% if trades %}
+      <h2>Summary</h2>
+      <table class="blingalytics_table table-striped">
+        <tr>
+          <th>Team</th>
+          <th>Trades</th>
+          <th>Players Sent</th>
+          <th>Players Received</th>
+        </tr>
+        {% for team_summary in summary.teams %}
+          <tr>
+            <td style="text-align:left">{{ team_summary.team.nickname }}</td>
+            <td>{{ team_summary.count }}</td>
+            <td>{{ team_summary.players_sent }}</td>
+            <td>{{ team_summary.players_received }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <th style="text-align:left">Total</th>
+          <th style="text-align:right">{{ summary.total }}</th>
+          <th/> {# players sent #}
+          <th/> {# players received #}
+        </tr>
+      </table>
+
+      <h2>Games</h2>
+      <em>(click on the column headings to sort)</em>
+      <table class="blingalytics_table sortable table-striped">
+        <tr>
+          <th>Year</th>
+          <th>Week</th>
+          <th>Receiver</td>
+          <th>Player / Pick</th>
+          <th>Keeper Cost</th>
+          <th>Sender</th>
+        </tr>
+        {% for trade in trades %}
+          {% for asset in trade.traded_assets.all %}
+            <tr>
+              <td><a href="{% url 'blingaleague.single_season' trade.year %}">{{ trade.year}}</a></td>
+              <td><a href="{{ trade.week_object.href }}">{{ trade.week }}</a></td>
+              <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.receiver.id trade.year %}">{{ asset.receiver.nickname }}</a></td>
+              <td style="text-align:left">{{ asset.name }}</td>
+              <td>{{ asset.keeper_cost|default_if_none:'' }}</td>
+              <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.sender.id trade.year %}">{{ asset.sender.nickname }}</a></td>
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </table>
+    {% else %}
+      <h3 class="no_results_message">No trades found</h3>
+    {% endif %}
+  </div>
+</div>
+
+<script type="text/javascript">
+    $("#form_toggle_button").click(function() {
+        $('#trade_finder_form').toggle();
+    });
+</script>
+{% endblock content %}

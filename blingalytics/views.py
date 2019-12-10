@@ -11,7 +11,8 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from blingaleague.models import REGULAR_SEASON_WEEKS, \
-                                Game, Week, Member, TeamSeason, Season, Matchup, \
+                                Game, Week, Member, TeamSeason, \
+                                Season, Matchup, Trade, \
                                 OUTCOME_WIN, OUTCOME_LOSS
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
@@ -20,7 +21,7 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_MADE_PLAYOFFS, CHOICE_MISSED_PLAYOFFS, \
                    CHOICE_CLINCHED_BYE, CHOICE_CLINCHED_PLAYOFFS, \
                    CHOICE_ELIMINATED_EARLY, \
-                   GameFinderForm, SeasonFinderForm
+                   GameFinderForm, SeasonFinderForm, TradeFinderForm
 from .utils import sorted_seasons_by_attr, \
                    sorted_expected_wins_odds, \
                    build_belt_holder_list
@@ -242,7 +243,10 @@ class GameFinderView(CSVResponseMixin, TemplateView):
 
                 all_games.append(game_dict)
 
-        return sorted(all_games, key=lambda x: (x['year'], x['week'], -x['score']))
+        return sorted(
+            all_games,
+            key=lambda x: (x['year'], x['week'], -x['score']),
+        )
 
     def build_summary(self, games):
         games_counted = set()
@@ -502,6 +506,88 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 
         if 'csv' in request.GET:
             return self.render_to_csv(team_seasons)
+
+        return self.render_to_response(context)
+
+
+class TradeFinderView(TemplateView):
+    template_name = 'blingalytics/trade_finder.html'
+
+    def filter_trades(self, form_data):
+        base_trades = Trade.objects.all()
+
+        if form_data['year_min'] is not None:
+            base_trades = base_trades.filter(year__gte=form_data['year_min'])
+        if form_data['year_max'] is not None:
+            base_trades = base_trades.filter(year__lte=form_data['year_max'])
+
+        if form_data['week_min'] is not None:
+            base_trades = base_trades.filter(week__gte=form_data['week_min'])
+        if form_data['week_max'] is not None:
+            base_trades = base_trades.filter(week__lte=form_data['week_max'])
+
+        teams = form_data['teams']
+
+        all_trades = []
+        for trade in base_trades:
+            if len(teams) > 0:
+                teams_matched = False
+                for team_id in teams:
+                    if team_id in trade.team_ids:
+                        teams_matched = True
+                        break
+
+                if not teams_matched:
+                    continue
+
+            all_trades.append(trade)
+
+        return sorted(
+            all_trades,
+            key=lambda x: (x.year, x.week, x.date),
+        )
+
+    def build_summary(self, trades):
+        trades_counted = set()
+        trade_dict = defaultdict(lambda: defaultdict(int))
+
+        for trade in trades:
+            if trade.id in trades_counted:
+                continue
+
+            for team in trade.teams:
+                trade_dict[team]['count'] += 1
+
+            for asset in trade.traded_assets.all():
+                trade_dict[asset.sender]['players_sent'] += 1
+                trade_dict[asset.receiver]['players_received'] += 1
+
+            trades_counted.add(trade.id)
+
+        teams = []
+        for team, stats in sorted(trade_dict.items(), key=lambda x: x[0].nickname):
+            stats['team'] = team
+            teams.append(stats)
+
+        return {
+            'teams': teams,
+            'total': len(trades_counted),
+        }
+
+    def get(self, request):
+        trades = []
+
+        trade_finder_form = TradeFinderForm(request.GET)
+        if trade_finder_form.is_valid():
+            form_data = trade_finder_form.cleaned_data
+
+            trades = list(self.filter_trades(form_data))
+
+        context = {
+            'form': trade_finder_form,
+            'trades': trades,
+            'summary': self.build_summary(trades),
+        }
 
         return self.render_to_response(context)
 

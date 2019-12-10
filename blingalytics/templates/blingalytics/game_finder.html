@@ -69,7 +69,7 @@
             <td>{{ game.score }}</td>
             <td style="text-align:center">&ndash;</td>
             <td>{{ game.opponent_score }}</td>
-            <td style="text-align:left">{{ game.opponent.nickname }}</td>
+            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' game.opponent.id game.year %}">{{ game.opponent.nickname }}</a></td>
             <td>{{ game.margin }}</td>
             <td>{{ game.streak }}</td>
             <td style="text-align:left">{{ game.extra_description }}</td>

@@ -2103,6 +2103,78 @@ class Matchup(object):
         return str(self)
 
 
+# don't cache any properties for Trade-related models,
+# due to the two-part data entry process
+class Trade(models.Model):
+    year = models.IntegerField(db_index=True)
+    week = models.IntegerField(db_index=True)
+    date = models.DateField(default=None, db_index=True)
+
+    @property
+    def week_object(self):
+        return Week(self.year, self.week)
+
+    @property
+    def teams(self):
+        teams = set()
+        for asset in self.traded_assets.all():
+            teams.add(asset.receiver)
+            teams.add(asset.sender)
+        return teams
+
+    @property
+    def team_ids(self):
+        return set(map(lambda x: x.id, self.teams))
+
+    @property
+    def teams_str(self):
+        if self.teams:
+            return ' and '.join(
+                sorted(
+                    map(lambda x: x.nickname, self.teams),
+                ),
+            )
+
+        return 'unknown teams'
+
+    def __str__(self):
+        return "Trade between {}, {} ({})".format(
+            self.teams_str,
+            self.week_object,
+            self.date.strftime('%Y-%m-%d'),
+        )
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        ordering = ['-year', '-week', '-date']
+
+
+class TradedAsset(models.Model):
+    trade = models.ForeignKey(Trade, db_index=True, related_name='traded_assets')
+    sender = models.ForeignKey(Member, db_index=True, related_name='traded_away')
+    receiver = models.ForeignKey(Member, db_index=True, related_name='traded_for')
+    name = models.CharField(max_length=200)
+    keeper_cost = models.IntegerField(blank=True, null=True)
+    is_draft_pick = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "{}, Traded from {} to {}, {} ({})".format(
+            self.name,
+            self.sender.nickname,
+            self.receiver.nickname,
+            self.trade.week_object,
+            self.trade.date.strftime('%Y-%m-%d'),
+        )
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        ordering = ['trade', 'sender', 'receiver', 'keeper_cost', 'name']
+
+
 def build_object_cache(obj):
     print("{}: building cache for {}".format(datetime.datetime.now(), obj))
     for attr in dir(obj):

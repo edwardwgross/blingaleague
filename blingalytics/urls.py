@@ -3,7 +3,7 @@ from django.conf.urls import url
 from .views import WeeklyScoresView, ExpectedWinsView, \
                    GameFinderView, SeasonFinderView, \
                    TopSeasonsView, TeamVsTeamView, \
-                   BeltHolderView
+                   BeltHolderView, TradeFinderView
 
 urlpatterns = [
     url(
@@ -30,6 +30,11 @@ urlpatterns = [
         r'season_finder/$',
         SeasonFinderView.as_view(),
         name='blingalytics.season_finder',
+    ),
+    url(
+        r'trade_finder/$',
+        TradeFinderView.as_view(),
+        name='blingalytics.trade_finder',
     ),
     url(
         r'top_seasons/$',
