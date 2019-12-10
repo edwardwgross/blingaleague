@@ -14,6 +14,8 @@ from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
+from slugify import slugify
+
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties
 
 
@@ -2149,6 +2151,17 @@ class Trade(models.Model, ComparableObject):
         )
 
     @fully_cached_property
+    def public_id(self):
+        date_str = self.date.strftime('%Y%m%d')
+        team_id_str = ''.join(
+            map(
+                lambda x: "{:02}".format(x),
+                sorted(self.team_ids),
+            ),
+        )
+        return "{}.{}".format(date_str, team_id_str)
+
+    @fully_cached_property
     def week_object(self):
         return Week(self.year, self.week)
 
@@ -2198,8 +2211,24 @@ class TradedAsset(models.Model):
     sender = models.ForeignKey(Member, db_index=True, related_name='assets_sent')
     receiver = models.ForeignKey(Member, db_index=True, related_name='assets_received')
     name = models.CharField(max_length=200)
+    keeper_eligible = models.BooleanField(default=True)
     keeper_cost = models.IntegerField(blank=True, null=True)
     is_draft_pick = models.BooleanField(default=False)
+
+    @fully_cached_property
+    def keeper_cost_str(self):
+        if self.is_draft_pick:
+            return ''
+
+        if self.keeper_eligible:
+            if self.keeper_cost is None:
+                return ''
+            else:
+                return "keeper cost: {}".format(
+                    ordinal(self.keeper_cost),
+                )
+        else:
+            return 'ineligible to be kept'
 
     def save(self, **kwargs):
         super().save(**kwargs)

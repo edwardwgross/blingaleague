@@ -1,18 +1,16 @@
-{% load humanize %}
-
 {% if base_object.trades %}
   <h3>Trades</h3>
 
   <table class="trades">
     <tr>
-      <th/> {# week #}
+      <th>Week</th>
       <th>Traded for</th>
       <th>Traded away</th>
     </tr>
     {% for trade in base_object.trades %}
       <tr class="trade">
-        <td>
-          <a href="{{ trade.trade.week_object.href }}">{{ trade.trade.week_object }}</a>
+        <td style="text-align:right">
+          <a href="{{ trade.trade.week_object.href }}">{{ trade.trade.week }}</a>
         </td>
         <td>
           <ul>
@@ -21,7 +19,7 @@
                 {{ asset.name }}
                 <small>
                   - from <a href="{%url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a>
-                  {% if asset.keeper_cost and not asset.is_draft_pick %}- keeper cost: {{ asset.keeper_cost|ordinal }}{% endif %}
+                  {% if asset.keeper_cost_str %}- {{ asset.keeper_cost_str }}{% endif %}
                 </small>
               </li>
             {% endfor %}
@@ -33,8 +31,8 @@
               <li>
                 {{ asset.name }}
                 <small>
-                  - to <a href="{%url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a>
-                  {% if asset.keeper_cost and not asset.is_draft_pick %} - keeper cost: {{ asset.keeper_cost|ordinal }}{% endif %}
+                  - to <a href="{%url 'blingaleague.team_season' asset.receiver.id asset.trade.year %}">{{ asset.receiver.nickname }}</a>
+                  {% if asset.keeper_cost_str %}- {{ asset.keeper_cost_str }}{% endif %}
                 </small>
               </li>
             {% endfor %}
