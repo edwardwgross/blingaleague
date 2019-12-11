@@ -2196,13 +2196,17 @@ class Trade(models.Model, ComparableObject):
 
         return 'unknown teams'
 
+    @fully_cached_property
+    def description(self):
+        return "Trade between {}".format(self.teams_str)
+
     def save(self, **kwargs):
         super().save(**kwargs)
         clear_cached_properties()
 
     def __str__(self):
-        return "Trade between {}, {} ({})".format(
-            self.teams_str,
+        return "{}, {} ({})".format(
+            self.description,
             self.week_object,
             self.date.strftime('%Y-%m-%d'),
         )
@@ -2216,8 +2220,8 @@ class Trade(models.Model, ComparableObject):
 
 class TradedAsset(models.Model):
     trade = models.ForeignKey(Trade, db_index=True, related_name='traded_assets')
-    sender = models.ForeignKey(Member, db_index=True, related_name='assets_sent')
     receiver = models.ForeignKey(Member, db_index=True, related_name='assets_received')
+    sender = models.ForeignKey(Member, db_index=True, related_name='assets_sent')
     name = models.CharField(max_length=200)
     keeper_eligible = models.BooleanField(default=True)
     keeper_cost = models.IntegerField(blank=True, null=True)
