@@ -62,13 +62,13 @@ class ComparableObject(object):
     def __gt__(self, obj2):
         return self._comparison_val > obj2._comparison_val
 
-    def __gte__(self, obj2):
+    def __ge__(self, obj2):
         return self._comparison_val >= obj2._comparison_val
 
     def __lt__(self, obj2):
         return self._comparison_val < obj2._comparison_val
 
-    def __lte__(self, obj2):
+    def __le__(self, obj2):
         return self._comparison_val <= obj2._comparison_val
 
     def __eq__(self, obj2):
@@ -182,6 +182,14 @@ class Game(models.Model, ComparableObject):
     @fully_cached_property
     def week_object(self):
         return Week(self.year, self.week)
+
+    @fully_cached_property
+    def winner_team_season(self):
+        return TeamSeason(self.winner.id, self.year)
+
+    @fully_cached_property
+    def loser_team_season(self):
+        return TeamSeason(self.loser.id, self.year)
 
     @fully_cached_property
     def blangums(self):
