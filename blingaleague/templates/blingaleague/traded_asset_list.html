@@ -1,0 +1,15 @@
+<ul>
+  {% for asset in asset_list %}
+    <li>
+      {{ asset.name }}
+      <small>
+        {% if is_sender_pov %}
+          - to <a href="{% url 'blingaleague.team_season' asset.receiver_id asset.trade.year %}">{{ asset.receiver.nickname }}</a>
+        {% else %}
+          - from <a href="{%url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a>
+        {% endif %}
+        {% if asset.keeper_cost_str %} - {{ asset.keeper_cost_str }}{% endif %}
+      </small>
+    </li>
+  {% endfor %}
+</ul>

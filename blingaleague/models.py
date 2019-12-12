@@ -1892,6 +1892,13 @@ class Week(ComparableObject):
         )
 
     @fully_cached_property
+    def trades(self):
+        return Trade.objects.filter(
+            year=self.year,
+            week=self.week,
+        ).order_by('-date')
+
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.week', args=(self.year, self.week))
 
@@ -2112,6 +2119,20 @@ class Matchup(object):
         return "{}-{}".format(self.team1_count, self.team2_count)
 
     @fully_cached_property
+    def trades(self):
+        trades = set()
+
+        for asset in TradedAsset.objects.filter(receiver=self.team1):
+            if self.team2.id in asset.trade.team_ids:
+               trades.add(asset.trade)
+
+        return sorted(
+            trades,
+            key=lambda x: (x.year, x.week, x.date),
+            reverse=True,
+        )
+
+    @fully_cached_property
     def headline(self):
         if self.team1_count == self.team2_count:
             return "All-time series tied, {}-{}".format(self.team1_count, self.team2_count)
@@ -2199,6 +2220,25 @@ class Trade(models.Model, ComparableObject):
     @fully_cached_property
     def description(self):
         return "Trade between {}".format(self.teams_str)
+
+    @fully_cached_property
+    def grouped_assets(self):
+        assets_by_receiver = defaultdict(list)
+        for asset in self.traded_assets.all():
+            assets_by_receiver[asset.receiver].append(asset)
+
+        grouped_assets = []
+        for team in sorted(self.teams):
+            grouped_assets.append({
+                'team': team,
+                'assets_received': assets_by_receiver[team],
+            })
+
+        return grouped_assets
+
+    @fully_cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.trade', args=(self.id,))
 
     def save(self, **kwargs):
         super().save(**kwargs)

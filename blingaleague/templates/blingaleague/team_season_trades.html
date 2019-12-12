@@ -13,30 +13,16 @@
           <a href="{{ trade.trade.week_object.href }}">{{ trade.trade.week }}</a>
         </td>
         <td>
-          <ul>
-            {% for asset in trade.received %}
-              <li>
-                {{ asset.name }}
-                <small>
-                  - from <a href="{%url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a>
-                  {% if asset.keeper_cost_str %}- {{ asset.keeper_cost_str }}{% endif %}
-                </small>
-              </li>
-            {% endfor %}
-          </ul>
+          {% with trade.received as asset_list %}
+            {% include "blingaleague/traded_asset_list.html" %}
+          {% endwith %}
         </td>
         <td>
-          <ul>
-            {% for asset in trade.sent %}
-              <li>
-                {{ asset.name }}
-                <small>
-                  - to <a href="{%url 'blingaleague.team_season' asset.receiver.id asset.trade.year %}">{{ asset.receiver.nickname }}</a>
-                  {% if asset.keeper_cost_str %}- {{ asset.keeper_cost_str }}{% endif %}
-                </small>
-              </li>
-            {% endfor %}
-          </ul>
+          {% with trade.sent as asset_list %}
+          {% with True as is_sender_pov %}
+            {% include "blingaleague/traded_asset_list.html" %}
+          {% endwith %}
+          {% endwith %}
         </td>
       </tr>
     {% endfor %}

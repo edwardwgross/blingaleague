@@ -5,7 +5,8 @@ from django.views.generic import RedirectView
 
 from .views import HomeView, TeamDetailsView, TeamListView,\
                    SeasonListView, SingleSeasonView, AllTimeStandingsView,\
-                   MatchupView, WeekView, TeamSeasonView
+                   MatchupView, WeekView, TeamSeasonView,\
+                   TradeView
 
 
 admin.autodiscover()
@@ -50,6 +51,11 @@ urlpatterns = [
         r'^team/(?P<team>\d+)/(?P<year>\d{4})/$',
         TeamSeasonView.as_view(),
         name='blingaleague.team_season',
+    ),
+    url(
+        r'^trade/(?P<trade>\d+)/$',
+        TradeView.as_view(),
+        name='blingaleague.trade',
     ),
 
     # done this way so old links still work, even though this

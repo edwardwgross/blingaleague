@@ -267,11 +267,13 @@ table#team_list td {
 }
 
 #games,
-#season_details {
+#season_details,
+#trades {
     width: fit-content;
 }
 
-#games .game {
+#games .game,
+#trades .trade {
     clear: both;
     padding: 12px 24px;
     text-align: center;
@@ -279,21 +281,28 @@ table#team_list td {
     width: 600px;
 }
 
-#games .game:first-of-type {
+#games .game:first-of-type,
+#trades .trade:first-of-type {
     border-top: 1px solid #a4c2f4;
 }
 
-#games .game:last-of-type {
+#games .game:last-of-type,
+#trades .trade:last-of-type {
     margin-bottom: 30px;
 }
 
-#games .game .week {
+#games .game .week,
+#trades .trade .week {
     font-size: 75%;
 }
 
 #games .game .teams,
 #games .game .score {
     font-size: 100%;
+}
+
+#trades .trade .asset_group {
+    text-align: left;
 }
 
 table.game_table {

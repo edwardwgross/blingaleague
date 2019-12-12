@@ -4,6 +4,7 @@ from blingacontent.models import Gazette
 
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
+                    Trade, \
                     REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK
 
 
@@ -101,6 +102,10 @@ class GamesView(TemplateView):
 class MatchupView(GamesView):
     games_sub_template = 'blingaleague/team_vs_team_games.html'
 
+    post_games_sub_templates = (
+        'blingaleague/trade_list.html',
+    )
+
     def get(self, request, team1, team2):
         context = self._context(Matchup(team1, team2))
         return self.render_to_response(context)
@@ -108,6 +113,7 @@ class MatchupView(GamesView):
 
 class WeekView(GamesView):
     post_games_sub_templates = (
+        'blingaleague/trade_list.html',
         'blingaleague/standings_sub_page.html',
     )
     games_sub_template = 'blingaleague/weekly_games.html'
@@ -162,4 +168,13 @@ class TeamDetailsView(TemplateView):
     def get(self, request, team):
         team = Member.objects.get(id=team)
         context = {'team': team}
+        return self.render_to_response(context)
+
+
+class TradeView(TemplateView):
+    template_name = 'blingaleague/trade_base.html'
+
+    def get(self, request, trade):
+        trade = Trade.objects.get(id=trade)
+        context = {'trade': trade}
         return self.render_to_response(context)

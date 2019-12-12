@@ -1,0 +1,11 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}{{ trade }}{% endblock %}
+
+{% block content %}
+<h1>{{ trade.description }}</h1>
+
+<div id="trades">
+  {% include "blingaleague/single_trade.html" %}
+</div>
+{% endblock %}

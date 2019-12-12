@@ -52,7 +52,7 @@
         {% for trade in trades %}
           {% for asset in trade.traded_assets.all %}
             <tr>
-              <td>{{ trade.public_id }}</td>
+              <td><a href="{{ trade.href }}">{{ trade.public_id }}</a></td>
               <td><a href="{% url 'blingaleague.single_season' trade.year %}">{{ trade.year}}</a></td>
               <td><a href="{{ trade.week_object.href }}">{{ trade.week }}</a></td>
               <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.receiver.id trade.year %}">{{ asset.receiver.nickname }}</a></td>
