@@ -1126,9 +1126,10 @@ class TeamSeason(ComparableObject):
     @fully_cached_property
     def headline(self):
         regular_season = self.regular_season
-        text = "{}-{}, {} points, {}".format(
+        text = "{}-{} ({:.3f}), {} points, {}".format(
             regular_season.win_count,
             regular_season.loss_count,
+            regular_season.win_pct,
             intcomma(regular_season.points),
             regular_season.place,
         )
@@ -1411,6 +1412,13 @@ class TeamMultiSeasons(TeamSeason):
     @fully_cached_property
     def expected_wins(self):
         return self._sum_seasonal_values('expected_wins')
+
+    @fully_cached_property
+    def all_play_record(self):
+        return {
+            'wins': self.all_play_wins,
+            'losses': self.all_play_losses,
+        }
 
     @fully_cached_property
     def all_play_wins(self):
