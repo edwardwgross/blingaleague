@@ -13,11 +13,20 @@
 <h2>{% if season.headline %}{{ season.headline }}{% else %}Current Standings{% endif %}</h2>
 {% include "blingaleague/standings_table.html" %}
 
+<h2>Last Week</h2>
 <div id="games">
-  <h2>Last Week</h2>
   {% for game in week.games %}
     {% include "blingaleague/single_game.html" %}
   {% endfor %}
 </div>
 
+{% if week.trades %}
+  <h3>Trades</h3>
+
+  <div id="trades">
+    {% for trade in week.trades %}
+      {% include "blingaleague/single_trade.html" %}
+    {% endfor %}
+  </div>
+{% endif %}
 {% endblock content %}
