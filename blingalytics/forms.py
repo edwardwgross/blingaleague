@@ -69,6 +69,12 @@ class GameFinderForm(BaseFinderForm):
             (CHOICE_PLAYOFFS, 'Playoffs only'),
         ],
     )
+    playoff_game_types = forms.TypedMultipleChoiceField(
+        required=False,
+        label='Playoff Game Type',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(c, c) for c in CHOICES_PLAYOFF_GAME_TYPE],
+    )
     teams = forms.TypedMultipleChoiceField(
         required=False,
         label='Teams',
@@ -102,12 +108,6 @@ class GameFinderForm(BaseFinderForm):
         ],
     )
     streak_min = forms.IntegerField(required=False, label='Minimum W/L Streak')
-    playoff_game_types = forms.TypedMultipleChoiceField(
-        required=False,
-        label='Playoff Game Type',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[(c, c) for c in CHOICES_PLAYOFF_GAME_TYPE],
-    )
 
 
 class SeasonFinderForm(BaseFinderForm):
