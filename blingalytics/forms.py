@@ -45,7 +45,7 @@ class BaseFinderForm(forms.Form):
         if len(list(filtered_fields)) < self.filter_threshold:
             self.add_error(
                 None,
-                "You must filter on at least {} fields to see results".format(
+                "You must filter on at least {} field(s) to see results".format(
                     self.filter_threshold,
                 ),
             )
@@ -164,7 +164,7 @@ class SeasonFinderForm(BaseFinderForm):
     champion = forms.BooleanField(required=False, label='Won Sanderson Cup')
 
 
-class TradeFinderForm(forms.Form):
+class TradeFinderForm(BaseFinderForm):
     year_min = forms.IntegerField(required=False, label='Start Year')
     year_max = forms.IntegerField(required=False, label='End Year')
     week_min = forms.IntegerField(required=False, label='Start Week')
@@ -179,4 +179,4 @@ class TradeFinderForm(forms.Form):
         coerce=int,
     )
 
-    filter_threshold = 0
+    filter_threshold = 1
