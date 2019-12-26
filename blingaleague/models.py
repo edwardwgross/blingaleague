@@ -1898,15 +1898,15 @@ class Week(ComparableObject):
         )
 
     @fully_cached_property
+    def season_object(self):
+        return Season(self.year)
+
+    @fully_cached_property
     def trades(self):
         return Trade.objects.filter(
             year=self.year,
             week=self.week,
         ).order_by('-date')
-
-    @fully_cached_property
-    def href(self):
-        return urlresolvers.reverse_lazy('blingaleague.week', args=(self.year, self.week))
 
     @fully_cached_property
     def average_score(self):
@@ -1925,30 +1925,6 @@ class Week(ComparableObject):
             raw_expected_wins += Game.expected_wins(game.winner_score, game.loser_score)
 
         return len(self.games) / raw_expected_wins
-
-    @fully_cached_property
-    def previous(self):
-        if self.week == 1:
-            prev_week = Week(self.year - 1, BLINGABOWL_WEEK)
-        else:
-            prev_week = Week(self.year, self.week - 1)
-
-        if len(prev_week.games) == 0:
-            return None
-
-        return prev_week
-
-    @fully_cached_property
-    def next(self):
-        if self.week == BLINGABOWL_WEEK:
-            next_week = Week(self.year + 1, 1)
-        else:
-            next_week = Week(self.year, self.week + 1)
-
-        if len(next_week.games) == 0:
-            return None
-
-        return next_week
 
     @fully_cached_property
     def team_scores(self):
@@ -2049,6 +2025,43 @@ class Week(ComparableObject):
             settings.FULL_SITE_URL,
             week_url,
         )
+
+    @fully_cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.week', args=(self.year, self.week))
+
+    @fully_cached_property
+    def previous(self):
+        if self.week == 1:
+            prev_week = Week(self.year - 1, BLINGABOWL_WEEK)
+        else:
+            prev_week = Week(self.year, self.week - 1)
+
+        if len(prev_week.games) == 0:
+            return None
+
+        return prev_week
+
+    @fully_cached_property
+    def next(self):
+        if self.week == BLINGABOWL_WEEK:
+            next_week = Week(self.year + 1, 1)
+        else:
+            next_week = Week(self.year, self.week + 1)
+
+        if len(next_week.games) == 0:
+            return None
+
+        return next_week
+
+    @fully_cached_property
+    def level_up_links(self):
+        return [
+            {
+                'description': str(self.season_object),
+                'href': self.season_object.href,
+            },
+        ]
 
     @classmethod
     def latest(cls):
