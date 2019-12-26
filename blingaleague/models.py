@@ -14,8 +14,6 @@ from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
-from slugify import slugify
-
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties
 
 
@@ -2132,7 +2130,7 @@ class Matchup(object):
 
         for asset in TradedAsset.objects.filter(receiver=self.team1):
             if self.team2.id in asset.trade.team_ids:
-               trades.add(asset.trade)
+                trades.add(asset.trade)
 
         return sorted(
             trades,

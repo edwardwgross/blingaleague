@@ -4,7 +4,7 @@ from django.contrib.auth.views import login, logout
 from django.views.generic import RedirectView
 
 from .views import HomeView, TeamDetailsView, TeamListView,\
-                   SeasonListView, SingleSeasonView, AllTimeStandingsView,\
+                   SeasonListView, SingleSeasonView,\
                    MatchupView, WeekView, TeamSeasonView,\
                    TradeView
 

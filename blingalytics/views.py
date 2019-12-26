@@ -164,7 +164,6 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                     output_field=DecimalField(max_digits=6, decimal_places=2),
                 ),
             )
-            fg = base_games.first()
             if margin_min is not None:
                 base_games = base_games.filter(margin__gte=margin_min)
             if margin_max is not None:
