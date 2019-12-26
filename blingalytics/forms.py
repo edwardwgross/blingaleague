@@ -1,19 +1,33 @@
 from django import forms
 
-from blingaleague.models import Member
+from blingaleague.models import Member, BLINGABOWL_TITLE_BASE, \
+                                SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
+                                THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE
 
 
 CHOICE_BLANGUMS = 'team_blangums'
 CHOICE_SLAPPED_HEARTBEAT = 'slapped_heartbeat'
+
 CHOICE_WINS = 'wins'
 CHOICE_LOSSES = 'losses'
+
 CHOICE_REGULAR_SEASON = 'regular'
 CHOICE_PLAYOFFS = 'playoffs'
+
 CHOICE_MADE_PLAYOFFS = 'made_playoffs'
 CHOICE_MISSED_PLAYOFFS = 'missed_playoffs'
+
 CHOICE_CLINCHED_BYE = 'clinched_bye'
 CHOICE_CLINCHED_PLAYOFFS = 'clinched_playoffs'
 CHOICE_ELIMINATED_EARLY = 'eliminated_early'
+
+CHOICES_PLAYOFF_GAME_TYPE = (
+    BLINGABOWL_TITLE_BASE,
+    SEMIFINALS_TITLE_BASE,
+    QUARTERFINALS_TITLE_BASE,
+    THIRD_PLACE_TITLE_BASE,
+    FIFTH_PLACE_TITLE_BASE,
+)
 
 
 class BaseFinderForm(forms.Form):
@@ -88,6 +102,12 @@ class GameFinderForm(BaseFinderForm):
         ],
     )
     streak_min = forms.IntegerField(required=False, label='Minimum W/L Streak')
+    playoff_game_types = forms.TypedMultipleChoiceField(
+        required=False,
+        label='Playoff Game Type',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(c, c) for c in CHOICES_PLAYOFF_GAME_TYPE],
+    )
 
 
 class SeasonFinderForm(BaseFinderForm):

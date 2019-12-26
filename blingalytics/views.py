@@ -178,6 +178,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
         score_max = form_data['score_max']
         awards = form_data['awards']
         streak_min = form_data['streak_min']
+        playoff_game_types = form_data['playoff_game_types']
 
         team_prefixes = (PREFIX_WINNER, PREFIX_LOSER)
         if wins_only:
@@ -206,6 +207,9 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                 if CHOICE_SLAPPED_HEARTBEAT in awards and not game.slapped_heartbeat:
                     continue
 
+                if playoff_game_types and game.playoff_title_base not in playoff_game_types:
+                    continue
+
                 if streak_min is not None:
                     if team_prefix == PREFIX_WINNER and game.winner_streak < streak_min:
                         continue
@@ -232,7 +236,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                 }
 
                 extra_description = ''
-                if game.playoff_title:
+                if game.playoff_title_base:
                     extra_description = game.playoff_title_base
                 elif team_prefix == PREFIX_WINNER and game.blangums:
                     extra_description = 'Team Blangums'
