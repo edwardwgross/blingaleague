@@ -44,15 +44,19 @@
     {% endfor %}
   </table>
 
+  {% if team.blangums_games %}
   <h2>Team Blangums ({{ team.blangums_games|length }})</h2>
-  {% with team.blangums_games as games %}
-    {% include "blingaleague/awards_games.html" %}
-  {% endwith %}
+    {% with team.blangums_games as games %}
+      {% include "blingaleague/awards_games.html" %}
+    {% endwith %}
+  {% endif %}
 
-  <h2>Slapped Heartbeats ({{ team.slapped_heartbeat_games|length }})</h2>
-  {% with team.slapped_heartbeat_games as games %}
-    {% include "blingaleague/awards_games.html" %}
-  {% endwith %}
+  {% if team.slapped_heartbeat_games %}
+    <h2>Slapped Heartbeats ({{ team.slapped_heartbeat_games|length }})</h2>
+    {% with team.slapped_heartbeat_games as games %}
+      {% include "blingaleague/awards_games.html" %}
+    {% endwith %}
+  {% endif %}
 </div>
 
 {% endblock content %}
