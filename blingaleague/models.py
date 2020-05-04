@@ -1302,6 +1302,10 @@ class TeamSeason(ComparableObject):
     def gazette_link(self):
         return "{}{}".format(settings.FULL_SITE_URL, self.href)
 
+    @fully_cached_property
+    def short_name(self):
+        return "{} {}".format(self.year, self.team.nickname)
+
     def __str__(self):
         return "{}, {}".format(self.team, self.year)
 
