@@ -101,7 +101,7 @@ class Gazette(models.Model):
             args=(self.id,),
         )
 
-    def to_html(self, for_email=False):
+    def to_html(self, for_email=False, include_css=False):
         html_str = render_to_string(
             'blingacontent/gazette_body.html',
             {
@@ -110,14 +110,17 @@ class Gazette(models.Model):
             },
         )
 
-        if for_email:
+        if include_css:
             css_path = Path(settings.STATIC_ROOT) / 'blingaleague' / 'css' / 'blingaleague.css'
             css_fh = open(css_path, 'r')
             head_str = "<head><style>{}</style></head>".format(css_fh.read())
-            body_str = "<body style=\"font-size:14px\">{}</body>".format(html_str)
+            body_str = "<body>{}</body>".format(html_str)
             html_str = "<html>{}{}</html>".format(head_str, body_str)
 
         return html_str
+
+    def to_email(self, include_css=False):
+        return self.to_html(for_email=True, include_css=include_css)
 
     def send(self):
         gmail_service = get_gmail_service()
@@ -136,10 +139,10 @@ class Gazette(models.Model):
                 fake_member.email,
             ))
 
-        message = MIMEText(self.to_html(for_email=True), 'html')
+        message = MIMEText(self.to_email(include_css=True), 'html')
         message['to'] = ', '.join(sorted(recipients))
         message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
-        message['subject'] = "The Sanderson Gazette - {}".format(self)
+        message['subject'] = "TEST The Sanderson Gazette - {}".format(self)
 
         message64 = base64.urlsafe_b64encode(message.as_string().encode())
 

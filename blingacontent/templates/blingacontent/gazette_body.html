@@ -1,7 +1,7 @@
 {% load markdown_filter %}
 {% load tagging_tags %}
 
-<div id="single_gazette" class="blingacontent">
+<div id="single_gazette" class="blingacontent" {% if for_email %}style="font-size:14px"{% endif %}>
   <h1 class="gazette_headline">The Sanderson Gazette - {{ gazette }}</h1>
   <div id="gazette_detail" class="blingacontent_section" {% if for_email %}style="width:90%"{% endif %}>
     {% if gazette.use_markdown %}

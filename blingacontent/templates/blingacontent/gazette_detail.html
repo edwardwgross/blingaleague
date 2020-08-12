@@ -3,11 +3,15 @@
 {% block title %}The Sanderson Gazette - {{ gazette }}{% endblock %}
 
 {% block content %}
-  {{ gazette.to_html }}
+  {% if for_email %}
+    {{ gazette.to_email }}
+  {% else %}
+    {{ gazette.to_html }}
 
-  {% if user.is_staff and not for_email %}
-    <div style="clear:both; text-align:right">
-      <a href="{{ gazette.edit_url }}" class="link" target="_blank">[edit]</a>
-    </div>
+    {% if user.is_staff %}
+      <div style="clear:both; text-align:right">
+        <a href="{{ gazette.edit_url }}" class="link" target="_blank">[edit]</a>
+      </div>
+    {% endif %}
   {% endif %}
 {% endblock content %}

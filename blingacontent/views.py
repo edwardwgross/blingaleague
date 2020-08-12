@@ -70,3 +70,8 @@ class GazetteDetailView(DetailView):
     model = Gazette
     slug_url_kwarg = 'slug'
     query_pk_and_slug = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['for_email'] = 'for_email' in self.request.GET
+        return context
