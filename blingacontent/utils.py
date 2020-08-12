@@ -32,7 +32,8 @@ def get_gmail_service():
     if not creds or creds.invalid:
         credentials_path = Path(settings.BASE_DIR) / 'data' / 'gmail_credentials.json'
         flow = client.flow_from_clientsecrets(credentials_path, SCOPES)
-        creds = tools.run_flow(flow, store)
+        flags = tools.argparser.parse_args(args=['--noauth_local_webserver'])
+        creds = tools.run_flow(flow, store, flags=flags)
     service = build('gmail', 'v1', http=creds.authorize(Http()))
     return service
 
