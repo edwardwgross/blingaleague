@@ -142,7 +142,7 @@ class Gazette(models.Model):
         message = MIMEText(self.to_email(include_css=True), 'html')
         message['to'] = ', '.join(sorted(recipients))
         message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
-        message['subject'] = "TEST The Sanderson Gazette - {}".format(self)
+        message['subject'] = "The Sanderson Gazette - {}".format(self)
 
         message64 = base64.urlsafe_b64encode(message.as_string().encode())
 
