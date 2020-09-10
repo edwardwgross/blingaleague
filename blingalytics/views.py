@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 
 from blingaleague.models import REGULAR_SEASON_WEEKS, \
                                 Game, Week, Member, TeamSeason, \
-                                Season, Matchup, Trade, \
+                                Season, Matchup, Trade, Keeper, \
                                 OUTCOME_WIN, OUTCOME_LOSS
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
@@ -21,7 +21,8 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_MADE_PLAYOFFS, CHOICE_MISSED_PLAYOFFS, \
                    CHOICE_CLINCHED_BYE, CHOICE_CLINCHED_PLAYOFFS, \
                    CHOICE_ELIMINATED_EARLY, \
-                   GameFinderForm, SeasonFinderForm, TradeFinderForm
+                   GameFinderForm, SeasonFinderForm, \
+                   TradeFinderForm, KeeperFinderForm
 from .utils import sorted_seasons_by_attr, \
                    sorted_expected_wins_odds, \
                    build_belt_holder_list
@@ -590,6 +591,50 @@ class TradeFinderView(TemplateView):
             'form': trade_finder_form,
             'trades': trades,
             'summary': self.build_summary(trades),
+        }
+
+        return self.render_to_response(context)
+
+
+class KeeperFinderView(TemplateView):
+    template_name = 'blingalytics/keeper_finder.html'
+
+    def filter_keepers(self, form_data):
+        base_keepers = Keeper.objects.all()
+
+        if form_data['year_min'] is not None:
+            base_keepers = base_keepers.filter(year__gte=form_data['year_min'])
+        if form_data['year_max'] is not None:
+            base_keepers = base_keepers.filter(year__lte=form_data['year_max'])
+
+        if form_data['round_min'] is not None:
+            base_keepers = base_keepers.filter(round__gte=form_data['round_min'])
+        if form_data['round_max'] is not None:
+            base_keepers = base_keepers.filter(round__lte=form_data['round_max'])
+
+        if form_data['times_kept']:
+            base_keepers = base_keepers.filter(times_kept__in=form_data['times_kept'])
+
+        if form_data['teams']:
+            base_keepers = base_keepers.filter(team__id__in=form_data['teams'])
+
+        return sorted(
+            base_keepers,
+            key=lambda x: (x.year, x.round, x.team),
+        )
+
+    def get(self, request):
+        keepers = []
+
+        keeper_finder_form = KeeperFinderForm(request.GET)
+        if keeper_finder_form.is_valid():
+            form_data = keeper_finder_form.cleaned_data
+
+            keepers = self.filter_keepers(form_data)
+
+        context = {
+            'form': keeper_finder_form,
+            'keepers': keepers,
         }
 
         return self.render_to_response(context)

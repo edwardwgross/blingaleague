@@ -1,0 +1,47 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Keeper Finder{% endblock %}
+
+{% block content %}
+<h1>Trade Finder</h1>
+
+<div id="keeper_finder" class="blingalytics">
+  <div id="keeper_finder_controls">
+    {% with "keeper_finder_form" as form_id %}
+      {% include "blingalytics/form.html" %}
+    {% endwith %}
+  </div>
+  <div id="keepers_found" class="finder_results">
+    {% if keepers %}
+      <h2>Keepers</h2>
+      <em>(click on the column headings to sort)</em>
+      <table class="blingalytics_table sortable table-striped">
+        <tr>
+          <th>Year</th>
+          <th>Round</th>
+          <th>Player</th>
+          <th>Team</td>
+          <th>Times Kept</th>
+        </tr>
+        {% for keeper in keepers %}
+          <tr>
+            <td><a href="{% url 'blingaleague.single_season' keeper.year %}">{{ keeper.year}}</a></td>
+            <td>{{ keeper.round }}</td>
+            <td style="text-align:left">{{ keeper.name }}</td>
+            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' keeper.team.id keeper.year %}">{{ keeper.team.nickname }}</a></td>
+            <td>{{ keeper.times_kept }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <h3 class="no_results_message">No keepers found</h3>
+    {% endif %}
+  </div>
+</div>
+
+<script type="text/javascript">
+    $("#form_toggle_button").click(function() {
+        $('#keeper_finder_form').toggle();
+    });
+</script>
+{% endblock content %}

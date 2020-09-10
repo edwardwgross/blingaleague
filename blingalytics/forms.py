@@ -180,3 +180,27 @@ class TradeFinderForm(BaseFinderForm):
     )
 
     filter_threshold = 1
+
+
+class KeeperFinderForm(BaseFinderForm):
+    year_min = forms.IntegerField(required=False, label='Start Year')
+    year_max = forms.IntegerField(required=False, label='End Year')
+    round_min = forms.IntegerField(required=False, label='Earliest Round')
+    round_max = forms.IntegerField(required=False, label='Latest Round')
+    times_kept = forms.TypedMultipleChoiceField(
+        required=False,
+        label='Times Kept',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(1, 1), (2, 2)]
+    )
+    teams = forms.TypedMultipleChoiceField(
+        required=False,
+        label='Teams',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[
+            (m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')
+        ],
+        coerce=int,
+    )
+
+    filter_threshold = 1
