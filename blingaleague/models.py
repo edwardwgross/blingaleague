@@ -1123,6 +1123,9 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def headline(self):
+        if not self.games:
+            return 'No games played'
+
         regular_season = self.regular_season
         text = "{}-{} ({:.3f}), {} points, {}".format(
             regular_season.win_count,
@@ -1263,6 +1266,10 @@ class TeamSeason(ComparableObject):
             trade_dict.values(),
             key=lambda x: x['trade'],
         )
+
+    @fully_cached_property
+    def keepers(self):
+        return self.team.keepers.filter(year=self.year)
 
     @classmethod
     def all(cls):
@@ -2323,6 +2330,41 @@ class TradedAsset(models.Model):
 
     class Meta:
         ordering = ['trade', 'sender', 'receiver', 'keeper_cost', 'name']
+
+
+class Keeper(models.Model, ComparableObject):
+    name = models.CharField(max_length=200)
+    year = models.IntegerField(db_index=True)
+    team = models.ForeignKey(Member, db_index=True, related_name='keepers')
+    round = models.IntegerField()
+    times_kept = models.IntegerField()
+
+    _comparison_attr = 'name_year'
+
+    @fully_cached_property
+    def name_year(self):
+        return (
+            self.name,
+            self.year,
+        )
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        clear_cached_properties()
+
+    def __str__(self):
+        return "{} ({}, {}, {} round)".format(
+            self.name,
+            self.team.nickname,
+            self.year,
+            ordinal(self.round),
+        )
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        ordering = ['year', 'round', 'team', 'name']
 
 
 def build_object_cache(obj):

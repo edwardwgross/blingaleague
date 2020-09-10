@@ -14,6 +14,10 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
     margin-top: 0;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    clear: both;
+}
+
 h1 {
     font-size: 180%;
 }
@@ -90,8 +94,16 @@ th a, th a:hover, th a:visited, th a:focus {
     float: left;
 }
 
+.previous::before {
+    content: "\2190 ";
+}
+
 .next {
     float: right;
+}
+
+.next::after {
+    content: " \2192";
 }
 
 .center {
@@ -268,7 +280,8 @@ table#team_list td {
 
 #games,
 #season_details,
-#trades {
+#trades,
+#keepers {
     width: fit-content;
 }
 

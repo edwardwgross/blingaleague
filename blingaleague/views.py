@@ -150,6 +150,7 @@ class TeamSeasonView(GamesView):
         'blingaleague/expected_win_distribution_team.html',
     )
     post_games_sub_templates = (
+        'blingaleague/team_season_keepers.html',
         'blingaleague/team_season_trades.html',
         'blingaleague/similar_seasons.html',
     )

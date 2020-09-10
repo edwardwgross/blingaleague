@@ -1,48 +1,50 @@
 {% load humanize %}
 
-<h3>Most Similar Seasons</h3>
+{% if base_object.most_similar %}
+  <h3>Most Similar Seasons</h3>
 
-<table id="similar_seasons" class="standings_table">
-  <tr>
-    <th/>
-    <th>Score</th>
-    <th/> {# Year #}
-    <th/> {# Team #}
-    <th>Record</th>
-    <th>Points</th>
-    <th>Exp. W</th>
-    {% if base_object.is_partial %}
-      <th>Final Record</th>
-      <th>Final Place</th>
-    {% else %}
-      <th>Place</th>
-    {% endif %}
-    <th>Playoff Finish</th>
-  </tr>
-  {% for similar_season in base_object.most_similar %}
+  <table id="similar_seasons" class="standings_table">
     <tr>
-      <td>{{ forloop.counter }}</td>
-      <td><strong>{{ similar_season.score|floatformat:0 }}</strong></td>
-      <td><a href="{{ similar_season.season.season_object.href }}">{{ similar_season.season.year }}</a></td>
-      <td style="text-align:left"><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
-      <td style="text-align:center">{{ similar_season.season.record }}</td>
-      <td>{{ similar_season.season.points|intcomma }}</td>
-      <td>{{ similar_season.season.expected_wins|floatformat:2 }}</td>
+      <th/>
+      <th>Score</th>
+      <th/> {# Year #}
+      <th/> {# Team #}
+      <th>Record</th>
+      <th>Points</th>
+      <th>Exp. W</th>
       {% if base_object.is_partial %}
-        <td style="text-align:center">
-          {% if not similar_season.season.regular_season.is_partial %}
-            {{ similar_season.season.regular_season.record }}
-          {% endif%}
-        </td>
-        <td>
-          {% if not similar_season.season.regular_season.is_partial %}
-            {{ similar_season.season.regular_season.place_numeric }}
-          {% endif%}
-        </td>
+        <th>Final Record</th>
+        <th>Final Place</th>
       {% else %}
-        <td>{{ similar_season.season.place_numeric }}</td>
+        <th>Place</th>
       {% endif %}
-      <td style="text-align:left">{{ similar_season.season.regular_season.playoff_finish }}</td>
+      <th>Playoff Finish</th>
     </tr>
-  {% endfor %}
-</table>
+    {% for similar_season in base_object.most_similar %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><strong>{{ similar_season.score|floatformat:0 }}</strong></td>
+        <td><a href="{{ similar_season.season.season_object.href }}">{{ similar_season.season.year }}</a></td>
+        <td style="text-align:left"><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
+        <td style="text-align:center">{{ similar_season.season.record }}</td>
+        <td>{{ similar_season.season.points|intcomma }}</td>
+        <td>{{ similar_season.season.expected_wins|floatformat:2 }}</td>
+        {% if base_object.is_partial %}
+          <td style="text-align:center">
+            {% if not similar_season.season.regular_season.is_partial %}
+              {{ similar_season.season.regular_season.record }}
+            {% endif%}
+          </td>
+          <td>
+            {% if not similar_season.season.regular_season.is_partial %}
+              {{ similar_season.season.regular_season.place_numeric }}
+            {% endif%}
+          </td>
+        {% else %}
+          <td>{{ similar_season.season.place_numeric }}</td>
+        {% endif %}
+        <td style="text-align:left">{{ similar_season.season.regular_season.playoff_finish }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}

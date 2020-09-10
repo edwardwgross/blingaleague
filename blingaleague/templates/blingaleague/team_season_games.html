@@ -1,47 +1,49 @@
-<table class="game_table sortable">
-  <tr>
-    <th>Week</th>
-    <th>W/L</th>
-    <th>PF</th>
-    <th>PA</th>
-    <th>Opponent</th>
-    <th>Margin</th>
-    <th/> {# Notes #}
-  </tr>
-  {% for game in base_object.games %}
-    <tr {% if game.is_playoffs %}class="playoffs"{% endif %}>
-      <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
-      {% if base_object.team == game.winner %}
-        <td style="text-align:center">W</td>
-        <td>{{ game.winner_score }}</td>
-        <td>{{ game.loser_score }}</td>
-        <td style="text-align:left">
-          <a href="{% url 'blingaleague.team_season' game.loser.id game.year %}">{{ game.loser }}</a>
-        </td>
-        <td>{{ game.margin }}</td>
-        <td style="text-align:left">
-          {% if game.playoff_title %}
-            {{ game.playoff_title }}
-          {% elif game.blangums %}
-            Team Blangums
-          {% endif %}
-        </td>
-      {% else %}
-        <td style="text-align:center">L</td>
-        <td>{{ game.loser_score }}</td>
-        <td>{{ game.winner_score }}</td>
-        <td style="text-align:left">
-          <a href="{% url 'blingaleague.team_season' game.winner.id game.year %}">{{ game.winner }}</a>
-        </td>
-        <td>-{{ game.margin }}</td>
-        <td style="text-align:left">
-          {% if game.playoff_title %}
-            {{ game.playoff_title }}
-          {% elif game.slapped_heartbeat %}
-            Slapped Heartbeat
-          {% endif %}
-        </td>
-      {% endif %}
+{% if base_object.games %}
+  <table class="game_table sortable">
+    <tr>
+      <th>Week</th>
+      <th>W/L</th>
+      <th>PF</th>
+      <th>PA</th>
+      <th>Opponent</th>
+      <th>Margin</th>
+      <th/> {# Notes #}
     </tr>
-  {% endfor %}
-</table>
+    {% for game in base_object.games %}
+      <tr {% if game.is_playoffs %}class="playoffs"{% endif %}>
+        <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
+        {% if base_object.team == game.winner %}
+          <td style="text-align:center">W</td>
+          <td>{{ game.winner_score }}</td>
+          <td>{{ game.loser_score }}</td>
+          <td style="text-align:left">
+            <a href="{% url 'blingaleague.team_season' game.loser.id game.year %}">{{ game.loser }}</a>
+          </td>
+          <td>{{ game.margin }}</td>
+          <td style="text-align:left">
+            {% if game.playoff_title %}
+              {{ game.playoff_title }}
+            {% elif game.blangums %}
+              Team Blangums
+            {% endif %}
+          </td>
+        {% else %}
+          <td style="text-align:center">L</td>
+          <td>{{ game.loser_score }}</td>
+          <td>{{ game.winner_score }}</td>
+          <td style="text-align:left">
+            <a href="{% url 'blingaleague.team_season' game.winner.id game.year %}">{{ game.winner }}</a>
+          </td>
+          <td>-{{ game.margin }}</td>
+          <td style="text-align:left">
+            {% if game.playoff_title %}
+              {{ game.playoff_title }}
+            {% elif game.slapped_heartbeat %}
+              Slapped Heartbeat
+            {% endif %}
+          </td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}
