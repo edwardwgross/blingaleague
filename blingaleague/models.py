@@ -46,6 +46,8 @@ PLAYOFF_TITLE_ORDER = [
 
 MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
 
+POSITIONS = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K']
+
 
 class ComparableObject(object):
 
@@ -2296,6 +2298,12 @@ class TradedAsset(models.Model):
     keeper_eligible = models.BooleanField(default=True)
     keeper_cost = models.IntegerField(blank=True, null=True)
     is_draft_pick = models.BooleanField(default=False)
+    position = models.CharField(
+        blank=True,
+        null=True,
+        max_length=10,
+        choices=[(p, p) for p in POSITIONS],
+    )
 
     @fully_cached_property
     def keeper_cost_str(self):
@@ -2334,6 +2342,10 @@ class TradedAsset(models.Model):
 
 class Keeper(models.Model, ComparableObject):
     name = models.CharField(max_length=200)
+    position = models.CharField(
+        max_length=10,
+        choices=[(p, p) for p in POSITIONS],
+    )
     year = models.IntegerField(db_index=True)
     team = models.ForeignKey(Member, db_index=True, related_name='keepers')
     round = models.IntegerField()

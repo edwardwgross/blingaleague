@@ -531,6 +531,7 @@ class TradeFinderView(TemplateView):
             base_trades = base_trades.filter(week__lte=form_data['week_max'])
 
         teams = form_data['teams']
+        positions = form_data['positions']
 
         all_trades = []
         for trade in base_trades:
@@ -543,6 +544,9 @@ class TradeFinderView(TemplateView):
 
                 if not teams_matched:
                     continue
+
+            if len(positions) > 0 and trade.traded_assets.filter(position__in=positions).count() == 0:
+                continue
 
             all_trades.append(trade)
 
@@ -600,26 +604,29 @@ class KeeperFinderView(TemplateView):
     template_name = 'blingalytics/keeper_finder.html'
 
     def filter_keepers(self, form_data):
-        base_keepers = Keeper.objects.all()
+        keepers = Keeper.objects.all()
 
         if form_data['year_min'] is not None:
-            base_keepers = base_keepers.filter(year__gte=form_data['year_min'])
+            keepers = keepers.filter(year__gte=form_data['year_min'])
         if form_data['year_max'] is not None:
-            base_keepers = base_keepers.filter(year__lte=form_data['year_max'])
+            keepers = keepers.filter(year__lte=form_data['year_max'])
 
         if form_data['round_min'] is not None:
-            base_keepers = base_keepers.filter(round__gte=form_data['round_min'])
+            keepers = keepers.filter(round__gte=form_data['round_min'])
         if form_data['round_max'] is not None:
-            base_keepers = base_keepers.filter(round__lte=form_data['round_max'])
+            keepers = keepers.filter(round__lte=form_data['round_max'])
 
         if form_data['times_kept']:
-            base_keepers = base_keepers.filter(times_kept__in=form_data['times_kept'])
+            keepers = keepers.filter(times_kept__in=form_data['times_kept'])
 
         if form_data['teams']:
-            base_keepers = base_keepers.filter(team__id__in=form_data['teams'])
+            keepers = keepers.filter(team__id__in=form_data['teams'])
+
+        if form_data['positions']:
+            keepers = keepers.filter(position__in=form_data['positions'])
 
         return sorted(
-            base_keepers,
+            keepers,
             key=lambda x: (x.year, x.round, x.team),
         )
 

@@ -20,6 +20,7 @@
           <th>Year</th>
           <th>Round</th>
           <th>Player</th>
+          <th>Position</th>
           <th>Team</td>
           <th>Times Kept</th>
         </tr>
@@ -28,6 +29,7 @@
             <td><a href="{% url 'blingaleague.single_season' keeper.year %}">{{ keeper.year}}</a></td>
             <td>{{ keeper.round }}</td>
             <td style="text-align:left">{{ keeper.name }}</td>
+            <td style="text-align:left">{{ keeper.position }}</td>
             <td style="text-align:left"><a href="{% url 'blingaleague.team_season' keeper.team.id keeper.year %}">{{ keeper.team.nickname }}</a></td>
             <td>{{ keeper.times_kept }}</td>
           </tr>

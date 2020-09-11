@@ -2,7 +2,8 @@ from django import forms
 
 from blingaleague.models import Member, BLINGABOWL_TITLE_BASE, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
-                                THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE
+                                THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE, \
+                                POSITIONS
 
 
 CHOICE_BLANGUMS = 'team_blangums'
@@ -178,6 +179,12 @@ class TradeFinderForm(BaseFinderForm):
         ],
         coerce=int,
     )
+    positions = forms.TypedMultipleChoiceField(
+        required=False,
+        label='Position',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(p, p) for p in POSITIONS],
+    )
 
     filter_threshold = 1
 
@@ -187,6 +194,12 @@ class KeeperFinderForm(BaseFinderForm):
     year_max = forms.IntegerField(required=False, label='End Year')
     round_min = forms.IntegerField(required=False, label='Earliest Round')
     round_max = forms.IntegerField(required=False, label='Latest Round')
+    positions = forms.TypedMultipleChoiceField(
+        required=False,
+        label='Position',
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(p, p) for p in POSITIONS],
+    )
     times_kept = forms.TypedMultipleChoiceField(
         required=False,
         label='Times Kept',

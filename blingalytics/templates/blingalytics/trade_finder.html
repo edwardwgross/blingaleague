@@ -46,6 +46,7 @@
           <th>Week</th>
           <th>Receiver</td>
           <th>Asset</th>
+          <th>Position</th>
           <th>Keeper Cost</th>
           <th>Sender</th>
         </tr>
@@ -57,6 +58,7 @@
               <td><a href="{{ trade.week_object.href }}">{{ trade.week }}</a></td>
               <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.receiver.id trade.year %}">{{ asset.receiver.nickname }}</a></td>
               <td style="text-align:left">{{ asset.name }}</td>
+              <td style="text-align:left">{{ asset.position|default_if_none:"" }}</td>
               <td>{{ asset.keeper_cost|default_if_none:'' }}</td>
               <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.sender.id trade.year %}">{{ asset.sender.nickname }}</a></td>
             </tr>
