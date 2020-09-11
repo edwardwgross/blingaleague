@@ -86,9 +86,6 @@ def new_gazette_body_template():
             sections.append([
                 '# Playoff Scenarios',
             ])
-
-        if last_week.week <= 10:
-            sections.append(playoff_odds_section(last_week))
     else:
         sections.append(postmortems_section(last_week, current_season))
 
