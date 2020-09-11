@@ -281,8 +281,10 @@ table#team_list td {
 #games,
 #season_details,
 #trades,
+table.trades,
 #keepers {
     width: fit-content;
+    margin-bottom: 30px;
 }
 
 #games .game,
