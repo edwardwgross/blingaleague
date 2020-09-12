@@ -18,7 +18,8 @@ class Command(LabelCommand):
         for ts in season.standings_table[PLAYOFF_TEAMS:]:
             team_tuple = (
                 ts.team.nickname,
-                ts.loss_count, ts.points,
+                ts.loss_count,
+                ts.points,
             )
             teams.append(team_tuple)
 
