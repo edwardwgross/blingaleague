@@ -76,7 +76,7 @@ class Command(LabelCommand):
                         total_level = total_level + level
                         if random_value < total_level:
                             if name in used_teams:
-                                # don't move onto next team, instead re-generatezd random number
+                                # don't move onto next team, instead re-generate random number
                                 break
                             else:
                                 used_teams[name] = 1
