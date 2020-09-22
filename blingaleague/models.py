@@ -802,7 +802,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def expected_wins(self):
-        return sum(self.expected_wins_by_game)
+        return min(sum(self.expected_wins_by_game), len(self.games))
 
     @fully_cached_property
     def raw_expected_wins_against(self):
@@ -812,7 +812,8 @@ class TeamSeason(ComparableObject):
     def expected_wins_against(self):
         scaling_factor = self.season_object.expected_wins_scaling_factor
         raw_expected_wins_against = self.raw_expected_wins_against
-        return scaling_factor * raw_expected_wins_against
+        expected_wins_against = scaling_factor * raw_expected_wins_against
+        return min(expected_wins_against, len(self.games))
 
     @fully_cached_property
     def strength_of_schedule(self):
@@ -1594,18 +1595,13 @@ class Season(ComparableObject):
         if self.weeks_with_games > REGULAR_SEASON_WEEKS:
             return self.regular_season.expected_wins_scaling_factor
 
-        raw_scaling_factor = 1
+        scaling_factor = 1
         if self.total_raw_expected_wins > 0:
-            raw_scaling_factor = (
+            scaling_factor = (
                 decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
             )
 
-        full_weight_week = math.ceil(REGULAR_SEASON_WEEKS / 2)
-
-        this_season_weight = min(self.weeks_with_games, full_weight_week)
-        regression_weight = max(full_weight_week - self.weeks_with_games, 0)
-
-        return ((this_season_weight * raw_scaling_factor) + regression_weight) / full_weight_week
+        return scaling_factor
 
     @fully_cached_property
     def champion(self):
