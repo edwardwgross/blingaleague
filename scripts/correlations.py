@@ -20,11 +20,13 @@ def two_stat_correl(attr1, attr2, min_year=None):
     return numpy.corrcoef(list1, list2)[0][1]
 
 
-def in_season_correl(attr1, attr2, cutoff_week):
+def in_season_correl(attr1, attr2, cutoff_week, min_year=None):
     list_remain = []
     list_part = []
     for ts_full in TeamSeason.all():
         if ts_full.is_partial:
+            continue
+        if min_year is not None and ts_full.year < min_year:
             continue
         ts_part = TeamSeason(ts_full.team.id, ts_full.year, week_max=cutoff_week)
         attr1_part = getattr(ts_part, attr1)
