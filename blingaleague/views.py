@@ -16,6 +16,7 @@ class HomeView(TemplateView):
             'season': Season.latest(),
             'week': Week.latest(),
             'gazette': Gazette.latest(),
+            'trades': Trade.most_recent(),
         }
         return self.render_to_response(context)
 

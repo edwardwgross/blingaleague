@@ -2264,6 +2264,19 @@ class Trade(models.Model, ComparableObject):
 
         return grouped_assets
 
+    @classmethod
+    def most_recent(cls):
+        most_recent = []
+
+        latest_week = Week.latest()
+
+        for trade in cls.objects.order_by('-year', '-week'):
+            if trade.week_object < latest_week:
+                break
+            most_recent.append(trade)
+
+        return most_recent
+
     @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.trade', args=(self.id,))

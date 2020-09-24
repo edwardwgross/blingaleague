@@ -20,11 +20,11 @@
   {% endfor %}
 </div>
 
-{% if week.trades %}
+{% if trades %}
   <h3>Trades</h3>
 
   <div id="trades">
-    {% for trade in week.trades %}
+    {% for trade in trades %}
       {% include "blingaleague/single_trade.html" %}
     {% endfor %}
   </div>
