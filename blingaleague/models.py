@@ -1204,6 +1204,15 @@ class TeamSeason(ComparableObject):
         return list(map(_ss_display, sorted_seasons))
 
     def similarity_score(self, other_season):
+        record_similarity_score = self.record_similarity_score(other_season)
+        metrics_similarity_score = self.metrics_similarity_score(other_season)
+        return (record_similarity_score + metrics_similarity_score) / 2
+
+    def record_similarity_score(self, other_season):
+        win_diff = abs(self.win_count - other_season.win_count)
+        return 1000 - (decimal.Decimal(win_diff) * 50)
+
+    def metrics_similarity_score(self, other_season):
         week_by_week_score = aggregate_score = decimal.Decimal(1000)
 
         game_count = len(self.games)
