@@ -44,6 +44,8 @@ PLAYOFF_TITLE_ORDER = [
     FIFTH_PLACE_TITLE_BASE,
 ]
 
+MAX_SIMILARITY_SCORE = decimal.Decimal(1000)
+
 MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
 
 POSITIONS = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K']
@@ -577,15 +579,22 @@ class TeamSeason(ComparableObject):
     def loss_count(self):
         return len(self.losses)
 
+    @fully_cached_property
+    def outcome_sequence(self):
+        outcome_sequence = []
+
+        for game in self.games:
+            if game.winner == self.team:
+                outcome_sequence.append(OUTCOME_WIN)
+            else:
+                outcome_sequence.append(OUTCOME_LOSS)
+
+        return outcome_sequence
+
     def week_outcome(self, week):
         if week < 1 or week > len(self.games):
             return None
-
-        game = self.games[week - 1]
-        if game.winner == self.team:
-            return OUTCOME_WIN
-        else:
-            return OUTCOME_LOSS
+        return self.outcome_sequence[week - 1]
 
     @fully_cached_property
     def record(self):
@@ -1206,26 +1215,77 @@ class TeamSeason(ComparableObject):
     def similarity_score(self, other_season):
         record_similarity_score = self.record_similarity_score(other_season)
         metrics_similarity_score = self.metrics_similarity_score(other_season)
-        return (record_similarity_score + metrics_similarity_score) / 2
+        return statistics.mean([
+            record_similarity_score,
+            metrics_similarity_score,
+        ])
 
     def record_similarity_score(self, other_season):
-        win_diff = abs(self.win_count - other_season.win_count)
-        return 1000 - (decimal.Decimal(win_diff) * 50)
+        def _outcome_sequence_to_binary(outcome_sequence):
+            outcome_map = {
+                OUTCOME_WIN: 1,
+                OUTCOME_LOSS: 0,
+            }
+            return [outcome_map[o] for o in outcome_sequence]
+
+        sequence_score = TeamSeason._sequence_similarity_score(
+            _outcome_sequence_to_binary(self.outcome_sequence),
+            _outcome_sequence_to_binary(other_season.outcome_sequence),
+        )
+
+        total_win_score = TeamSeason._total_wins_similarity_score(
+            self.win_count,
+            other_season.win_count,
+        )
+
+        return statistics.mean([
+            sequence_score,
+            total_win_score,
+        ])
 
     def metrics_similarity_score(self, other_season):
-        week_by_week_score = aggregate_score = decimal.Decimal(1000)
+        sequence_score = TeamSeason._sequence_similarity_score(
+            self.expected_wins_by_game,
+            other_season.expected_wins_by_game,
+        )
 
-        game_count = len(self.games)
+        total_xw_score = TeamSeason._total_wins_similarity_score(
+            self.expected_wins,
+            other_season.expected_wins,
+        )
 
-        for i, xw in enumerate(self.expected_wins_by_game):
-            xw_diff = decimal.Decimal(abs(xw - other_season.expected_wins_by_game[i]))
-            week_by_week_score -= decimal.Decimal(xw_diff) * 500 / game_count
+        return statistics.mean([
+            sequence_score,
+            total_xw_score,
+        ])
 
-        total_xw_diff = abs(self.expected_wins - other_season.expected_wins)
-        aggregate_score -= decimal.Decimal(total_xw_diff) * 100
+    @classmethod
+    def _sequence_similarity_score(cls, sequence_1, sequence_2, multiplier=decimal.Decimal('0.5')):
+        if len(sequence_1) != len(sequence_2):
+            return 0
 
-        combined_score = (week_by_week_score + aggregate_score) / 2
-        return max(combined_score, 0)
+        sequence_diff = 0
+
+        final_multipler = multiplier * MAX_SIMILARITY_SCORE / len(sequence_1)
+
+        for i, val in enumerate(sequence_1):
+            sequence_diff += (final_multipler * decimal.Decimal(abs(val - sequence_2[i])))
+
+        return max(
+            MAX_SIMILARITY_SCORE - sequence_diff,
+            0,
+        )
+
+    @classmethod
+    def _total_wins_similarity_score(cls, wins_1, wins_2, multiplier=1):
+        final_multiplier = multiplier * MAX_SIMILARITY_SCORE / 10
+
+        total_wins_diff = final_multiplier * (abs(wins_1 - wins_2) ** 2)
+
+        return max(
+            MAX_SIMILARITY_SCORE - total_wins_diff,
+            0,
+        )
 
     def _filter_similar_seasons(self, threshold):
         base_season = self
