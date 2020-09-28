@@ -1218,8 +1218,8 @@ class TeamSeason(ComparableObject):
         attr_weights = {
             'win_pct': 40,
             'expected_win_pct': 40,
-            'all_play_win_pct': 5,
-            'expected_win_pct_against': 5,
+            'all_play_win_pct': 10,
+            'expected_win_pct_against': 10,
         }
 
         combined_score = 0
