@@ -824,10 +824,13 @@ class TeamSeason(ComparableObject):
         return min(expected_wins_against, len(self.games))
 
     @fully_cached_property
+    def expected_win_pct_against(self):
+        return self.expected_wins_against / len(self.games)
+
+    @fully_cached_property
     def strength_of_schedule(self):
-        xw_pct_against = self.expected_wins_against / len(self.games)
         half = decimal.Decimal(0.5)
-        return (xw_pct_against - half) / half
+        return (self.expected_win_pct_against - half) / half
 
     @fully_cached_property
     def strength_of_schedule_str(self):
@@ -1212,79 +1215,24 @@ class TeamSeason(ComparableObject):
         return list(map(_ss_display, sorted_seasons))
 
     def similarity_score(self, other_season):
-        record_similarity_score = self.record_similarity_score(other_season)
-        metrics_similarity_score = self.metrics_similarity_score(other_season)
-        return statistics.mean([
-            record_similarity_score,
-            metrics_similarity_score,
-        ])
+        attr_weights = {
+            'win_pct': 40,
+            'expected_win_pct': 40,
+            'all_play_win_pct': 5,
+            'expected_win_pct_against': 5,
+        }
 
-    def record_similarity_score(self, other_season):
-        def _outcome_sequence_to_binary(outcome_sequence):
-            outcome_map = {
-                OUTCOME_WIN: 1,
-                OUTCOME_LOSS: 0,
-            }
-            return [outcome_map[o] for o in outcome_sequence]
+        combined_score = 0
+        attr_diff_cap = decimal.Decimal('0.5')
 
-        sequence_score = TeamSeason._sequence_similarity_score(
-            _outcome_sequence_to_binary(self.outcome_sequence),
-            _outcome_sequence_to_binary(other_season.outcome_sequence),
-        )
+        for attr, weight in attr_weights.items():
+            # multiply by 2, since it's extremely rare that two seasons are ever
+            # more than .500 apart in any pct metric
+            attr_diff = 2 * abs(getattr(self, attr) - getattr(other_season, attr))
+            attr_score = max(1 - attr_diff, 0)
+            combined_score += weight * attr_score
 
-        total_win_score = TeamSeason._total_wins_similarity_score(
-            self.win_count,
-            other_season.win_count,
-        )
-
-        return statistics.mean([
-            sequence_score,
-            total_win_score,
-        ])
-
-    def metrics_similarity_score(self, other_season):
-        sequence_score = TeamSeason._sequence_similarity_score(
-            self.expected_wins_by_game,
-            other_season.expected_wins_by_game,
-        )
-
-        total_xw_score = TeamSeason._total_wins_similarity_score(
-            self.expected_wins,
-            other_season.expected_wins,
-        )
-
-        return statistics.mean([
-            sequence_score,
-            total_xw_score,
-        ])
-
-    @classmethod
-    def _sequence_similarity_score(cls, sequence_1, sequence_2, multiplier=decimal.Decimal('0.5')):
-        if len(sequence_1) != len(sequence_2):
-            return 0
-
-        sequence_diff = 0
-
-        final_multipler = multiplier * MAX_SIMILARITY_SCORE / len(sequence_1)
-
-        for i, val in enumerate(sequence_1):
-            sequence_diff += (final_multipler * decimal.Decimal(abs(val - sequence_2[i])))
-
-        return max(
-            MAX_SIMILARITY_SCORE - sequence_diff,
-            0,
-        )
-
-    @classmethod
-    def _total_wins_similarity_score(cls, wins_1, wins_2, multiplier=1):
-        final_multiplier = multiplier * MAX_SIMILARITY_SCORE / 10
-
-        total_wins_diff = final_multiplier * (abs(wins_1 - wins_2) ** 2)
-
-        return max(
-            MAX_SIMILARITY_SCORE - total_wins_diff,
-            0,
-        )
+        return MAX_SIMILARITY_SCORE * combined_score / sum(attr_weights.values())
 
     def _filter_similar_seasons(self, threshold):
         base_season = self
