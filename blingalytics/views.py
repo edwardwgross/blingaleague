@@ -545,8 +545,9 @@ class TradeFinderView(TemplateView):
                 if not teams_matched:
                     continue
 
-            if len(positions) > 0 and trade.traded_assets.filter(position__in=positions).count() == 0:
-                continue
+            if len(positions) > 0:
+                if trade.traded_assets.filter(position__in=positions).count() == 0:
+                    continue
 
             all_trades.append(trade)
 

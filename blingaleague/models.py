@@ -1,7 +1,6 @@
 import datetime
 import decimal
 import itertools
-import math
 import nvd3
 import statistics
 
@@ -763,15 +762,15 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def game_scores(self):
-        win_tuples = [(w.year, w.week, w.winner_score) for w in self.wins]
-        loss_tuples = [(l.year, l.week, l.loser_score) for l in self.losses]
+        win_tuples = [(win.year, win.week, win.winner_score) for win in self.wins]
+        loss_tuples = [(loss.year, loss.week, loss.loser_score) for loss in self.losses]
         all_tuples = sorted(win_tuples + loss_tuples)
         return list(map(lambda x: x[2], all_tuples))
 
     @fully_cached_property
     def game_scores_against(self):
-        win_tuples = [(w.year, w.week, w.winner_score) for w in self.losses]
-        loss_tuples = [(l.year, l.week, l.loser_score) for l in self.wins]
+        win_tuples = [(win.year, win.week, win.winner_score) for win in self.losses]
+        loss_tuples = [(loss.year, loss.week, loss.loser_score) for loss in self.wins]
         all_tuples = sorted(win_tuples + loss_tuples)
         return list(map(lambda x: x[2], all_tuples))
 
