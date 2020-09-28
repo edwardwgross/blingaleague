@@ -43,10 +43,12 @@ class SingleSeasonView(SeasonView):
         }
 
         week_max = None
+        hide_playoff_finish = False
         if 'week_max' in request.GET:
             try:
                 week_max = int(request.GET.get('week_max', REGULAR_SEASON_WEEKS))
                 season_kwargs['week_max'] = week_max
+                hide_playoff_finish = week_max < BLINGABOWL_WEEK
             except ValueError:
                 # ignore if user passed in a non-int
                 pass
@@ -66,6 +68,7 @@ class SingleSeasonView(SeasonView):
             'season': self.season,
             'week_max': week_max,
             'weeks_with_games': weeks_with_games,
+            'hide_playoff_finish': hide_playoff_finish,
         }
 
         return self.render_to_response(context)
