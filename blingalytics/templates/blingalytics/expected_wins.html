@@ -6,14 +6,15 @@
 <h1>Expected Wins Calculator</h1>
 
 <div id="expected_wins" class="blingalytics">
-  {% if expected_wins != None %}
-    <span>Expected wins for a score of <em>{{ score }}</em>: <strong>{{ expected_wins|floatformat:3 }}</strong>
-  {% endif %}
-
-  <form method="get">
-    Score <input type="text" name="score" {% if score != None %}value="{{ score }}"{% endif %}/>
+  <form method="get" style="margin-bottom:20px">
+    {% csrf_token %}
+    {{ form.as_p }}
     <input type="submit" value="Submit"/>
   </form>
+
+  {% if expected_wins != None %}
+    <div>Expected wins: <strong>{{ expected_wins|floatformat:3 }}</strong></div>
+  {% endif %}
 
   {{ expected_wins_graph.htmlcontent|safe }}
 </div>

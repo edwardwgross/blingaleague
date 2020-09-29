@@ -22,7 +22,8 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_CLINCHED_BYE, CHOICE_CLINCHED_PLAYOFFS, \
                    CHOICE_ELIMINATED_EARLY, \
                    GameFinderForm, SeasonFinderForm, \
-                   TradeFinderForm, KeeperFinderForm
+                   TradeFinderForm, KeeperFinderForm, \
+                   ExpectedWinsCalculatorForm
 from .utils import sorted_seasons_by_attr, \
                    sorted_expected_wins_odds, \
                    build_belt_holder_list
@@ -80,7 +81,7 @@ class WeeklyScoresView(TemplateView):
 class ExpectedWinsView(TemplateView):
     template_name = 'blingalytics/expected_wins.html'
 
-    def _expected_wins_graph(self, score):
+    def _expected_wins_graph(self, score, scaling_factor=1):
         min_score = Game.objects.all().order_by('loser_score')[0].loser_score
         max_score = Game.objects.all().order_by('-winner_score')[0].winner_score
 
@@ -94,7 +95,11 @@ class ExpectedWinsView(TemplateView):
             x_data = sorted(x_data + [score])
 
         x_data = list(map(float, x_data))
-        y_data = list(map(float, map(Game.expected_wins, x_data)))
+
+        y_data = []
+        for x_value in x_data:
+            y_value = float(scaling_factor * Game.expected_wins(x_value))
+            y_data.append(min(y_value, 1))
 
         graph = nvd3.lineChart(
             name='expected_wins',
@@ -118,16 +123,27 @@ class ExpectedWinsView(TemplateView):
 
     def get(self, request):
         expected_wins = None
+        score = None
+        scaling_factor = 1
 
-        score = request.GET.get('score', None)
+        expected_wins_form = ExpectedWinsCalculatorForm(request.GET)
+        if expected_wins_form.is_valid():
+            form_data = expected_wins_form.cleaned_data
+            score = form_data['score']
+            year = form_data['year']
+            if year:
+                scaling_factor = Season(year).expected_wins_scaling_factor
+
         if score is not None:
-            score = decimal.Decimal(score)
-            expected_wins = Game.expected_wins(score)
+            expected_wins = min(
+                scaling_factor * Game.expected_wins(score),
+                1,
+            )
 
         context = {
-            'score': score,
+            'form': expected_wins_form,
             'expected_wins': expected_wins,
-            'expected_wins_graph': self._expected_wins_graph(score),
+            'expected_wins_graph': self._expected_wins_graph(score, scaling_factor),
         }
 
         return self.render_to_response(context)

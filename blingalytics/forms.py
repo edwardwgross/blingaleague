@@ -1,6 +1,6 @@
 from django import forms
 
-from blingaleague.models import Member, BLINGABOWL_TITLE_BASE, \
+from blingaleague.models import Member, Season, BLINGABOWL_TITLE_BASE, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
                                 THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE, \
                                 POSITIONS
@@ -29,6 +29,28 @@ CHOICES_PLAYOFF_GAME_TYPE = (
     THIRD_PLACE_TITLE_BASE,
     FIFTH_PLACE_TITLE_BASE,
 )
+
+
+class ExpectedWinsCalculatorForm(forms.Form):
+    score = forms.DecimalField(required=False, label='Score', decimal_places=2)
+    year = forms.IntegerField(required=False, label='Year')
+
+    def is_valid(self):
+        if not super().is_valid():
+            return False
+
+        year = self.cleaned_data['year']
+        if year is not None:
+            min_year = Season.min().year
+            max_year = Season.max().year
+            if (year < min_year) or (year > max_year):
+                self.add_error(
+                    None,
+                    "Year must be between {} and {}".format(min_year, max_year),
+                )
+                return False
+
+        return True
 
 
 class BaseFinderForm(forms.Form):
