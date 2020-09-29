@@ -59,6 +59,8 @@ def new_gazette_body_template():
                 current_season.gazette_link,
             ),
             current_season.gazette_str,
+            '## Blingalytics Ratings',
+            blingalytics_ratings_section(current_season),
         ])
     elif last_week.week == BLINGABOWL_WEEK:
         sections.append([
@@ -186,3 +188,23 @@ def postmortems_section(week_obj, season):
         postmortems_section.append(team_season.gazette_postmortem_str)
 
     return postmortems_section
+
+
+def blingalytics_ratings_section(season):
+    expected_wins_ranking = sorted(
+        season.standings_table,
+        key=lambda x: x.expected_win_pct,
+        reverse=True,
+    )
+
+    ratings_rows = []
+    for i, team_season in enumerate(expected_wins_ranking, 1):
+        ratings_rows.append(
+            "{}. {}, {:.0f}".format(
+                i,
+                team_season.team.nickname,
+                1000 * team_season.expected_win_pct,
+            ),
+        )
+
+    return '\n'.join(ratings_rows)
