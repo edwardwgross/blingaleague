@@ -1216,9 +1216,8 @@ class TeamSeason(ComparableObject):
 
     def similarity_score(self, other_season):
         attr_weights = {
-            'win_pct': 40,
+            'win_pct': 50,
             'expected_win_pct': 40,
-            'all_play_win_pct': 10,
             'expected_win_pct_against': 10,
         }
 

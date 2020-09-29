@@ -12,6 +12,7 @@
       <th>Record</th>
       <th>Points</th>
       <th>Exp. W</th>
+      <th>SOS</th>
       {% if base_object.is_partial %}
         <th>Final Record</th>
         <th>Final Place</th>
@@ -29,6 +30,7 @@
         <td style="text-align:center">{{ similar_season.season.record }}</td>
         <td>{{ similar_season.season.points|intcomma }}</td>
         <td>{{ similar_season.season.expected_wins|floatformat:2 }}</td>
+        <td>{{ similar_season.season.strength_of_schedule_str }}</td>
         {% if base_object.is_partial %}
           <td style="text-align:center">
             {% if not similar_season.season.regular_season.is_partial %}
