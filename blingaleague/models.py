@@ -521,7 +521,7 @@ class Postseason(models.Model):
         clear_cached_properties()
 
     def __str__(self):
-        return str(self.year)
+        return "{} postseason".format(self.year)
 
     def __repr__(self):
         return str(self)
@@ -1140,16 +1140,15 @@ class TeamSeason(ComparableObject):
         if not self.games:
             return 'No games played'
 
-        regular_season = self.regular_season
         text = "{}-{} ({:.3f}), {} points, {}".format(
-            regular_season.win_count,
-            regular_season.loss_count,
-            regular_season.win_pct,
-            intcomma(regular_season.points),
-            regular_season.place,
+            self.headline_season.win_count,
+            self.headline_season.loss_count,
+            self.headline_season.win_pct,
+            intcomma(self.headline_season.points),
+            self.headline_season.place,
         )
 
-        if self.playoff_finish:
+        if self.playoff_finish and not self.is_partial:
             text = "{} (regular season), {} (playoffs)".format(text, self.playoff_finish)
 
         return text
@@ -1192,6 +1191,13 @@ class TeamSeason(ComparableObject):
     @fully_cached_property
     def regular_season(self):
         return TeamSeason(self.team.id, self.year, week_max=REGULAR_SEASON_WEEKS)
+
+    @fully_cached_property
+    def headline_season(self):
+        if self.is_partial:
+            return self
+
+        return self.regular_season
 
     @fully_cached_property
     def most_similar(self):
@@ -1332,7 +1338,19 @@ class TeamSeason(ComparableObject):
         return "{} {}".format(self.year, self.team.nickname)
 
     def __str__(self):
-        return "{}, {}".format(self.team, self.year)
+        base_str = "{}, {}".format(self.team, self.year)
+
+        # if we've built a partial season, but it has a full-length season completed
+        # we should note this
+        extra_str = ''
+        if self.is_partial and len(self.games) != len(self.regular_season.games):
+            game_count = len(self.games)
+            week_str = 'week'
+            if game_count != 1:
+                week_str = 'weeks'
+            extra_str = "(through {} {})".format(game_count, week_str)
+
+        return "{} {}".format(base_str, extra_str).strip()
 
     def __repr__(self):
         return str(self)

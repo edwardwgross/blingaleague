@@ -161,8 +161,24 @@ class TeamSeasonView(GamesView):
     games_sub_template = 'blingaleague/team_season_games.html'
 
     def get(self, request, team, year):
+        week_max = None
+        if 'week_max' in request.GET:
+            try:
+                week_max = min(
+                    int(request.GET.get('week_max', REGULAR_SEASON_WEEKS)),
+                    REGULAR_SEASON_WEEKS,
+                )
+            except ValueError:
+                # ignore if user passed in a non-int
+                pass
+
         context = self._context(
-            TeamSeason(team, year, include_playoffs=True),
+            TeamSeason(
+                team,
+                year,
+                include_playoffs=True,
+                week_max=week_max,
+            ),
         )
         return self.render_to_response(context)
 
