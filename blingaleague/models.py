@@ -1228,8 +1228,6 @@ class TeamSeason(ComparableObject):
         }
 
         combined_score = 0
-        attr_diff_cap = decimal.Decimal('0.5')
-
         for attr, weight in attr_weights.items():
             # multiply by 2, since it's extremely rare that two seasons are ever
             # more than .500 apart in any pct metric

@@ -30,6 +30,28 @@ CHOICES_PLAYOFF_GAME_TYPE = (
     FIFTH_PLACE_TITLE_BASE,
 )
 
+CHOICE_MATCHING_ASSETS_ONLY = 'matching_assets'
+
+
+def _teams_multiple_choice_field(label='Team'):
+    ordered_members = Member.objects.all().order_by('first_name', 'last_name')
+    return forms.TypedMultipleChoiceField(
+        required=False,
+        label=label,
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(m.id, m.full_name) for m in ordered_members],
+        coerce=int,
+    )
+
+
+def _positions_multiple_choice_field(label='Position'):
+    return forms.TypedMultipleChoiceField(
+        required=False,
+        label=label,
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(p, p) for p in POSITIONS],
+    )
+
 
 class ExpectedWinsCalculatorForm(forms.Form):
     score = forms.DecimalField(required=False, label='Score', decimal_places=2)
@@ -98,15 +120,7 @@ class GameFinderForm(BaseFinderForm):
         widget=forms.CheckboxSelectMultiple,
         choices=[(c, c) for c in CHOICES_PLAYOFF_GAME_TYPE],
     )
-    teams = forms.TypedMultipleChoiceField(
-        required=False,
-        label='Teams',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[
-            (m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')
-        ],
-        coerce=int,
-    )
+    teams = _teams_multiple_choice_field()
     awards = forms.TypedMultipleChoiceField(
         required=False,
         label='Weekly Awards',
@@ -137,15 +151,7 @@ class SeasonFinderForm(BaseFinderForm):
     year_min = forms.IntegerField(required=False, label='Start Year')
     year_max = forms.IntegerField(required=False, label='End Year')
     week_max = forms.IntegerField(required=False, label='Through Week')
-    teams = forms.TypedMultipleChoiceField(
-        required=False,
-        label='Teams',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[
-            (m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')
-        ],
-        coerce=int,
-    )
+    teams = _teams_multiple_choice_field()
     wins_min = forms.IntegerField(required=False, label='Minimum Wins')
     wins_max = forms.IntegerField(required=False, label='Maximum Wins')
     expected_wins_min = forms.DecimalField(
@@ -192,20 +198,17 @@ class TradeFinderForm(BaseFinderForm):
     year_max = forms.IntegerField(required=False, label='End Year')
     week_min = forms.IntegerField(required=False, label='Start Week')
     week_max = forms.IntegerField(required=False, label='End Week')
-    teams = forms.TypedMultipleChoiceField(
+    receivers = _teams_multiple_choice_field(label='Receiver')
+    senders = _teams_multiple_choice_field('Sender')
+    positions = _positions_multiple_choice_field()
+    assets_display = forms.TypedChoiceField(
         required=False,
-        label='Teams',
-        widget=forms.CheckboxSelectMultiple,
+        label='Display Options',
+        widget=forms.RadioSelect,
         choices=[
-            (m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')
+            ('', 'All assets in trades'),
+            (CHOICE_MATCHING_ASSETS_ONLY, 'Matching assets only'),
         ],
-        coerce=int,
-    )
-    positions = forms.TypedMultipleChoiceField(
-        required=False,
-        label='Position',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[(p, p) for p in POSITIONS],
     )
 
     filter_threshold = 1
@@ -216,26 +219,13 @@ class KeeperFinderForm(BaseFinderForm):
     year_max = forms.IntegerField(required=False, label='End Year')
     round_min = forms.IntegerField(required=False, label='Earliest Round')
     round_max = forms.IntegerField(required=False, label='Latest Round')
-    positions = forms.TypedMultipleChoiceField(
-        required=False,
-        label='Position',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[(p, p) for p in POSITIONS],
-    )
+    positions = _positions_multiple_choice_field()
     times_kept = forms.TypedMultipleChoiceField(
         required=False,
         label='Times Kept',
         widget=forms.CheckboxSelectMultiple,
         choices=[(1, 1), (2, 2)]
     )
-    teams = forms.TypedMultipleChoiceField(
-        required=False,
-        label='Teams',
-        widget=forms.CheckboxSelectMultiple,
-        choices=[
-            (m.id, m.full_name) for m in Member.objects.all().order_by('first_name', 'last_name')
-        ],
-        coerce=int,
-    )
+    teams = _teams_multiple_choice_field()
 
     filter_threshold = 1

@@ -12,7 +12,7 @@
     {% endwith %}
   </div>
   <div id="trades_found" class="finder_results">
-    {% if trades %}
+    {% if traded_assets %}
       <h2>Summary</h2>
       <table class="blingalytics_table table-striped">
         <tr>
@@ -24,7 +24,7 @@
         {% for team_summary in summary.teams %}
           <tr>
             <td style="text-align:left">{{ team_summary.team.nickname }}</td>
-            <td>{{ team_summary.count }}</td>
+            <td>{{ team_summary.trade_ids|length }}</td>
             <td>{{ team_summary.assets_sent }}</td>
             <td>{{ team_summary.assets_received }}</td>
           </tr>
@@ -32,16 +32,16 @@
         <tr>
           <th style="text-align:left">Total</th>
           <th style="text-align:right">{{ summary.total }}</th>
-          <th/> {# assets sent #}
-          <th/> {# assets received #}
+          <th style="text-align:right">{{ traded_assets|length }}</th>
+          <th style="text-align:right">{{ traded_assets|length }}</th>
         </tr>
       </table>
 
-      <h2>Trades</h2>
+      <h2>Traded Assets</h2>
       <em>(click on the column headings to sort)</em>
       <table class="blingalytics_table sortable table-striped">
         <tr>
-          <th>Trade ID</th>
+          <th>Trade</th>
           <th>Year</th>
           <th>Week</th>
           <th>Receiver</td>
@@ -50,19 +50,17 @@
           <th>Keeper Cost</th>
           <th>Sender</th>
         </tr>
-        {% for trade in trades %}
-          {% for asset in trade.traded_assets.all %}
-            <tr>
-              <td><a href="{{ trade.href }}">{{ trade.public_id }}</a></td>
-              <td><a href="{% url 'blingaleague.single_season' trade.year %}">{{ trade.year}}</a></td>
-              <td><a href="{{ trade.week_object.href }}">{{ trade.week }}</a></td>
-              <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.receiver.id trade.year %}">{{ asset.receiver.nickname }}</a></td>
-              <td style="text-align:left">{{ asset.name }}</td>
-              <td style="text-align:left">{{ asset.position|default_if_none:"" }}</td>
-              <td>{{ asset.keeper_cost|default_if_none:'' }}</td>
-              <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.sender.id trade.year %}">{{ asset.sender.nickname }}</a></td>
-            </tr>
-          {% endfor %}
+        {% for asset in traded_assets %}
+          <tr>
+            <td><a href="{{ asset.trade.href }}">{{ asset.trade.public_id }}</a></td>
+            <td><a href="{% url 'blingaleague.single_season' asset.trade.year %}">{{ asset.trade.year}}</a></td>
+            <td><a href="{{ asset.trade.week_object.href }}">{{ asset.trade.week }}</a></td>
+            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.receiver.id asset.trade.year %}">{{ asset.receiver.nickname }}</a></td>
+            <td style="text-align:left">{{ asset.name }}</td>
+            <td style="text-align:left">{{ asset.position|default_if_none:"" }}</td>
+            <td>{{ asset.keeper_cost|default_if_none:'' }}</td>
+            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a></td>
+          </tr>
         {% endfor %}
       </table>
     {% else %}
