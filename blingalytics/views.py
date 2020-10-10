@@ -12,7 +12,8 @@ from django.views.generic import TemplateView
 from blingaleague.models import REGULAR_SEASON_WEEKS, \
                                 Game, Week, Member, TeamSeason, \
                                 Season, Matchup, Trade, Keeper, \
-                                OUTCOME_WIN, OUTCOME_LOSS
+                                OUTCOME_WIN, OUTCOME_LOSS, \
+                                position_sort_key
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
@@ -268,7 +269,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             key=lambda x: (x['year'], x['week'], -x['score']),
         )
 
-    def build_summary(self, games):
+    def build_summary_tables(self, games):
         games_counted = set()
         game_dict = defaultdict(lambda: defaultdict(int))
 
@@ -354,7 +355,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
         context = {
             'form': game_finder_form,
             'games': games,
-            'summary': self.build_summary(games),
+            'summary': self.build_summary_tables(games),
         }
 
         if 'csv' in request.GET:
@@ -521,7 +522,7 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
         context = {
             'form': season_finder_form,
             'team_seasons': team_seasons,
-            'summary_tables': self.build_summary_tables(team_seasons),
+            'summary': self.build_summary_tables(team_seasons),
         }
 
         if 'csv' in request.GET:
@@ -582,28 +583,44 @@ class TradeFinderView(TemplateView):
 
         return assets_to_display
 
-    def build_summary(self, traded_assets):
+    def build_summary_tables(self, traded_assets):
         all_trade_ids = set()
-        trade_dict = defaultdict(lambda: {
+
+        team_dict = defaultdict(lambda: {
             'trade_ids': set(),
             'assets_sent': 0,
             'assets_received': 0,
         })
 
+        position_dict = defaultdict(lambda: {
+            'trade_ids': set(),
+            'assets': 0,
+        })
+
         for asset in traded_assets:
-            trade_dict[asset.sender]['assets_sent'] += 1
-            trade_dict[asset.receiver]['assets_received'] += 1
-            trade_dict[asset.sender]['trade_ids'].add(asset.trade.id)
-            trade_dict[asset.receiver]['trade_ids'].add(asset.trade.id)
+            team_dict[asset.sender]['assets_sent'] += 1
+            team_dict[asset.receiver]['assets_received'] += 1
+            team_dict[asset.sender]['trade_ids'].add(asset.trade.id)
+            team_dict[asset.receiver]['trade_ids'].add(asset.trade.id)
+
+            position_dict[asset.position_display]['assets'] += 1
+            position_dict[asset.position_display]['trade_ids'].add(asset.trade.id)
+
             all_trade_ids.add(asset.trade.id)
 
         teams = []
-        for team, stats in sorted(trade_dict.items(), key=lambda x: x[0].nickname):
+        for team, stats in sorted(team_dict.items(), key=lambda x: x[0].nickname):
             stats['team'] = team
             teams.append(stats)
 
+        positions = []
+        for position, stats in sorted(position_dict.items(), key=lambda x: position_sort_key(x[0])):
+            stats['position'] = position
+            positions.append(stats)
+
         return {
             'teams': teams,
+            'positions': positions,
             'total': len(all_trade_ids),
         }
 
@@ -619,7 +636,7 @@ class TradeFinderView(TemplateView):
         context = {
             'form': trade_finder_form,
             'traded_assets': traded_assets,
-            'summary': self.build_summary(traded_assets),
+            'summary': self.build_summary_tables(traded_assets),
         }
 
         return self.render_to_response(context)
@@ -655,6 +672,22 @@ class KeeperFinderView(TemplateView):
             key=lambda x: (x.year, x.round, x.team),
         )
 
+    def build_summary_tables(self, keepers):
+        team_dict = defaultdict(int)
+        round_dict = defaultdict(int)
+        position_dict = defaultdict(int)
+
+        for keeper in keepers:
+            team_dict[keeper.team] += 1
+            round_dict[keeper.round] += 1
+            position_dict[keeper.position] += 1
+
+        return {
+            'teams': sorted(team_dict.items(), key=lambda x: x[0].nickname),
+            'rounds': sorted(round_dict.items()),
+            'positions': sorted(position_dict.items(), key=lambda x: position_sort_key(x[0])),
+        }
+
     def get(self, request):
         keepers = []
 
@@ -667,6 +700,7 @@ class KeeperFinderView(TemplateView):
         context = {
             'form': keeper_finder_form,
             'keepers': keepers,
+            'summary': self.build_summary_tables(keepers),
         }
 
         return self.render_to_response(context)

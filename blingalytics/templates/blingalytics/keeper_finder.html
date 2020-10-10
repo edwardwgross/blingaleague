@@ -13,6 +13,44 @@
   </div>
   <div id="keepers_found" class="finder_results">
     {% if keepers %}
+      <h2>Summary</h2>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
+          <th>Team</th>
+          <th>{# Total #}</th>
+        </tr>
+        {% for team, total in summary.teams %}
+          <tr>
+            <td style="text-align:left">{{ team.nickname }}</td>
+            <td>{{ total }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
+          <th>Round</th>
+          <th>{# Total #}</th>
+        </tr>
+        {% for round, total in summary.rounds %}
+          <tr>
+            <td style="text-align:left">{{ round }}</td>
+            <td>{{ total }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
+          <th>Position</th>
+          <th>{# Total #}</th>
+        </tr>
+        {% for position, total in summary.positions %}
+          <tr>
+            <td style="text-align:left">{{ position }}</td>
+            <td>{{ total }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
       <h2>Keepers</h2>
       <em>(click on the column headings to sort)</em>
       <table class="blingalytics_table sortable table-striped">

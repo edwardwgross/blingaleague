@@ -47,7 +47,14 @@ MAX_SIMILARITY_SCORE = decimal.Decimal(1000)
 
 MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
 
-POSITIONS = ['QB', 'RB', 'WR', 'TE', 'DEF', 'K']
+POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
+
+
+def position_sort_key(position):
+    try:
+        return POSITIONS.index(position)
+    except ValueError:
+        return len(POSITIONS)
 
 
 class ComparableObject(object):
@@ -810,7 +817,10 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def expected_wins(self):
-        return min(sum(self.expected_wins_by_game), len(self.games))
+        return min(
+            sum(self.expected_wins_by_game),
+            decimal.Decimal(len(self.games)),
+        )
 
     @fully_cached_property
     def raw_expected_wins_against(self):
@@ -821,7 +831,10 @@ class TeamSeason(ComparableObject):
         scaling_factor = self.season_object.expected_wins_scaling_factor
         raw_expected_wins_against = self.raw_expected_wins_against
         expected_wins_against = scaling_factor * raw_expected_wins_against
-        return min(expected_wins_against, len(self.games))
+        return min(
+            expected_wins_against,
+            decimal.Decimal(len(self.games)),
+        )
 
     @fully_cached_property
     def expected_win_pct_against(self):
@@ -2359,6 +2372,16 @@ class TradedAsset(models.Model):
                 )
         else:
             return 'ineligible to be kept'
+
+    @fully_cached_property
+    def position_display(self):
+        if self.position:
+            return self.position
+
+        if self.is_draft_pick:
+            return 'Pick'
+
+        return ''
 
     def save(self, **kwargs):
         super().save(**kwargs)

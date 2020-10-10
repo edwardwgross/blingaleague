@@ -14,7 +14,7 @@
   <div id="trades_found" class="finder_results">
     {% if traded_assets %}
       <h2>Summary</h2>
-      <table class="blingalytics_table table-striped">
+      <table class="blingalytics_table table-striped" style="display:inline-table">
         <tr>
           <th>Team</th>
           <th>Trades</th>
@@ -33,6 +33,25 @@
           <th style="text-align:left">Total</th>
           <th style="text-align:right">{{ summary.total }}</th>
           <th style="text-align:right">{{ traded_assets|length }}</th>
+          <th style="text-align:right">{{ traded_assets|length }}</th>
+        </tr>
+      </table>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
+          <th>Position</th>
+          <th>Trades</th>
+          <th>Assets</th>
+        </tr>
+        {% for position_summary in summary.positions %}
+          <tr>
+            <td style="text-align:left">{{ position_summary.position }}</td>
+            <td>{{ position_summary.trade_ids|length }}</td>
+            <td>{{ position_summary.assets }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <th style="text-align:left">Total</th>
+          <th style="text-align:right">{{ summary.total }}</th>
           <th style="text-align:right">{{ traded_assets|length }}</th>
         </tr>
       </table>

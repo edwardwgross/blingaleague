@@ -21,7 +21,7 @@
           <th>Team</th>
           <th>{# Total #}</th>
         </tr>
-        {% for team, total in summary_tables.teams %}
+        {% for team, total in summary.teams %}
           <tr>
             <td style="text-align:left">{{ team.nickname }}</td>
             <td>{{ total }}</td>
@@ -33,7 +33,7 @@
           <th>Year</th>
           <th>{# Total #}</th>
         </tr>
-        {% for year, total in summary_tables.years %}
+        {% for year, total in summary.years %}
           <tr>
             <td style="text-align:left">{{ year }}</td>
             <td>{{ total }}</td>
