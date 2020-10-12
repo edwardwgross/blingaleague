@@ -923,24 +923,6 @@ class TeamSeason(ComparableObject):
         return graph.htmlcontent
 
     @fully_cached_property
-    def all_play_record(self):
-        all_play_record = defaultdict(int)
-
-        for week in range(1, len(self.games) + 1):
-            week_obj = Week(self.year, week)
-
-            rank = week_obj.team_to_rank.get(self.team)
-            if rank is None:
-                continue
-
-            team_total = len(week_obj.team_to_rank)
-
-            all_play_record['wins'] += team_total - rank
-            all_play_record['losses'] += rank - 1
-
-        return all_play_record
-
-    @fully_cached_property
     def all_play_wins(self):
         return self.all_play_record['wins']
 
@@ -956,40 +938,31 @@ class TeamSeason(ComparableObject):
         return decimal.Decimal(self.all_play_wins) / decimal.Decimal(all_play_total)
 
     @fully_cached_property
-    def weekly_rank_record(self):
-        weekly_rank_record = {
-            'wins': 0,
-            'losses': 0,
-        }
-
-        for week in range(1, len(self.games) + 1):
-            week_obj = Week(self.year, week)
-
-            rank = week_obj.team_to_rank.get(self.team)
-            if rank is None:
-                continue
-
-            if rank <= len(week_obj.team_to_rank) / 2:
-                weekly_rank_record['wins'] += 1
-            else:
-                weekly_rank_record['losses'] += 1
-
-        return weekly_rank_record
+    def vs_season_median_wins(self):
+        wins = decimal.Decimal(0)
+        for score in self.game_scores:
+            if score > self.season_object.median_game_score:
+                wins += 1
+            elif score == self.season_object.median_game_score:
+                wins += decimal.Decimal('0.5')
+        return wins
 
     @fully_cached_property
-    def weekly_rank_wins(self):
-        return self.weekly_rank_record['wins']
+    def vs_season_median_losses(self):
+        losses = decimal.Decimal(0)
+        for score in self.game_scores:
+            if score < self.season_object.median_game_score:
+                losses += 1
+            elif score == self.season_object.median_game_score:
+                losses += decimal.Decimal('0.5')
+        return losses
 
     @fully_cached_property
-    def weekly_rank_losses(self):
-        return self.weekly_rank_record['losses']
-
-    @fully_cached_property
-    def weekly_rank_win_pct(self):
-        weekly_rank_total = self.weekly_rank_wins + self.weekly_rank_losses
-        if weekly_rank_total == 0:
+    def vs_season_median_win_pct(self):
+        total = self.vs_season_median_wins + self.vs_season_median_losses
+        if total == 0:
             return 0
-        return decimal.Decimal(self.weekly_rank_wins) / decimal.Decimal(weekly_rank_total)
+        return self.vs_season_median_wins / total
 
     @fully_cached_property
     def blangums_games(self):
@@ -1470,13 +1443,6 @@ class TeamMultiSeasons(TeamSeason):
         return self._sum_seasonal_values('expected_wins')
 
     @fully_cached_property
-    def all_play_record(self):
-        return {
-            'wins': self.all_play_wins,
-            'losses': self.all_play_losses,
-        }
-
-    @fully_cached_property
     def all_play_wins(self):
         return self._sum_seasonal_values('all_play_wins')
 
@@ -1612,6 +1578,10 @@ class Season(ComparableObject):
     @fully_cached_property
     def stdev_game_score(self):
         return statistics.pstdev(self.all_game_scores)
+
+    @fully_cached_property
+    def median_game_score(self):
+        return statistics.median(self.all_game_scores)
 
     @fully_cached_property
     def average_team_points(self):
