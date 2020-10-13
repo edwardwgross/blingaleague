@@ -20,19 +20,19 @@
       <tr>
         <th colspan="100%">{{ table.title }}</th>
       </tr>
-       {% for row in table.rows %}
-         <tr>
-           <td>{{ row.rank }}</td>
-           <td><a href="{{ row.team_season.season_object.href }}">{{ row.team_season.year }}</a></td>
-           <td style="text-align:left; width:auto">
-             <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
-             {% if row.team_season.is_partial %}
-               <small>{{ row.team_season.regular_season.games|length }} game{{ row.team_season.regular_season.games|pluralize }}</small>
-             {% endif %}
-           </td>
-           <td>{{ row.value|intcomma }}</td>
-         </tr>
-       {% endfor %}
+      {% for row in table.rows %}
+        <tr>
+          <td>{{ row.rank }}</td>
+          <td><a href="{{ row.team_season.season_object.href }}">{{ row.team_season.year }}</a></td>
+          <td style="text-align:left; width:auto">
+            <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
+            {% if row.team_season.is_partial %}
+              <small>{{ row.team_season.regular_season.games|length }} game{{ row.team_season.regular_season.games|pluralize }}</small>
+            {% endif %}
+          </td>
+          <td>{{ row.value|intcomma }}</td>
+        </tr>
+      {% endfor %}
     </table>
   {% endfor %}
 </div>
