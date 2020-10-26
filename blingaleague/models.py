@@ -27,6 +27,7 @@ EXPANSION_SEASON = 2012
 
 OUTCOME_WIN = 'W'
 OUTCOME_LOSS = 'L'
+OUTCOME_TIE = 'T'
 OUTCOME_ANY = '*'
 
 BLINGABOWL_TITLE_BASE = 'Blingabowl'
@@ -58,6 +59,14 @@ def position_sort_key(position):
         return POSITIONS.index(position)
     except ValueError:
         return len(POSITIONS)
+
+
+def compare_two_scores(score1, score2):
+    if score1 > score2:
+        return OUTCOME_WIN
+    elif score1 < score2:
+        return OUTCOME_LOSS
+    return OUTCOME_TIE
 
 
 class ComparableObject(object):
@@ -499,7 +508,7 @@ class Postseason(models.Model):
     def robscores(self):
         robscores = defaultdict(lambda: 0)
 
-        for place, team in enumerate(self.playoff_results):
+        for team in self.playoff_results:
             robscores[team] += 1  # all playoff teams get one
 
             # there are bonuses for finishing in the top three
@@ -687,10 +696,14 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def average_margin_win(self):
+        if len(self.win_margins) == 0:
+            return decimal.Decimal(0)
         return statistics.mean(self.win_margins)
 
     @fully_cached_property
     def average_margin_loss(self):
+        if len(self.loss_margins) == 0:
+            return decimal.Decimal(0)
         return statistics.mean(self.loss_margins)
 
     @classmethod
@@ -937,18 +950,18 @@ class TeamSeason(ComparableObject):
 
             team_total = len(week_obj.team_to_rank)
 
-            all_play_record['wins'] += team_total - rank
-            all_play_record['losses'] += rank - 1
+            all_play_record[OUTCOME_WIN] += team_total - rank
+            all_play_record[OUTCOME_LOSS] += rank - 1
 
         return all_play_record
 
     @fully_cached_property
     def all_play_wins(self):
-        return self._all_play_record['wins']
+        return self._all_play_record[OUTCOME_WIN]
 
     @fully_cached_property
     def all_play_losses(self):
-        return self._all_play_record['losses']
+        return self._all_play_record[OUTCOME_LOSS]
 
     @fully_cached_property
     def all_play_win_pct(self):
@@ -964,26 +977,22 @@ class TeamSeason(ComparableObject):
         season_median = self.season_object.median_game_score
 
         for score in self.game_scores:
-            if score > season_median:
-                vs_season_median_record['wins'] += 1
-            elif score == season_median:
-                vs_season_median_record['ties'] += 1
-            else:
-                vs_season_median_record['losses'] += 1
+            outcome = compare_two_scores(score, season_median)
+            vs_season_median_record[outcome] += 1
 
         return vs_season_median_record
 
     @fully_cached_property
     def vs_season_median_wins(self):
-        return self._vs_season_median_record['wins']
+        return self._vs_season_median_record[OUTCOME_WIN]
 
     @fully_cached_property
     def vs_season_median_losses(self):
-        return self._vs_season_median_record['losses']
+        return self._vs_season_median_record[OUTCOME_LOSS]
 
     @fully_cached_property
     def vs_season_median_ties(self):
-        return self._vs_season_median_record['ties']
+        return self._vs_season_median_record[OUTCOME_TIE]
 
     @fully_cached_property
     def vs_season_median_win_pct(self):
@@ -996,6 +1005,17 @@ class TeamSeason(ComparableObject):
             return 0
 
         return (wins + HALF * ties) / total
+
+    def vs_other_team(self, opponent_id):
+        opponent_season = TeamSeason(opponent_id, self.year)
+
+        record = defaultdict(int)
+        for i, score in enumerate(self.game_scores):
+            opponent_score = opponent_season.game_scores[i]
+            outcome = compare_two_scores(score, opponent_score)
+            record[outcome] += 1
+
+        return record
 
     @fully_cached_property
     def blangums_games(self):
@@ -1478,8 +1498,8 @@ class TeamMultiSeasons(TeamSeason):
     @fully_cached_property
     def _all_play_record(self):
         return {
-            'wins': self.all_play_wins,
-            'losses': self.all_play_losses,
+            OUTCOME_WIN: self.all_play_wins,
+            OUTCOME_LOSS: self.all_play_losses,
         }
 
     @fully_cached_property
@@ -1493,9 +1513,9 @@ class TeamMultiSeasons(TeamSeason):
     @fully_cached_property
     def _vs_season_median_record(self):
         return {
-            'wins': self.vs_season_median_wins,
-            'losses': self.vs_season_median_losses,
-            'ties': self.vs_season_median_ties,
+            OUTCOME_WIN: self.vs_season_median_wins,
+            OUTCOME_LOSS: self.vs_season_median_losses,
+            OUTCOME_TIE: self.vs_season_median_ties,
         }
 
     @fully_cached_property
@@ -1905,9 +1925,9 @@ class Season(ComparableObject):
             )
 
     def team_to_place(self, team):
-        for place, team_season in enumerate(self.standings_table):
+        for place, team_season in enumerate(self.standings_table, 1):
             if team == team_season.team:
-                return place + 1
+                return place
 
         return None
 
