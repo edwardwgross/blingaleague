@@ -1637,6 +1637,10 @@ class Season(ComparableObject):
         return max(self.all_games.values_list('week', flat=True))
 
     @fully_cached_property
+    def weeks(self):
+        return [Week(self.year, week + 1) for week in range(self.weeks_with_games)]
+
+    @fully_cached_property
     def all_game_scores(self):
         all_scores = []
         for winner_score, loser_score in self.all_games.values_list('winner_score', 'loser_score'):
