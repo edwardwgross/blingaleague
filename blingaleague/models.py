@@ -933,7 +933,6 @@ class TeamSeason(ComparableObject):
         graph.add_serie(x=x_data, y=y_data)
 
         graph.buildcontent()
-        graph.buildhtml()
 
         return graph.htmlcontent
 
@@ -1016,6 +1015,40 @@ class TeamSeason(ComparableObject):
             record[outcome] += 1
 
         return record
+
+    @fully_cached_property
+    def rank_by_week(self):
+        rank_by_week = {}
+
+        stats_to_rank = [
+            {'attr': 'points', 'name': 'points'},
+            {'attr': 'expected_wins', 'name': 'expected wins'},
+        ]
+
+        week = 1
+        while week <= len(self.games):
+            ts_week = TeamSeason(self.team.id, self.year, week_max=week)
+            week_ranks = {
+                'place': ts_week.place_numeric,
+            }
+
+            for stat in stats_to_rank:
+                sorted_table = sorted(
+                    Season(self.year, week_max=week).standings_table,
+                    key=lambda x: getattr(x, stat['attr']),
+                    reverse=True,
+                )
+
+                for rank, ts in enumerate(sorted_table, 1):
+                    if ts.team == self.team:
+                        week_ranks[stat['name']] = rank
+                        break
+
+            rank_by_week[week] = week_ranks
+
+            week += 1
+
+        return rank_by_week
 
     @fully_cached_property
     def blangums_games(self):
@@ -1865,7 +1898,6 @@ class Season(ComparableObject):
             graph.add_serie(x=x_data, y=y_data, name=team_season.team.nickname)
 
         graph.buildcontent()
-        graph.buildhtml()
 
         return graph.htmlcontent
 

@@ -118,7 +118,6 @@ class ExpectedWinsView(TemplateView):
         )
 
         graph.buildcontent()
-        graph.buildhtml()
 
         return graph
 
