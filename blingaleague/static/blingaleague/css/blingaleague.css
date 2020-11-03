@@ -356,6 +356,11 @@ table.game_table td {
     min-width: 180px;
 }
 
+.playoff_bracket .round:last-of-type .game {
+    /* blingabowl centering */
+    margin-top: 50px;
+}
+
 .playoff_bracket .round .game .team {
     border-bottom: 1px solid #a4c2f4;
     border-right: 1px solid #a4c2f4;
