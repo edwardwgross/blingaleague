@@ -278,6 +278,17 @@ class Game(models.Model, ComparableObject):
     def total_score(self):
         return self.winner_score + self.loser_score
 
+    @fully_cached_property
+    def winner_zscore(self):
+        return self._zscore(self.winner_score)
+
+    @fully_cached_property
+    def loser_zscore(self):
+        return self._zscore(self.loser_score)
+
+    def _zscore(self, score):
+        return (score - self.week_object.average_score) / self.week_object.stdev_score
+
     @classmethod
     def all_scores(cls, include_playoffs=False):
         cache_key = "blingaleague_game_all_scores|{}".format(include_playoffs)
@@ -2041,13 +2052,15 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def average_score(self):
-        # divide by two because the total_score attribute
-        # is made up of both scores in a game
-        return statistics.mean([g.total_score for g in self.games]) / 2
+        return statistics.mean([s['score'] for s in self.team_scores])
 
     @fully_cached_property
     def average_margin(self):
         return statistics.mean([g.margin for g in self.games])
+
+    @fully_cached_property
+    def stdev_score(self):
+        return statistics.pstdev([s['score'] for s in self.team_scores])
 
     @fully_cached_property
     def expected_wins_scaling_factor(self):
