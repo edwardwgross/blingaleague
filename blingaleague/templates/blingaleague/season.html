@@ -32,6 +32,10 @@
     </div>
   {% endif %}
 
+  {% if season.playoff_bracket %}
+    {% include "blingaleague/playoff_bracket.html" %}
+  {% endif %}
+
   {% if season.previous %}
     <a href="{{ season.previous.href }}" class="link previous">Previous</a>
   {% endif %}

@@ -337,6 +337,45 @@ table.game_table td {
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
+.playoff_bracket {
+    margin: 30px 0;
+}
+
+.playoff_bracket .round {
+    display: inline-block;
+    padding: 0 12px;
+    vertical-align: top;
+}
+
+.playoff_bracket .round .title {
+    text-align: center;
+}
+
+.playoff_bracket .round .game {
+    margin: 12px 0;
+    min-width: 180px;
+}
+
+.playoff_bracket .round .game .team {
+    border-bottom: 1px solid #a4c2f4;
+    border-right: 1px solid #a4c2f4;
+    padding: 12px 6px 0 0;
+    min-height: 36px;
+}
+
+.playoff_bracket .round .game .team:first-of-type {
+    border-right: none;
+}
+
+.playoff_bracket .round .game .team .score {
+    float: right;
+    margin-left: 12px;
+}
+
+.playoff_bracket .round .game .winner {
+    font-weight: bold;
+}
+
 table.blingalytics_table.sortable tbody {
     counter-reset: blingalytics_tabletablescope;
 }

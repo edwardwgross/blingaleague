@@ -20,6 +20,8 @@ CACHE = caches['blingaleague']
 
 REGULAR_SEASON_WEEKS = 13
 BLINGABOWL_WEEK = 16
+SEMIFINALS_WEEK = BLINGABOWL_WEEK - 1
+QUARTERFINALS_WEEK = SEMIFINALS_WEEK - 1
 BYE_TEAMS = 2
 PLAYOFF_TEAMS = 6
 FIRST_SEASON = 2008
@@ -39,8 +41,8 @@ FIFTH_PLACE_TITLE_BASE = 'Fifth-Place Game'
 PLAYOFF_TITLE_ORDER = [
     BLINGABOWL_TITLE_BASE,
     SEMIFINALS_TITLE_BASE,
-    THIRD_PLACE_TITLE_BASE,
     QUARTERFINALS_TITLE_BASE,
+    THIRD_PLACE_TITLE_BASE,
     FIFTH_PLACE_TITLE_BASE,
 ]
 
@@ -242,7 +244,7 @@ class Game(models.Model, ComparableObject):
                     return BLINGABOWL_TITLE_BASE
                 else:
                     return THIRD_PLACE_TITLE_BASE
-            elif self.week == (BLINGABOWL_WEEK - 1):
+            elif self.week == SEMIFINALS_WEEK:
                 if winner_last_game is None or self.winner == winner_last_game.winner:
                     # semifinal participants either won their last game or had a bye
                     return SEMIFINALS_TITLE_BASE
@@ -1848,6 +1850,135 @@ class Season(ComparableObject):
         return Season(year=self.year)
 
     @fully_cached_property
+    def playoff_bracket(self):
+        if self.is_partial:
+            return []
+
+        return [
+            self._playoff_bracket_week(QUARTERFINALS_WEEK),
+            self._playoff_bracket_week(SEMIFINALS_WEEK),
+            self._playoff_bracket_week(BLINGABOWL_WEEK),
+        ]
+
+    def _playoff_bracket_week(self, week):
+        if self.is_partial:
+            return {}
+
+        week_object = Week(self.year, week)
+        if not week_object.is_playoffs:
+            return {}
+
+        games_to_ignore = (THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE)
+        games = []
+        if len(week_object.games) > 0:  # XXX remove year
+            for game in week_object.games:
+                if game.playoff_title_base in games_to_ignore:
+                    continue
+
+                games.append(
+                    sorted(
+                        (
+                            {
+                                'team_season': game.winner_team_season,
+                                'seed': game.winner_team_season.place_numeric,
+                                'score': game.winner_score,
+                                'is_winner': True,
+                            },
+                            {
+                                'team_season': game.loser_team_season,
+                                'seed': game.loser_team_season.place_numeric,
+                                'score': game.loser_score,
+                            },
+                        ),
+                        key=lambda x: x['seed'],
+                    ),
+                )
+        elif week == QUARTERFINALS_WEEK:
+            seed_pairs = [(3, 6), (4, 5)]
+            for seed1, seed2 in seed_pairs:
+                games.append(
+                    (
+                        {
+                            'team_season': self.standings_table[seed1 - 1],
+                            'seed': seed1,
+                        },
+                        {
+                            'team_season': self.standings_table[seed2 - 1],
+                            'seed': seed2,
+                        },
+                    ),
+                )
+        else:
+            last_week_winners = []
+            for game in week_object.previous.games:
+                if game.playoff_title_base in games_to_ignore:
+                    continue
+
+                last_week_winners.append(game.winner_team_season)
+
+            if week == SEMIFINALS_WEEK:
+                bye_teams = self.standings_table[:BYE_TEAMS]
+                last_week_winners = sorted(
+                    last_week_winners,
+                    key=lambda x: x.place_numeric,
+                    reverse=True,
+                )
+
+                if last_week_winners:
+                    for i, team_season in enumerate(bye_teams):
+                        games.append(
+                            (
+                                {
+                                    'team_season': team_season,
+                                    'seed': team_season.place_numeric,
+                                },
+                                {
+                                    'team_season': last_week_winners[i],
+                                    'seed': last_week_winners[i].place_numeric,
+                                },
+                            ),
+                        )
+                else:
+                    # if there are no quarterfinals winners yet, we only know the bye teams
+                    games = [
+                        (
+                            {'team_season': bye_teams[0], 'seed': bye_teams[0].place_numeric},
+                            {},
+                        ),
+                        (
+                            {'team_season': bye_teams[1], 'seed': bye_teams[1].place_numeric},
+                            {},
+                        ),
+                    ]
+            else:
+                # it's BLINGABOWL_WEEK
+                last_week_winners = sorted(
+                    last_week_winners,
+                    key=lambda x: x.place_numeric,
+                )
+
+                if last_week_winners:
+                    games = [
+                        (
+                            {
+                                'team_season': last_week_winners[0],
+                                'seed': last_week_winners[0].place_numeric,
+                            },
+                            {
+                                'team_season': last_week_winners[1],
+                                'seed': last_week_winners[1].place_numeric,
+                            },
+                        ),
+                    ]
+                else:
+                    games = [({}, {})]
+
+        return {
+            'week': week_object,
+            'games': games,
+        }
+
+    @fully_cached_property
     def possible_final_outcomes(self):
         if self.is_upcoming_season or self.all_time:
             return None
@@ -2023,6 +2154,10 @@ class Week(ComparableObject):
         return (self.year, self.week)
 
     @fully_cached_property
+    def is_playoffs(self):
+        return self.week > REGULAR_SEASON_WEEKS
+
+    @fully_cached_property
     def games(self):
         games = Game.objects.filter(year=self.year, week=self.week)
 
@@ -2148,7 +2283,7 @@ class Week(ComparableObject):
         if len(self.games) == 0:
             return 'No games yet'
 
-        if self.week > REGULAR_SEASON_WEEKS:
+        if self.is_playoffs:
             return self.games[0].title
 
         return "Team Blangums: {} / Slapped Heartbeat: {}".format(
@@ -2159,8 +2294,8 @@ class Week(ComparableObject):
     @classmethod
     def week_to_title(self, year, week):
         special_weeks = {
-            BLINGABOWL_WEEK - 2: QUARTERFINALS_TITLE_BASE,
-            BLINGABOWL_WEEK - 1: SEMIFINALS_TITLE_BASE,
+            QUARTERFINALS_WEEK: QUARTERFINALS_TITLE_BASE,
+            SEMIFINALS_WEEK: SEMIFINALS_TITLE_BASE,
             BLINGABOWL_WEEK: "{} {}".format(
                 BLINGABOWL_TITLE_BASE,
                 Postseason.year_to_blingabowl(year),
