@@ -1021,16 +1021,23 @@ class TeamSeason(ComparableObject):
 
         return (wins + HALF * ties) / total
 
-    def vs_other_team(self, opponent_id):
-        opponent_season = TeamSeason(opponent_id, self.year)
-
+    def _vs_score_list(self, score_list):
         record = defaultdict(int)
+
         for i, score in enumerate(self.game_scores):
-            opponent_score = opponent_season.game_scores[i]
+            opponent_score = score_list[i]
             outcome = compare_two_scores(score, opponent_score)
             record[outcome] += 1
 
         return record
+
+    def vs_other_team(self, opponent_id):
+        opponent_season = TeamSeason(opponent_id, self.year)
+        return self._vs_score_list(opponent_season.game_scores)
+
+    def vs_other_schedule(self, opponent_id):
+        opponent_season = TeamSeason(opponent_id, self.year)
+        return self._vs_score_list(opponent_season.game_scores_against)
 
     @fully_cached_property
     def rank_by_week(self):
