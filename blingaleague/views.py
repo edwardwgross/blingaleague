@@ -31,11 +31,8 @@ class SeasonListView(TemplateView):
         return self.render_to_response(context)
 
 
-class SeasonView(TemplateView):
+class SingleSeasonView(TemplateView):
     template_name = 'blingaleague/season.html'
-
-
-class SingleSeasonView(SeasonView):
 
     def get(self, request, year):
         season_kwargs = {
@@ -71,17 +68,6 @@ class SingleSeasonView(SeasonView):
             'hide_playoff_finish': hide_playoff_finish,
         }
 
-        return self.render_to_response(context)
-
-
-class AllTimeStandingsView(SeasonView):
-
-    def get(self, request):
-        include_playoffs = 'include_playoffs' in request.GET
-        self.season = Season(all_time=True, include_playoffs=include_playoffs)
-        context = {
-            'season': self.season,
-        }
         return self.render_to_response(context)
 
 
