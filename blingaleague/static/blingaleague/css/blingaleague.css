@@ -278,6 +278,10 @@ table#team_list td {
     text-align: right;
 }
 
+.team_list_graph {
+    margin-bottom: 30px;
+}
+
 #games,
 #season_details,
 #trades,

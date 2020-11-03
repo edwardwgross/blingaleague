@@ -1,3 +1,5 @@
+import nvd3
+
 from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
@@ -127,10 +129,64 @@ class WeekView(GamesView):
 class TeamListView(TemplateView):
     template_name = 'blingaleague/team_list.html'
 
+    def _team_graph_lists(self):
+        graph_attrs = [
+            # (graph title, TeamSeason attribute, y_axis_format, y_axis_max)
+            ('Wins', 'win_count', 'i', 13),
+            ('Points', 'points', '.2f', 13 * 130),
+            ('Expected Wins', 'expected_wins', '.2f', 13),
+        ]
+
+        graph_list = []
+
+        years = [s.year for s in sorted(Season.all()) if not s.is_partial]
+        team_list = Member.objects.all()
+
+        for title, attr, y_format, y_max in graph_attrs:
+            graph = nvd3.lineChart(
+                name=attr,
+                width=600,
+                height=400,
+                x_axis_date=True,
+                y_axis_format=y_format,
+                y_axis_scale_min=0,
+                y_axis_scale_max=y_max,
+                show_legend=True,
+            )
+
+            for team in sorted(team_list, key=lambda x: x.nickname):
+                y_data = []
+                for year in years:
+                    team_season = TeamSeason(team.id, year)
+                    if team_season.games:
+                        y_value = getattr(team_season, attr)
+                        if y_format != 'i':
+                            y_value = float(y_value)
+                        y_data.append(y_value)
+                    else:
+                        y_data.append(None)
+
+                graph.add_serie(
+                    x=years,
+                    y=y_data,
+                    name=team.nickname,
+                )
+
+            graph.buildcontent()
+
+            graph_list.append({
+                'title': title,
+                'graph': graph,
+            })
+
+
+        return graph_list
+
     def get(self, request):
         context = {
             'team_list': Member.objects.all(),
             'include_playoffs': 'include_playoffs' in request.GET,
+            'graph_list': self._team_graph_lists(),
         }
         return self.render_to_response(context)
 
