@@ -954,14 +954,8 @@ class TeamSeason(ComparableObject):
         for week in range(1, len(self.games) + 1):
             week_obj = Week(self.year, week)
 
-            rank = week_obj.team_to_rank.get(self.team)
-            if rank is None:
-                continue
-
-            team_total = len(week_obj.team_to_rank)
-
-            all_play_record[OUTCOME_WIN] += team_total - rank
-            all_play_record[OUTCOME_LOSS] += rank - 1
+            for outcome, count in week_obj.all_play_record(self.team).items():
+                all_play_record[outcome] += count
 
         return all_play_record
 
@@ -974,11 +968,20 @@ class TeamSeason(ComparableObject):
         return self._all_play_record[OUTCOME_LOSS]
 
     @fully_cached_property
+    def all_play_ties(self):
+        return self._all_play_record[OUTCOME_TIE]
+
+    @fully_cached_property
     def all_play_win_pct(self):
-        all_play_total = self.all_play_wins + self.all_play_losses
-        if all_play_total == 0:
+        wins = decimal.Decimal(self.all_play_wins)
+        losses = decimal.Decimal(self.all_play_losses)
+        ties = decimal.Decimal(self.all_play_ties)
+
+        total = wins + losses + ties
+        if total == 0:
             return 0
-        return decimal.Decimal(self.all_play_wins) / decimal.Decimal(all_play_total)
+
+        return (wins + HALF * ties) / total
 
     @fully_cached_property
     def _vs_season_median_record(self):
@@ -2097,11 +2100,11 @@ class Week(ComparableObject):
         )
 
     @fully_cached_property
-    def team_to_rank(self):
-        team_to_rank = {}
+    def team_to_score(self):
+        team_to_score = {}
         for i, team_score in enumerate(self.team_scores_sorted, 1):
-            team_to_rank[team_score['team']] = i
-        return team_to_rank
+            team_to_score[team_score['team']] = team_score['score']
+        return team_to_score
 
     @fully_cached_property
     def team_to_game(self):
@@ -2110,6 +2113,23 @@ class Week(ComparableObject):
             team_to_game[game.winner] = game
             team_to_game[game.loser] = game
         return team_to_game
+
+    def all_play_record(self, team):
+        all_play_record = defaultdict(int)
+
+        score_to_compare = self.team_to_score[team]
+        for team_score in self.team_scores:
+            if team_score['team'] == team:
+                continue
+
+            if team_score['score'] < score_to_compare:
+                all_play_record[OUTCOME_WIN] += 1
+            elif team_score['score'] == score_to_compare:
+                all_play_record[OUTCOME_TIE] += 1
+            else:
+                all_play_record[OUTCOME_LOSS] += 1
+
+        return all_play_record
 
     @fully_cached_property
     def blangums(self):
