@@ -986,6 +986,18 @@ class TeamSeason(ComparableObject):
         return (wins + HALF * ties) / total
 
     @fully_cached_property
+    def all_play_record_str(self):
+        record_parts = [
+            self.all_play_wins,
+            self.all_play_losses,
+        ]
+
+        if self.all_play_ties:
+            record_parts.append(self.all_play_ties)
+
+        return '-'.join(map(str, record_parts))
+
+    @fully_cached_property
     def _vs_season_median_record(self):
         vs_season_median_record = defaultdict(int)
 
@@ -1565,6 +1577,10 @@ class TeamMultiSeasons(TeamSeason):
     @fully_cached_property
     def all_play_losses(self):
         return self._sum_seasonal_values('all_play_losses')
+
+    @fully_cached_property
+    def all_play_ties(self):
+        return self._sum_seasonal_values('all_play_ties')
 
     @fully_cached_property
     def _vs_season_median_record(self):
