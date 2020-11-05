@@ -1,6 +1,6 @@
 import csv
 import datetime
-import nvd3
+import pygal
 
 from collections import defaultdict
 
@@ -102,24 +102,28 @@ class ExpectedWinsView(TemplateView):
             y_value = float(scaling_factor * Game.expected_wins(x_value))
             y_data.append(min(y_value, 1))
 
-        graph = nvd3.lineChart(
-            name='expected_wins',
+        graph = pygal.Line(
+            title='Expected Wins',
             width=600,
             height=400,
-            x_axis_format='.2f',
-            y_axis_format='.3f',
+            margin=0,
+            max_scale=6,
             show_legend=False,
+            value_formatter=lambda x: "{:.3f}".format(x),
+            truncate_label=3,
+            x_labels_major_count=6,
+            show_minor_x_labels=False,
+            js=[],
         )
 
-        graph.add_serie(
-            x=x_data,
-            y=y_data,
-            name='Expected Wins',
+        graph.x_labels = x_data
+
+        graph.add(
+            '',
+            y_data,
         )
 
-        graph.buildcontent()
-
-        return graph
+        return graph.render()
 
     def get(self, request):
         expected_wins = None
@@ -143,7 +147,7 @@ class ExpectedWinsView(TemplateView):
         context = {
             'form': expected_wins_form,
             'expected_wins': expected_wins,
-            'expected_wins_graph': self._expected_wins_graph(score, scaling_factor),
+            'expected_wins_graph_html': self._expected_wins_graph(score, scaling_factor),
         }
 
         return self.render_to_response(context)

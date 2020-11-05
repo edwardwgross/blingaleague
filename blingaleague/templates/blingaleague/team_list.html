@@ -54,7 +54,7 @@
 {% for graph in graph_list %}
   <div class="team_list_graph">
     <h3>{{ graph.title }}</h3>
-    {{ graph.graph.htmlcontent|safe }}
+    {{ graph.html|safe }}
   </div>
 {% endfor %}
 

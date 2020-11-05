@@ -1,7 +1,6 @@
 import datetime
 import decimal
 import itertools
-import nvd3
 import statistics
 
 from collections import defaultdict
@@ -929,25 +928,6 @@ class TeamSeason(ComparableObject):
                 win_distribution[win_count] = 0
 
         return dict(win_distribution)
-
-    @fully_cached_property
-    def expected_win_distribution_graph_html(self):
-        expected_win_distribution = sorted(self.expected_win_distribution.items())
-        x_data = list(map(lambda x: x[0], expected_win_distribution))
-        y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
-
-        graph = nvd3.discreteBarChart(
-            name='expected_win_distribution',
-            width=600,
-            height=200,
-            y_axis_format='%',
-        )
-
-        graph.add_serie(x=x_data, y=y_data)
-
-        graph.buildcontent()
-
-        return graph.htmlcontent
 
     @fully_cached_property
     def _all_play_record(self):
@@ -2038,36 +2018,6 @@ class Season(ComparableObject):
             possible_outcomes.append(win_counts)
 
         return possible_outcomes
-
-    @fully_cached_property
-    def expected_win_distribution_graph_html(self):
-        if self.all_time:
-            return ''
-
-        graph = nvd3.lineChart(
-            name='expected_win_distribution',
-            width=1200,
-            height=300,
-            y_axis_format='%',
-        )
-
-        x_data = None
-
-        for team_season in self.standings_table:
-            expected_win_distribution = sorted(
-                team_season.expected_win_distribution.items(),
-            )
-
-            if x_data is None:
-                x_data = list(map(lambda x: x[0], expected_win_distribution))
-
-            y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
-
-            graph.add_serie(x=x_data, y=y_data, name=team_season.team.nickname)
-
-        graph.buildcontent()
-
-        return graph.htmlcontent
 
     @classmethod
     def all(cls, **kwargs):

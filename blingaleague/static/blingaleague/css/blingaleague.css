@@ -282,6 +282,15 @@ table#team_list td {
     margin-bottom: 30px;
 }
 
+.team_list_graph svg.pygal-chart {
+    width: 800px;
+}
+
+.expected_win_distribution_graph svg.pygal-chart,
+#expected_wins svg.pygal-chart {
+    width: 600px;
+}
+
 #games,
 #season_details,
 #trades,

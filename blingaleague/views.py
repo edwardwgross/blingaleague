@@ -1,4 +1,4 @@
-import nvd3
+import pygal
 
 from django.views.generic import TemplateView
 
@@ -131,10 +131,10 @@ class TeamListView(TemplateView):
 
     def _team_graph_lists(self):
         graph_attrs = [
-            # (graph title, TeamSeason attribute, y_axis_format, y_axis_max)
-            ('Wins', 'win_count', 'i', 13),
-            ('Points', 'points', '.2f', 13 * 130),
-            ('Expected Wins', 'expected_wins', '.2f', 13),
+            # (graph title, TeamSeason attribute, y_axis_format)
+            ('Wins', 'win_count', '{:.0f}'),
+            ('Points', 'points', '{:.2f}'),
+            ('Expected Wins', 'expected_wins', '{:.2f}'),
         ]
 
         graph_list = []
@@ -142,17 +142,18 @@ class TeamListView(TemplateView):
         years = [s.year for s in sorted(Season.all()) if not s.is_partial]
         team_list = Member.objects.all()
 
-        for title, attr, y_format, y_max in graph_attrs:
-            graph = nvd3.lineChart(
-                name=attr,
-                width=600,
+        for title, attr, y_format in graph_attrs:
+            graph = pygal.Line(
+                title=title,
+                width=800,
                 height=400,
-                x_axis_date=True,
-                y_axis_format=y_format,
-                y_axis_scale_min=0,
-                y_axis_scale_max=y_max,
-                show_legend=True,
+                margin=0,
+                max_scale=6,
+                value_formatter=lambda x: y_format.format(x),
+                js=[],
             )
+
+            graph.x_labels = years
 
             for team in sorted(team_list, key=lambda x: x.nickname):
                 y_data = []
@@ -166,17 +167,14 @@ class TeamListView(TemplateView):
                     else:
                         y_data.append(None)
 
-                graph.add_serie(
-                    x=years,
-                    y=y_data,
-                    name=team.nickname,
+                graph.add(
+                    team.nickname,
+                    y_data,
                 )
-
-            graph.buildcontent()
 
             graph_list.append({
                 'title': title,
-                'graph': graph,
+                'html': graph.render(),
             })
 
 
@@ -202,6 +200,26 @@ class TeamSeasonView(GamesView):
     )
     games_sub_template = 'blingaleague/team_season_games.html'
 
+    def _expected_win_distribution_graph(self, team_season):
+        expected_win_distribution = sorted(team_season.expected_win_distribution.items())
+        x_data = list(map(lambda x: x[0], expected_win_distribution))
+        y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
+
+        graph = pygal.Bar(
+            width=600,
+            height=200,
+            margin=0,
+            show_legend=False,
+            max_scale=6,
+            value_formatter=lambda x: "{:.0f}%".format(100 * x),
+            js=[],
+        )
+
+        graph.x_labels = x_data
+        graph.add('', y_data)
+
+        return graph.render()
+
     def get(self, request, team, year):
         week_max = None
         if 'week_max' in request.GET:
@@ -214,14 +232,17 @@ class TeamSeasonView(GamesView):
                 # ignore if user passed in a non-int
                 pass
 
-        context = self._context(
-            TeamSeason(
-                team,
-                year,
-                include_playoffs=True,
-                week_max=week_max,
-            ),
+
+        team_season = TeamSeason(
+            team,
+            year,
+            include_playoffs=True,
+            week_max=week_max,
         )
+
+        context = self._context(team_season)
+        context['expected_win_distribution_graph_html'] = self._expected_win_distribution_graph(team_season)
+
         return self.render_to_response(context)
 
 
