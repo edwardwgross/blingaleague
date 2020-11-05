@@ -147,9 +147,10 @@ class TeamListView(TemplateView):
                 title=title,
                 width=800,
                 height=400,
-                margin=0,
+                margin=12,
                 max_scale=6,
                 value_formatter=lambda x: y_format.format(x),
+                truncate_label=4,
                 js=[],
             )
 
@@ -206,9 +207,10 @@ class TeamSeasonView(GamesView):
         y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
 
         graph = pygal.Bar(
+            title='Expected Win Distribution',
             width=600,
             height=200,
-            margin=0,
+            margin=12,
             show_legend=False,
             max_scale=6,
             value_formatter=lambda x: "{:.0f}%".format(100 * x),

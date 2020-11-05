@@ -106,7 +106,7 @@ class ExpectedWinsView(TemplateView):
             title='Expected Wins',
             width=600,
             height=400,
-            margin=0,
+            margin=12,
             max_scale=6,
             show_legend=False,
             value_formatter=lambda x: "{:.3f}".format(x),
