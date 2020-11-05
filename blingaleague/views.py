@@ -173,11 +173,7 @@ class TeamListView(TemplateView):
                     y_data,
                 )
 
-            graph_list.append({
-                'title': title,
-                'html': graph.render(),
-            })
-
+            graph_list.append(graph.render())
 
         return graph_list
 
@@ -213,7 +209,7 @@ class TeamSeasonView(GamesView):
             margin=12,
             show_legend=False,
             max_scale=6,
-            value_formatter=lambda x: "{:.0f}%".format(100 * x),
+            value_formatter=lambda x: "{:.1f}%".format(100 * x),
             js=[],
         )
 

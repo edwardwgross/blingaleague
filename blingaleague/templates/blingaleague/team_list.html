@@ -51,11 +51,8 @@
   </small>
 </p>
 
-{% for graph in graph_list %}
-  <div class="team_list_graph">
-    <h3>{{ graph.title }}</h3>
-    {{ graph.html|safe }}
-  </div>
+{% for graph_html in graph_list %}
+  <div class="team_list_graph">{{ graph_html|safe }}</div>
 {% endfor %}
 
 {% endblock content %}
