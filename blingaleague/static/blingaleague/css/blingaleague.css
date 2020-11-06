@@ -358,6 +358,7 @@ table.game_table td {
     display: inline-block;
     padding: 0 12px;
     vertical-align: top;
+    min-width: 300px;
 }
 
 .playoff_bracket .round .title {

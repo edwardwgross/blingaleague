@@ -1978,7 +1978,7 @@ class Season(ComparableObject):
 
         return {
             'week': week_object,
-            'games': games,
+            'games': sorted(games, key=lambda x: x[0]['seed']),
         }
 
     @fully_cached_property
