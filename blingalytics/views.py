@@ -1,6 +1,5 @@
 import csv
 import datetime
-import pygal
 
 from collections import defaultdict
 
@@ -14,6 +13,7 @@ from blingaleague.models import REGULAR_SEASON_WEEKS, \
                                 Season, Matchup, Trade, Keeper, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
                                 position_sort_key
+from blingaleague.utils import line_graph_html
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
@@ -91,39 +91,33 @@ class ExpectedWinsView(TemplateView):
         max_x = interval * (max_score // interval) + interval  # add interval to round up
 
         # add interval because range() is exclusive at the high end
-        x_data = list(range(int(min_x), int(max_x) + interval, interval))
+        scores = list(range(int(min_x), int(max_x) + interval, interval))
         if score is not None:
-            x_data = sorted(x_data + [score])
+            scores = sorted(scores + [score])
 
-        x_data = list(map(float, x_data))
+        scores = list(map(float, scores))
 
-        y_data = []
-        for x_value in x_data:
-            y_value = float(scaling_factor * Game.expected_wins(x_value))
-            y_data.append(min(y_value, 1))
+        xw_values = []
+        for score in scores:
+            xw_value = float(scaling_factor * Game.expected_wins(score))
+            xw_values.append(min(xw_value, 1))
 
-        graph = pygal.Line(
-            title='Expected Wins',
-            width=600,
-            height=400,
-            margin=12,
-            max_scale=6,
-            show_legend=False,
-            value_formatter=lambda x: "{:.3f}".format(x),
-            truncate_label=3,
-            x_labels_major_count=6,
-            show_minor_x_labels=False,
-            js=[],
+        custom_kwargs = {
+            'title': 'Expected Wins',
+            'show_legend': False,
+            'value_formatter': lambda x: "{:.3f}".format(x),
+            'truncate_label': 3,
+            'x_labels_major_count': 6,
+            'show_minor_x_labels': False,
+        }
+
+        graph_html = line_graph_html(
+            scores, # x_data
+            [('', xw_values)], # y_series
+            **custom_kwargs,
         )
 
-        graph.x_labels = x_data
-
-        graph.add(
-            '',
-            y_data,
-        )
-
-        return graph.render()
+        return graph_html
 
     def get(self, request):
         expected_wins = None

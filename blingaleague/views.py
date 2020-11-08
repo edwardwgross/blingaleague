@@ -1,5 +1,3 @@
-import pygal
-
 from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
@@ -8,6 +6,7 @@ from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
                     Trade, \
                     REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK
+from .utils import line_graph_html, bar_graph_html
 
 
 class HomeView(TemplateView):
@@ -129,9 +128,9 @@ class WeekView(GamesView):
 class TeamListView(TemplateView):
     template_name = 'blingaleague/team_list.html'
 
-    def _team_graph_lists(self):
+    def _team_graph_list(self):
         graph_attrs = [
-            # (graph title, TeamSeason attribute, y_axis_format)
+            # (graph title, TeamSeason attribute, value format)
             ('Wins', 'win_count', '{:.0f}'),
             ('Points', 'points', '{:.2f}'),
             ('Expected Wins', 'expected_wins', '{:.2f}'),
@@ -142,38 +141,36 @@ class TeamListView(TemplateView):
         years = [s.year for s in sorted(Season.all()) if not s.is_partial]
         team_list = Member.objects.all()
 
-        for title, attr, y_format in graph_attrs:
-            graph = pygal.Line(
-                title=title,
-                width=800,
-                height=400,
-                margin=12,
-                max_scale=6,
-                value_formatter=lambda x: y_format.format(x),
-                truncate_label=4,
-                js=[],
-            )
+        for title, attr, value_format in graph_attrs:
+            custom_kwargs = {
+                'title': title,
+                'width': 800,
+                'value_formatter': lambda x: value_format.format(x),
+                'truncate_label': 4,
+            }
 
-            graph.x_labels = years
-
+            team_series = []
             for team in sorted(team_list, key=lambda x: x.nickname):
-                y_data = []
+                team_data = []
                 for year in years:
                     team_season = TeamSeason(team.id, year)
                     if team_season.games:
-                        y_value = getattr(team_season, attr)
-                        if y_format != 'i':
-                            y_value = float(y_value)
-                        y_data.append(y_value)
+                        value = getattr(team_season, attr)
+                        if value_format != 'i':
+                            value = float(value)
+                        team_data.append(value)
                     else:
-                        y_data.append(None)
+                        team_data.append(None)
 
-                graph.add(
-                    team.nickname,
-                    y_data,
-                )
+                team_series.append((team.nickname, team_data))
 
-            graph_list.append(graph.render())
+            graph_html = line_graph_html(
+                years,  # x_data
+                team_series,  # y_series
+                **custom_kwargs,
+            )
+
+            graph_list.append(graph_html)
 
         return graph_list
 
@@ -181,7 +178,7 @@ class TeamListView(TemplateView):
         context = {
             'team_list': Member.objects.all(),
             'include_playoffs': 'include_playoffs' in request.GET,
-            'graph_list': self._team_graph_lists(),
+            'graph_list': self._team_graph_list(),
         }
         return self.render_to_response(context)
 
@@ -199,24 +196,23 @@ class TeamSeasonView(GamesView):
 
     def _expected_win_distribution_graph(self, team_season):
         expected_win_distribution = sorted(team_season.expected_win_distribution.items())
-        x_data = list(map(lambda x: x[0], expected_win_distribution))
-        y_data = list(map(lambda x: float(x[1]), expected_win_distribution))
+        wins = list(map(lambda x: x[0], expected_win_distribution))
+        odds = list(map(lambda x: float(x[1]), expected_win_distribution))
 
-        graph = pygal.Bar(
-            title='Expected Win Distribution',
-            width=600,
-            height=200,
-            margin=12,
-            show_legend=False,
-            max_scale=6,
-            value_formatter=lambda x: "{:.1f}%".format(100 * x),
-            js=[],
+        custom_kwargs = {
+            'title': 'Expected Win Distribution',
+            'height': 200,
+            'show_legend': False,
+            'value_formatter': lambda x: "{:.1f}%".format(100 * x),
+        }
+
+        graph_html = bar_graph_html(
+            wins, # x_data
+            [('', odds)], # y_series
+            **custom_kwargs,
         )
 
-        graph.x_labels = x_data
-        graph.add('', y_data)
-
-        return graph.render()
+        return graph_html
 
     def get(self, request, team, year):
         week_max = None

@@ -1,9 +1,19 @@
+import pygal
+
 from django.core.cache import caches
 
 
 CACHE = caches['blingaleague']
 
 MEMCACHE_KEY_LENGTH_LIMIT = 250
+
+GRAPH_DEFAULT_KWARGS = {
+    'width': 600,
+    'height': 400,
+    'margin': 12,
+    'max_scale': 6,
+    'js': [],
+}
 
 
 class fully_cached_property(object):
@@ -72,3 +82,25 @@ def int_to_roman(integer):
                 break
 
     return roman
+
+
+def _graph_html(graph_class, x_data, y_series, **custom_kwargs):
+    graph_kwargs = GRAPH_DEFAULT_KWARGS.copy()
+    graph_kwargs.update(custom_kwargs)
+
+    graph = graph_class(**graph_kwargs)
+
+    graph.x_labels = x_data
+
+    for (y_name, y_data) in y_series:
+        graph.add(y_name, y_data)
+
+    return graph.render()
+
+
+def line_graph_html(x_data, y_series, **custom_kwargs):
+    return _graph_html(pygal.Line, x_data, y_series, **custom_kwargs)
+
+
+def bar_graph_html(x_data, y_series, **custom_kwargs):
+    return _graph_html(pygal.Bar, x_data, y_series, **custom_kwargs)
