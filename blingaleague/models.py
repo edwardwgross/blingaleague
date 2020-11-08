@@ -1040,8 +1040,9 @@ class TeamSeason(ComparableObject):
             {'attr': 'expected_wins', 'name': 'expected wins'},
         ]
 
+        week_max = min(len(self.games), REGULAR_SEASON_WEEKS)
         week = 1
-        while week <= len(self.games):
+        while week <= week_max:
             ts_week = TeamSeason(self.team.id, self.year, week_max=week)
             week_ranks = {
                 'place': ts_week.place_numeric,

@@ -105,6 +105,7 @@ class ExpectedWinsView(TemplateView):
         custom_options = {
             'title': 'Expected Wins',
             'show_legend': False,
+            'x_title': 'Score',
             'value_formatter': lambda x: "{:.3f}".format(x),
             'truncate_label': 3,
             'x_labels_major_count': 6,

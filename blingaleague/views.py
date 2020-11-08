@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+from django.contrib.humanize.templatetags.humanize import ordinal, intcomma
 from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
@@ -145,7 +148,7 @@ class TeamListView(TemplateView):
             custom_options = {
                 'title': title,
                 'width': 800,
-                'value_formatter': lambda x: value_format.format(x),
+                'value_formatter': lambda x: intcomma(value_format.format(x)),
                 'truncate_label': 4,
             }
 
@@ -190,6 +193,7 @@ class TeamSeasonView(GamesView):
     post_games_sub_templates = (
         'blingaleague/team_season_keepers.html',
         'blingaleague/team_season_trades.html',
+        'blingaleague/team_season_rank_by_week.html',
         'blingaleague/similar_seasons.html',
     )
     games_sub_template = 'blingaleague/team_season_games.html'
@@ -201,14 +205,44 @@ class TeamSeasonView(GamesView):
 
         custom_options = {
             'title': 'Expected Win Distribution',
-            'height': 200,
+            'height': 240,
             'show_legend': False,
+            'x_title': 'Wins',
             'value_formatter': lambda x: "{:.1f}%".format(100 * x),
         }
 
         graph_html = bar_graph_html(
             wins, # x_data
             [('', odds)], # y_series
+            **custom_options,
+        )
+
+        return graph_html
+
+    def _rank_by_week_graph(self, team_season):
+        weeks = sorted(team_season.rank_by_week.keys())
+        rank_series = defaultdict(list)
+
+        total_teams = len(Season(team_season.year).standings_table)
+
+        for week in weeks:
+            ranks = team_season.rank_by_week[week]
+            for name, value in ranks.items():
+                rank_series[name.title()].append(total_teams - value)
+
+        custom_options = {
+            'title': 'Rank by Week',
+            'width': 800,
+            'x_title': 'Week',
+            'min_scale': total_teams - 1,
+            'max_scale': total_teams - 1,
+            'range': (0, total_teams - 1),
+            'value_formatter': lambda x: ordinal(total_teams - x),
+        }
+
+        graph_html = line_graph_html(
+            weeks, # x_data
+            sorted(rank_series.items()), # y_series
             **custom_options,
         )
 
@@ -236,6 +270,7 @@ class TeamSeasonView(GamesView):
 
         context = self._context(team_season)
         context['expected_win_distribution_graph_html'] = self._expected_win_distribution_graph(team_season)
+        context['rank_by_week_graph_html'] = self._rank_by_week_graph(team_season)
 
         return self.render_to_response(context)
 
