@@ -162,7 +162,10 @@ class TeamListView(TemplateView):
                         value = getattr(team_season, attr)
                         if value_format != 'i':
                             value = float(value)
-                        team_data.append(value)
+                        team_data.append({
+                            'value': value,
+                            'xlink': team_season.href,
+                        })
                     else:
                         team_data.append(None)
 
