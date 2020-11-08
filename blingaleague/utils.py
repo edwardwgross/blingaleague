@@ -7,7 +7,7 @@ CACHE = caches['blingaleague']
 
 MEMCACHE_KEY_LENGTH_LIMIT = 250
 
-GRAPH_DEFAULT_KWARGS = {
+GRAPH_DEFAULT_OPTIONS = {
     'width': 600,
     'height': 400,
     'margin': 12,
@@ -84,11 +84,11 @@ def int_to_roman(integer):
     return roman
 
 
-def _graph_html(graph_class, x_data, y_series, **custom_kwargs):
-    graph_kwargs = GRAPH_DEFAULT_KWARGS.copy()
-    graph_kwargs.update(custom_kwargs)
+def _graph_html(graph_class, x_data, y_series, **custom_options):
+    graph_options = GRAPH_DEFAULT_OPTIONS.copy()
+    graph_options.update(custom_options)
 
-    graph = graph_class(**graph_kwargs)
+    graph = graph_class(**graph_options)
 
     graph.x_labels = x_data
 
@@ -98,9 +98,9 @@ def _graph_html(graph_class, x_data, y_series, **custom_kwargs):
     return graph.render()
 
 
-def line_graph_html(x_data, y_series, **custom_kwargs):
-    return _graph_html(pygal.Line, x_data, y_series, **custom_kwargs)
+def line_graph_html(x_data, y_series, **custom_options):
+    return _graph_html(pygal.Line, x_data, y_series, **custom_options)
 
 
-def bar_graph_html(x_data, y_series, **custom_kwargs):
-    return _graph_html(pygal.Bar, x_data, y_series, **custom_kwargs)
+def bar_graph_html(x_data, y_series, **custom_options):
+    return _graph_html(pygal.Bar, x_data, y_series, **custom_options)

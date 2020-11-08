@@ -142,7 +142,7 @@ class TeamListView(TemplateView):
         team_list = Member.objects.all()
 
         for title, attr, value_format in graph_attrs:
-            custom_kwargs = {
+            custom_options = {
                 'title': title,
                 'width': 800,
                 'value_formatter': lambda x: value_format.format(x),
@@ -167,7 +167,7 @@ class TeamListView(TemplateView):
             graph_html = line_graph_html(
                 years,  # x_data
                 team_series,  # y_series
-                **custom_kwargs,
+                **custom_options,
             )
 
             graph_list.append(graph_html)
@@ -199,7 +199,7 @@ class TeamSeasonView(GamesView):
         wins = list(map(lambda x: x[0], expected_win_distribution))
         odds = list(map(lambda x: float(x[1]), expected_win_distribution))
 
-        custom_kwargs = {
+        custom_options = {
             'title': 'Expected Win Distribution',
             'height': 200,
             'show_legend': False,
@@ -209,7 +209,7 @@ class TeamSeasonView(GamesView):
         graph_html = bar_graph_html(
             wins, # x_data
             [('', odds)], # y_series
-            **custom_kwargs,
+            **custom_options,
         )
 
         return graph_html

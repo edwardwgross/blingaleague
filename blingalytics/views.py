@@ -102,7 +102,7 @@ class ExpectedWinsView(TemplateView):
             xw_value = float(scaling_factor * Game.expected_wins(score))
             xw_values.append(min(xw_value, 1))
 
-        custom_kwargs = {
+        custom_options = {
             'title': 'Expected Wins',
             'show_legend': False,
             'value_formatter': lambda x: "{:.3f}".format(x),
@@ -114,7 +114,7 @@ class ExpectedWinsView(TemplateView):
         graph_html = line_graph_html(
             scores, # x_data
             [('', xw_values)], # y_series
-            **custom_kwargs,
+            **custom_options,
         )
 
         return graph_html
