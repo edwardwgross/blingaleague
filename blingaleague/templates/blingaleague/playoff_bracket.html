@@ -8,7 +8,7 @@
             <div class="team {% if team_dict.is_winner %}winner{% endif %}">
               {% if team_dict %}
                 <span class="seed">#{{ team_dict.seed }}</span>
-                <span class="name">{{ team_dict.team_season.team }}</span>
+                <span class="name"><a href="{{ team_dict.team_season.href }}">{{ team_dict.team_season.team }}</a></span>
                 {% if team_dict.score %}<span class="score">{{ team_dict.score }}</span>{% endif %}
               {% endif %}
             </div>
