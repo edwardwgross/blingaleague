@@ -8,7 +8,8 @@ from blingacontent.models import Gazette
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
                     Trade, \
-                    REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK
+                    REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK, \
+                    PLAYOFF_TEAMS
 from .utils import line_graph_html, bar_graph_html
 
 
@@ -237,6 +238,7 @@ class TeamSeasonView(GamesView):
             'min_scale': total_teams - 1,
             'max_scale': total_teams - 1,
             'range': (0, total_teams - 1),
+            'y_labels_major': [total_teams - PLAYOFF_TEAMS],
             'value_formatter': lambda x: ordinal(total_teams - x),
         }
 
