@@ -15,15 +15,11 @@
 
   {% include "blingaleague/standings_table.html" %}
 
-  {% if season.all_time %}
-    <div class="center">
-      {% if season.include_playoffs %}
-        <a href="{% url 'blingaleague.all_time' %}">Exclude playoffs</a>
-      {% else %}
-        <a href="{% url 'blingaleague.all_time' %}?include_playoffs">Include playoffs</a>
-      {% endif %}
-    </div>
-  {% elif weeks_with_games %}
+  {% if season.playoff_bracket %}
+    {% include "blingaleague/playoff_bracket.html" %}
+  {% endif %}
+
+  {% if weeks_with_games %}
     <div class="center">
       Week:
       {% for week in weeks_with_games %}
@@ -32,11 +28,8 @@
     </div>
   {% endif %}
 
-  {% if season.playoff_bracket %}
-    {% include "blingaleague/playoff_bracket.html" %}
-  {% endif %}
-
   <div class="wide_graph">{{ place_by_week_graph_html|safe }}</div>
+
   {% if season.previous %}
     <a href="{{ season.previous.href }}" class="link previous">Previous</a>
   {% endif %}

@@ -50,7 +50,7 @@ class SingleSeasonView(TemplateView):
                 )
 
         custom_options = {
-            'title': 'Place by Week',
+            'title': 'Weekly Standings',
             'x_title': 'Week',
         }
 
