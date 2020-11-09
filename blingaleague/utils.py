@@ -1,5 +1,6 @@
 import pygal
 
+from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core.cache import caches
 
 
@@ -104,3 +105,26 @@ def line_graph_html(x_data, y_series, **custom_options):
 
 def bar_graph_html(x_data, y_series, **custom_options):
     return _graph_html(pygal.Bar, x_data, y_series, **custom_options)
+
+def rank_over_time_graph_html(time_data, raw_rank_series, total_teams, rank_cutoff, **custom_options):
+    graph_options = {
+        'title': 'Rank over Time',
+        'width': 800,
+        'min_scale': total_teams - 1,
+        'max_scale': total_teams - 1,
+        'range': (0, total_teams - 1),
+        'y_labels_major': [total_teams - rank_cutoff],
+        'value_formatter': lambda x: ordinal(total_teams - x),
+    }
+
+    graph_options.update(custom_options)
+
+    rank_series = {}
+    for name, values in raw_rank_series.items():
+        rank_series[name.title()] = [total_teams - value for value in values]
+
+    return line_graph_html(
+        time_data, # x_data
+        sorted(rank_series.items()), # y_series
+        **graph_options,
+    )

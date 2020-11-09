@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from django.contrib.humanize.templatetags.humanize import ordinal, intcomma
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
@@ -10,7 +10,7 @@ from .models import Season, Game, Member, \
                     Trade, \
                     REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK, \
                     PLAYOFF_TEAMS
-from .utils import line_graph_html, bar_graph_html
+from .utils import line_graph_html, bar_graph_html, rank_over_time_graph_html
 
 
 class HomeView(TemplateView):
@@ -39,6 +39,31 @@ class SeasonListView(TemplateView):
 class SingleSeasonView(TemplateView):
     template_name = 'blingaleague/season.html'
 
+    def _place_by_week_graph(self, season):
+        weeks = sorted(season.standings_table[0].rank_by_week.keys())
+        place_series = defaultdict(list)
+
+        for team_season in season.standings_table:
+            for week in weeks:
+                place_series[team_season.team.nickname].append(
+                    team_season.rank_by_week[week]['place'],
+                )
+
+        custom_options = {
+            'title': 'Place by Week',
+            'x_title': 'Week',
+        }
+
+        graph_html = rank_over_time_graph_html(
+            weeks, # time_data
+            place_series, # raw_rank_series
+            len(season.standings_table), # total_teams
+            PLAYOFF_TEAMS, # rank_cutoff
+            **custom_options,
+        )
+
+        return graph_html
+
     def get(self, request, year):
         season_kwargs = {
             'year': int(year),
@@ -55,11 +80,11 @@ class SingleSeasonView(TemplateView):
                 # ignore if user passed in a non-int
                 pass
 
-        self.season = Season(**season_kwargs)
+        season = Season(**season_kwargs)
 
         weeks_with_games = sorted(set(
             Game.objects.filter(
-                year=self.season.year,
+                year=season.year,
             ).values_list(
                 'week',
                 flat=True,
@@ -67,10 +92,11 @@ class SingleSeasonView(TemplateView):
         ))
 
         context = {
-            'season': self.season,
+            'season': season,
             'week_max': week_max,
             'weeks_with_games': weeks_with_games,
             'hide_playoff_finish': hide_playoff_finish,
+            'place_by_week_graph_html': self._place_by_week_graph(season),
         }
 
         return self.render_to_response(context)
@@ -164,7 +190,7 @@ class TeamListView(TemplateView):
                             value = float(value)
                         team_data.append({
                             'value': value,
-                            'xlink': team_season.href,
+                            'xlink': str(team_season.href),
                         })
                     else:
                         team_data.append(None)
@@ -232,22 +258,18 @@ class TeamSeasonView(GamesView):
         for week in weeks:
             ranks = team_season.rank_by_week[week]
             for name, value in ranks.items():
-                rank_series[name.title()].append(total_teams - value)
+                rank_series[name].append(value)
 
         custom_options = {
             'title': 'Rank by Week',
-            'width': 800,
             'x_title': 'Week',
-            'min_scale': total_teams - 1,
-            'max_scale': total_teams - 1,
-            'range': (0, total_teams - 1),
-            'y_labels_major': [total_teams - PLAYOFF_TEAMS],
-            'value_formatter': lambda x: ordinal(total_teams - x),
         }
 
-        graph_html = line_graph_html(
-            weeks, # x_data
-            sorted(rank_series.items()), # y_series
+        graph_html = rank_over_time_graph_html(
+            weeks, # time_data
+            rank_series, # raw_rank_series
+            len(Season(team_season.year).standings_table), # total_teams
+            PLAYOFF_TEAMS, # rank_cutoff
             **custom_options,
         )
 
@@ -283,9 +305,44 @@ class TeamSeasonView(GamesView):
 class TeamDetailsView(TemplateView):
     template_name = 'blingaleague/team_details.html'
 
+    def _rank_by_year_graph(self, team):
+        years = []
+        rank_series = defaultdict(list)
+
+        total_teams = 0
+
+        for team_season in team.seasons:
+            years.append(team_season.year)
+
+            final_week = max(team_season.rank_by_week.keys())
+            final_ranks = team_season.rank_by_week[final_week]
+
+            for name, value in final_ranks.items():
+                rank_series[name].append(value)
+
+            team_count = len(Season(team_season.year).standings_table)
+            if team_count > total_teams:
+                total_teams = team_count
+
+        custom_options = {
+            'title': 'Rank by Season',
+            'truncate_label': 4,
+        }
+
+        return rank_over_time_graph_html(
+            years, # time_data
+            rank_series, # raw_rank_series
+            total_teams,
+            PLAYOFF_TEAMS, # rank_cutoff
+            **custom_options,
+        )
+
     def get(self, request, team):
         team = Member.objects.get(id=team)
-        context = {'team': team}
+        context = {
+            'team': team,
+            'rank_by_year_graph_html': self._rank_by_year_graph(team),
+        }
         return self.render_to_response(context)
 
 

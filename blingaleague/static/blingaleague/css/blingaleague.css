@@ -286,8 +286,7 @@ svg.pygal-chart {
     width: 600px;
 }
 
-.team_list_graph svg.pygal-chart,
-.team_season_rank_by_week_graph svg.pygal-chart {
+.wide_graph svg.pygal-chart {
     width: 800px;
 }
 

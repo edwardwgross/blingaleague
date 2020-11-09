@@ -36,6 +36,7 @@
     {% include "blingaleague/playoff_bracket.html" %}
   {% endif %}
 
+  <div class="wide_graph">{{ place_by_week_graph_html|safe }}</div>
   {% if season.previous %}
     <a href="{{ season.previous.href }}" class="link previous">Previous</a>
   {% endif %}
