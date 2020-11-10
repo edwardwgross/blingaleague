@@ -113,8 +113,8 @@ class ExpectedWinsView(TemplateView):
         }
 
         graph_html = scatter_graph_html(
-            scores, # x_data
-            [('', xw_values)], # y_series
+            scores,  # x_data
+            [('', xw_values)],  # y_series
             **custom_options,
         )
 

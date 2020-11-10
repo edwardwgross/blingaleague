@@ -55,10 +55,10 @@ class SingleSeasonView(TemplateView):
         }
 
         graph_html = rank_over_time_graph_html(
-            weeks, # time_data
-            place_series, # raw_rank_series
-            len(season.standings_table), # total_teams
-            PLAYOFF_TEAMS, # rank_cutoff
+            weeks,  # time_data
+            place_series,  # raw_rank_series
+            len(season.standings_table),  # total_teams
+            PLAYOFF_TEAMS,  # rank_cutoff
             **custom_options,
         )
 
@@ -242,8 +242,8 @@ class TeamSeasonView(GamesView):
         }
 
         graph_html = bar_graph_html(
-            wins, # x_data
-            [('', odds)], # y_series
+            wins,  # x_data
+            [('', odds)],  # y_series
             **custom_options,
         )
 
@@ -252,8 +252,6 @@ class TeamSeasonView(GamesView):
     def _rank_by_week_graph(self, team_season):
         weeks = sorted(team_season.rank_by_week.keys())
         rank_series = defaultdict(list)
-
-        total_teams = len(Season(team_season.year).standings_table)
 
         for week in weeks:
             ranks = team_season.rank_by_week[week]
@@ -266,10 +264,10 @@ class TeamSeasonView(GamesView):
         }
 
         graph_html = rank_over_time_graph_html(
-            weeks, # time_data
-            rank_series, # raw_rank_series
-            len(Season(team_season.year).standings_table), # total_teams
-            PLAYOFF_TEAMS, # rank_cutoff
+            weeks,  # time_data
+            rank_series,  # raw_rank_series
+            len(Season(team_season.year).standings_table),  # total_teams
+            PLAYOFF_TEAMS,  # rank_cutoff
             **custom_options,
         )
 
@@ -287,7 +285,6 @@ class TeamSeasonView(GamesView):
                 # ignore if user passed in a non-int
                 pass
 
-
         team_season = TeamSeason(
             team,
             year,
@@ -296,7 +293,7 @@ class TeamSeasonView(GamesView):
         )
 
         context = self._context(team_season)
-        context['expected_win_distribution_graph_html'] = self._expected_win_distribution_graph(team_season)
+        context['expected_win_distribution_graph_html'] = self._expected_win_distribution_graph(team_season)  # noqa: E501
         context['rank_by_week_graph_html'] = self._rank_by_week_graph(team_season)
 
         return self.render_to_response(context)
@@ -330,10 +327,10 @@ class TeamDetailsView(TemplateView):
         }
 
         return rank_over_time_graph_html(
-            years, # time_data
-            rank_series, # raw_rank_series
+            years,  # time_data
+            rank_series,  # raw_rank_series
             total_teams,
-            PLAYOFF_TEAMS, # rank_cutoff
+            PLAYOFF_TEAMS,  # rank_cutoff
             **custom_options,
         )
 
