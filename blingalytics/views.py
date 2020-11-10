@@ -13,7 +13,7 @@ from blingaleague.models import REGULAR_SEASON_WEEKS, \
                                 Season, Matchup, Trade, Keeper, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
                                 position_sort_key
-from blingaleague.utils import line_graph_html
+from blingaleague.utils import scatter_graph_html
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
@@ -112,7 +112,7 @@ class ExpectedWinsView(TemplateView):
             'show_minor_x_labels': False,
         }
 
-        graph_html = line_graph_html(
+        graph_html = scatter_graph_html(
             scores, # x_data
             [('', xw_values)], # y_series
             **custom_options,

@@ -106,6 +106,17 @@ def line_graph_html(x_data, y_series, **custom_options):
 def bar_graph_html(x_data, y_series, **custom_options):
     return _graph_html(pygal.Bar, x_data, y_series, **custom_options)
 
+def scatter_graph_html(x_data, y_series, **custom_options):
+    graph_options = GRAPH_DEFAULT_OPTIONS.copy()
+    graph_options.update(custom_options)
+
+    graph = pygal.XY(**graph_options)
+
+    for (y_name, y_data) in y_series:
+        graph.add(y_name, list(zip(x_data, y_data)))
+
+    return graph.render()
+
 def rank_over_time_graph_html(time_data, raw_rank_series, total_teams, rank_cutoff, **custom_options):
     graph_options = {
         'title': 'Rank over Time',
