@@ -975,7 +975,7 @@ class TeamSeason(ComparableObject):
         if self.all_play_ties:
             record_parts.append(self.all_play_ties)
 
-        return '-'.join(map(str, record_parts))
+        return '-'.join(map(intcomma, record_parts))
 
     @fully_cached_property
     def _vs_season_median_record(self):
@@ -1549,6 +1549,7 @@ class TeamMultiSeasons(TeamSeason):
         return {
             OUTCOME_WIN: self.all_play_wins,
             OUTCOME_LOSS: self.all_play_losses,
+            OUTCOME_TIE: self.all_play_ties,
         }
 
     @fully_cached_property
