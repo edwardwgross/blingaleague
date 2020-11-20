@@ -46,6 +46,20 @@
 
   <div class="wide_graph">{{ rank_by_year_graph_html|safe }}</div>
 
+  {% if team.blangums_games %}
+  <h2>Team Blangums ({{ team.seasons.blangums_count }})</h2>
+    {% with team.blangums_games as games %}
+      {% include "blingaleague/awards_games.html" %}
+    {% endwith %}
+  {% endif %}
+
+  {% if team.slapped_heartbeat_games %}
+    <h2>Slapped Heartbeats ({{ team.seasons.slapped_heartbeat_count }})</h2>
+    {% with team.slapped_heartbeat_games as games %}
+      {% include "blingaleague/awards_games.html" %}
+    {% endwith %}
+  {% endif %}
+
   {% if team.seasons.keepers %}
     <h2>Keepers</h2>
     <table>
@@ -78,20 +92,6 @@
         {% endfor %}
       {% endfor %}
     </table>
-  {% endif %}
-
-  {% if team.blangums_games %}
-  <h2>Team Blangums ({{ team.seasons.blangums_count }})</h2>
-    {% with team.blangums_games as games %}
-      {% include "blingaleague/awards_games.html" %}
-    {% endwith %}
-  {% endif %}
-
-  {% if team.slapped_heartbeat_games %}
-    <h2>Slapped Heartbeats ({{ team.seasons.slapped_heartbeat_count }})</h2>
-    {% with team.slapped_heartbeat_games as games %}
-      {% include "blingaleague/awards_games.html" %}
-    {% endwith %}
   {% endif %}
 </div>
 
