@@ -1,7 +1,7 @@
 <tr class="trade">
   {% if include_year %}
     <td style="text-align:right">
-      <a href="{% url 'blingaleague.team_season' trade.received.0.receiver.id trade.trade.year %}">{{ trade.trade.year }}</a>
+      <a href="{% url 'blingaleague.single_season' trade.trade.year %}">{{ trade.trade.year }}</a>
     </td>
   {% endif %}
   <td style="text-align:right">
