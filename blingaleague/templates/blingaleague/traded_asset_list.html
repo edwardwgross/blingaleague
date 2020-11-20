@@ -4,7 +4,7 @@
       {{ asset.name }}
       <small>
         {% if is_sender_pov %}
-          - to <a href="{% url 'blingaleague.team_season' asset.receiver_id asset.trade.year %}">{{ asset.receiver.nickname }}</a>
+          - to <a href="{% url 'blingaleague.team_season' asset.receiver.id asset.trade.year %}">{{ asset.receiver.nickname }}</a>
         {% else %}
           - from <a href="{%url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a>
         {% endif %}

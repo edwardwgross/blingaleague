@@ -8,23 +8,7 @@
       <th>Traded away</th>
     </tr>
     {% for trade in base_object.trades %}
-      <tr class="trade">
-        <td style="text-align:right">
-          <a href="{{ trade.trade.week_object.href }}">{{ trade.trade.week }}</a>
-        </td>
-        <td>
-          {% with trade.received as asset_list %}
-            {% include "blingaleague/traded_asset_list.html" %}
-          {% endwith %}
-        </td>
-        <td>
-          {% with trade.sent as asset_list %}
-          {% with True as is_sender_pov %}
-            {% include "blingaleague/traded_asset_list.html" %}
-          {% endwith %}
-          {% endwith %}
-        </td>
-      </tr>
+      {% include "blingaleague/team_trade_row.html" %}
     {% endfor %}
   </table>
 {% endif %}

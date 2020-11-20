@@ -44,8 +44,41 @@
     {% endfor %}
   </table>
 
-  <h3>Rank by Season</h3>
   <div class="wide_graph">{{ rank_by_year_graph_html|safe }}</div>
+
+  {% if team.seasons.keepers %}
+    <h2>Keepers</h2>
+    <table>
+      {% for team_season in team.seasons reversed %}
+        {% if team_season.keepers %}
+          <tr>
+            <td><a href="{{ team_season.season_object.href }}">{{ team_season.season_object.year }}</a></td>
+            <td>{% if team_season.keepers|length > 0 %}{{ team_season.keepers.0.name }} ({{ team_season.keepers.0.round|ordinal }}){% endif %}</td>
+            <td>{% if team_season.keepers|length > 1 %}{{ team_season.keepers.1.name }} ({{ team_season.keepers.1.round|ordinal }}){% endif %}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if team.seasons.trades %}
+    <h2>Trades</h2>
+    <table class="trades">
+      <tr>
+        <th>Year</th>
+        <th>Week</th>
+        <th>Traded for</th>
+        <th>Traded away</th>
+      </tr>
+      {% for team_season in team.seasons reversed %}
+        {% for trade in team_season.trades reversed %}
+          {% with True as include_year %}
+            {% include "blingaleague/team_trade_row.html" %}
+          {% endwith %}
+        {% endfor %}
+      {% endfor %}
+    </table>
+  {% endif %}
 
   {% if team.blangums_games %}
   <h2>Team Blangums ({{ team.seasons.blangums_count }})</h2>

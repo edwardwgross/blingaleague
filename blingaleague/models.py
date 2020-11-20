@@ -1609,6 +1609,28 @@ class TeamMultiSeasons(TeamSeason):
         return None
 
     @fully_cached_property
+    def trades(self):
+        trades = []
+
+        for season in self:
+            trades.extend(season.trades)
+
+        return sorted(
+            trades,
+            key=lambda x: x['trade'],
+            reverse=True,
+        )
+
+    @fully_cached_property
+    def keepers(self):
+        keepers = []
+
+        for season in sorted(self, reverse=True):  # most recent first
+            keepers.extend(season.keepers)
+
+        return keepers
+
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.team.id,))
 
@@ -1830,7 +1852,14 @@ class Season(ComparableObject):
             teams.add(game.winner)
             teams.add(game.loser)
 
-        return sorted(teams, key=lambda x: (x.first_name, x.last_name))
+        return sorted(teams)
+
+    @fully_cached_property
+    def alpha_team_seasons(self):
+        return sorted(
+            self.standings_table,
+            key=lambda x: x.team,
+        )
 
     @fully_cached_property
     def is_upcoming_season(self):
@@ -2020,6 +2049,23 @@ class Season(ComparableObject):
             possible_outcomes.append(win_counts)
 
         return possible_outcomes
+
+    @fully_cached_property
+    def keepers(self):
+        return Keeper.objects.filter(
+            year=self.year,
+        ).order_by(
+            'team',
+        )
+
+    @fully_cached_property
+    def trades(self):
+        return Trade.objects.filter(
+            year=self.year,
+            week__lte=self.week_max,
+        ).order_by(
+            'week', 'date',
+        )
 
     @classmethod
     def all(cls, **kwargs):

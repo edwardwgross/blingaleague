@@ -1,0 +1,22 @@
+<tr class="trade">
+  {% if include_year %}
+    <td style="text-align:right">
+      <a href="{% url 'blingaleague.team_season' trade.received.0.receiver.id trade.trade.year %}">{{ trade.trade.year }}</a>
+    </td>
+  {% endif %}
+  <td style="text-align:right">
+    <a href="{{ trade.trade.week_object.href }}">{{ trade.trade.week }}</a>
+  </td>
+  <td>
+    {% with trade.received as asset_list %}
+      {% include "blingaleague/traded_asset_list.html" %}
+    {% endwith %}
+  </td>
+  <td>
+    {% with trade.sent as asset_list %}
+    {% with True as is_sender_pov %}
+      {% include "blingaleague/traded_asset_list.html" %}
+    {% endwith %}
+    {% endwith %}
+  </td>
+</tr>
