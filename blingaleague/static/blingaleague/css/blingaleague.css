@@ -394,6 +394,13 @@ table.game_table td {
     font-weight: bold;
 }
 
+.toggle_button {
+    font-size: 60%;
+    color: #3344dd;
+    border: none;
+    background-color: transparent;
+}
+
 table.blingalytics_table.sortable tbody {
     counter-reset: blingalytics_tabletablescope;
 }
@@ -493,10 +500,6 @@ form .errorlist li {
 
 form .errorlist li {
     width: 100%;
-}
-
-.toggle_button {
-    font-size: 60%;
 }
 
 .blingalytics .finder_results {
