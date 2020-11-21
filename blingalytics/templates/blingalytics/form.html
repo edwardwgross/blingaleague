@@ -1,4 +1,4 @@
-<button type="button" id="form_toggle_button">Show/hide form</button>
+{% with form_id as toggle_section_id %}{% include "blingaleague/toggle_button.html" %}{% endwith %}
 <form id="{{ form_id }}" class="blingalytics_form" method="get">
   {% csrf_token %}
   <ul>
@@ -8,7 +8,7 @@
 </form>
 <div style="clear:both"></div>
 <script type="text/javascript">
-    $("#form_toggle_button").click(function() {
+    $("#{{ form_id|escapejs }}_toggle_button").click(function() {
         $('#{{ form_id|escapejs }}').toggle();
     });
 </script>

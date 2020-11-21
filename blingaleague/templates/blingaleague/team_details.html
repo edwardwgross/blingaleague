@@ -47,22 +47,35 @@
   <div class="wide_graph">{{ rank_by_year_graph_html|safe }}</div>
 
   {% if team.blangums_games %}
-  <h2>Team Blangums ({{ team.seasons.blangums_count }})</h2>
+    <h2>
+      Team Blangums ({{ team.seasons.blangums_count }})
+      {% with "team_blangums" as toggle_section_id %}{% include "blingaleague/toggle_button.html" %}{% endwith %}
+    </h2>
+    {% with "team_blangums" as award_id %}
     {% with team.blangums_games as games %}
       {% include "blingaleague/awards_games.html" %}
+    {% endwith %}
     {% endwith %}
   {% endif %}
 
   {% if team.slapped_heartbeat_games %}
-    <h2>Slapped Heartbeats ({{ team.seasons.slapped_heartbeat_count }})</h2>
+    <h2>
+      Slapped Heartbeats ({{ team.seasons.slapped_heartbeat_count }})
+      {% with "team_slapped_heartbeats" as toggle_section_id %}{% include "blingaleague/toggle_button.html" %}{% endwith %}
+    </h2>
+    {% with "team_slapped_heartbeats" as award_id %}
     {% with team.slapped_heartbeat_games as games %}
       {% include "blingaleague/awards_games.html" %}
+    {% endwith %}
     {% endwith %}
   {% endif %}
 
   {% if team.seasons.keepers %}
-    <h2>Keepers</h2>
-    <table>
+    <h2>
+      Keepers
+      {% with "team_keepers" as toggle_section_id %}{% include "blingaleague/toggle_button.html" %}{% endwith %}
+    </h2>
+    <table id="team_keepers" style="display:none">
       {% for team_season in team.seasons reversed %}
         {% if team_season.keepers %}
           <tr>
@@ -76,8 +89,11 @@
   {% endif %}
 
   {% if team.seasons.trades %}
-    <h2>Trades</h2>
-    <table class="trades">
+    <h2>
+      Trades
+      {% with "team_trades" as toggle_section_id %}{% include "blingaleague/toggle_button.html" %}{% endwith %}
+    </h2>
+    <table class="trades" id="team_trades" style="display:none">
       <tr>
         <th>Year</th>
         <th>Week</th>

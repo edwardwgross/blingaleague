@@ -495,7 +495,7 @@ form .errorlist li {
     width: 100%;
 }
 
-#form_toggle_button {
+.toggle_button {
     font-size: 60%;
 }
 
