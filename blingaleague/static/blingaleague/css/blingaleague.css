@@ -502,6 +502,17 @@ form .errorlist li {
     width: 100%;
 }
 
+.blingalytics button,
+.blingalytics input[type=submit] {
+    color: #3344dd;
+    background-color: transparent;
+    border-width: 1px;
+    border-style: outset;
+    border-color: #3344dd;
+    border-radius: 4px;
+    margin: 12px 0;
+}
+
 .blingalytics .finder_results {
     width: min-content;
     padding-right: 60px;
