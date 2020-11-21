@@ -494,12 +494,11 @@ form ul li ul li label {
 
 form .errorlist li {
     font-style: italic;
+    font-weight: bold;
     color: red;
     font-size: 100%;
-}
-
-form .errorlist li {
     width: 100%;
+    margin-bottom: 12px;
 }
 
 .blingalytics button,
