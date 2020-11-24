@@ -91,7 +91,7 @@ class ExpectedWinsView(TemplateView):
         max_x = interval * (max_score // interval) + interval  # add interval to round up
 
         # add interval because range() is exclusive at the high end
-        scores = list(range(int(min_x), int(max_x) + interval, interval))
+        scores = range(int(min_x), int(max_x) + interval, interval)
         if score is not None:
             scores = sorted(scores + [score])
 
