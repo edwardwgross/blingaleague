@@ -15,7 +15,7 @@
         Tags:
         {% tags_for_object gazette as gazette_tags %}
         {% for tag in gazette_tags %}
-          <a href="{% url 'blingacontent.gazette_list' %}?tag={{ tag.name }}">{{ tag.name }}</a>
+          <a href="{{ gazette.gazette_list_full_url }}?tag={{ tag.name }}">{{ tag.name }}</a>
         {% endfor %}
       </p>
       <p>

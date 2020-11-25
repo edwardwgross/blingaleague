@@ -95,6 +95,13 @@ class Gazette(models.Model):
         )
 
     @property
+    def gazette_list_full_url(self):
+        return "{}{}".format(
+            settings.FULL_SITE_URL,
+            urlresolvers.reverse_lazy('blingacontent.gazette_list'),
+        )
+
+    @property
     def edit_url(self):
         return urlresolvers.reverse_lazy(
             "admin:{}_{}_change".format(self._meta.app_label, self._meta.model_name),
