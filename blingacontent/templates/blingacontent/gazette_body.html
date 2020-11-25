@@ -12,6 +12,13 @@
 
     {% if for_email %}
       <p>
+        Tags:
+        {% tags_for_object gazette as gazette_tags %}
+        {% for tag in gazette_tags %}
+          <a href="{% url 'blingacontent.gazette_list' %}?tag={{ tag.name }}">{{ tag.name }}</a>
+        {% endfor %}
+      </p>
+      <p>
         <a href="{{ gazette.full_url }}" class="link">
           Read <em>{{ gazette.headline }}</em> on blingaleague.com
         </a>
@@ -36,9 +43,7 @@
       {% tags_for_object gazette as gazette_tags %}
       {% for tag in gazette_tags %}
         <li>
-          <a href="{% url 'blingacontent.gazette_list' %}?tag={{ tag.name }}">
-            {{ tag.name }}
-          </a>
+          <a href="{% url 'blingacontent.gazette_list' %}?tag={{ tag.name }}">{{ tag.name }}</a>
         </li>
       {% endfor %}
     </ul>
