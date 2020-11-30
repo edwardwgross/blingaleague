@@ -477,10 +477,11 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
                 'Points',
                 'Exp. W',
                 'Exp. %',
-                'SOS',
+                'Strength of Schedule',
                 'Place',
                 'Final Place',
                 'Blangums',
+                'Slapped Heartbeats',
                 'Playoff Finish',
             ],
         ]
@@ -503,6 +504,7 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
                 season.place_numeric,
                 final_place,
                 season.blangums_count,
+                season.slapped_heartbeat_count,
                 season.playoff_finish,
             ])
 
