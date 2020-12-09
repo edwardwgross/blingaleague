@@ -1,7 +1,7 @@
 <div class="playoff_bracket">
   {% for round in season.playoff_bracket %}
     <div class="round">
-      <div class="title"><a href="{{ round.week.href }}">{{ round.week.headline }}</a></div>
+      <div class="title"><a href="{{ round.week.href }}">{{ round.week.bracket_headline }}</a></div>
       {% for game in round.games %}
         <div class="game">
           {% for team_dict in game %}

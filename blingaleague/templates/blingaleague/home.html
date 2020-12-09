@@ -10,10 +10,18 @@
   </ul>
 </div>
 
-<h2>{% if season.headline %}{{ season.headline }}{% else %}{{ season.year}} Standings{% endif %}</h2>
+<h2>
+  {% if season.headline %}
+    {{ season.headline }}
+  {% else %}
+    {{ season.year}} Season
+  {% endif %}
+</h2>
+
 {% if season.playoff_bracket %}
   {% include "blingaleague/playoff_bracket.html" %}
 {% endif %}
+
 {% include "blingaleague/standings_table.html" %}
 
 <h2>Last Week</h2>

@@ -1670,27 +1670,20 @@ class Season(ComparableObject):
             # playoffs are explicitly included
             self.week_max = REGULAR_SEASON_WEEKS
 
-        self.postseason = None
-        self.headline = None
-
         if self.all_time:
             self.year = None
         else:
             if self.year is None:
                 raise ValueError('Must specify a year or all_time must be True')
 
-            try:
-                self.postseason = Postseason.objects.get(year=self.year)
-                if self.postseason.place_1:
-                    self.headline = "Blingabowl {}: {} def. {}".format(
-                        self.postseason.blingabowl,
-                        self.postseason.place_1,
-                        self.postseason.place_2,
-                    )
-            except Postseason.DoesNotExist:
-                pass  # won't exist for the current season
-
         self.cache_key = "|".join(map(str, (year, all_time, include_playoffs, week_max)))
+
+    @fully_cached_property
+    def postseason(self):
+        try:
+            return Postseason.objects.get(year=self.year)
+        except Postseason.DoesNotExist:
+            return None  # won't exist for in-progress seasons
 
     @fully_cached_property
     def all_games(self):
@@ -1944,11 +1937,12 @@ class Season(ComparableObject):
                 )
         else:
             last_week_winners = []
-            for game in week_object.previous.games:
-                if game.playoff_title_base in games_to_ignore:
-                    continue
+            if week_object.previous is not None:
+                for game in week_object.previous.games:
+                    if game.playoff_title_base in games_to_ignore:
+                        continue
 
-                last_week_winners.append(game.winner_team_season)
+                    last_week_winners.append(game.winner_team_season)
 
             if week == SEMIFINALS_WEEK:
                 bye_teams = self.standings_table[:BYE_TEAMS]
@@ -2009,7 +2003,10 @@ class Season(ComparableObject):
 
         return {
             'week': week_object,
-            'games': sorted(games, key=lambda x: x[0]['seed']),
+            'games': sorted(
+                games,
+                key=lambda x: x[0].get('seed'),
+            ),
         }
 
     @fully_cached_property
@@ -2145,6 +2142,17 @@ class Season(ComparableObject):
             settings.FULL_SITE_URL,
             self.href,
         )
+
+    @fully_cached_property
+    def headline(self):
+        if self.postseason is not None and self.postseason.place_1:
+            return "Blingabowl {}: {} def. {}".format(
+                self.postseason.blingabowl,
+                self.postseason.place_1,
+                self.postseason.place_2,
+            )
+
+        return None
 
     def __str__(self):
         if self.year:
@@ -2311,6 +2319,10 @@ class Week(ComparableObject):
             self.blangums,
             self.slapped_heartbeat,
         )
+
+    @fully_cached_property
+    def bracket_headline(self):
+        return self.week_to_title(self.year, self.week)
 
     @classmethod
     def week_to_title(self, year, week):

@@ -378,7 +378,7 @@ table.game_table td {
     border-bottom: 1px solid #a4c2f4;
     border-right: 1px solid #a4c2f4;
     padding: 12px 6px 0 0;
-    min-height: 36px;
+    min-height: 40px;
 }
 
 .playoff_bracket .round .game .team:first-of-type {
