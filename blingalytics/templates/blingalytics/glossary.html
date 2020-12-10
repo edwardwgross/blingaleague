@@ -1,0 +1,30 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Glossary{% endblock %}
+
+{% block content %}
+<h1>Glossary</h1>
+
+<h3 id="expected_wins">Expected Wins</h3>
+<p>
+  Expected wins uses <a href="{% url 'blingalytics.expected_wins' %}">historical game scores</a> to determine a team's odds of winning each game and sums that for all the team's games in a season.  The totals are then adjusted so that the sum of expected wins for all teams in a season equals the total number of games played for the season.
+</p>
+
+<h3 id="robscore">RobScore</h3>
+<p>
+  RobScore is an unscientific measure of historic success of a franchise.  For a given season, a team's gets:
+  <ul>
+    <li>1 point for making the playoffs</li>
+    <li>1 point for winning the Sanderson Cup</li>
+    <li>0.5 points for losing in the Blingabowl</li>
+    <li>0.25 points for winning the third-place game</li>
+    <li>0.5 points for finishing the regular season in first place</li>
+    <li>0.25 points for finishing the regular season in second place</li>
+  </ul>
+</p>
+
+<h3 id="sos">Strength of Schedule</h3>
+<p>
+  Strength of schedule looks at <a href="#expected_wins">expected wins</a> based on a team's opponents' scores over the course of a season.  Positive values indicate a more difficult schedule.  A value of +10% means your opponents' scores added up to an expected wins total of 10% more than average.
+</p>
+{% endblock content %}
