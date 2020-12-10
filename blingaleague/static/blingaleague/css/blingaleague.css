@@ -351,6 +351,7 @@ table.game_table td {
 
 .playoff_bracket {
     margin: 30px 0;
+    min-width: 1000px;  /* to ensure no wrapping */
 }
 
 .playoff_bracket .round {
@@ -370,8 +371,7 @@ table.game_table td {
 }
 
 .playoff_bracket .round:last-of-type .game {
-    /* blingabowl centering */
-    margin-top: 50px;
+    margin-top: 50px;  /* blingabowl centering */
 }
 
 .playoff_bracket .round .game .team {
