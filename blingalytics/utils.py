@@ -17,7 +17,13 @@ def has_enough_games(team_season):
     return len(team_season.regular_season.games) >= MIN_GAMES_THRESHOLD
 
 
-def sorted_seasons_by_attr(attr, limit=None, sort_desc=False, min_games=1):
+def sorted_seasons_by_attr(
+    attr,
+    limit=None,
+    sort_desc=False,
+    min_games=1,
+    display_attr=None,
+):
     all_attrs = []
     for team_season in TeamSeason.all():
         if len(team_season.games) < min_games:
@@ -29,6 +35,7 @@ def sorted_seasons_by_attr(attr, limit=None, sort_desc=False, min_games=1):
         all_attrs,
         limit=limit,
         sort_desc=sort_desc,
+        display_attr=display_attr,
     )
 
 
@@ -56,6 +63,7 @@ def build_ranked_seasons_table(
     limit=None,
     sort_desc=False,
     num_format='{:.2f}',
+    display_attr=None,
 ):
     sorted_seasons = sorted(
         season_stat_tuples,
@@ -74,13 +82,17 @@ def build_ranked_seasons_table(
         if limit is not None and rank > limit:
             break
 
-        if type(stat_value) == int:
-            num_format = '{:.0f}'
+        if display_attr is not None:
+            display_value = getattr(team_season, display_attr)
+        else:
+            if type(stat_value) == int:
+               num_format = '{:.0f}'
+            display_value = num_format.format(stat_value)
 
         season_dict = {
             'rank': rank,
             'team_season': team_season,
-            'value': num_format.format(stat_value),
+            'value': display_value,
         }
 
         seasons_list.append(season_dict)

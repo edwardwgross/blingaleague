@@ -38,7 +38,172 @@ PREFIX_LOSER = 'loser'
 
 # number of games to qualify for top seasons
 # leaderboard for non-counting stats
-TOP_SEASONS_STAT_THRESHOLD = 6
+TOP_SEASONS_GAME_THRESHOLD = 6
+
+TOP_SEASONS_STATS = [
+    {
+        'title': 'Best Record',
+        'attr': 'win_pct',
+        'sort_desc': True,
+        'min_games': REGULAR_SEASON_WEEKS,
+        'display_attr': 'record',
+    },
+    {
+        'title': 'Worst Record',
+        'attr': 'win_count',
+        'min_games': REGULAR_SEASON_WEEKS,
+        'display_attr': 'record',
+    },
+    {
+        'title': 'Most Points',
+        'attr': 'points',
+        'sort_desc': True,
+        'min_games': 1,
+    },
+    {
+        'title': 'Fewest Points',
+        'attr': 'points',
+        'min_games': REGULAR_SEASON_WEEKS,
+    },
+    {
+        'title': 'Most Expected Wins',
+        'attr': 'expected_wins',
+        'sort_desc': True,
+        'min_games': 1,
+    },
+    {
+        'title': 'Fewest Expected Wins',
+        'attr': 'expected_wins',
+        'min_games': REGULAR_SEASON_WEEKS,
+    },
+    {
+        'title': 'Best All-Play Record',
+        'attr': 'all_play_win_pct',
+        'sort_desc': True,
+        'display_attr': 'all_play_record_str',
+    },
+    {
+        'title': 'Worst All-Play Record',
+        'attr': 'all_play_win_pct',
+        'display_attr': 'all_play_record_str',
+    },
+    {
+        'title': 'Hardest Schedule',
+        'attr': 'strength_of_schedule',
+        'sort_desc': True,
+        'display_attr': 'strength_of_schedule_str',
+    },
+    {
+        'title': 'Easiest Schedule',
+        'attr': 'strength_of_schedule',
+        'display_attr': 'strength_of_schedule_str',
+    },
+    {
+        'title': 'Most Team Blangums',
+        'attr': 'blangums_count',
+        'sort_desc': True,
+        'min_games': 1,
+    },
+    {
+        'title': 'Most Slapped Heartbeats',
+        'attr': 'slapped_heartbeat_count',
+        'sort_desc': True,
+        'min_games': 1,
+    },
+    {
+        'title': 'Highest Average Score',
+        'attr': 'average_score',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Average Score',
+        'attr': 'average_score',
+    },
+    {
+        'title': 'Highest Median Score',
+        'attr': 'median_score',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Median Score',
+        'attr': 'median_score',
+    },
+    {
+        'title': 'Highest Minimum Score',
+        'attr': 'min_score',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Maximum Score',
+        'attr': 'max_score',
+    },
+    {
+        'title': 'Highest Standard Deviation',
+        'attr': 'stdev_score',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Standard Deviation',
+        'attr': 'stdev_score',
+    },
+    {
+        'title': 'Standard Deviations Above Average Points',
+        'attr': 'zscore_points',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Standard Deviations Below Average Points',
+        'attr': 'zscore_points',
+    },
+    {
+        'title': 'Standard Deviations Above Average Expected Wins',
+        'attr': 'zscore_expected_wins',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Standard Deviations Below Average Expected Wins',
+        'attr': 'zscore_expected_wins',
+    },
+    {
+        'title': 'Highest Average Margin',
+        'attr': 'average_margin',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Average Margin',
+        'attr': 'average_margin',
+    },
+    {
+        'title': 'Highest Average Margin in Wins',
+        'attr': 'average_margin_win',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Average Margin in Wins',
+        'attr': 'average_margin_win',
+    },
+    {
+        'title': 'Highest Average Margin in Losses',
+        'attr': 'average_margin_loss',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Average Margin in Losses',
+        'attr': 'average_margin_loss',
+    },
+    {
+        'title': 'Longest Winning Streak (single season)',
+        'attr': 'longest_winning_streak',
+        'sort_desc': True,
+        'min_games': 1,
+    },
+    {
+        'title': 'Longest Losing Streak (single season)',
+        'attr': 'longest_losing_streak',
+        'sort_desc': True,
+        'min_games': 1,
+    },
+]
 
 
 class CSVResponseMixin(object):
@@ -712,44 +877,19 @@ class TopSeasonsView(TemplateView):
     def generate_top_seasons_tables(self, row_limit):
         top_seasons_tables = []
 
-        top_attrs_categories = (
-            # title, attr, sort_desc, game_count_threshold
-            ('Most Wins', 'win_count', True, 1),  # noqa: E501
-            ('Fewest Wins', 'win_count', False, REGULAR_SEASON_WEEKS),  # noqa: E501
-            ('Most Points', 'points', True, 1),  # noqa: E501
-            ('Fewest Points', 'points', False, REGULAR_SEASON_WEEKS),  # noqa: E501
-            ('Most Expected Wins', 'expected_wins', True, 1),  # noqa: E501
-            ('Fewest Expected Wins', 'expected_wins', False, REGULAR_SEASON_WEEKS),  # noqa: E501
-            ('Most Team Blangums', 'blangums_count', True, 1),  # noqa: E501
-            ('Most Slapped Heartbeats', 'slapped_heartbeat_count', True, 1),  # noqa: E501
-            ('Highest Average Score', 'average_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Lowest Average Score', 'average_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Highest Median Score', 'median_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Lowest Median Score', 'median_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Highest Minimum Score', 'min_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Lowest Maximum Score', 'max_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Highest Standard Deviation', 'stdev_score', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Lowest Standard Deviation', 'stdev_score', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Standard Deviations Above Average Points', 'zscore_points', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Standard Deviations Below Average Points', 'zscore_points', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Standard Deviations Above Average Expected Wins', 'zscore_expected_wins', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Standard Deviations Below Average Expected Wins', 'zscore_expected_wins', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Highest Average Margin', 'average_margin', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Lowest Average Margin', 'average_margin', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Highest Average Margin in Wins', 'average_margin_win', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Lowest Average Margin in Wins', 'average_margin_win', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Highest Average Margin in Losses', 'average_margin_loss', True, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Lowest Average Margin in Losses', 'average_margin_loss', False, TOP_SEASONS_STAT_THRESHOLD),  # noqa: E501
-            ('Longest Winning Streak (single season)', 'longest_winning_streak', True, 1),  # noqa: E501
-            ('Longest Losing Streak (single season)', 'longest_losing_streak', True, 1),  # noqa: E501
-        )
+        for stat_dict in TOP_SEASONS_STATS:
+            title = stat_dict['title']
+            attr = stat_dict['attr']
+            sort_desc = stat_dict.get('sort_desc', False)
+            min_games = stat_dict.get('min_games', TOP_SEASONS_GAME_THRESHOLD)
+            display_attr = stat_dict.get('display_attr', None)
 
-        for title, attr, sort_desc, min_games in top_attrs_categories:
             table_rows = sorted_seasons_by_attr(
                 attr,
                 limit=row_limit,
                 sort_desc=sort_desc,
                 min_games=min_games,
+                display_attr=display_attr,
             )
             top_seasons_tables.append({
                 'title': title,
