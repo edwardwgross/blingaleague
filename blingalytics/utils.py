@@ -109,7 +109,7 @@ def build_belt_holder_list():
 
     sequence = []
 
-    for week in Week.all():
+    for week in sorted(Week.all()):
         if holder is None:
             holder = week.blangums
 
