@@ -45,6 +45,12 @@ PLAYOFF_TITLE_ORDER = [
     FIFTH_PLACE_TITLE_BASE,
 ]
 
+ELIMINATION_GAMES = [
+    BLINGABOWL_TITLE_BASE,
+    SEMIFINALS_TITLE_BASE,
+    QUARTERFINALS_TITLE_BASE,
+]
+
 MAX_SIMILARITY_SCORE = decimal.Decimal(1000)
 
 MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
@@ -229,6 +235,10 @@ class Game(models.Model, ComparableObject):
     @fully_cached_property
     def is_playoffs(self):
         return self.week > REGULAR_SEASON_WEEKS
+
+    @fully_cached_property
+    def is_elimination(self):
+        return self.is_playoffs and self.playoff_title_base in ELIMINATION_GAMES
 
     @fully_cached_property
     def playoff_title_base(self):
