@@ -71,7 +71,8 @@ table {
 }
 
 tbody tr:hover,
-.table-striped > tbody > tr:nth-of-type(odd):hover {
+.table-striped > tbody > tr:nth-of-type(odd):hover,
+table.game_table tr.playoffs:hover {
     background-color: #eaeaea;
 }
 
