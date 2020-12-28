@@ -10,8 +10,8 @@
 <table id="season_list" class="table-striped">
   <tr>
     <th>Year</th>
-    <th>Champion</th>
-    <th>Best Record</th>
+    <th>Blingabowl Champion</th>
+    <th>Regular Season Champion</th>
     <th>Most Points</th>
     <th>Most Expected Wins</th>
   </tr>
@@ -25,6 +25,9 @@
       <td>
         <a href="{{ season.champion.href }}">
           {{ season.champion.team }}
+          {% if season.champion != season.first_place %}
+            (#{{ season.champion.place_numeric }} seed)
+          {% endif %}
         </a>
       </td>
       <td>
