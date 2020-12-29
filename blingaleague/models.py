@@ -138,6 +138,14 @@ class Member(models.Model, ComparableObject):
     def seasons_including_playoffs(self):
         return TeamMultiSeasons(self.id, include_playoffs=True)
 
+    def last_x_seasons(self, num_seasons):
+        last_season = Season.latest()
+        years_range = range(
+            last_season.year - num_seasons + 1,
+            last_season.year + 1,
+        )
+        return TeamMultiSeasons(self.id, years=years_range)
+
     @fully_cached_property
     def blangums_games(self):
         return self.seasons.blangums_games
@@ -149,6 +157,10 @@ class Member(models.Model, ComparableObject):
     @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.id,))
+
+    @fully_cached_property
+    def gazette_link(self):
+        return "{}{}".format(settings.FULL_SITE_URL, self.href)
 
     def save(self, **kwargs):
         super().save(**kwargs)
@@ -1639,6 +1651,26 @@ class TeamMultiSeasons(TeamSeason):
             keepers.extend(season.keepers)
 
         return keepers
+
+    @fully_cached_property
+    def championships(self):
+        return len([ts for ts in self if ts.champion])
+
+    @fully_cached_property
+    def blingabowl_appearances(self):
+        return len([ts for ts in self if ts.playoff_finish_numeric == 2])
+
+    @fully_cached_property
+    def playoff_appearances(self):
+        return len([ts for ts in self if ts.made_playoffs])
+
+    @fully_cached_property
+    def regular_season_first_place_finishes(self):
+        return len([ts for ts in self if ts.place_numeric == 1])
+
+    @fully_cached_property
+    def average_place(self):
+        return statistics.mean([ts.place_numeric for ts in self])
 
     @fully_cached_property
     def href(self):
