@@ -22,7 +22,7 @@
   {% endif %}
 
   {% if weeks_with_games %}
-    <div class="center">
+    <div>
       Week:
       {% for week in weeks_with_games %}
         <a href="{% url 'blingaleague.week' season.year week %}">{{ week }}</a>
