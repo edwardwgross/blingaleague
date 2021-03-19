@@ -2,18 +2,20 @@ import csv
 import random
 
 team_rows = list(csv.reader(
-    open('teams.tsv', 'r'),
-    delimiter='\t',
+    open('/data/blingaleague/scripts/teams.csv', 'r'),
 ))[1:]
 
 output_order = []
 
 try:
-    output_fh = open('random_order.txt', 'r')
+    output_fh = open('/data/blingaleague/scripts/random_order.txt', 'r')
     output_order = list(map(
         lambda x: x.strip(),
         output_fh.readlines(),
     ))
+    print('')
+    print('Random order already generated, using that list')
+    print('')
 except Exception:
     pass
 
@@ -30,7 +32,7 @@ for region, seed, team in team_rows:
         team_rows_3_16.append((region, seed, team))
 
 if len(output_order) == 0:
-    output_fh = open('random_order.txt', 'w')
+    output_fh = open('/data/blingaleague/scripts/random_order.txt', 'w')
     for team_list in (team_rows_3_16, team_rows_1_2):
         for team_tuple in team_list:
             team_str = ' '.join(map(str, team_tuple))
