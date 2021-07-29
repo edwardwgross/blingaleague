@@ -1687,6 +1687,14 @@ class TeamMultiSeasons(TeamSeason):
             if len(team_multi_season.games) > 0:
                 yield team_multi_season
 
+    @fully_cached_property
+    def short_name(self):
+        return "{}-{} {}".format(
+            self.first_active_year,
+            self.last_active_year,
+            self.team.nickname,
+        )
+
     def __str__(self):
         return "{}, {}-{}".format(
             self.team,
