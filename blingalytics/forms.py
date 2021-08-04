@@ -201,6 +201,7 @@ class TradeFinderForm(BaseFinderForm):
     receivers = _teams_multiple_choice_field(label='Receiver')
     senders = _teams_multiple_choice_field('Sender')
     positions = _positions_multiple_choice_field()
+    includes_draft_picks = forms.BooleanField(required=False, label='Includes Draft Picks')
     assets_display = forms.TypedChoiceField(
         required=False,
         label='Display Options',

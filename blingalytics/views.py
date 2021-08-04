@@ -726,6 +726,9 @@ class TradeFinderView(TemplateView):
         if positions:
             trades = trades.filter(traded_assets__position__in=positions)
 
+        if form_data['includes_draft_picks']:
+            trades = trades.filter(traded_assets__is_draft_pick=True)
+
         trades = trades.distinct()
 
         assets_to_display = []
