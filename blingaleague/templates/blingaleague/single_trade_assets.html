@@ -1,0 +1,10 @@
+{% for asset_group in trade.grouped_assets %}
+  <div class="asset_group">
+    <div class="receiver">
+      <a href="{% url 'blingaleague.team_season' asset_group.team.id trade.year %}">{{ asset_group.team }}</a> received:
+    </div>
+    {% with asset_group.assets_received as asset_list %}
+      {% include "blingaleague/traded_asset_list.html" %}
+    {% endwith %}
+  </div>
+{% endfor %}

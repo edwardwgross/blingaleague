@@ -699,10 +699,7 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 class TradeFinderView(TemplateView):
     template_name = 'blingalytics/trade_finder.html'
 
-    def filter_traded_assets(self, form_data):
-        # first get a distinct set of matching trades,
-        # because the user has the option to show all assets from matching trades
-        # later, we build the list of assets to show based on that choice
+    def filter_trades(self, form_data):
         trades = Trade.objects.all()
 
         if form_data['year_min'] is not None:
@@ -729,17 +726,27 @@ class TradeFinderView(TemplateView):
         if form_data['includes_draft_picks']:
             trades = trades.filter(traded_assets__is_draft_pick=True)
 
-        trades = trades.distinct()
+        return sorted(
+            trades.distinct(),
+            key=lambda x: (x.year, x.week, x.date),
+        )
 
+    def filter_traded_assets(self, trades, form_data):
         assets_to_display = []
-        # sort it as we build, not at the end
-        for trade in sorted(trades, key=lambda x: (x.year, x.week, x.date)):
+
+        # assume trades is in the desired order
+        for trade in trades:
+            # sort it as we build, not at the end
             traded_assets = trade.traded_assets.order_by(
                 'receiver', 'sender', 'keeper_cost', 'name',
             )
 
             # user had the option to only show the assets that matched (vs. the full trades)
             if form_data['assets_display'] == CHOICE_MATCHING_ASSETS_ONLY:
+                receivers = form_data['receivers']
+                senders = form_data['senders']
+                positions = form_data['positions']
+
                 if receivers:
                     traded_assets = traded_assets.filter(receiver_id__in=receivers)
                 if senders:
@@ -793,18 +800,26 @@ class TradeFinderView(TemplateView):
         }
 
     def get(self, request):
+        trades = []
         traded_assets = []
 
         trade_finder_form = TradeFinderForm(request.GET)
         if trade_finder_form.is_valid():
             form_data = trade_finder_form.cleaned_data
 
-            traded_assets = list(self.filter_traded_assets(form_data))
+            # first get a distinct set of matching trades,
+            # because the user has the option to show all assets from matching trades
+            # later, we build the list of assets to show based on that choice
+            trades = list(self.filter_trades(form_data))
+
+            traded_assets = list(self.filter_traded_assets(trades, form_data))
 
         context = {
             'form': trade_finder_form,
+            'trades': sorted(list(trades)),
             'traded_assets': traded_assets,
             'summary': self.build_summary_tables(traded_assets),
+            'show_matching_assets_only': form_data['assets_display'] == CHOICE_MATCHING_ASSETS_ONLY,
         }
 
         return self.render_to_response(context)

@@ -1,0 +1,18 @@
+<h2>Trades</h2>
+<em>(click on the column headings to sort)</em>
+<table class="blingalytics_table sortable table-striped">
+  <tr>
+    <th>Trade</th>
+    <th>Year</th>
+    <th>Week</th>
+    <th style="pointer-events:none">Details</th>
+  </tr>
+  {% for trade in trades %}
+    <tr>
+      <td><a href="{{ trade.href }}">{{ trade.public_id }}</a></td>
+      <td><a href="{% url 'blingaleague.single_season' trade.year %}">{{ trade.year}}</a></td>
+      <td><a href="{{ trade.week_object.href }}">{{ trade.week }}</a></td>
+      <td style="text-align:left; padding-left:24px">{% include "blingaleague/single_trade_assets.html" %}</td>
+    </tr>
+  {% endfor %}
+</table>
