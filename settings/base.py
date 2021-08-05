@@ -24,7 +24,7 @@ LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'blingaleague.home'
 
-FULL_SITE_URL = 'http://blingaleague.com'
+FULL_SITE_URL = 'https://blingaleague.com'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '8735061745-nbbkebaqtd706bd6pkfo7opvsu3u61fd.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'ceIa4DpTNtL8cdcX_k68c9wP'

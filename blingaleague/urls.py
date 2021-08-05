@@ -58,17 +58,14 @@ urlpatterns = [
         name='blingaleague.trade',
     ),
 
-    # done this way so old links still work, even though this
-    # view was moved to the blingalytics app
+    # deprecated urls
     url(
         r'^team_vs_team/$',
         RedirectView.as_view(
             pattern_name='blingalytics.team_vs_team',
             permanent=True,
-        )
+        ),
     ),
-
-    # more deprecated urls
     url(
         r'^standings/$',
         RedirectView.as_view(
@@ -76,7 +73,6 @@ urlpatterns = [
             permanent=True,
         ),
     ),
-
     url(
         r'^standings/(?P<year>\d{4})/$',
         RedirectView.as_view(
@@ -84,7 +80,6 @@ urlpatterns = [
             permanent=True,
         ),
     ),
-
     url(
         r'^season/all_time/$',
         RedirectView.as_view(
@@ -92,7 +87,6 @@ urlpatterns = [
             permanent=True,
         ),
     ),
-
     url(
         r'^standings/all_time/$',
         RedirectView.as_view(
@@ -100,11 +94,17 @@ urlpatterns = [
             permanent=True,
         ),
     ),
-
     url(
         r'^season/$',
         RedirectView.as_view(
             pattern_name='blingaleague.seasons',
+            permanent=True,
+        ),
+    ),
+    url(
+        r'^home/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.home',
             permanent=True,
         ),
     ),
@@ -114,12 +114,10 @@ urlpatterns = [
         r'^blingalytics/',
         include('blingalytics.urls'),
     ),
-
     url(
         r'^',
         include('blingacontent.urls'),
     ),
-
     url(
         r'^auth/',
         include('social_django.urls', namespace='social'),
