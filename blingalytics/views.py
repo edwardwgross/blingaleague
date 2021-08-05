@@ -803,6 +803,8 @@ class TradeFinderView(TemplateView):
         trades = []
         traded_assets = []
 
+        show_matching_assets_only = False
+
         trade_finder_form = TradeFinderForm(request.GET)
         if trade_finder_form.is_valid():
             form_data = trade_finder_form.cleaned_data
@@ -814,12 +816,14 @@ class TradeFinderView(TemplateView):
 
             traded_assets = list(self.filter_traded_assets(trades, form_data))
 
+            show_matching_assets_only = form_data['assets_display'] == CHOICE_MATCHING_ASSETS_ONLY
+
         context = {
             'form': trade_finder_form,
             'trades': sorted(list(trades)),
             'traded_assets': traded_assets,
             'summary': self.build_summary_tables(traded_assets),
-            'show_matching_assets_only': form_data['assets_display'] == CHOICE_MATCHING_ASSETS_ONLY,
+            'show_matching_assets_only': show_matching_assets_only,
         }
 
         return self.render_to_response(context)
