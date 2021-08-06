@@ -59,9 +59,6 @@ class SeasonListView(TemplateView):
             'range': (graph_min, graph_max),
             'y_labels': graph_increments,
         }
-        import logging
-        logger = logging.getLogger('default')
-        logger.error(custom_options)
 
         graph_html = line_graph_html(
             [season.year for season in seasons],  # x_data
@@ -220,6 +217,8 @@ class TeamListView(TemplateView):
                 'width': 800,
                 'value_formatter': lambda x: intcomma(value_format.format(x)),
                 'truncate_label': 4,
+                'range': (0, REGULAR_SEASON_WEEKS),
+                'y_labels': range(0, REGULAR_SEASON_WEEKS + 1),
             }
 
             team_series = []
