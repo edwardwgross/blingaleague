@@ -319,12 +319,19 @@ class Game(models.Model, ComparableObject):
             all_scores = []
 
             games = cls.objects.all()
-            if not include_playoffs:
-                games = games.filter(lambda x: not x.is_playoffs, games)
 
-            game_results = games.values_list('winner_score', 'loser_score')
+            game_attrs = games.values_list(
+                'winner_score',
+                'loser_score',
+                'year',
+                'week',
+            )
 
-            for winner_score, loser_score in game_results:
+            for winner_score, loser_score, year, week in game_attrs:
+                if not include_playoffs:
+                    if week > regular_season_weeks(year):
+                        continue
+
                 all_scores.extend([winner_score, loser_score])
 
             CACHE.set(cache_key, all_scores)
