@@ -86,7 +86,7 @@ def build_ranked_seasons_table(
             display_value = getattr(team_season, display_attr)
         else:
             if type(stat_value) == int:
-               num_format = '{:.0f}'
+                num_format = '{:.0f}'
             display_value = num_format.format(stat_value)
 
         season_dict = {
