@@ -1,11 +1,6 @@
-import statistics
-
 from django.core.cache import caches
 
-from blingaleague.models import TeamSeason, Week, Season, \
-                                REGULAR_SEASON_WEEKS, \
-                                EXPANSION_SEASON, \
-                                OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY
+from blingaleague.models import TeamSeason, Week
 
 
 CACHE = caches['blingaleague']
@@ -21,13 +16,15 @@ def sorted_seasons_by_attr(
     attr,
     limit=None,
     sort_desc=False,
+    require_full_season=False,
     min_games=1,
     display_attr=None,
 ):
     all_attrs = []
     for team_season in TeamSeason.all():
-        if len(team_season.games) < min_games:
-            continue
+        if team_season.is_partial:
+            if require_full_season or len(team_season.games) < min_games:
+                continue
 
         all_attrs.append((team_season, getattr(team_season, attr)))
 
@@ -142,85 +139,3 @@ def build_belt_holder_list():
     })
 
     return sequence
-
-
-def get_playoff_odds(week, min_year=EXPANSION_SEASON):
-    cache_key = "blingalytics_playoff_odds|{}|{}".format(
-        week,
-        min_year,
-    )
-
-    if cache_key in CACHE:
-        return CACHE.get(cache_key)
-
-    week = min(week, REGULAR_SEASON_WEEKS)
-
-    # don't use defaultdict, because we can't pickle it for caching
-    playoff_odds = {}
-    win_count = 0
-    while win_count <= week:
-        playoff_odds[win_count] = {}
-
-        for outcome in (OUTCOME_ANY, OUTCOME_WIN, OUTCOME_LOSS):
-            playoff_odds[win_count][outcome] = {
-                'total': 0,
-                'playoffs': 0,
-            }
-
-        win_count += 1
-
-    for season in Season.all(week_max=week):
-        if season.year < min_year:
-            continue
-
-        if season.regular_season.is_partial:
-            continue
-
-        for ts in season.standings_table:
-            outcomes = (OUTCOME_ANY, ts.week_outcome(week))
-
-            for outcome in outcomes:
-                playoff_odds[ts.win_count][outcome]['total'] += 1
-
-                playoffs = ts.regular_season.made_playoffs
-                if playoffs:
-                    playoff_odds[ts.win_count][outcome]['playoffs'] += 1
-
-    for outcome in (OUTCOME_ANY, OUTCOME_WIN, OUTCOME_LOSS):
-        win_count = 0
-
-        max_wins = week
-        if outcome == OUTCOME_LOSS:
-            max_wins = week - 1
-
-        while win_count <= max_wins:
-            playoffs = playoff_odds[win_count][outcome]['playoffs']
-            total = playoff_odds[win_count][outcome]['total']
-
-            if total > 0:
-                pct = playoffs / total
-            else:
-                # use whatever we were at last week as the default if we don't
-                # have any history for this week/win_count/outcome combo
-                if week > 1:
-                    last_week_odds = get_playoff_odds(week - 1, min_year=min_year)
-
-                    if outcome == OUTCOME_WIN:
-                        pct = last_week_odds[max(0, win_count - 1)][OUTCOME_ANY]['pct']
-                    elif outcome == OUTCOME_LOSS:
-                        pct = last_week_odds[win_count][OUTCOME_ANY]['pct']
-                    else:
-                        pct = statistics.mean([
-                            last_week_odds[max(0, win_count - 1)][OUTCOME_ANY]['pct'],
-                            last_week_odds[min(week - 1, win_count)][OUTCOME_ANY]['pct'],
-                        ])
-                else:
-                    pct = 0
-
-            playoff_odds[win_count][outcome]['pct'] = pct
-
-            win_count += 1
-
-    CACHE.set(cache_key, playoff_odds)
-
-    return playoff_odds

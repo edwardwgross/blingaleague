@@ -3,19 +3,15 @@ from httplib2 import Http
 from pathlib import Path
 
 from django.conf import settings
-from django.core import urlresolvers
 
 from googleapiclient.discovery import build
 
 from oauth2client import file, client, tools
 
-from blingaleague.models import Week, Season, TeamSeason, \
-                                EXPANSION_SEASON, REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK, \
-                                OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_ANY, PLAYOFF_TEAMS, \
+from blingaleague.models import Week, Season, TeamSeason, PLAYOFF_TEAMS, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
                                 BLINGABOWL_TITLE_BASE
-
-from blingalytics.utils import get_playoff_odds
+from blingaleague.utils import regular_season_weeks, blingabowl_week
 
 
 SCOPES = [
@@ -53,7 +49,7 @@ def new_gazette_body_template():
         last_week.gazette_str,
     ])
 
-    if last_week.week <= REGULAR_SEASON_WEEKS:
+    if last_week.week <= regular_season_weeks(last_week.year):
         sections.append([
             "# [Standings]({})".format(
                 current_season.gazette_link,
@@ -62,7 +58,7 @@ def new_gazette_body_template():
             '## Blingalytics Ratings',
             blingalytics_ratings_section(current_season),
         ])
-    elif last_week.week == BLINGABOWL_WEEK:
+    elif last_week.week == blingabowl_week(last_week.year):
         sections.append([
             "# [Final Standings]({})".format(
                 current_season.gazette_link,
@@ -91,7 +87,7 @@ def new_gazette_body_template():
     else:
         sections.append(postmortems_section(last_week, current_season))
 
-    if last_week.week == BLINGABOWL_WEEK:
+    if last_week.week == blingabowl_week(last_week.year):
         sections.append(['# Blingapower Rankings'])
         sections.append(['# Draft Lottery'])
     else:
@@ -112,60 +108,12 @@ def new_gazette_body_template():
     )
 
 
-def playoff_odds_section(week_obj):
-    playoff_odds_section = [
-        '# Playoff Odds',
-        'Since expansion, this is how often teams with each record have made the playoffs:',
-    ]
-
-    current_odds = get_playoff_odds(week_obj.week)
-
-    if week_obj.week < REGULAR_SEASON_WEEKS:
-        next_week_odds = get_playoff_odds(week_obj.week + 1)
-    else:
-        next_week_odds = current_odds
-
-    for win_count, odds in sorted(current_odds.items()):
-        loss_count = week_obj.week - win_count
-
-        season_finder_url = urlresolvers.reverse_lazy('blingalytics.season_finder')
-        querystring = "?year_min={}&year_max={}&week_max={}&wins_min={}&wins_max={}".format(
-            EXPANSION_SEASON,
-            week_obj.year - 1,
-            week_obj.week,
-            win_count,
-            win_count,
-        )
-        season_finder_link = "{}{}{}".format(
-            settings.FULL_SITE_URL,
-            season_finder_url,
-            querystring,
-        )
-
-        with_win = next_week_odds[win_count + 1][OUTCOME_WIN]['pct']
-        with_loss = next_week_odds[win_count][OUTCOME_LOSS]['pct']
-
-        playoff_odds_section.append(
-            "- [{}-{}]({}): {:.0f}% ({:.0f}% with week {} win, {:.0f}% with loss)".format(
-                win_count,
-                loss_count,
-                season_finder_link,
-                100 * odds[OUTCOME_ANY]['pct'],
-                100 * with_win,
-                week_obj.week + 1,
-                100 * with_loss,
-            ),
-        )
-
-    return playoff_odds_section
-
-
 def postmortems_section(week_obj, season):
     postmortems_section = ['# Season Postmortems']
 
     dead_teams = []
 
-    if week_obj.week == REGULAR_SEASON_WEEKS:
+    if week_obj.week == regular_season_weeks(week_obj.year):
         dead_teams = season.standings_table[PLAYOFF_TEAMS:]
     else:
         for game in week_obj.games:

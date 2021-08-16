@@ -8,12 +8,11 @@ from django.db.models import F, ExpressionWrapper, DecimalField
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 
-from blingaleague.models import REGULAR_SEASON_WEEKS, \
-                                Game, Week, Member, TeamSeason, \
+from blingaleague.models import Game, Week, Member, TeamSeason, \
                                 Season, Matchup, Trade, Keeper, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
                                 position_sort_key
-from blingaleague.utils import scatter_graph_html
+from blingaleague.utils import scatter_graph_html, regular_season_weeks
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
@@ -45,13 +44,13 @@ TOP_SEASONS_STATS = [
         'title': 'Best Record',
         'attr': 'win_pct',
         'sort_desc': True,
-        'min_games': REGULAR_SEASON_WEEKS,
+        'require_full_season': True,
         'display_attr': 'record',
     },
     {
         'title': 'Worst Record',
         'attr': 'win_count',
-        'min_games': REGULAR_SEASON_WEEKS,
+        'require_full_season': True,
         'display_attr': 'record',
     },
     {
@@ -63,7 +62,7 @@ TOP_SEASONS_STATS = [
     {
         'title': 'Fewest Points',
         'attr': 'points',
-        'min_games': REGULAR_SEASON_WEEKS,
+        'require_full_season': True,
     },
     {
         'title': 'Most Expected Wins',
@@ -74,7 +73,7 @@ TOP_SEASONS_STATS = [
     {
         'title': 'Fewest Expected Wins',
         'attr': 'expected_wins',
-        'min_games': REGULAR_SEASON_WEEKS,
+        'require_full_season': True,
     },
     {
         'title': 'Best All-Play Record',
@@ -236,7 +235,7 @@ class WeeklyScoresView(TemplateView):
     def get(self, request):
         context = {
             'weeks': sorted(
-                Week.regular_season_weeks(),
+                Week.regular_season_week_list(),
                 key=lambda x: (x.year, x.week),
             ),
         }
@@ -331,11 +330,6 @@ class GameFinderView(CSVResponseMixin, TemplateView):
         if form_data['week_max'] is not None:
             base_games = base_games.filter(week__lte=form_data['week_max'])
 
-        if form_data['week_type'] == CHOICE_REGULAR_SEASON:
-            base_games = base_games.filter(week__lte=REGULAR_SEASON_WEEKS)
-        elif form_data['week_type'] == CHOICE_PLAYOFFS:
-            base_games = base_games.filter(week__gt=REGULAR_SEASON_WEEKS)
-
         margin_min = form_data['margin_min']
         margin_max = form_data['margin_max']
         if margin_min is not None or margin_max is not None:
@@ -356,6 +350,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
         teams = form_data['teams']
         score_min = form_data['score_min']
         score_max = form_data['score_max']
+        week_type = form_data['week_type']
         awards = form_data['awards']
         streak_min = form_data['streak_min']
         playoff_game_types = form_data['playoff_game_types']
@@ -381,6 +376,11 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             opponent_prefix = PREFIX_LOSER if team_prefix == PREFIX_WINNER else PREFIX_WINNER
 
             for game in base_games.filter(**type_kwargs):
+                if week_type == CHOICE_REGULAR_SEASON and game.is_playoffs:
+                    continue
+                if week_type == CHOICE_PLAYOFFS and not game.is_playoffs:
+                    continue
+
                 if CHOICE_BLANGUMS in awards and not game.blangums:
                     continue
 
@@ -559,7 +559,7 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
                     # and the value given is in the regular season,
                     # don't show seasons that haven't yet reached that week
                     # playoffs are special, though - teams with byes won't have the same logic
-                    if form_data['week_max'] <= REGULAR_SEASON_WEEKS or not ts.bye:
+                    if form_data['week_max'] <= regular_season_weeks(year) or not ts.bye:
                         if game_count < form_data['week_max']:
                             continue
                     elif ts.bye:
@@ -903,6 +903,7 @@ class TopSeasonsView(TemplateView):
             title = stat_dict['title']
             attr = stat_dict['attr']
             sort_desc = stat_dict.get('sort_desc', False)
+            require_full_season = stat_dict.get('require_full_season', False)
             min_games = stat_dict.get('min_games', TOP_SEASONS_GAME_THRESHOLD)
             display_attr = stat_dict.get('display_attr', None)
 
@@ -910,6 +911,7 @@ class TopSeasonsView(TemplateView):
                 attr,
                 limit=row_limit,
                 sort_desc=sort_desc,
+                require_full_season=require_full_season,
                 min_games=min_games,
                 display_attr=display_attr,
             )

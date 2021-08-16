@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-from django.contrib.humanize.templatetags.humanize import intcomma
 from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
@@ -8,9 +7,9 @@ from blingacontent.models import Gazette
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
                     Trade, \
-                    REGULAR_SEASON_WEEKS, BLINGABOWL_WEEK, \
                     PLAYOFF_TEAMS
-from .utils import line_graph_html, bar_graph_html, rank_over_time_graph_html
+from .utils import line_graph_html, bar_graph_html, rank_over_time_graph_html, \
+                   regular_season_weeks, blingabowl_week
 
 
 class HomeView(TemplateView):
@@ -113,9 +112,9 @@ class SingleSeasonView(TemplateView):
         hide_playoff_finish = False
         if 'week_max' in request.GET:
             try:
-                week_max = int(request.GET.get('week_max', REGULAR_SEASON_WEEKS))
+                week_max = int(request.GET.get('week_max', regular_season_weeks(year)))
                 season_kwargs['week_max'] = week_max
-                hide_playoff_finish = week_max < BLINGABOWL_WEEK
+                hide_playoff_finish = week_max < blingabowl_week(year)
             except ValueError:
                 # ignore if user passed in a non-int
                 pass
@@ -190,7 +189,7 @@ class WeekView(GamesView):
             week_max=week,
         )
 
-        context['hide_playoff_finish'] = week < BLINGABOWL_WEEK
+        context['hide_playoff_finish'] = week < blingabowl_week(year)
 
         return self.render_to_response(context)
 
@@ -198,62 +197,10 @@ class WeekView(GamesView):
 class TeamListView(TemplateView):
     template_name = 'blingaleague/team_list.html'
 
-    def _team_graph_list(self):
-        graph_attrs = [
-            # (graph title, TeamSeason attribute, value format)
-            ('Wins', 'win_count', '{:.0f}'),
-            ('Points', 'points', '{:.2f}'),
-            ('Expected Wins', 'expected_wins', '{:.2f}'),
-        ]
-
-        graph_list = []
-
-        years = [s.year for s in sorted(Season.all()) if not s.is_partial]
-        team_list = Member.objects.all()
-
-        for title, attr, value_format in graph_attrs:
-            custom_options = {
-                'title': title,
-                'width': 800,
-                'value_formatter': lambda x: intcomma(value_format.format(x)),
-                'truncate_label': 4,
-                'range': (0, REGULAR_SEASON_WEEKS),
-                'y_labels': range(0, REGULAR_SEASON_WEEKS + 1),
-            }
-
-            team_series = []
-            for team in sorted(team_list, key=lambda x: x.nickname):
-                team_data = []
-                for year in years:
-                    team_season = TeamSeason(team.id, year)
-                    if team_season.games:
-                        value = getattr(team_season, attr)
-                        if value_format != 'i':
-                            value = float(value)
-                        team_data.append({
-                            'value': value,
-                            'xlink': str(team_season.href),
-                        })
-                    else:
-                        team_data.append(None)
-
-                team_series.append((team.nickname, team_data))
-
-            graph_html = line_graph_html(
-                years,  # x_data
-                team_series,  # y_series
-                **custom_options,
-            )
-
-            graph_list.append(graph_html)
-
-        return graph_list
-
     def get(self, request):
         context = {
             'team_list': Member.objects.all(),
             'include_playoffs': 'include_playoffs' in request.GET,
-            'graph_list': self._team_graph_list(),
         }
         return self.render_to_response(context)
 
@@ -320,8 +267,8 @@ class TeamSeasonView(GamesView):
         if 'week_max' in request.GET:
             try:
                 week_max = min(
-                    int(request.GET.get('week_max', REGULAR_SEASON_WEEKS)),
-                    REGULAR_SEASON_WEEKS,
+                    int(request.GET.get('week_max', regular_season_weeks(year))),
+                    regular_season_weeks(year),
                 )
             except ValueError:
                 # ignore if user passed in a non-int

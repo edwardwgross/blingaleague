@@ -53,6 +53,27 @@ def clear_cached_properties():
     CACHE.clear()
 
 
+def regular_season_weeks(year):
+    year = int(year)
+
+    if year <= 2020:
+        return 13
+
+    return 14
+
+
+def quarterfinals_week(year):
+    return regular_season_weeks(year) + 1
+
+
+def semifinals_week(year):
+    return quarterfinals_week(year) + 1
+
+
+def blingabowl_week(year):
+    return semifinals_week(year) + 1
+
+
 def int_to_roman(integer):
     if integer <= 0:
         return '?'

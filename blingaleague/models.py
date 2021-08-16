@@ -12,15 +12,12 @@ from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
-from .utils import int_to_roman, fully_cached_property, clear_cached_properties
+from .utils import int_to_roman, fully_cached_property, clear_cached_properties, \
+                   regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week
 
 
 CACHE = caches['blingaleague']
 
-REGULAR_SEASON_WEEKS = 13
-BLINGABOWL_WEEK = 16
-SEMIFINALS_WEEK = BLINGABOWL_WEEK - 1
-QUARTERFINALS_WEEK = SEMIFINALS_WEEK - 1
 BYE_TEAMS = 2
 PLAYOFF_TEAMS = 6
 FIRST_SEASON = 2008
@@ -246,7 +243,7 @@ class Game(models.Model, ComparableObject):
 
     @fully_cached_property
     def is_playoffs(self):
-        return self.week > REGULAR_SEASON_WEEKS
+        return self.week > regular_season_weeks(self.year)
 
     @fully_cached_property
     def is_elimination(self):
@@ -259,13 +256,13 @@ class Game(models.Model, ComparableObject):
 
             winner_last_game = previous_week.team_to_game.get(self.winner)
 
-            if self.week == BLINGABOWL_WEEK:
+            if self.week == blingabowl_week(self.year):
                 if self.winner == winner_last_game.winner:
                     # blingabowl participants must have won their last game
                     return BLINGABOWL_TITLE_BASE
                 else:
                     return THIRD_PLACE_TITLE_BASE
-            elif self.week == SEMIFINALS_WEEK:
+            elif self.week == semifinals_week(self.year):
                 if winner_last_game is None or self.winner == winner_last_game.winner:
                     # semifinal participants either won their last game or had a bye
                     return SEMIFINALS_TITLE_BASE
@@ -323,7 +320,7 @@ class Game(models.Model, ComparableObject):
 
             games = cls.objects.all()
             if not include_playoffs:
-                games = games.filter(week__lte=REGULAR_SEASON_WEEKS)
+                games = games.filter(lambda x: not x.is_playoffs, games)
 
             game_results = games.values_list('winner_score', 'loser_score')
 
@@ -593,9 +590,9 @@ class TeamSeason(ComparableObject):
         self.team = Member.objects.get(id=team_id)
         if week_max is None:
             if include_playoffs:
-                week_max = BLINGABOWL_WEEK
+                week_max = blingabowl_week(self.year)
             else:
-                week_max = REGULAR_SEASON_WEEKS
+                week_max = regular_season_weeks(self.year)
         self.week_max = week_max
 
         try:
@@ -766,7 +763,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def place_numeric(self):
-        if self.week_max > REGULAR_SEASON_WEEKS:
+        if self.week_max > regular_season_weeks(self.year):
             return self.regular_season.place_numeric
         return self.season_object.team_to_place(self.team)
 
@@ -845,7 +842,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def is_partial(self):
-        return len(self.games) < REGULAR_SEASON_WEEKS
+        return len(self.games) < regular_season_weeks(self.year)
 
     @fully_cached_property
     def raw_expected_wins_by_game(self):
@@ -922,10 +919,10 @@ class TeamSeason(ComparableObject):
 
         expected_wins_by_game = self.expected_wins_by_game
         num_games = len(expected_wins_by_game)
-        if num_games > REGULAR_SEASON_WEEKS:
+        if num_games > regular_season_weeks(self.year):
             # we only care about this for the regular season
             expected_wins_by_game = self.regular_season.expected_wins_by_game
-            num_games = REGULAR_SEASON_WEEKS
+            num_games = regular_season_weeks(self.year)
 
         outcome_combos = itertools.product([0, 1], repeat=num_games)
 
@@ -1062,7 +1059,7 @@ class TeamSeason(ComparableObject):
             {'attr': 'expected_wins', 'name': 'expected wins'},
         ]
 
-        week_max = min(len(self.games), REGULAR_SEASON_WEEKS)
+        week_max = min(len(self.games), regular_season_weeks(self.year))
         week = 1
         while week <= week_max:
             ts_week = TeamSeason(self.team.id, self.year, week_max=week)
@@ -1092,7 +1089,7 @@ class TeamSeason(ComparableObject):
     def blangums_games(self):
         def _is_blangums(game):
             return (game.week_object.blangums == self.team and
-                    game.week <= REGULAR_SEASON_WEEKS)
+                    game.week <= regular_season_weeks(game.year))
 
         return list(filter(_is_blangums, self.games))
 
@@ -1104,7 +1101,7 @@ class TeamSeason(ComparableObject):
     def slapped_heartbeat_games(self):
         def _is_slapped_heartbeat(game):
             return (game.week_object.slapped_heartbeat == self.team and
-                    game.week <= REGULAR_SEASON_WEEKS)
+                    game.week <= regular_season_weeks(self.year))
 
         return list(filter(_is_slapped_heartbeat, self.games))
 
@@ -1157,7 +1154,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def weeks_remaining(self):
-        return max(0, REGULAR_SEASON_WEEKS - len(self.games))
+        return max(0, regular_season_weeks(self.year) - len(self.games))
 
     @fully_cached_property
     def clinched_playoffs(self):
@@ -1300,7 +1297,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def regular_season(self):
-        return TeamSeason(self.team.id, self.year, week_max=REGULAR_SEASON_WEEKS)
+        return TeamSeason(self.team.id, self.year, week_max=regular_season_weeks(self.year))
 
     @fully_cached_property
     def headline_season(self):
@@ -1351,9 +1348,9 @@ class TeamSeason(ComparableObject):
         base_season = self
         week_max = len(self.games)
 
-        if week_max > REGULAR_SEASON_WEEKS:
+        if week_max > regular_season_weeks(self.year):
             base_season = self.regular_season
-            week_max = REGULAR_SEASON_WEEKS
+            week_max = regular_season_weeks(self.year)
 
         for season in Season.all():
             for team_id in Member.objects.all().values_list('id', flat=True):
@@ -1718,7 +1715,7 @@ class Season(ComparableObject):
         if self.week_max is None and not self.include_playoffs:
             # only time we don't want a week_max is if
             # playoffs are explicitly included
-            self.week_max = REGULAR_SEASON_WEEKS
+            self.week_max = regular_season_weeks(self.year)
 
         if self.all_time:
             self.year = None
@@ -1801,7 +1798,7 @@ class Season(ComparableObject):
     @fully_cached_property
     def expected_wins_scaling_factor(self):
         # make sure we aren't including playoff games in the normalization
-        if self.weeks_with_games > REGULAR_SEASON_WEEKS:
+        if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.expected_wins_scaling_factor
 
         scaling_factor = 1
@@ -1862,7 +1859,7 @@ class Season(ComparableObject):
             if len(team_season.games) > 0 or self.is_upcoming_season:
                 team_seasons.append(team_season)
 
-        if self.week_max is not None and self.week_max > REGULAR_SEASON_WEEKS:
+        if self.week_max is not None and self.week_max > regular_season_weeks(self.year):
             return sorted(
                 team_seasons,
                 key=lambda x: (x.regular_season.win_pct, x.regular_season.points),
@@ -1932,9 +1929,9 @@ class Season(ComparableObject):
             return []
 
         return [
-            self._playoff_bracket_week(QUARTERFINALS_WEEK),
-            self._playoff_bracket_week(SEMIFINALS_WEEK),
-            self._playoff_bracket_week(BLINGABOWL_WEEK),
+            self._playoff_bracket_week(quarterfinals_week(self.year)),
+            self._playoff_bracket_week(semifinals_week(self.year)),
+            self._playoff_bracket_week(blingabowl_week(self.year)),
         ]
 
     def _playoff_bracket_week(self, week):
@@ -1970,7 +1967,7 @@ class Season(ComparableObject):
                         key=lambda x: x['seed'],
                     ),
                 )
-        elif week == QUARTERFINALS_WEEK:
+        elif week == quarterfinals_week(self.year):
             seed_pairs = [(3, 6), (4, 5)]
             for seed1, seed2 in seed_pairs:
                 games.append(
@@ -1994,7 +1991,7 @@ class Season(ComparableObject):
 
                     last_week_winners.append(game.winner_team_season)
 
-            if week == SEMIFINALS_WEEK:
+            if week == semifinals_week(self.year):
                 bye_teams = self.standings_table[:BYE_TEAMS]
                 last_week_winners = sorted(
                     last_week_winners,
@@ -2029,7 +2026,7 @@ class Season(ComparableObject):
                         ),
                     ]
             else:
-                # it's BLINGABOWL_WEEK
+                # it's Blingabowl week
                 last_week_winners = sorted(
                     last_week_winners,
                     key=lambda x: x.place_numeric,
@@ -2155,7 +2152,7 @@ class Season(ComparableObject):
     def href(self):
         if self.year is not None:
             getargs = ''
-            if self.week_max is not None and self.week_max != REGULAR_SEASON_WEEKS:
+            if self.week_max is not None and self.week_max != regular_season_weeks(self.year):
                 getargs = "?week_max={}".format(self.week_max)
 
             return "{}{}".format(
@@ -2234,7 +2231,7 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def is_playoffs(self):
-        return self.week > REGULAR_SEASON_WEEKS
+        return self.week > regular_season_weeks(self.year)
 
     @fully_cached_property
     def games(self):
@@ -2347,13 +2344,13 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def blangums(self):
-        if self.week > REGULAR_SEASON_WEEKS:
+        if self.week > regular_season_weeks(self.year):
             return None
         return self.team_scores_sorted[0]['team']
 
     @fully_cached_property
     def slapped_heartbeat(self):
-        if self.week > REGULAR_SEASON_WEEKS:
+        if self.week > regular_season_weeks(self.year):
             return None
         return self.team_scores_sorted[-1]['team']
 
@@ -2377,9 +2374,9 @@ class Week(ComparableObject):
     @classmethod
     def week_to_title(self, year, week):
         special_weeks = {
-            QUARTERFINALS_WEEK: QUARTERFINALS_TITLE_BASE,
-            SEMIFINALS_WEEK: SEMIFINALS_TITLE_BASE,
-            BLINGABOWL_WEEK: "{} {}".format(
+            quarterfinals_week(self.year): QUARTERFINALS_TITLE_BASE,
+            semifinals_week(self.year): SEMIFINALS_TITLE_BASE,
+            blingabowl_week(self.year): "{} {}".format(
                 BLINGABOWL_TITLE_BASE,
                 Postseason.year_to_blingabowl(year),
             ),
@@ -2415,7 +2412,7 @@ class Week(ComparableObject):
     @fully_cached_property
     def previous(self):
         if self.week == 1:
-            prev_week = Week(self.year - 1, BLINGABOWL_WEEK)
+            prev_week = Week(self.year - 1, blingabowl_week(self.year))
         else:
             prev_week = Week(self.year, self.week - 1)
 
@@ -2426,7 +2423,7 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def next(self):
-        if self.week == BLINGABOWL_WEEK:
+        if self.week == blingabowl_week(self.year):
             next_week = Week(self.year + 1, 1)
         else:
             next_week = Week(self.year, self.week + 1)
@@ -2462,19 +2459,19 @@ class Week(ComparableObject):
         return all_weeks
 
     @classmethod
-    def regular_season_weeks(cls):
+    def regular_season_week_list(cls):
         return list(
             filter(
-                lambda x: x.week <= REGULAR_SEASON_WEEKS,
+                lambda x: x.week <= regular_season_weeks(x.year),
                 cls.all(),
             ),
         )
 
     @classmethod
-    def playoff_weeks(cls):
+    def playoff_week_list(cls):
         return list(
             filter(
-                lambda x: x.week > REGULAR_SEASON_WEEKS,
+                lambda x: x.week >= quarterfinals_week(x.year),
                 cls.all(),
             ),
         )
