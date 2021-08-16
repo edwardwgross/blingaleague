@@ -49,7 +49,7 @@ class SeasonListView(TemplateView):
 
         interval = 5
         graph_min = int(interval * (all_time_min // interval))
-        graph_max = int(interval * (all_time_max // interval) + interval)  # add interval to round up
+        graph_max = int(interval * (all_time_max // interval) + interval)  # add interval to round up  # noqa: E501
         graph_increments = range(graph_min, graph_max + interval, interval)
 
         custom_options = {
