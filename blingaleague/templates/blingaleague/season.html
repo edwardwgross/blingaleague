@@ -15,6 +15,18 @@
 <div id="season_details">
   {% if season.headline %}<h2>{{ season.headline }}</h2>{% endif %}
 
+  <div class="center">
+    {% if season.previous %}
+      <a href="{{ season.previous.href }}" class="link previous">Previous</a>
+    {% endif %}
+
+    <a href="{% url 'blingaleague.seasons' %}">All seasons</a>
+
+    {% if season.next %}
+      <a href="{{ season.next.href }}" class="link next">Next</a>
+    {% endif %}
+  </div>
+
   {% include "blingaleague/standings_table.html" %}
 
   {% if season.playoff_bracket %}
@@ -55,17 +67,6 @@
       {% endfor %}
     </div>
   {% endif %}
-
-  {% if season.previous %}
-    <a href="{{ season.previous.href }}" class="link previous">Previous</a>
-  {% endif %}
-  {% if season.next %}
-    <a href="{{ season.next.href }}" class="link next">Next</a>
-  {% endif %}
-
-  <div class="center">
-    <a href="{% url 'blingaleague.seasons' %}">All seasons</a>
-  </div>
 </div>
 
 {% endblock %}
