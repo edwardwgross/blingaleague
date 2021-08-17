@@ -152,6 +152,24 @@ class Member(models.Model, ComparableObject):
         return self.seasons.slapped_heartbeat_games
 
     @fully_cached_property
+    def playoff_seasons(self):
+        return [
+            season for season in self.seasons if season.made_playoffs
+        ]
+
+    @fully_cached_property
+    def bye_seasons(self):
+        return [
+            season for season in self.seasons if season.bye
+        ]
+
+    @fully_cached_property
+    def championship_seasons(self):
+        return [
+            season for season in self.seasons if season.champion
+        ]
+
+    @fully_cached_property
     def href(self):
         return urlresolvers.reverse_lazy('blingaleague.team', args=(self.id,))
 
