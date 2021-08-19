@@ -2399,9 +2399,9 @@ class Week(ComparableObject):
     @classmethod
     def week_to_title(self, year, week):
         special_weeks = {
-            quarterfinals_week(self.year): QUARTERFINALS_TITLE_BASE,
-            semifinals_week(self.year): SEMIFINALS_TITLE_BASE,
-            blingabowl_week(self.year): "{} {}".format(
+            quarterfinals_week(year): QUARTERFINALS_TITLE_BASE,
+            semifinals_week(year): SEMIFINALS_TITLE_BASE,
+            blingabowl_week(year): "{} {}".format(
                 BLINGABOWL_TITLE_BASE,
                 Postseason.year_to_blingabowl(year),
             ),
