@@ -1775,6 +1775,9 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def weeks_with_games(self):
+        if not self.all_games:
+            return 0
+
         return max(self.all_games.values_list('week', flat=True))
 
     @fully_cached_property
@@ -1906,9 +1909,6 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def active_teams(self):
-        if self.year is not None and self.year > Season.max().year:
-            return []
-
         if self.is_upcoming_season or self.all_time:
             return Member.objects.filter(defunct=False).order_by('first_name', 'last_name')
 
@@ -1921,10 +1921,13 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def alpha_team_seasons(self):
-        return sorted(
-            self.standings_table,
-            key=lambda x: x.team,
-        )
+        if self.standings_table:
+            return sorted(
+                self.standings_table,
+                key=lambda x: x.team,
+            )
+
+        return [TeamSeason(team.id, self.year) for team in self.active_teams]
 
     @fully_cached_property
     def is_upcoming_season(self):
@@ -1933,6 +1936,10 @@ class Season(ComparableObject):
     @fully_cached_property
     def is_partial(self):
         if self.all_time:
+            return True
+
+        if not self.standings_table:
+            # edge case where season hasn't started yet
             return True
 
         for team_season in self.standings_table:

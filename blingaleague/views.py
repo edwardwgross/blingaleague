@@ -79,6 +79,9 @@ class SingleSeasonView(TemplateView):
     template_name = 'blingaleague/season.html'
 
     def _place_by_week_graph(self, season):
+        if season.is_upcoming_season:
+            return ''
+
         weeks = sorted(season.standings_table[0].rank_by_week.keys())
         place_series = defaultdict(list)
 
@@ -239,6 +242,9 @@ class TeamSeasonView(GamesView):
         return graph_html
 
     def _rank_by_week_graph(self, team_season):
+        if team_season.season_object.is_upcoming_season:
+            return ''
+
         weeks = sorted(team_season.rank_by_week.keys())
         rank_series = defaultdict(list)
 

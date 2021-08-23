@@ -27,7 +27,9 @@
     {% endif %}
   </div>
 
-  {% include "blingaleague/standings_table.html" %}
+  {% if season.weeks_with_games %}
+    {% include "blingaleague/standings_table.html" %}
+  {% endif %}
 
   {% if season.playoff_bracket %}
     {% include "blingaleague/playoff_bracket.html" %}
