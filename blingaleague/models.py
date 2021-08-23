@@ -1142,6 +1142,43 @@ class TeamSeason(ComparableObject):
         return self.postseason.robscores.get(self.team, 0)
 
     @fully_cached_property
+    def strength_of_schedule_opponent(self):
+        previous_season = self.season_object.previous
+
+        if previous_season is None:
+            return None
+
+        if self.previous is not None:
+            last_year_place = self.previous.place_numeric
+            if self.previous.playoff_finish_numeric:
+                last_year_place = self.previous.playoff_finish_numeric
+        else:
+            replaced_teams = set(previous_season.active_teams).difference(
+                set(self.season_object.active_teams),
+            )
+
+            if len(replaced_teams) != 1:
+                raise Exception(
+                    "More than 1 candidate that {} replaced: {}".format(
+                        self.short_name,
+                        replaced_teams,
+                    ),
+                )
+
+            replaced_team_season = TeamSeason(replaced_teams.pop().id, previous_season.year)
+
+            last_year_place = replaced_team_season.place_numeric
+            if replaced_team_season.playoff_finish_numeric:
+                last_year_place = replaced_team_season.playoff_finish_numeric
+
+        if last_year_place % 2 == 0:
+            opponent_place = last_year_place - 1
+        else:
+            opponent_place = last_year_place + 1
+
+        return previous_season.post_playoffs_standings[opponent_place - 1].team
+
+    @fully_cached_property
     def has_beaten(self):
         return sorted([game.loser for game in self.wins])
 
@@ -1158,7 +1195,10 @@ class TeamSeason(ComparableObject):
         yet_to_play = []
 
         if self.year >= EXPANSION_SEASON:
-            full_season_opponents = self.season_object.active_teams
+            full_season_opponents = list(self.season_object.active_teams)
+
+            if len(full_season_opponents) <= regular_season_weeks(self.year):
+                full_season_opponents.append(self.strength_of_schedule_opponent)
         else:
             # we know this is in the past
             full_season_opponents = TeamSeason(
@@ -1928,6 +1968,21 @@ class Season(ComparableObject):
             )
 
         return [TeamSeason(team.id, self.year) for team in self.active_teams]
+
+    @fully_cached_property
+    def post_playoffs_standings(self):
+        if not self.champion:
+            return []
+
+        def _post_playoffs_sort(team_season):
+            if team_season.playoff_finish_numeric:
+                return team_season.playoff_finish_numeric
+            return team_season.place_numeric
+
+        return sorted(
+            self.standings_table,
+            key=_post_playoffs_sort,
+        )
 
     @fully_cached_property
     def is_upcoming_season(self):
