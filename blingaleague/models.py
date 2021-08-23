@@ -1969,7 +1969,7 @@ class Season(ComparableObject):
 
         games_to_ignore = (THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE)
         games = []
-        if len(week_object.games) > 0:  # XXX remove year
+        if len(week_object.games) > 0:
             for game in week_object.games:
                 if game.playoff_title_base in games_to_ignore:
                     continue
