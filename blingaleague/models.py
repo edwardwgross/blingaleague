@@ -870,6 +870,10 @@ class TeamSeason(ComparableObject):
         return len(self.games) < regular_season_weeks(self.year)
 
     @fully_cached_property
+    def is_upcoming_season(self):
+        return self.season_object.is_upcoming_season and not self.team.defunct
+
+    @fully_cached_property
     def raw_expected_wins_by_game(self):
         return list(map(
             lambda x: Game.expected_wins(x),
@@ -910,6 +914,8 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def expected_win_pct_against(self):
+        if len(self.games) == 0:
+            return 0
         return self.expected_wins_against / len(self.games)
 
     @fully_cached_property
@@ -931,7 +937,7 @@ class TeamSeason(ComparableObject):
     def expected_win_pct(self):
         if len(self.games) == 0:
             return 0
-        return decimal.Decimal(self.expected_wins) / decimal.Decimal(len(self.games))
+        return self.expected_wins / len(self.games)
 
     @fully_cached_property
     def expected_win_distribution(self):
@@ -1534,6 +1540,7 @@ class TeamMultiSeasons(TeamSeason):
     def __init__(self, team_id, years=None, include_playoffs=False, week_max=None):
         if years is None:
             years = [season.year for season in Season.all()]
+        print(years)
 
         self.years = sorted(years)
         self.team = Member.objects.get(id=team_id)
@@ -1563,7 +1570,7 @@ class TeamMultiSeasons(TeamSeason):
                 week_max=self.week_max,
             )
 
-            if len(team_season.games) > 0:
+            if len(team_season.games) > 0 or team_season.is_upcoming_season:
                 team_seasons.append(team_season)
 
         return team_seasons
@@ -2210,6 +2217,9 @@ class Season(ComparableObject):
     @classmethod
     def all(cls, **kwargs):
         all_years = set(Game.objects.all().values_list('year', flat=True))
+        all_years.update(set(Keeper.objects.all().values_list('year', flat=True)))
+        all_years.update(set(Trade.objects.all().values_list('year', flat=True)))
+
         return [
             cls(year=year, **kwargs) for year in all_years
         ]

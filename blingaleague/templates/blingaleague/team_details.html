@@ -30,19 +30,21 @@
       <th/>{# Playoff Finish #}
     </tr>
     {% for team_season in team.seasons reversed %}
-      <tr>
-        <td><a href="{{ team_season.season_object.href }}">{{ team_season.season_object.year }}</a></td>
-        <td><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
-        <td>{{ team_season.win_count }}</td>
-        <td>{{ team_season.loss_count }}</td>
-        <td>{{ team_season.points|intcomma }}</td>
-        <td>{{ team_season.expected_wins|floatformat:2 }}</td>
-        <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
-        <td>{{ team_season.strength_of_schedule_str }}</td>
-        <td>{{ team_season.blangums_count }}</td>
-        <td>{{ team_season.slapped_heartbeat_count }}</td>
-        <td style="text-align:left">{{ team_season.playoff_finish }}</td>
-      </tr>
+      {% if team_season.games %}
+        <tr>
+          <td><a href="{{ team_season.season_object.href }}">{{ team_season.season_object.year }}</a></td>
+          <td><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
+          <td>{{ team_season.win_count }}</td>
+          <td>{{ team_season.loss_count }}</td>
+          <td>{{ team_season.points|intcomma }}</td>
+          <td>{{ team_season.expected_wins|floatformat:2 }}</td>
+          <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
+          <td>{{ team_season.strength_of_schedule_str }}</td>
+          <td>{{ team_season.blangums_count }}</td>
+          <td>{{ team_season.slapped_heartbeat_count }}</td>
+          <td style="text-align:left">{{ team_season.playoff_finish }}</td>
+        </tr>
+      {% endif %}
     {% endfor %}
   </table>
 

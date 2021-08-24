@@ -304,6 +304,9 @@ class TeamDetailsView(TemplateView):
         total_teams = 0
 
         for team_season in team.seasons:
+            if len(team_season.games) == 0:
+                continue
+
             years.append(team_season.year)
 
             final_week = max(team_season.rank_by_week.keys())
