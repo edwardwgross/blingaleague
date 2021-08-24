@@ -1629,6 +1629,15 @@ class TeamMultiSeasons(TeamSeason):
         return self._sum_seasonal_values('expected_wins')
 
     @fully_cached_property
+    def raw_expected_wins_against(self):
+        return self._sum_seasonal_values('raw_expected_wins_against')
+
+    @fully_cached_property
+    def expected_wins_against(self):
+        return self._sum_seasonal_values('expected_wins_against')
+
+    @fully_cached_property
+    @fully_cached_property
     def _all_play_record(self):
         return {
             OUTCOME_WIN: self.all_play_wins,
