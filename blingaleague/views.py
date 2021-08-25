@@ -44,7 +44,11 @@ class SeasonListView(TemplateView):
         all_time_min = 999
         all_time_max = 0
 
+        years_to_graph = []
         for season in seasons:
+            if season.weeks_with_games == 0:
+                continue
+
             mean_score = season.average_game_score
             median_score = season.median_game_score
 
@@ -53,6 +57,8 @@ class SeasonListView(TemplateView):
 
             all_time_min = min(all_time_min, mean_score, median_score)
             all_time_max = max(all_time_max, mean_score, median_score)
+
+            years_to_graph.append(season.year)
 
         interval = 5
         graph_min = int(interval * (all_time_min // interval))
@@ -68,7 +74,7 @@ class SeasonListView(TemplateView):
         }
 
         graph_html = line_graph_html(
-            [season.year for season in seasons],  # x_data
+            years_to_graph,  # x_data
             sorted(averages_series.items()),  # y_series
             **custom_options,
         )

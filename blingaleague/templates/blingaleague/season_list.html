@@ -22,28 +22,36 @@
           {{ season.year }}
         </a>
       </td>
-      <td>
-        <a href="{{ season.champion.href }}">
-          {{ season.champion.team }}
-          {% if season.champion != season.first_place %}
-            (#{{ season.champion.place_numeric }} seed)
-          {% endif %}
-        </a>
-      </td>
-      <td>
-        <a href="{{ season.first_place.href }}">
-          {{ season.first_place.team }} ({{ season.first_place.record }})
-      </td>
-      <td>
-        <a href="{{ season.most_points.href }}">
-          {{ season.most_points.team }} ({{ season.most_points.points|intcomma }})
-        </a>
-      </td>
-      <td>
-        <a href="{{ season.most_expected_wins.href }}">
-          {{ season.most_expected_wins.team }} ({{ season.most_expected_wins.expected_wins|floatformat:2 }})
-        </a>
-      </td>
+      {% if season.weeks_with_games %}
+        <td>
+          <a href="{{ season.champion.href }}">
+            {{ season.champion.team }}
+            {% if season.champion != season.first_place %}
+              (#{{ season.champion.place_numeric }} seed)
+            {% endif %}
+          </a>
+        </td>
+        <td>
+          <a href="{{ season.first_place.href }}">
+            {{ season.first_place.team }} ({{ season.first_place.record }})
+          </a>
+        </td>
+        <td>
+          <a href="{{ season.most_points.href }}">
+            {{ season.most_points.team }} ({{ season.most_points.points|intcomma }})
+          </a>
+        </td>
+        <td>
+          <a href="{{ season.most_expected_wins.href }}">
+            {{ season.most_expected_wins.team }} ({{ season.most_expected_wins.expected_wins|floatformat:2 }})
+          </a>
+        </td>
+      {% else %}
+        <td/> {# Champion #}
+        <td/> {# First Place #}
+        <td/> {# Most Points #}
+        <td/> {# Most Expected Wins #}
+      {% endif %}
     </tr>
   {% endfor %}
 </table>
