@@ -110,7 +110,6 @@ th a, th a:hover, th a:visited, th a:focus {
 .center {
     clear: both;
     text-align: center;
-    margin: 0 auto;
     max-width: 900px;
 }
 
