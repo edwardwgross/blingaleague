@@ -108,6 +108,13 @@ urlpatterns = [
             permanent=True,
         ),
     ),
+    url(
+        r'^django.fcgi/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.home',
+            permanent=True,
+        ),
+    ),
     # end deprecated urls
 
     url(
