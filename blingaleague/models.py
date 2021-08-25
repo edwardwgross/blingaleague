@@ -2041,6 +2041,11 @@ class Season(ComparableObject):
         if self.is_partial:
             return {}
 
+        # if the specified week_max is during the playoffs,
+        # we don't want to include the bracket beyond that week
+        if self.week_max > regular_season_weeks(self.year) and week > self.week_max:
+            return {}
+
         week_object = Week(self.year, week)
         if not week_object.is_playoffs:
             return {}
@@ -2298,6 +2303,12 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def headline(self):
+        # if the specified week_max is during the playoffs,
+        # but doesn't include the Blingabowl week,
+        # don't populate the headline
+        if regular_season_weeks(self.year) < self.week_max < blingabowl_week(self.year):
+            return None
+
         if self.postseason is not None and self.postseason.place_1:
             return "Blingabowl {}: {} def. {}".format(
                 self.postseason.blingabowl,

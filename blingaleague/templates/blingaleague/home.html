@@ -20,6 +20,11 @@
 
 {% if season.playoff_bracket %}
   {% include "blingaleague/playoff_bracket.html" %}
+
+  {% if season.headline %}
+    {# if there wasn't a headline, we already put this text in the above <h2> #}
+    <h3> {{ season.year }} Season</h3>
+  {% endif %}
 {% endif %}
 
 {% include "blingaleague/standings_table.html" %}
