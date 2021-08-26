@@ -2041,18 +2041,19 @@ class Season(ComparableObject):
         if self.is_partial:
             return {}
 
-        # if the specified week_max is during the playoffs,
-        # we don't want to include the bracket beyond that week
-        if self.week_max > regular_season_weeks(self.year) and week > self.week_max:
-            return {}
-
         week_object = Week(self.year, week)
         if not week_object.is_playoffs:
             return {}
 
+        # if the specified week_max is during the playoffs,
+        # we will want to act like games that week haven't happened yet
+        omit_week_results = False
+        if self.week_max > regular_season_weeks(self.year) and week > self.week_max:
+            omit_week_results = True
+
         games_to_ignore = (THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE)
         games = []
-        if len(week_object.games) > 0:
+        if len(week_object.games) > 0 and not omit_week_results:
             for game in week_object.games:
                 if game.playoff_title_base in games_to_ignore:
                     continue
