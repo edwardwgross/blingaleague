@@ -2380,7 +2380,7 @@ class Week(ComparableObject):
         return Trade.objects.filter(
             year=self.year,
             week=self.week,
-        ).order_by('-date')
+        ).order_by('date', 'pk')
 
     @fully_cached_property
     def average_score(self):
@@ -2772,6 +2772,37 @@ class Trade(models.Model, ComparableObject):
     def save(self, **kwargs):
         super().save(**kwargs)
         clear_cached_properties()
+
+    @fully_cached_property
+    def gazette_link(self):
+        return "{}{}".format(settings.FULL_SITE_URL, self.href)
+
+    @fully_cached_property
+    def gazette_str(self):
+        lines = []
+
+        lines.append(
+            "### [{}]({})".format(
+                self.description,
+                self.gazette_link,
+            ),
+        )
+
+        for asset_group in self.grouped_assets:
+            lines.append('')
+            lines.append("{} received:".format(asset_group['team'].nickname))
+
+            for asset in asset_group['assets_received']:
+                asset_details = [
+                    asset.name,
+                    "from {}".format(asset.sender.nickname),
+                ]
+                if asset.keeper_cost_str:
+                    asset_details.append(asset.keeper_cost_str)
+
+                lines.append(" - {}".format(' - '.join(asset_details)))
+
+        return '\n'.join(lines)
 
     def __str__(self):
         return "{}, {} ({})".format(

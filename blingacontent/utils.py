@@ -11,7 +11,7 @@ from oauth2client import file, client, tools
 from blingaleague.models import Week, Season, TeamSeason, PLAYOFF_TEAMS, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
                                 BLINGABOWL_TITLE_BASE
-from blingaleague.utils import regular_season_weeks, blingabowl_week
+from blingaleague.utils import regular_season_weeks, blingabowl_week, semifinals_week
 
 
 SCOPES = [
@@ -90,7 +90,15 @@ def new_gazette_body_template():
     if last_week.week == blingabowl_week(last_week.year):
         sections.append(['# Blingapower Rankings'])
         sections.append(['# Draft Lottery'])
+    elif last_week.week == semifinals_week(last_week.year):
+        if current_season.trades:
+            sections.append(year_in_trades_section(current_season))
     else:
+        if last_week.trades:
+            sections.append([
+                '# Recent Trades',
+                '\n\n'.join([trade.gazette_str for trade in last_week.trades]),
+            ])
         sections.append([
             "# {} Preview".format(
                 Week.week_to_title(last_week.year, last_week.week + 1),
@@ -109,7 +117,7 @@ def new_gazette_body_template():
 
 
 def postmortems_section(week_obj, season):
-    postmortems_section = ['# Season Postmortems']
+    postmortems_lines = ['# Season Postmortems']
 
     dead_teams = []
 
@@ -133,9 +141,30 @@ def postmortems_section(week_obj, season):
     )
 
     for team_season in dead_teams:
-        postmortems_section.append(team_season.gazette_postmortem_str)
+        postmortems_lines.append(team_season.gazette_postmortem_str)
 
-    return postmortems_section
+    return postmortems_lines
+
+
+def year_in_trades_section(season):
+    if not season.trades:
+        return []
+
+    year_in_trades_lines = ['# The Year in Trades']
+
+    last_printed_week = None
+
+    for trade in season.trades:
+        if trade.week != last_printed_week:
+            year_in_trades_lines.append("## [{}]({})".format(
+                Week.week_to_title(trade.year, trade.week),
+                trade.week_object.gazette_link,
+            ))
+            last_printed_week = trade.week
+
+        year_in_trades_lines.append(trade.gazette_str)
+
+    return year_in_trades_lines
 
 
 def blingalytics_ratings_section(season):
