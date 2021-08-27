@@ -80,7 +80,7 @@ def new_gazette_body_template():
     ])
 
     if current_season.is_partial:
-        if last_week.week >= 8:
+        if last_week.week >= (regular_season_weeks(last_week.year) - 5):
             sections.append([
                 '# Playoff Scenarios',
             ])
