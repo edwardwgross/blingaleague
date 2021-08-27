@@ -13,6 +13,7 @@
 <td>{{ team_season.expected_wins|floatformat:2 }}</td>
 <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
 <td>{{ team_season.strength_of_schedule_str }}</td>
+<td sorttable_customkey="{{ team_season.all_play_win_pct }}" style="text-align:center">{{ team_season.all_play_record_str }}</td>
 <td>{{ team_season.blangums_count }}</td>
 <td>{{ team_season.slapped_heartbeat_count }}</td>
 {% if season.all_time %}
