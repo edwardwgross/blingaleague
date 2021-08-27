@@ -15,7 +15,7 @@
   <h3>{{ team.seasons.strength_of_schedule_str }} strength of schedule</h3>
 
   <h2>Seasons</h2>
-  <table class="standings_table">
+  <table class="standings_table sortable">
     <tr>
       <th/> {# Year #}
       <th>Place</th>
@@ -25,6 +25,7 @@
       <th title="Expected Wins">Exp. W</th>
       <th title="Expected Winning Percentage">Exp. %</th>
       <th title="Strength of Schedule">SOS</th>
+      <th title="All-Play Winning Percentage">All-Play</th>
       <th title="Team Blangums Awards">Blangums</th>
       <th title="Slapped Heartbeat Awards">SH</th>
       <th/>{# Playoff Finish #}
@@ -33,13 +34,14 @@
       {% if team_season.games %}
         <tr>
           <td><a href="{{ team_season.season_object.href }}">{{ team_season.season_object.year }}</a></td>
-          <td><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
+          <td sorttable_customkey="{{ team_season.place_numeric }}"><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
           <td>{{ team_season.win_count }}</td>
           <td>{{ team_season.loss_count }}</td>
           <td>{{ team_season.points|intcomma }}</td>
           <td>{{ team_season.expected_wins|floatformat:2 }}</td>
           <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
           <td>{{ team_season.strength_of_schedule_str }}</td>
+          <td>{{ team_season.all_play_win_pct|floatformat:3 }}</td>
           <td>{{ team_season.blangums_count }}</td>
           <td>{{ team_season.slapped_heartbeat_count }}</td>
           <td style="text-align:left">{{ team_season.playoff_finish }}</td>
