@@ -246,7 +246,7 @@ class WeeklyScoresView(TemplateView):
 class ExpectedWinsView(TemplateView):
     template_name = 'blingalytics/expected_wins.html'
 
-    def _expected_wins_graph(self, score, scaling_factor=1):
+    def _expected_wins_graph(self, score, scaling_function=float):
         min_score = Game.objects.all().order_by('loser_score')[0].loser_score
         max_score = Game.objects.all().order_by('-winner_score')[0].winner_score
 
@@ -263,7 +263,7 @@ class ExpectedWinsView(TemplateView):
 
         xw_values = []
         for score in scores:
-            xw_value = float(scaling_factor * Game.expected_wins(score))
+            xw_value = float(scaling_function(Game.expected_wins(score)))
             xw_values.append(min(xw_value, 1))
 
         custom_options = {
@@ -287,7 +287,7 @@ class ExpectedWinsView(TemplateView):
     def get(self, request):
         expected_wins = None
         score = None
-        scaling_factor = 1
+        scaling_function = float
 
         expected_wins_form = ExpectedWinsCalculatorForm(request.GET)
         if expected_wins_form.is_valid():
@@ -295,18 +295,15 @@ class ExpectedWinsView(TemplateView):
             score = form_data['score']
             year = form_data['year']
             if year:
-                scaling_factor = Season(year).expected_wins_scaling_factor
+                scaling_function = Season(year).scale_expected_wins
 
         if score is not None:
-            expected_wins = min(
-                scaling_factor * Game.expected_wins(score),
-                1,
-            )
+            expected_wins = scaling_function(Game.expected_wins(score))
 
         context = {
             'form': expected_wins_form,
             'expected_wins': expected_wins,
-            'expected_wins_graph_html': self._expected_wins_graph(score, scaling_factor),
+            'expected_wins_graph_html': self._expected_wins_graph(score, scaling_function),
         }
 
         return self.render_to_response(context)

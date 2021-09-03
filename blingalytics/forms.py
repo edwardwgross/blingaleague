@@ -34,12 +34,11 @@ CHOICE_MATCHING_ASSETS_ONLY = 'matching_assets'
 
 
 def _teams_multiple_choice_field(label='Team'):
-    ordered_members = Member.objects.all().order_by('first_name', 'last_name')
     return forms.TypedMultipleChoiceField(
         required=False,
         label=label,
         widget=forms.CheckboxSelectMultiple,
-        choices=[(m.id, m.full_name) for m in ordered_members],
+        choices=[(m.id, m) for m in Member.objects.all()],
         coerce=int,
     )
 

@@ -23,7 +23,7 @@
   {% for team in team_list %}
     <tr {% if team.defunct %}class="defunct"{% endif %}>
       <td style="text-align:left">
-        <a href="{{ team.href }}">{{ team.full_name }}</a>
+        <a href="{{ team.href }}">{{ team }}</a>
         {% if team.defunct %}
           <span class="standings_note" title="Franchise is defunct">RIP in Peace</span>
         {% endif %}

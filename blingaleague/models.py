@@ -110,7 +110,7 @@ class Member(models.Model, ComparableObject):
     email = models.EmailField(blank=True, null=True)
     use_nickname = models.BooleanField(default=False)
 
-    _comparison_attr = 'full_name'
+    _comparison_attr = 'nickname'
 
     @property
     def cache_key(self):
@@ -182,13 +182,13 @@ class Member(models.Model, ComparableObject):
         clear_cached_properties()
 
     def __str__(self):
-        return self.full_name
+        return self.nickname
 
     def __repr__(self):
         return str(self)
 
     class Meta:
-        ordering = ['first_name', 'last_name']
+        ordering = ['nickname', 'first_name', 'last_name']
 
 
 class FakeMember(models.Model):
@@ -883,7 +883,7 @@ class TeamSeason(ComparableObject):
     @fully_cached_property
     def expected_wins_by_game(self):
         return list(map(
-            lambda x: self.season_object.expected_wins_scaling_factor * x,
+            self.season_object.scale_expected_wins,
             self.raw_expected_wins_by_game,
         ))
 
@@ -893,10 +893,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def expected_wins(self):
-        return min(
-            sum(self.expected_wins_by_game),
-            decimal.Decimal(len(self.games)),
-        )
+        return sum(self.expected_wins_by_game)
 
     @fully_cached_property
     def raw_expected_wins_against(self):
@@ -904,12 +901,9 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def expected_wins_against(self):
-        scaling_factor = self.season_object.expected_wins_scaling_factor
-        raw_expected_wins_against = self.raw_expected_wins_against
-        expected_wins_against = scaling_factor * raw_expected_wins_against
-        return min(
-            expected_wins_against,
-            decimal.Decimal(len(self.games)),
+        return self.season_object.scale_expected_wins(
+            self.raw_expected_wins_against,
+            is_multiple_games=True,
         )
 
     @fully_cached_property
@@ -1540,7 +1534,6 @@ class TeamMultiSeasons(TeamSeason):
     def __init__(self, team_id, years=None, include_playoffs=False, week_max=None):
         if years is None:
             years = [season.year for season in Season.all()]
-        print(years)
 
         self.years = sorted(years)
         self.team = Member.objects.get(id=team_id)
@@ -1879,19 +1872,37 @@ class Season(ComparableObject):
     def total_raw_expected_wins(self):
         return Game.expected_wins(*self.all_game_scores)
 
-    @fully_cached_property
-    def expected_wins_scaling_factor(self):
+    def scale_expected_wins(self, raw_expected_wins, is_multiple_games=False):
         # make sure we aren't including playoff games in the normalization
         if self.weeks_with_games > regular_season_weeks(self.year):
-            return self.regular_season.expected_wins_scaling_factor
+            return self.regular_season.scale_expected_wins(raw_expected_wins)
 
-        scaling_factor = 1
-        if self.total_raw_expected_wins > 0:
+        # we want to avoid multiplying by more than 1, because we don't want to boost
+        # a near-1.000 expected winning percentage above 1.000
+        if self.total_raw_expected_wins >= self.total_wins:
+            # this is the easy case; if we're reducing the number of expected wins
+            # we can't go below 0, and won't be above 1 (since 1 is the raw maximum)
             scaling_factor = (
                 decimal.Decimal(self.total_wins) / decimal.Decimal(self.total_raw_expected_wins)
             )
+            return scaling_factor * raw_expected_wins
+        else:
+            # this case is trickier - if we just scale expected wins upward, we run the risk
+            # of exceeding a 1.000 expected win pct; so we need to look at expected *losses*
+            # note: total wins always equals total losses, so we use them interchangeably
+            total_raw_expected_losses = self.total_wins * 2 - self.total_raw_expected_wins
+            scaling_factor = (
+                decimal.Decimal(self.total_wins) / decimal.Decimal(total_raw_expected_losses)
+            )
 
-        return scaling_factor
+            weeks_with_games = 1
+            if is_multiple_games:
+                # when doing per-game calculations, need to make sure we're not capping
+                # at the whole season value
+                weeks_with_games = self.weeks_with_games
+
+            scaled_expected_losses = scaling_factor * (weeks_with_games - raw_expected_wins)
+            return weeks_with_games - scaled_expected_losses
 
     @fully_cached_property
     def champion(self):
@@ -2393,14 +2404,6 @@ class Week(ComparableObject):
     @fully_cached_property
     def stdev_score(self):
         return statistics.pstdev([s['score'] for s in self.team_scores])
-
-    @fully_cached_property
-    def expected_wins_scaling_factor(self):
-        raw_expected_wins = 0
-        for game in self.games:
-            raw_expected_wins += Game.expected_wins(game.winner_score, game.loser_score)
-
-        return len(self.games) / raw_expected_wins
 
     @fully_cached_property
     def team_scores(self):
