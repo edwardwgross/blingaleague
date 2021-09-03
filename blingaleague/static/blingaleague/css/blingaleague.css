@@ -333,6 +333,13 @@ table.trades,
     text-align: left;
 }
 
+.blingalytics_table .asset_group {
+    display: inline-block;
+    width: 300px;
+    white-space: normal;
+    vertical-align: top;
+}
+
 table.game_table {
     clear: both;
     padding: 12px 24px;
