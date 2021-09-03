@@ -1877,6 +1877,10 @@ class Season(ComparableObject):
         if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.scale_expected_wins(raw_expected_wins)
 
+        # handle season that has no games played yet
+        if self.weeks_with_games == 0:
+            return 0
+
         # we want to avoid multiplying by more than 1, because we don't want to boost
         # a near-1.000 expected winning percentage above 1.000
         if self.total_raw_expected_wins >= self.total_wins:
