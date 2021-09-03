@@ -274,6 +274,7 @@ class ExpectedWinsView(TemplateView):
             'truncate_label': 3,
             'x_labels_major_count': 6,
             'show_minor_x_labels': False,
+            'y_labels': (0, 0.2, 0.4, 0.6, 0.8, 1),
         }
 
         graph_html = scatter_graph_html(
