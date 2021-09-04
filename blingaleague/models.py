@@ -903,7 +903,7 @@ class TeamSeason(ComparableObject):
     def expected_wins_against(self):
         return self.season_object.scale_expected_wins(
             self.raw_expected_wins_against,
-            is_multiple_games=True,
+            is_season_sum=True,
         )
 
     @fully_cached_property
@@ -1872,7 +1872,24 @@ class Season(ComparableObject):
     def total_raw_expected_wins(self):
         return Game.expected_wins(*self.all_game_scores)
 
-    def scale_expected_wins(self, raw_expected_wins, is_multiple_games=False):
+    def scale_expected_wins(self, raw_expected_wins, is_season_sum=False):
+        # make sure we aren't including playoff games in the normalization
+        if self.weeks_with_games > regular_season_weeks(self.year):
+            return self.regular_season.scale_expected_wins(raw_expected_wins)
+
+        # handle season that has no games played yet
+        if self.weeks_with_games == 0:
+            return 0
+
+        win_gap = self.total_wins - self.total_raw_expected_wins
+        per_game_delta = win_gap / len(self.all_game_scores)
+
+        if is_season_sum:
+            return raw_expected_wins + self.weeks_with_games * per_game_delta
+
+        return raw_expected_wins + per_game_delta
+
+    def scale_expected_wins_deprecated(self, raw_expected_wins, is_season_sum=False):
         # make sure we aren't including playoff games in the normalization
         if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.scale_expected_wins(raw_expected_wins)
@@ -1900,7 +1917,7 @@ class Season(ComparableObject):
             )
 
             weeks_with_games = 1
-            if is_multiple_games:
+            if is_season_sum:
                 # when doing per-game calculations, need to make sure we're not capping
                 # at the whole season value
                 weeks_with_games = self.weeks_with_games
