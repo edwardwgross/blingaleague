@@ -2532,7 +2532,7 @@ class Week(ComparableObject):
     @fully_cached_property
     def gazette_str(self):
         return '\n\n'.join(
-            ["### {}:".format(game.gazette_str) for game in self.games],
+            ["### {}".format(game.gazette_str) for game in self.games],
         )
 
     @fully_cached_property
