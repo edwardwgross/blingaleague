@@ -965,7 +965,7 @@ class TeamVsTeamView(TemplateView):
     template_name = 'blingalytics/team_vs_team.html'
 
     def get(self, request):
-        teams = Member.objects.all().order_by('defunct', 'first_name', 'last_name')
+        teams = Member.objects.all().order_by('defunct', 'nickname')
 
         grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
 

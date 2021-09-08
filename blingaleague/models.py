@@ -2693,7 +2693,7 @@ class Matchup(object):
     @classmethod
     def get_all_for_team(cls, team1_id):
         team2_id_list = Member.objects.all().order_by(
-            'defunct', 'first_name', 'last_name',
+            'defunct', 'nickname',
         ).values_list('id', flat=True)
         return [cls(team1_id, team2_id) for team2_id in team2_id_list]
 
