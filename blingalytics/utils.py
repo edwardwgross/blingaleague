@@ -1,15 +1,15 @@
 from django.core.cache import caches
 
 from blingaleague.models import TeamSeason, Week
+from blingaleague.utils import regular_season_weeks
 
 
 CACHE = caches['blingaleague']
 
-MIN_GAMES_THRESHOLD = 6
-
 
 def has_enough_games(team_season):
-    return len(team_season.regular_season.games) >= MIN_GAMES_THRESHOLD
+    min_games_threshold = int(regular_season_weeks(team_season.year) / 2)
+    return len(team_season.regular_season.games) >= min_games_threshold
 
 
 def sorted_seasons_by_attr(
