@@ -1,5 +1,5 @@
 html, body {
-    font-family: Raleway, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     font-size: 16px;
     line-height: 1.5;
     height: 100%;
@@ -32,7 +32,7 @@ h3 {
 
 small {
     font-size: 60%;
-    font-family: Raleway, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
 }
 
 ul {
@@ -533,7 +533,7 @@ form .errorlist li {
     padding-right: 60px;
 }
 .blingalytics a.download_link {
-    font-family: Raleway, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     float: right;
     font-size: 80%;
  }
