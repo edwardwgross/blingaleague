@@ -1,5 +1,5 @@
 html, body {
-    font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     font-size: 16px;
     line-height: 1.5;
     height: 100%;
@@ -457,7 +457,7 @@ table.blingalytics_table.sortable tbody tr::before {
 .blingalytics thead tr::before,
 .blingalytics tbody tr::before,
 .blingalytics a {
-    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-family: "Courier New", Courier, monospace;
     white-space: nowrap;
 }
 
