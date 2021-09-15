@@ -1,5 +1,5 @@
 html, body {
-    font-family: "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Raleway, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     font-size: 16px;
     line-height: 1.5;
     height: 100%;
@@ -32,7 +32,7 @@ h3 {
 
 small {
     font-size: 60%;
-    font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Raleway, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
 }
 
 ul {
@@ -457,7 +457,7 @@ table.blingalytics_table.sortable tbody tr::before {
 .blingalytics thead tr::before,
 .blingalytics tbody tr::before,
 .blingalytics a {
-    font-family: "Courier New", Courier, monospace;
+    font-family: "JetBrains Mono", "Courier New", Courier, monospace;
     white-space: nowrap;
 }
 
@@ -533,7 +533,7 @@ form .errorlist li {
     padding-right: 60px;
 }
 .blingalytics a.download_link {
-    font-family: "Segoe UI", "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Raleway, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     float: right;
     font-size: 80%;
  }
@@ -590,7 +590,7 @@ h3.no_results_message {
 #gazette_detail h2,
 #gazette_detail h3 {
     font-weight: bold;
-    font-family: "Courier New", Courier, monospace;
+    font-family: "JetBrains Mono", "Courier New", Courier, monospace;
 }
 
 #gazette_detail h1 {
