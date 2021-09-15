@@ -68,15 +68,15 @@ def new_gazette_body_template():
 
     sections.append([
         '# Weekly Awards',
-        '### Team Blangums:',
-        '### Slapped Heartbeat:',
-        '### Weekly MVP:',
-        '### Dud of the Week:',
-        '### Start of the Week:',
-        '### Misplay of the Week:',
-        '### Pickup of the Week:',
-        '### Blessed Cahoots:',
-        '### Pryor Play of the Week:',
+        '### Team Blangums',
+        '### Slapped Heartbeat',
+        '### Weekly MVP',
+        '### Dud of the Week',
+        '### Start of the Week',
+        '### Misplay of the Week',
+        '### Pickup of the Week',
+        '### Blessed Cahoots',
+        '### Pryor Play of the Week',
     ])
 
     if current_season.is_partial:
