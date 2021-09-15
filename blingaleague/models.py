@@ -2673,6 +2673,14 @@ class Matchup(object):
         )
 
     @fully_cached_property
+    def gazette_str(self):
+        return "[{}.]({}{})".format(
+            self.headline,
+            settings.FULL_SITE_URL,
+            self.href,
+        )
+
+    @fully_cached_property
     def headline(self):
         if self.team1_count == self.team2_count:
             return "All-time series tied, {}-{}".format(self.team1_count, self.team2_count)
