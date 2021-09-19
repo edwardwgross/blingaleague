@@ -10,7 +10,7 @@ span, label, input, textarea, table, tr, th, td, ul, ol, li {
     font-family: inherit;
     font-size: inherit;
     line-height: 1.5;
-    color: #333333;
+    color: #654321;
     margin-top: 0;
 }
 
@@ -64,17 +64,17 @@ table {
 }
 
 .table-striped {
-    border: 1px solid #333333;
+    border: 1px solid #654321;
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: #f4f4f4;
+    background-color: #fff8e7;
 }
 
 tbody tr:hover,
 .table-striped > tbody > tr:nth-of-type(odd):hover,
 table.game_table tr.playoffs:hover {
-    background-color: #eaeaea;
+    background-color: #f0ead6;
 }
 
 th, td {
@@ -89,7 +89,7 @@ th, thead tr::before,
 th a, th a:hover, th a:visited, th a:focus {
     font-weight: bold;
     color: white;
-    background-color: #41b6e6;
+    background-color: #a4c2f4;
 }
 
 .previous {
@@ -117,28 +117,28 @@ th a, th a:hover, th a:visited, th a:focus {
 table.defunct_teams th,
 table.defunct_teams th a, table.defunct_teams th a:hover,
 table.defunct_teams th a:visited, table.defunct_teams th a:focus {
-    color: #333333;
-    background-color: #f4f4f4;
+    color: #654321;
+    background-color: #fff8e7;
 }
 
 td.defunct,
 td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
-    color: #a0a0a0;
+    color: #c19a6b;
     font-style: italic;
 }
 
 nav, #footer {
-    background-color: #41b6e6;
+    background-color: #a4c2f4;
     border-width: none !important;
     border-radius: 0 !important;
 }
 
 nav {
-    border-bottom: 4px solid #e4002b !important;
+    border-bottom: 4px solid red !important;
 }
 
 footer {
-    border-top: 2px solid #e4002b !important;
+    border-top: 2px solid red !important;
     color: white;
     text-align: center;
     padding: 4px 8px;
@@ -156,14 +156,14 @@ footer {
 }
 
 nav .icon-bar {
-    background-color: #e4002b;
+    background-color: red;
 }
 
 .nav li a, nav li a,
 .nav li a:visited, nav li a:visited,
 .nav li a:focus, nav li a:focus {
     color: white;
-    background-color: #41b6e6;
+    background-color: #a4c2f4;
     font-size: 90%;
     font-weight: bold;
     padding: 15px 10px;
@@ -174,7 +174,7 @@ nav .icon-bar {
 }
 
 .nav li a:hover span {
-    color: #e4002b;
+    color: red;
 }
 
 .nav ul.dropdown-menu li a {
@@ -186,7 +186,7 @@ nav .icon-bar {
 .nav .open > a,
 .nav .open > a:hover,
 .nav .open > a:focus {
-    color: #e4002b;
+    color: red;
     background-color: white;
 }
 
@@ -247,7 +247,7 @@ table.trades td {
 table#team_vs_team_grid,
 table#team_vs_team_grid th,
 table#team_vs_team_grid td {
-    border: 1px solid #333333;
+    border: 1px solid #654321;
     text-align: center;
     vertical-align: middle;
     font-size: 90%;
@@ -263,7 +263,7 @@ table#team_vs_team_grid th a {
 }
 
 table#team_vs_team_grid .empty {
-    background-color: #eaeaea;
+    background-color: #fff8e7;
 }
 
 table#season_list {
@@ -306,13 +306,13 @@ table.trades,
     clear: both;
     padding: 12px 24px;
     text-align: center;
-    border-bottom: 1px solid #41b6e6;
+    border-bottom: 1px solid #a4c2f4;
     width: 600px;
 }
 
 #games .game:first-of-type,
 #trades .trade:first-of-type {
-    border-top: 1px solid #41b6e6;
+    border-top: 1px solid #a4c2f4;
 }
 
 #games .game:last-of-type,
@@ -347,7 +347,7 @@ table.game_table {
     width: 600px;
 }
 table.game_table tr.playoffs {
-    background-color: #f4f4f4;
+    background-color: #fff8e7;
 }
 table.game_table th {
     white-space: nowrap;
@@ -384,8 +384,8 @@ table.game_table td {
 }
 
 .playoff_bracket .round .game .team {
-    border-bottom: 1px solid #41b6e6;
-    border-right: 1px solid #41b6e6;
+    border-bottom: 1px solid #a4c2f4;
+    border-right: 1px solid #a4c2f4;
     padding: 12px 6px 0 0;
     min-height: 40px;
 }
@@ -413,7 +413,7 @@ table.game_table td {
 .toggle_button:focus {
     border-width: 1px;
     border-style: solid;
-    border-color: #a0a0a0;
+    border-color: #c19a6b;
     border-radius: 4px;
     outline: none;
 }
@@ -487,7 +487,7 @@ form input[type=radio] {
 
 form input[type=text],
 form input[type=number] {
-    border: 1px solid #ababab;
+    border: 1px solid #b94e48;
 }
 
 form label {
@@ -512,7 +512,7 @@ form ul li ul li label {
 form .errorlist li {
     font-style: italic;
     font-weight: bold;
-    color: #e4002b;
+    color: red;
     font-size: 100%;
     width: 100%;
     margin-bottom: 12px;
@@ -524,7 +524,7 @@ form .errorlist li {
     background-color: transparent;
     border-width: 1px;
     border-style: solid;
-    border-color: #a0a0a0;
+    border-color: #c19a6b;
     border-radius: 4px;
     margin: 12px 0;
 }
@@ -683,7 +683,7 @@ h3.no_results_message {
     }
 
     .navbar-nav ul {
-        background-color: #41b6e6;
+        background-color: #a4c2f4;;
     }
 
     .navbar-nav>li {
