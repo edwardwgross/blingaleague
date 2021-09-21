@@ -340,7 +340,7 @@ table.trades,
     display: inline-block;
     width: 300px;
     white-space: normal;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 table.game_table {
