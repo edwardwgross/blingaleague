@@ -1,3 +1,5 @@
+/* Basic color scheme taken from the Chicago flag: https://design.chicago.gov/2019/08/26/choosing-the-cds-color-set.html */
+
 html, body {
     font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     font-size: 16px;
@@ -716,5 +718,13 @@ h3.no_results_message {
 
     .playoff_bracket .round .game .team {
         min-height: 60px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .nav li a, nav li a,
+    .nav li a:visited, nav li a:visited,
+    .nav li a:focus, nav li a:focus {
+        font-size: 75%;
     }
 }
