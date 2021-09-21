@@ -48,6 +48,11 @@ def new_gazette_body_template():
         ),
         last_week.gazette_str,
     ])
+    if last_week.trades:
+        sections.append([
+            '## Trades',
+            '\n\n'.join([trade.gazette_str for trade in last_week.trades]),
+        ])
 
     if last_week.week <= regular_season_weeks(last_week.year):
         sections.append([
@@ -94,11 +99,6 @@ def new_gazette_body_template():
         if current_season.trades:
             sections.append(year_in_trades_section(current_season))
     else:
-        if last_week.trades:
-            sections.append([
-                '# Recent Trades',
-                '\n\n'.join([trade.gazette_str for trade in last_week.trades]),
-            ])
         sections.append([
             "# {} Preview".format(
                 Week.week_to_title(last_week.year, last_week.week + 1),
