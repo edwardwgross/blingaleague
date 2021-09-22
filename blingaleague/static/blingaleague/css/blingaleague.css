@@ -709,7 +709,7 @@ h3.no_results_message {
     }
 
     .collapse.in{
-        display:block !important;
+        display: block !important;
         max-height: 100% !important;
         height: 100% !important;
     }
@@ -734,5 +734,10 @@ h3.no_results_message {
     .nav li a:visited, nav li a:visited,
     .nav li a:focus, nav li a:focus {
         font-size: 75%;
+    }
+
+    .navbar-collapse {
+        height: 100% !important;
+        max-height: 100% !important;
     }
 }
