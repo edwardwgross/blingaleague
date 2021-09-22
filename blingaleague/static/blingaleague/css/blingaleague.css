@@ -741,3 +741,11 @@ h3.no_results_message {
         max-height: 100% !important;
     }
 }
+
+@media screen and (max-width: 750px) {
+    .nav li a, nav li a,
+    .nav li a:visited, nav li a:visited,
+    .nav li a:focus, nav li a:focus {
+        padding: 6px 10px;
+    }
+}
