@@ -733,7 +733,7 @@ h3.no_results_message {
     .nav li a, nav li a,
     .nav li a:visited, nav li a:visited,
     .nav li a:focus, nav li a:focus {
-        font-size: 75%;
+        font-size: 12px;
     }
 
     .navbar-collapse {
