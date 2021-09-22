@@ -694,6 +694,7 @@ h3.no_results_message {
 
     .navbar-nav li {
         padding: 5px 0;
+        clear: both;
     }
 
     .navbar-nav li a,
@@ -701,7 +702,7 @@ h3.no_results_message {
     .nav .open > a,
     .nav .open > a:hover,
     .nav .open > a:focus  {
-        font-size: 32px;
+        font-size: 32px !important;
         padding-top: 10px;
         padding-bottom: 10px;
         line-height: 1;
@@ -709,7 +710,14 @@ h3.no_results_message {
 
     .collapse.in{
         display:block !important;
-        max-height: 500px;
+        max-height: 100% !important;
+        height: 100% !important;
+    }
+
+    .dropdown-menu {
+        position: relative;
+        box-shadow: none;
+        margin-left: 24px;
     }
 
     .playoff_bracket .round:last-of-type .game {
