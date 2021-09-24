@@ -128,17 +128,17 @@ td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
 }
 
 nav, #footer {
-    background-color: #a4c2f4;
+    background-color: #41b6e6;
     border-width: none !important;
     border-radius: 0 !important;
 }
 
 nav {
-    border-bottom: 4px solid red !important;
+    border-bottom: 4px solid #e4002b !important;
 }
 
 footer {
-    border-top: 2px solid red !important;
+    border-top: 2px solid #e4002b !important;
     color: white;
     text-align: center;
     padding: 4px 8px;
@@ -156,14 +156,14 @@ footer {
 }
 
 nav .icon-bar {
-    background-color: red;
+    background-color: #e4002b;
 }
 
 .nav li a, nav li a,
 .nav li a:visited, nav li a:visited,
 .nav li a:focus, nav li a:focus {
     color: white;
-    background-color: #a4c2f4;
+    background-color: #41b6e6;
     font-size: 90%;
     font-weight: bold;
     padding: 15px 10px;
@@ -174,7 +174,7 @@ nav .icon-bar {
 }
 
 .nav li a:hover span {
-    color: red;
+    color: #e4002b;
 }
 
 .nav ul.dropdown-menu li a {
@@ -186,7 +186,7 @@ nav .icon-bar {
 .nav .open > a,
 .nav .open > a:hover,
 .nav .open > a:focus {
-    color: red;
+    color: #e4002b;
     background-color: white;
 }
 
@@ -306,13 +306,13 @@ table.trades,
     clear: both;
     padding: 12px 24px;
     text-align: center;
-    border-bottom: 1px solid #a4c2f4;
+    border-bottom: 1px solid #41b6e6;
     width: 600px;
 }
 
 #games .game:first-of-type,
 #trades .trade:first-of-type {
-    border-top: 1px solid #a4c2f4;
+    border-top: 1px solid #41b6e6;
 }
 
 #games .game:last-of-type,
@@ -338,7 +338,7 @@ table.trades,
     display: inline-block;
     width: 300px;
     white-space: normal;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 table.game_table {
@@ -384,8 +384,8 @@ table.game_table td {
 }
 
 .playoff_bracket .round .game .team {
-    border-bottom: 1px solid #a4c2f4;
-    border-right: 1px solid #a4c2f4;
+    border-bottom: 1px solid #41b6e6;
+    border-right: 1px solid #41b6e6;
     padding: 12px 6px 0 0;
     min-height: 40px;
 }
@@ -512,7 +512,7 @@ form ul li ul li label {
 form .errorlist li {
     font-style: italic;
     font-weight: bold;
-    color: red;
+    color: #e4002b;
     font-size: 100%;
     width: 100%;
     margin-bottom: 12px;
@@ -683,7 +683,7 @@ h3.no_results_message {
     }
 
     .navbar-nav ul {
-        background-color: #a4c2f4;;
+        background-color: #41b6e6;
     }
 
     .navbar-nav>li {
@@ -692,6 +692,7 @@ h3.no_results_message {
 
     .navbar-nav li {
         padding: 5px 0;
+        clear: both;
     }
 
     .navbar-nav li a,
@@ -699,15 +700,22 @@ h3.no_results_message {
     .nav .open > a,
     .nav .open > a:hover,
     .nav .open > a:focus  {
-        font-size: 32px;
+        font-size: 32px !important;
         padding-top: 10px;
         padding-bottom: 10px;
         line-height: 1;
     }
 
     .collapse.in{
-        display:block !important;
-        max-height: 500px;
+        display: block !important;
+        max-height: 100% !important;
+        height: 100% !important;
+    }
+
+    .dropdown-menu {
+        position: relative;
+        box-shadow: none;
+        margin-left: 24px;
     }
 
     .playoff_bracket .round:last-of-type .game {
@@ -716,5 +724,26 @@ h3.no_results_message {
 
     .playoff_bracket .round .game .team {
         min-height: 60px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .nav li a, nav li a,
+    .nav li a:visited, nav li a:visited,
+    .nav li a:focus, nav li a:focus {
+        font-size: 12px;
+    }
+
+    .navbar-collapse {
+        height: 100% !important;
+        max-height: 100% !important;
+    }
+}
+
+@media screen and (max-width: 750px) {
+    .nav li a, nav li a,
+    .nav li a:visited, nav li a:visited,
+    .nav li a:focus, nav li a:focus {
+        padding: 6px 10px;
     }
 }
