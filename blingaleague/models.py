@@ -2823,6 +2823,7 @@ class Trade(models.Model, ComparableObject):
         for asset_group in self.grouped_assets:
             lines.append('')
             lines.append("{} received:".format(asset_group['team'].nickname))
+            lines.append('')
 
             for asset in asset_group['assets_received']:
                 asset_details = [
