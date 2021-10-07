@@ -64,7 +64,7 @@
         </tr>
         {% for team_season in team_seasons %}
           <tr>
-            <td><a href="{{ team_season.regular_season.season_object.href }}">{{ team_season.year }}</a></td>
+            <td><a href="{{ team_season.season_object.href }}">{{ team_season.year }}</a></td>
             <td style="text-align:left">
               <a href="{{ team_season.href }}">{{ team_season.team.nickname }}</a>
               {% if team_season.standings_note %}

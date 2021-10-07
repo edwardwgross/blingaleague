@@ -1327,7 +1327,14 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def href(self):
-        return urlresolvers.reverse_lazy('blingaleague.team_season', args=(self.team.id, self.year))
+        getargs = ''
+        if self.week_max is not None and self.week_max != regular_season_weeks(self.year):
+            getargs = "?week_max={}".format(self.week_max)
+
+        return "{}{}".format(
+            urlresolvers.reverse_lazy('blingaleague.team_season', args=(self.team.id, self.year)),
+            getargs,
+        )
 
     @fully_cached_property
     def previous(self):
