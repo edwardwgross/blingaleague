@@ -1508,7 +1508,7 @@ class TeamSeason(ComparableObject):
         return "{} {}".format(self.year, self.team.nickname)
 
     def __str__(self):
-        base_str = "{}, {}".format(self.team, self.year)
+        base_str = self.short_name
 
         # if we've built a partial season, but it has a full-length season completed
         # we should note this
