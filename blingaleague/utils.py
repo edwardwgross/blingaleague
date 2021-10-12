@@ -110,6 +110,13 @@ def _graph_html(graph_class, x_data, y_series, **custom_options):
     graph_options = GRAPH_DEFAULT_OPTIONS.copy()
     graph_options.update(custom_options)
 
+    graph_options['style'] = pygal.style.RotateStyle(
+        '#e4002b',
+        # a minimum step of 4 produces the right spread of colors
+        # for graphs with less than 4 series
+        step=max(len(y_series), 4),
+    )
+
     graph = graph_class(**graph_options)
 
     graph.x_labels = x_data
