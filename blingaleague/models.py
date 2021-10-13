@@ -1356,16 +1356,26 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def level_up_links(self):
-        return [
+        level_up_links = [
             {
                 'description': 'Franchise index',
                 'href': self.team.href,
             },
             {
-                'description': str(self.regular_season.season_object),
+                'description': "Blingaleague {}".format(self.regular_season.season_object),
                 'href': self.regular_season.season_object.href,
             },
         ]
+
+        if self.is_partial and len(self.games) != len(self.regular_season.games):
+            level_up_links.append(
+                {
+                    'description': "{} - full season".format(self.short_name),
+                    'href': self.regular_season.href,
+                },
+            )
+
+        return level_up_links
 
     @fully_cached_property
     def regular_season(self):
