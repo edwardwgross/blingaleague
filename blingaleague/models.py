@@ -246,6 +246,14 @@ class Game(models.Model, ComparableObject):
         return TeamSeason(self.loser.id, self.year)
 
     @fully_cached_property
+    def winner_team_season_before_game(self):
+        return TeamSeason(self.winner.id, self.year, week_max=self.week - 1)
+
+    @fully_cached_property
+    def loser_team_season_before_game(self):
+        return TeamSeason(self.loser.id, self.year, week_max=self.week - 1)
+
+    @fully_cached_property
     def blangums(self):
         return self.winner == self.week_object.blangums
 
@@ -2664,16 +2672,16 @@ class Matchup(object):
         return list(Game.objects.filter(winner=self.team2, loser=self.team1))
 
     @fully_cached_property
-    def team1_count(self):
+    def team1_win_count(self):
         return len(self.team1_wins)
 
     @fully_cached_property
-    def team2_count(self):
+    def team2_win_count(self):
         return len(self.team2_wins)
 
     @fully_cached_property
     def record(self):
-        return "{}-{}".format(self.team1_count, self.team2_count)
+        return "{}-{}".format(self.team1_win_count, self.team2_win_count)
 
     @fully_cached_property
     def trades(self):
@@ -2699,14 +2707,14 @@ class Matchup(object):
 
     @fully_cached_property
     def headline(self):
-        if self.team1_count == self.team2_count:
-            return "All-time series tied, {}-{}".format(self.team1_count, self.team2_count)
+        if self.team1_win_count == self.team2_win_count:
+            return "All-time series tied, {}-{}".format(self.team1_win_count, self.team2_win_count)
         else:
             text = "{} leads all-time series, {}-{}"
-            if self.team1_count > self.team2_count:
-                return text.format(self.team1.nickname, self.team1_count, self.team2_count)
+            if self.team1_win_count > self.team2_win_count:
+                return text.format(self.team1.nickname, self.team1_win_count, self.team2_win_count)
             else:
-                return text.format(self.team2.nickname, self.team2_count, self.team1_count)
+                return text.format(self.team2.nickname, self.team2_win_count, self.team1_win_count)
 
     @fully_cached_property
     def href(self):
