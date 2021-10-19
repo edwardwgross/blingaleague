@@ -965,7 +965,8 @@ class TeamSeason(ComparableObject):
             win_count = 0
             running_prob = decimal.Decimal(1)
             for i, outcome in enumerate(outcome_combo):
-                wp = expected_wins_by_game[i]
+                # per-game expected wins can be <0 or >1 in edge cases
+                wp = min(max(expected_wins_by_game[i], 0), 1)
                 if outcome:
                     win_count += 1
                     running_prob *= wp
