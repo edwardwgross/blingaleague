@@ -878,6 +878,10 @@ class TeamSeason(ComparableObject):
         return len(self.games) < regular_season_weeks(self.year)
 
     @fully_cached_property
+    def is_current_season(self):
+        return self.season_object.is_current_season
+
+    @fully_cached_property
     def is_upcoming_season(self):
         return self.season_object.is_upcoming_season and not self.team.defunct
 
@@ -2057,6 +2061,10 @@ class Season(ComparableObject):
             self.standings_table,
             key=_post_playoffs_sort,
         )
+
+    @fully_cached_property
+    def is_current_season(self):
+        return self.is_partial and self.year is not None and self.year == Week.latest().year
 
     @fully_cached_property
     def is_upcoming_season(self):
