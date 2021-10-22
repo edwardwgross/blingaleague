@@ -38,8 +38,8 @@
           </td>
           <td style="text-align:left; width:auto" {% if row.team_season.is_current_season %}class="emphasize"{% endif %}>
             <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
-            {% if row.team_season.regular_season.is_partial and not week_max %}
-              <small>{{ row.team_season.regular_season.games|length }} game{{ row.team_season.regular_season.games|pluralize }}</small>
+            {% if row.team_season.is_partial %}
+              <small>{{ row.team_season.games|length }} game{{ row.team_season.games|pluralize }}</small>
             {% endif %}
           </td>
           <td>{{ row.value|intcomma }}</td>
