@@ -65,14 +65,13 @@ TOP_SEASONS_STATS = [
         'require_full_season': True,
     },
     {
-        'title': 'Most Expected Wins',
-        'attr': 'expected_wins',
+        'title': 'Best Expected Winning Percentage',
+        'attr': 'expected_win_pct',
         'sort_desc': True,
-        'min_games': 1,
     },
     {
-        'title': 'Fewest Expected Wins',
-        'attr': 'expected_wins',
+        'title': 'Worst Expected Winning Percentage',
+        'attr': 'expected_win_pct',
         'require_full_season': True,
     },
     {
