@@ -26,7 +26,8 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    ExpectedWinsCalculatorForm
 from .utils import sorted_seasons_by_attr, \
                    sorted_expected_wins_odds, \
-                   build_belt_holder_list
+                   build_belt_holder_list, \
+                   TOP_SEASONS_DEFAULT_NUM_FORMAT
 
 
 CACHE = caches['blingaleague']
@@ -65,14 +66,15 @@ TOP_SEASONS_STATS = [
         'require_full_season': True,
     },
     {
-        'title': 'Best Expected Winning Percentage',
+        'title': 'Best Expected Win Pct',
         'attr': 'expected_win_pct',
         'sort_desc': True,
+        'num_format': '{:.3f}',
     },
     {
-        'title': 'Worst Expected Winning Percentage',
+        'title': 'Worst Expected Win Pct',
         'attr': 'expected_win_pct',
-        'require_full_season': True,
+        'num_format': '{:.3f}',
     },
     {
         'title': 'Best All-Play Record',
@@ -903,6 +905,7 @@ class TopSeasonsView(TemplateView):
             require_full_season = stat_dict.get('require_full_season', False)
             min_games = stat_dict.get('min_games', TOP_SEASONS_GAME_THRESHOLD)
             display_attr = stat_dict.get('display_attr', None)
+            num_format = stat_dict.get('num_format', TOP_SEASONS_DEFAULT_NUM_FORMAT)
 
             table_rows = sorted_seasons_by_attr(
                 attr,
@@ -911,6 +914,7 @@ class TopSeasonsView(TemplateView):
                 require_full_season=require_full_season,
                 min_games=min_games,
                 display_attr=display_attr,
+                num_format=num_format,
                 week_max=week_max,
             )
             top_seasons_tables.append({

@@ -6,6 +6,8 @@ from blingaleague.utils import regular_season_weeks
 
 CACHE = caches['blingaleague']
 
+TOP_SEASONS_DEFAULT_NUM_FORMAT = '{:.2f}'
+
 
 def sorted_seasons_by_attr(
     attr,
@@ -14,6 +16,7 @@ def sorted_seasons_by_attr(
     require_full_season=False,
     min_games=1,
     display_attr=None,
+    num_format=TOP_SEASONS_DEFAULT_NUM_FORMAT,
     week_max=None,
 ):
     all_attrs = []
@@ -35,6 +38,7 @@ def sorted_seasons_by_attr(
         limit=limit,
         sort_desc=sort_desc,
         display_attr=display_attr,
+        num_format=num_format,
     )
 
 
@@ -61,7 +65,7 @@ def build_ranked_seasons_table(
     season_stat_tuples,
     limit=None,
     sort_desc=False,
-    num_format='{:.2f}',
+    num_format=TOP_SEASONS_DEFAULT_NUM_FORMAT,
     display_attr=None,
 ):
     sorted_seasons = sorted(
