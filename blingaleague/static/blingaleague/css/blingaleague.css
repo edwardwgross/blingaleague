@@ -455,6 +455,14 @@ table.blingalytics_table.sortable tbody tr::before {
     width: 50px;
 }
 
+#top_seasons .emphasize {
+    font-style: italic;
+}
+
+#top_seasons .emphasize small {
+    font-style: normal;
+}
+
 .blingalytics th,
 .blingalytics td,
 .blingalytics thead tr::before,
