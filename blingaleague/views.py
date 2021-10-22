@@ -132,7 +132,7 @@ class SingleSeasonView(TemplateView):
                 week_max = int(request.GET.get('week_max', regular_season_weeks(year)))
                 season_kwargs['week_max'] = week_max
                 hide_playoff_finish = week_max < blingabowl_week(year)
-            except ValueError:
+            except (ValueError, TypeError):
                 # ignore if user passed in a non-int
                 pass
 
@@ -284,15 +284,13 @@ class TeamSeasonView(GamesView):
 
     def get(self, request, team, year):
         week_max = None
-        if 'week_max' in request.GET:
-            try:
-                week_max = min(
-                    int(request.GET.get('week_max', regular_season_weeks(year))),
-                    regular_season_weeks(year),
-                )
-            except ValueError:
-                # ignore if user passed in a non-int
-                pass
+        try:
+            week_max = int(request.GET.get('week_max', regular_season_weeks(year)))
+            # regardless of given value, cap at the number of regular season weeks
+            week_max = min(week_max, regular_season_weeks(year))
+        except (ValueError, TypeError):
+            # ignore if user passed in a non-int
+            pass
 
         team_season = TeamSeason(
             team,

@@ -2,7 +2,12 @@
 
 {% load humanize %}
 
-{% block title %}{{ season }}{% endblock %}
+{% block title %}
+  {{ season }}
+  {% if week_max %}
+    (through week {{ week_max }})
+  {% endif %}
+{% endblock %}
 
 {% block content %}
 <h1>
