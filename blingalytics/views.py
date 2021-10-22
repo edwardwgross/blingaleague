@@ -894,7 +894,7 @@ class KeeperFinderView(TemplateView):
 class TopSeasonsView(TemplateView):
     template_name = 'blingalytics/top_seasons.html'
 
-    def generate_top_seasons_tables(self, row_limit):
+    def generate_top_seasons_tables(self, row_limit, week_max):
         top_seasons_tables = []
 
         for stat_dict in TOP_SEASONS_STATS:
@@ -912,6 +912,7 @@ class TopSeasonsView(TemplateView):
                 require_full_season=require_full_season,
                 min_games=min_games,
                 display_attr=display_attr,
+                week_max=week_max,
             )
             top_seasons_tables.append({
                 'title': title,
@@ -939,23 +940,32 @@ class TopSeasonsView(TemplateView):
 
     def get(self, request):
         row_limit = 10
-
         try:
-            row_limit = int(request.GET.get('limit', row_limit))
-        except ValueError:
+            row_limit = int(request.GET.get('limit', 10))
+        except (ValueError, TypeError):
             # ignore if user passed in a non-int
             pass
 
-        cache_key = "blingalytics_top_seasons|{}".format(row_limit)
+        week_max = None
+        try:
+            week_max = int(request.GET.get('week_max', None))
+            if week_max < 1:
+                week_max = None
+        except (ValueError, TypeError):
+            # ignore if user passed in a non-int
+            pass
+
+        cache_key = "blingalytics_top_seasons|{}|{}".format(row_limit, week_max)
 
         if cache_key in CACHE:
             top_seasons_tables = CACHE.get(cache_key)
         else:
-            top_seasons_tables = self.generate_top_seasons_tables(row_limit)
+            top_seasons_tables = self.generate_top_seasons_tables(row_limit, week_max)
             CACHE.set(cache_key, top_seasons_tables)
 
         context = {
             'top_seasons_tables': top_seasons_tables,
+            'week_max': week_max,
         }
 
         return self.render_to_response(context)

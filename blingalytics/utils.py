@@ -7,11 +7,6 @@ from blingaleague.utils import regular_season_weeks
 CACHE = caches['blingaleague']
 
 
-def has_enough_games(team_season):
-    min_games_threshold = int(regular_season_weeks(team_season.year) / 2)
-    return len(team_season.regular_season.games) >= min_games_threshold
-
-
 def sorted_seasons_by_attr(
     attr,
     limit=None,
@@ -19,12 +14,19 @@ def sorted_seasons_by_attr(
     require_full_season=False,
     min_games=1,
     display_attr=None,
+    week_max=None,
 ):
     all_attrs = []
     for team_season in TeamSeason.all():
-        if team_season.is_partial:
-            if require_full_season or len(team_season.games) < min_games:
+        if week_max and (week_max < regular_season_weeks(team_season.year)):
+            # ignore any specified week_max parameters that are longer than the season
+            team_season = TeamSeason(team_season.team.id, team_season.year, week_max=week_max)
+            if len(team_season.games) < week_max:
                 continue
+        else:
+            if team_season.is_partial:
+                if require_full_season or len(team_season.games) < min_games:
+                    continue
 
         all_attrs.append((team_season, getattr(team_season, attr)))
 

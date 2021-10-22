@@ -2,10 +2,20 @@
 
 {% load humanize %}
 
-{% block title %}Top Seasons{% endblock %}
+{% block title %}
+  Top Seasons
+  {% if week_max %}
+    (through week {{ week_max }})
+  {% endif %}
+{% endblock %}
 
 {% block content %}
-<h1>Top Seasons</h1>
+<h1>
+  Top Seasons
+  {% if week_max %}
+    (through week {{ week_max }})
+  {% endif %}
+</h1>
 <h2>(regular season games only)</h2>
 
 <div id="top_seasons" class="blingalytics">
@@ -26,7 +36,7 @@
           <td><a href="{{ row.team_season.season_object.href }}">{{ row.team_season.year }}</a></td>
           <td style="text-align:left; width:auto">
             <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
-            {% if row.team_season.is_partial %}
+            {% if row.team_season.regular_season.is_partial and not week_max %}
               <small>{{ row.team_season.regular_season.games|length }} game{{ row.team_season.regular_season.games|pluralize }}</small>
             {% endif %}
           </td>
