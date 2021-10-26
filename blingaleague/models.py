@@ -930,10 +930,37 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def strength_of_schedule_str(self):
+        return self._strength_of_schedule_to_string()
+
+    @fully_cached_property
+    def future_strength_of_schedule(self):
+        if len(self.games) == 0:
+            return HALF
+
+        if not self.is_partial:
+            return 0
+
+        future_xw_pct_against = []
+        for opponent in self.yet_to_play:
+            opponent_season = TeamSeason(opponent.id, self.year, week_max=self.week_max)
+            future_xw_pct_against.append(opponent_season.expected_win_pct)
+
+        return (statistics.mean(future_xw_pct_against) - HALF) / HALF
+
+    @fully_cached_property
+    def future_strength_of_schedule_str(self):
+        return self._strength_of_schedule_to_string(is_future=True)
+
+    def _strength_of_schedule_to_string(self, is_future=False):
+        raw_strength_of_schedule = self.strength_of_schedule
+        if is_future:
+            raw_strength_of_schedule = self.future_strength_of_schedule
+
         prefix = ''
-        if self.strength_of_schedule > 0:
+        if raw_strength_of_schedule > 0:
             prefix = '+'
-        return "{}{:.1f}%".format(prefix, 100 * self.strength_of_schedule)
+
+        return "{}{:.1f}%".format(prefix, 100 * raw_strength_of_schedule)
 
     @fully_cached_property
     def expected_wins_luck(self):
