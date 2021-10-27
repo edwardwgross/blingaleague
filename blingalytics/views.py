@@ -25,7 +25,6 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    TradeFinderForm, KeeperFinderForm, \
                    ExpectedWinsCalculatorForm
 from .utils import sorted_seasons_by_attr, \
-                   sorted_expected_wins_odds, \
                    build_belt_holder_list, \
                    TOP_SEASONS_DEFAULT_NUM_FORMAT
 
@@ -202,6 +201,20 @@ TOP_SEASONS_STATS = [
         'attr': 'longest_losing_streak',
         'sort_desc': True,
         'min_games': 1,
+    },
+    {
+        'title': 'Highest Undefeated Odds',
+        'attr': 'undefeated_odds',
+        'sort_desc': True,
+        'require_full_season': True,
+        'num_format': '{:.2%}',
+    },
+    {
+        'title': 'Highest Winless Odds',
+        'attr': 'winless_odds',
+        'sort_desc': True,
+        'require_full_season': True,
+        'num_format': '{:.2%}',
     },
 ]
 
@@ -916,23 +929,6 @@ class TopSeasonsView(TemplateView):
                 display_attr=display_attr,
                 num_format=num_format,
                 week_max=week_max,
-            )
-            top_seasons_tables.append({
-                'title': title,
-                'rows': table_rows,
-            })
-
-        win_odds_categories = (
-            # title, win_count
-            ('Highest Undefeated Odds', 13),
-            ('Highest Winless Odds', 0),
-        )
-
-        for title, win_count in win_odds_categories:
-            table_rows = sorted_expected_wins_odds(
-                win_count,
-                limit=row_limit,
-                sort_desc=True,
             )
             top_seasons_tables.append({
                 'title': title,

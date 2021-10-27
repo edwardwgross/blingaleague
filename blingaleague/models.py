@@ -1466,6 +1466,17 @@ class TeamSeason(ComparableObject):
 
         return MAX_SIMILARITY_SCORE * combined_score / sum(attr_weights.values())
 
+    @fully_cached_property
+    def undefeated_odds(self):
+        return self._odds_of_n_wins(len(self.games))
+
+    @fully_cached_property
+    def winless_odds(self):
+        return self._odds_of_n_wins(0)
+
+    def _odds_of_n_wins(self, win_count):
+        return self.expected_win_distribution.get(win_count, 0)
+
     def _filter_similar_seasons(self, threshold):
         base_season = self
         week_max = len(self.games)

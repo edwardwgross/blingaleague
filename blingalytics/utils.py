@@ -42,25 +42,6 @@ def sorted_seasons_by_attr(
     )
 
 
-def sorted_expected_wins_odds(win_count, limit=None, sort_desc=False):
-    all_odds = []
-    for team_season in TeamSeason.all():
-        if team_season.is_partial:
-            continue
-
-        win_odds = team_season.expected_win_distribution.get(win_count, 0)
-        if win_odds > 0:
-            # we'll format as a percent, so multiply here
-            all_odds.append((team_season, 100 * win_odds))
-
-    return build_ranked_seasons_table(
-        all_odds,
-        limit=limit,
-        sort_desc=sort_desc,
-        num_format='{:.2f}%'
-    )
-
-
 def build_ranked_seasons_table(
     season_stat_tuples,
     limit=None,
