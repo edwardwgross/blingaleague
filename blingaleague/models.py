@@ -2920,7 +2920,7 @@ class Trade(models.Model, ComparableObject):
         return str(self)
 
     class Meta:
-        ordering = ['-year', '-week', '-date']
+        ordering = ['-year', '-week', '-date', '-pk']
 
 
 class TradedAsset(models.Model):
