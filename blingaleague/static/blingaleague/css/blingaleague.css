@@ -220,6 +220,10 @@ nav .icon-bar {
     height: 40px;
 }
 
+.emphasize {
+    font-style: italic;
+}
+
 table.sortable th {
     cursor: pointer;
 }
@@ -453,10 +457,6 @@ table.blingalytics_table.sortable tbody tr::before {
 
 #top_seasons table.blingalytics_table td {
     width: 50px;
-}
-
-#top_seasons .emphasize {
-    font-style: italic;
 }
 
 #top_seasons .emphasize small {

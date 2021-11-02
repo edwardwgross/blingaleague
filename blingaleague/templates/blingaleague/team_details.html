@@ -32,7 +32,7 @@
     </tr>
     {% for team_season in team.seasons reversed %}
       {% if team_season.games %}
-        <tr>
+        <tr {% if team_season.is_current_season %}class="emphasize"{% endif %}>
           <td><a href="{{ team_season.season_object.href }}">{{ team_season.season_object.year }}</a></td>
           <td sorttable_customkey="{{ team_season.place_numeric }}"><a href="{{ team_season.href }}">{{ team_season.place }}</a></td>
           <td>{{ team_season.win_count }}</td>
