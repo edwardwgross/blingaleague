@@ -98,6 +98,17 @@ TOP_SEASONS_STATS = [
         'display_attr': 'strength_of_schedule_str',
     },
     {
+        'title': 'Most Points Against',
+        'attr': 'points_against',
+        'sort_desc': True,
+        'min_games': 1,
+    },
+    {
+        'title': 'Fewest Points Against',
+        'attr': 'points_against',
+        'require_full_season': True,
+    },
+    {
         'title': 'Most Team Blangums',
         'attr': 'blangums_count',
         'sort_desc': True,
@@ -740,7 +751,7 @@ class TradeFinderView(TemplateView):
 
         return sorted(
             trades.distinct(),
-            key=lambda x: (x.year, x.week, x.date),
+            key=lambda x: (x.year, x.week, x.date, x.id),
         )
 
     def filter_traded_assets(self, trades, form_data):
