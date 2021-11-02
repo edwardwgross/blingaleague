@@ -76,15 +76,15 @@ TOP_SEASONS_STATS = [
         'num_format': '{:.3f}',
     },
     {
-        'title': 'Best All-Play Record',
+        'title': 'Best All-Play Win Pct',
         'attr': 'all_play_win_pct',
         'sort_desc': True,
-        'display_attr': 'all_play_record_str',
+        'num_format': '{:.3f}',
     },
     {
-        'title': 'Worst All-Play Record',
+        'title': 'Worst All-Play Win Pct',
         'attr': 'all_play_win_pct',
-        'display_attr': 'all_play_record_str',
+        'num_format': '{:.3f}',
     },
     {
         'title': 'Hardest Schedule',
