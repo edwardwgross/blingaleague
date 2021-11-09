@@ -4,9 +4,14 @@ import pprint
 from blingaleague.models import Game
 
 
-def compare_consistency(average, penalty=0, games=4, players=1, min_year=2016, max_year=2020):
+def compare_consistency(average, penalty=0, players=1, min_year=2016, max_year=2020):
     if average < 10 or average > 30:
         raise ValueError('Average score must be between 10 and 30')
+
+    if players < 1 or players > 7:
+        raise ValueError('Players must be between 1 and 7')
+
+    games = 4
 
     consistent_player = games * [average]
 
