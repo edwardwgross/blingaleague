@@ -275,6 +275,18 @@ table#team_vs_team_grid .empty {
 table#season_list {
 }
 
+table#season_list .team {
+}
+
+table#season_list .value {
+    text-align: right;
+    padding-right: 18px;
+}
+
+table#season_list .value:last-of-type {
+    padding-right: 6px;
+}
+
 table#team_list {
 }
 

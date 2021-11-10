@@ -11,9 +11,9 @@
   <tr>
     <th>Year</th>
     <th>Blingabowl Champion</th>
-    <th>First Place</th>
-    <th>Most Points</th>
-    <th>Most Expected Wins</th>
+    <th colspan="2">First Place</th>
+    <th colspan="2">Most Points</th>
+    <th colspan="2">Highest Expected Win Pct</th>
   </tr>
   {% for season in season_list %}
     <tr>
@@ -23,7 +23,7 @@
         </a>
       </td>
       {% if season.weeks_with_games %}
-        <td>
+        <td class="team">
           <a href="{{ season.champion.href }}">
             {{ season.champion.team }}
             {% if season.champion != season.first_place %}
@@ -31,26 +31,17 @@
             {% endif %}
           </a>
         </td>
-        <td>
-          <a href="{{ season.first_place.href }}">
-            {{ season.first_place.team }} ({{ season.first_place.record }})
-          </a>
-        </td>
-        <td>
-          <a href="{{ season.most_points.href }}">
-            {{ season.most_points.team }} ({{ season.most_points.points|intcomma }})
-          </a>
-        </td>
-        <td>
-          <a href="{{ season.most_expected_wins.href }}">
-            {{ season.most_expected_wins.team }} ({{ season.most_expected_wins.expected_wins|floatformat:2 }})
-          </a>
-        </td>
+        <td class="team"><a href="{{ season.first_place.href }}">{{ season.first_place.team }}</a></td>
+        <td class="value">{{ season.first_place.record }}</td>
+        <td class="team"><a href="{{ season.most_points.href }}">{{ season.most_points.team }}</a></td>
+        <td class="value">{{ season.most_points.points|intcomma }}</td>
+        <td class="team"><a href="{{ season.most_expected_wins.href }}">{{ season.most_expected_wins.team }}</a></td>
+        <td class="value">{{ season.most_expected_wins.expected_win_pct|floatformat:3 }}</td>
       {% else %}
         <td/> {# Champion #}
-        <td/> {# First Place #}
-        <td/> {# Most Points #}
-        <td/> {# Most Expected Wins #}
+        <td/><td/> {# First Place #}
+        <td/><td/> {# Most Points #}
+        <td/><td/> {# Most Expected Wins #}
       {% endif %}
     </tr>
   {% endfor %}
