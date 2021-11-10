@@ -318,7 +318,7 @@ table.trades,
 
 #games .game:first-of-type,
 #trades .trade:first-of-type {
-    border-top: 1px solid #41b6e6;
+    /*border-top: 1px solid #41b6e6;*/
 }
 
 #games .game:last-of-type,
