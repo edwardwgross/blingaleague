@@ -22,7 +22,7 @@
       <th>Playoff Finish</th>
     </tr>
     {% for similar_season in base_object.most_similar %}
-      <tr>
+      <tr {% if similar_season.season.is_current_season %}class="emphasize"{% endif %}>
         <td>{{ forloop.counter }}</td>
         <td><strong>{{ similar_season.score|floatformat:0 }}</strong></td>
         <td><a href="{{ similar_season.season.season_object.href }}">{{ similar_season.season.year }}</a></td>
