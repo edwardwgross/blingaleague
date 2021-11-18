@@ -16,7 +16,7 @@
     <th colspan="2">Highest Expected Win Pct</th>
   </tr>
   {% for season in season_list %}
-    <tr>
+    <tr {% if season.is_current_season %}class="emphasize"{% endif %}>
       <td>
         <a href="{{ season.href }}">
           {{ season.year }}
