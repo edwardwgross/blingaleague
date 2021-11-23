@@ -82,6 +82,7 @@ def new_gazette_body_template():
         '### Pickup of the Week',
         '### Blessed Cahoots',
         '### Pryor Play of the Week',
+        '### D\'Ernest D\'oh',
     ])
 
     if current_season.is_partial:
