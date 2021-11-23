@@ -20,9 +20,11 @@
 
 <div id="top_seasons" class="blingalytics">
   <div class="table_links">
-    {% for table in top_seasons_tables %}
-      <a href="#{{ table.title|slugify }}"><small>[{{ table.title }}]</small></a>
-    {% endfor %}
+    <ul>
+      {% for table in top_seasons_tables %}
+        <li><a href="#{{ table.title|slugify }}"><small>{{ table.title }}</small></a></li>
+      {% endfor %}
+    </ul>
   </div>
 
   {% for table in top_seasons_tables %}

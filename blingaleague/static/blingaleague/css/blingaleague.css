@@ -455,6 +455,25 @@ table.blingalytics_table.sortable tbody tr::before {
     white-space: nowrap;
 }
 
+#top_seasons .table_links {
+    column-count: 4;
+}
+
+#top_seasons .table_links ul {
+    margin-left: 4px;
+    text-indent: -4px;
+}
+
+#top_seasons .table_links ul li {
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+#top_seasons .table_links a {
+    white-space: normal;
+    line-height: 1;
+}
+
 #top_seasons table.blingalytics_table {
     display: inline-block;
     vertical-align: top;
@@ -759,6 +778,10 @@ h3.no_results_message {
     .navbar-collapse {
         height: 100% !important;
         max-height: 100% !important;
+    }
+
+    #top_seasons .table_links {
+        column-count: 2;
     }
 }
 
