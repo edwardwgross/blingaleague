@@ -283,14 +283,16 @@ class TeamSeasonView(GamesView):
         return graph_html
 
     def get(self, request, team, year):
-        week_max = None
-        try:
-            week_max = int(request.GET.get('week_max', regular_season_weeks(year)))
-            # regardless of given value, cap at the number of regular season weeks
-            week_max = min(week_max, regular_season_weeks(year))
-        except (ValueError, TypeError):
-            # ignore if user passed in a non-int
-            pass
+        week_max = request.GET.get('week_max', None)
+
+        if week_max is not None:
+            try:
+                week_max = int(week_max)
+                # regardless of given value, cap at the number of total weeks
+                week_max = min(week_max, blingabowl_week(year))
+            except (ValueError, TypeError):
+                # ignore if user passed in a non-int
+                week_max = None
 
         team_season = TeamSeason(
             team,

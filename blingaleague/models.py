@@ -1479,25 +1479,24 @@ class TeamSeason(ComparableObject):
 
     def _filter_similar_seasons(self, threshold):
         base_season = self
-        week_max = len(self.games)
+        week_max = base_season.week_max
 
         if week_max > regular_season_weeks(self.year):
             base_season = self.regular_season
-            week_max = regular_season_weeks(self.year)
+            week_max = None
 
-        for season in Season.all():
-            for team_id in Member.objects.all().values_list('id', flat=True):
-                if team_id == base_season.team.id and season.year == base_season.year:
-                    continue
+        for other_team_season in TeamSeason.all():
+            if other_team_season.team.id == self.team.id and other_team_season.year == self.year:
+                continue
 
-                team_season = TeamSeason(team_id, season.year, week_max=week_max)
+            other_comp_season = TeamSeason(other_team_season.team.id, other_team_season.year, week_max=len(base_season.games))
 
-                if len(team_season.games) != week_max:
-                    continue
+            if len(other_comp_season.games) != len(base_season.games):
+                continue
 
-                sim_score = base_season.similarity_score(team_season)
-                if sim_score >= threshold:
-                    yield {'season': team_season, 'score': sim_score}
+            sim_score = base_season.similarity_score(other_comp_season)
+            if sim_score >= threshold:
+                yield {'season': other_comp_season, 'score': sim_score}
 
     @fully_cached_property
     def trades(self):
