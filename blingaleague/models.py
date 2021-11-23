@@ -1489,7 +1489,11 @@ class TeamSeason(ComparableObject):
             if other_team_season.team.id == self.team.id and other_team_season.year == self.year:
                 continue
 
-            other_comp_season = TeamSeason(other_team_season.team.id, other_team_season.year, week_max=len(base_season.games))
+            other_comp_season = TeamSeason(
+                other_team_season.team.id,
+                other_team_season.year,
+                week_max=len(base_season.games),
+            )
 
             if len(other_comp_season.games) != len(base_season.games):
                 continue
