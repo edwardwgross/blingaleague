@@ -637,6 +637,11 @@ h3.no_results_message {
 
 #gazette_detail h1 {
     font-size: 160%;
+    margin-top: 24px
+}
+
+#gazette_detail h1:first-of-type {
+    margin-top: 0;
 }
 
 #gazette_detail h2,
