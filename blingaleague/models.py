@@ -2983,7 +2983,7 @@ class TradedAsset(models.Model):
         return str(self)
 
     class Meta:
-        ordering = ['trade', 'sender', 'receiver', 'keeper_cost', 'name']
+        ordering = ['trade', 'receiver', 'keeper_cost', 'name', 'sender']
 
 
 class Keeper(models.Model, ComparableObject):

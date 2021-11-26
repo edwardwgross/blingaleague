@@ -761,7 +761,7 @@ class TradeFinderView(TemplateView):
         for trade in trades:
             # sort it as we build, not at the end
             traded_assets = trade.traded_assets.order_by(
-                'receiver', 'sender', 'keeper_cost', 'name',
+                'receiver', 'keeper_cost', 'name', 'sender',
             )
 
             # user had the option to only show the assets that matched (vs. the full trades)
