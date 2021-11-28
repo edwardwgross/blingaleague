@@ -2693,6 +2693,28 @@ class Week(ComparableObject):
             ),
         )
 
+    def __sub__(self, other_week):
+        if other_week > self:
+            return -1 * (other_week - self)
+
+        if self.year == other_week.year:
+            return self.week - other_week.week
+
+        # how many weeks left in the earlier week's season?
+        week_diff = regular_season_weeks(other_week.year) - other_week.week
+
+        # for each season in between the two weeks in question, need to add in
+        # the number of weeks individually, since it could be different each season
+        year = other_week.year + 1
+        while year < self.year:
+            week_diff += regular_season_weeks(year)
+            year += 1
+
+        # how many weeks into the later week's season are we?
+        week_diff += self.week
+
+        return week_diff
+
     def __str__(self):
         return "Week {}, {}".format(self.week, self.year)
 
