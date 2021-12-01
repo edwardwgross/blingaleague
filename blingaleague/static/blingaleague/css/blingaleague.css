@@ -629,7 +629,8 @@ h3.no_results_message {
     font-weight: normal;
 }
 
-#gazette_detail ul {
+#gazette_detail ul,
+#gazette_detail ol {
     margin-bottom: 16px;
 }
 
