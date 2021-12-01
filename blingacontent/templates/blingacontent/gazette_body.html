@@ -4,6 +4,14 @@
 <div id="single_gazette" class="blingacontent" {% if for_email %}style="font-size:14px"{% endif %}>
   <h1 class="gazette_headline">The Sanderson Gazette - {{ gazette }}</h1>
   <div id="gazette_detail" class="blingacontent_section" {% if for_email %}style="width:90%"{% endif %}>
+    {% if for_email %}
+      <p>
+        <a href="{{ gazette.full_url }}" class="link">
+          Read <em>{{ gazette.headline }}</em> on blingaleague.com
+        </a>
+      </p>
+    {% endif %}
+
     {% if gazette.use_markdown %}
       {{ gazette.body.strip|markdown_filter|safe }}
     {% else %}
@@ -19,9 +27,7 @@
         {% endfor %}
       </p>
       <p>
-        <a href="{{ gazette.full_url }}" class="link">
-          Read <em>{{ gazette.headline }}</em> on blingaleague.com
-        </a>
+        <a href="{{ gazette.gazette_list_full_url }}" class="link">All Sanderson Gazettes</a>
       </p>
     {% else %}
       <p>
