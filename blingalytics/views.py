@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from blingaleague.models import Game, Week, Member, TeamSeason, \
                                 Season, Matchup, Trade, Keeper, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
-                                position_sort_key
+                                position_sort_key, calculate_expected_wins
 from blingaleague.utils import scatter_graph_html, regular_season_weeks
 
 from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
@@ -288,7 +288,7 @@ class ExpectedWinsView(TemplateView):
 
         xw_values = []
         for score in scores:
-            xw_value = float(scaling_function(Game.expected_wins(score)))
+            xw_value = float(scaling_function(calculate_expected_wins(score)))
             xw_values.append(min(xw_value, 1))
 
         custom_options = {
@@ -324,7 +324,7 @@ class ExpectedWinsView(TemplateView):
                 scaling_function = Season(year).scale_expected_wins
 
         if score is not None:
-            expected_wins = scaling_function(Game.expected_wins(score))
+            expected_wins = scaling_function(calculate_expected_wins(score))
 
         context = {
             'form': expected_wins_form,

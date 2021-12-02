@@ -73,6 +73,20 @@ def compare_two_scores(score1, score2):
     return OUTCOME_TIE
 
 
+def calculate_expected_wins(*game_scores, include_playoffs=False):
+    all_scores = Game.all_scores(include_playoffs=include_playoffs)
+
+    all_scores_count = decimal.Decimal(len(all_scores))
+
+    def _win_expectancy(score):
+        win_list = list(filter(lambda x: x < score, all_scores))
+        tie_list = list(filter(lambda x: x == score, all_scores))
+        win_count = len(win_list) + 0.5 * len(tie_list)
+        return decimal.Decimal(win_count) / all_scores_count
+
+    return sum(_win_expectancy(score) for score in game_scores)
+
+
 class ComparableObject(object):
 
     @property
@@ -363,20 +377,6 @@ class Game(models.Model, ComparableObject):
             CACHE.set(cache_key, all_scores)
 
         return all_scores
-
-    @classmethod
-    def expected_wins(cls, *game_scores, include_playoffs=False):
-        all_scores = cls.all_scores(include_playoffs=include_playoffs)
-
-        all_scores_count = decimal.Decimal(len(all_scores))
-
-        def _win_expectancy(score):
-            win_list = list(filter(lambda x: x < score, all_scores))
-            tie_list = list(filter(lambda x: x == score, all_scores))
-            win_count = len(win_list) + 0.5 * len(tie_list)
-            return decimal.Decimal(win_count) / all_scores_count
-
-        return sum(_win_expectancy(score) for score in game_scores)
 
     def _sequential_team_game(self, team, backwards=False):
         sequential_team_game = None
@@ -888,7 +888,7 @@ class TeamSeason(ComparableObject):
     @fully_cached_property
     def raw_expected_wins_by_game(self):
         return list(map(
-            lambda x: Game.expected_wins(x),
+            lambda x: calculate_expected_wins(x),
             self.game_scores,
         ))
 
@@ -909,7 +909,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def raw_expected_wins_against(self):
-        return Game.expected_wins(*self.game_scores_against)
+        return calculate_expected_wins(*self.game_scores_against)
 
     @fully_cached_property
     def expected_wins_against(self):
@@ -1941,7 +1941,7 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def total_raw_expected_wins(self):
-        return Game.expected_wins(*self.all_game_scores)
+        return calculate_expected_wins(*self.all_game_scores)
 
     def scale_expected_wins(self, raw_expected_wins, is_season_sum=False):
         # make sure we aren't including playoff games in the normalization
