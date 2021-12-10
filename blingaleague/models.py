@@ -2545,17 +2545,19 @@ class Week(ComparableObject):
     def all_play_record(self, team):
         all_play_record = defaultdict(int)
 
-        score_to_compare = self.team_to_score[team]
-        for team_score in self.team_scores:
-            if team_score['team'] == team:
-                continue
+        score_to_compare = self.team_to_score.get(team)
 
-            if team_score['score'] < score_to_compare:
-                all_play_record[OUTCOME_WIN] += 1
-            elif team_score['score'] == score_to_compare:
-                all_play_record[OUTCOME_TIE] += 1
-            else:
-                all_play_record[OUTCOME_LOSS] += 1
+        if score_to_compare:
+            for team_score in self.team_scores:
+                if team_score['team'] == team:
+                    continue
+
+                if team_score['score'] < score_to_compare:
+                    all_play_record[OUTCOME_WIN] += 1
+                elif team_score['score'] == score_to_compare:
+                    all_play_record[OUTCOME_TIE] += 1
+                else:
+                    all_play_record[OUTCOME_LOSS] += 1
 
         return all_play_record
 
