@@ -11,7 +11,7 @@
       <th/> {# Team #}
       <th>Record</th>
       <th>Points</th>
-      <th>Exp. W</th>
+      <th>Exp. %</th>
       <th title="Strength of Schedule">SOS</th>
       {% if base_object.is_partial %}
         <th>Final Record</th>
@@ -29,7 +29,7 @@
         <td style="text-align:left"><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
         <td style="text-align:center">{{ similar_season.season.record }}</td>
         <td>{{ similar_season.season.points|intcomma }}</td>
-        <td>{{ similar_season.season.expected_wins|floatformat:2 }}</td>
+        <td>{{ similar_season.season.expected_win_pct|floatformat:3 }}</td>
         <td>{{ similar_season.season.strength_of_schedule_str }}</td>
         {% if base_object.is_partial %}
           <td style="text-align:center">

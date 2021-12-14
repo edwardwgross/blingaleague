@@ -1481,7 +1481,7 @@ class TeamSeason(ComparableObject):
             other_comp_season = TeamSeason(
                 other_team_season.team.id,
                 other_team_season.year,
-                week_max=len(base_season.games),
+                week_max=week_max,
             )
 
             if base_season.is_partial and len(other_comp_season.games) != len(base_season.games):
