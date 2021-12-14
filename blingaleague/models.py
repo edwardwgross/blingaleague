@@ -1466,17 +1466,6 @@ class TeamSeason(ComparableObject):
 
         return MAX_SIMILARITY_SCORE * combined_score / sum(attr_weights.values())
 
-    @fully_cached_property
-    def undefeated_odds(self):
-        return self._odds_of_n_wins(len(self.games))
-
-    @fully_cached_property
-    def winless_odds(self):
-        return self._odds_of_n_wins(0)
-
-    def _odds_of_n_wins(self, win_count):
-        return self.expected_win_distribution.get(win_count, 0)
-
     def _filter_similar_seasons(self, threshold):
         base_season = self
         week_max = base_season.week_max
@@ -1495,12 +1484,23 @@ class TeamSeason(ComparableObject):
                 week_max=len(base_season.games),
             )
 
-            if len(other_comp_season.games) != len(base_season.games):
+            if base_season.is_partial and len(other_comp_season.games) != len(base_season.games):
                 continue
 
             sim_score = base_season.similarity_score(other_comp_season)
             if sim_score >= threshold:
                 yield {'season': other_comp_season, 'score': sim_score}
+
+    @fully_cached_property
+    def undefeated_odds(self):
+        return self._odds_of_n_wins(len(self.games))
+
+    @fully_cached_property
+    def winless_odds(self):
+        return self._odds_of_n_wins(0)
+
+    def _odds_of_n_wins(self, win_count):
+        return self.expected_win_distribution.get(win_count, 0)
 
     @fully_cached_property
     def trades(self):
