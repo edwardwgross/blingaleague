@@ -739,6 +739,10 @@ class TeamSeason(ComparableObject):
         return statistics.mean(self.game_scores)
 
     @fully_cached_property
+    def average_score_against(self):
+        return statistics.mean(self.game_scores_against)
+
+    @fully_cached_property
     def median_score(self):
         return statistics.median(self.game_scores)
 
@@ -780,6 +784,14 @@ class TeamSeason(ComparableObject):
             self.points,
             self.season_object.average_team_points,
             self.season_object.stdev_team_points,
+        )
+
+    @fully_cached_property
+    def zscore_points_against(self):
+        return self._zscore(
+            self.points,
+            self.season_object.average_team_points_against,
+            self.season_object.stdev_team_points_against,
         )
 
     @fully_cached_property
@@ -1932,6 +1944,14 @@ class Season(ComparableObject):
         return statistics.pstdev(map(lambda x: x.points, self.standings_table))
 
     @fully_cached_property
+    def average_team_points_against(self):
+        return statistics.mean(map(lambda x: x.points_against, self.standings_table))
+
+    @fully_cached_property
+    def stdev_team_points_against(self):
+        return statistics.pstdev(map(lambda x: x.points_against, self.standings_table))
+
+    @fully_cached_property
     def average_team_expected_wins(self):
         return statistics.mean(map(lambda x: x.expected_wins, self.standings_table))
 
@@ -2324,7 +2344,7 @@ class Season(ComparableObject):
             year=self.year,
             week__lte=self.week_max,
         ).order_by(
-            'week', 'date',
+            'week', 'date', 'pk',
         )
 
     @classmethod
