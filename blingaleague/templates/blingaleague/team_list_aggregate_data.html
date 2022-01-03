@@ -1,7 +1,8 @@
 {% load humanize %}
 
-<td>{{ season_list.first_active_year }}</td>
-<td>{% if team.defunct %}{{ season_list.last_active_year }}{% endif %}</td>
+<td sorttable_customkey="{{ season_list.last_active_year }}{{ season_list.first_active_year }}" style="text-align:center; font-size:smaller">
+  {{ season_list.first_active_year }}{% if team.defunct %}{% if season_list.first_active_year != season_list.last_active_year %}&ndash;{{ season_list.last_active_year }}{% endif %}{% else %}&ndash;current{% endif %}
+</td>
 <td>{{ season_list.win_count }}</td>
 <td>{{ season_list.loss_count }}</td>
 <td>{{ season_list.win_pct|floatformat:3 }}</td>
