@@ -96,10 +96,10 @@ def new_gazette_body_template():
     if last_week.week == blingabowl_week(last_week.year):
         sections.append(['# Blingapower Rankings'])
         sections.append(['# Draft Lottery'])
-    elif last_week.week == semifinals_week(last_week.year):
-        if current_season.trades:
-            sections.append(year_in_trades_section(current_season))
     else:
+        if last_week.week == semifinals_week(last_week.year) and current_season.trades:
+            sections.append(year_in_trades_section(current_season))
+
         sections.append([
             "# {} Preview".format(
                 Week.week_to_title(last_week.year, last_week.week + 1),
