@@ -31,9 +31,19 @@
         </td>
         <td class="team"><a href="{{ season.first_place.href }}">{{ season.first_place.team }}</a></td>
         <td class="value">{{ season.first_place.record }}</td>
-        <td class="team"><a href="{{ season.most_points.href }}">{{ season.most_points.team }}</a></td>
+        <td class="team">
+          <a href="{{ season.most_points.href }}">{{ season.most_points.team }}</a>
+          {% if season.most_points != season.first_place %}
+            <small>{{ season.most_points.place }} place</small>
+          {% endif %}
+        </td>
         <td class="value">{{ season.most_points.points|intcomma }}</td>
-        <td class="team"><a href="{{ season.most_expected_wins.href }}">{{ season.most_expected_wins.team }}</a></td>
+        <td class="team">
+          <a href="{{ season.most_expected_wins.href }}">{{ season.most_expected_wins.team }}</a>
+          {% if season.most_expected_wins != season.first_place %}
+            <small>{{ season.most_expected_wins.place }} place</small>
+          {% endif %}
+        </td>
         <td class="value">{{ season.most_expected_wins.expected_win_pct|floatformat:3 }}</td>
       {% else %}
         <td/> {# Champion #}
