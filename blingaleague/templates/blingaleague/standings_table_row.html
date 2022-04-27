@@ -21,6 +21,6 @@
 {% else %}
   <td style="text-align:center">{{ team_season.current_streak }}</td>
   {% if not hide_playoff_finish %}
-    <td style="text-align:left">{{ team_season.playoff_finish }}</td>
+    <td sorttable_customkey="{{ team_season.playoff_finish_sort_key }}" style="text-align:left">{{ team_season.playoff_finish }}</td>
   {% endif %}
 {% endif %}

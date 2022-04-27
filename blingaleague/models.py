@@ -839,6 +839,13 @@ class TeamSeason(ComparableObject):
         return ''
 
     @fully_cached_property
+    def playoff_finish_sort_key(self):
+        if self.playoff_finish_numeric is None:
+            return self.place_numeric
+
+        return self.playoff_finish_numeric
+
+    @fully_cached_property
     def made_playoffs(self):
         regular_season = self.regular_season
         return regular_season.place_numeric <= PLAYOFF_TEAMS and not regular_season.is_partial
