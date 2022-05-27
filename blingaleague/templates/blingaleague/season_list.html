@@ -11,6 +11,7 @@
   <tr>
     <th>Year</th>
     <th>Blingabowl Champion</th>
+    <th>Runner-Up</th>
     <th colspan="2">First Place</th>
     <th colspan="2">Most Points</th>
     <th colspan="2">Highest Expected Win Pct</th>
@@ -27,6 +28,12 @@
           <a href="{{ season.champion.href }}">{{ season.champion.team }}</a>
           {% if season.champion != season.first_place %}
             <small>#{{ season.champion.place_numeric }} seed</small>
+          {% endif %}
+        </td>
+        <td class="team">
+          <a href="{{ season.runner_up.href }}">{{ season.runner_up.team }}</a>
+          {% if season.runner_up.place_numeric != 2 %}
+            <small>#{{ season.runner_up.place_numeric }} seed</small>
           {% endif %}
         </td>
         <td class="team"><a href="{{ season.first_place.href }}">{{ season.first_place.team }}</a></td>

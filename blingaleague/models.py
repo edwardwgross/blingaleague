@@ -2031,6 +2031,13 @@ class Season(ComparableObject):
         return TeamSeason(self.postseason.place_1.id, self.year)
 
     @fully_cached_property
+    def runner_up(self):
+        if self.postseason is None:
+            return None
+
+        return TeamSeason(self.postseason.place_2.id, self.year)
+
+    @fully_cached_property
     def first_place(self):
         return self.standings_table[0]
 
