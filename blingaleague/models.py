@@ -1417,7 +1417,7 @@ class TeamSeason(ComparableObject):
     def level_up_links(self):
         level_up_links = [
             {
-                'description': 'Franchise index',
+                'description': "{} franchise index".format(self.team),
                 'href': self.team.href,
             },
             {
