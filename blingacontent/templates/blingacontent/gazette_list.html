@@ -22,7 +22,7 @@
     {% endfor %}
   </ul>
   <ul id="gazette_tags" class="blingacontent_section">
-    Tags:
+    <strong>Tags:</strong>
     {% tags_for_model blingacontent.Gazette as gazette_tags with counts %}
     {% for tag in gazette_tags %}
       <li>
