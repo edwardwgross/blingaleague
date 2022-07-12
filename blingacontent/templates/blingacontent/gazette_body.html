@@ -31,9 +31,10 @@
         {% endfor %}
       </ul>
     {% endif %}
-     <div id="gazette_footer" class="blingacontent_section">
+
+    <div id="gazette_footer" class="blingacontent_section">
       {% if for_email %}
-        <p>
+        <p style="margin:48px 0">
           <strong>Tags:</strong>
           {% tags_for_object gazette as gazette_tags %}
           {% for tag in gazette_tags %}
