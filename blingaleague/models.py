@@ -3086,6 +3086,96 @@ class Keeper(models.Model, ComparableObject):
         ordering = ['year', 'round', 'team', 'name']
 
 
+class DraftPick(models.Model, ComparableObject):
+    name = models.CharField(max_length=200)
+    position = models.CharField(
+        max_length=10,
+        choices=[(p, p) for p in POSITIONS],
+    )
+    year = models.IntegerField(db_index=True)
+    team = models.ForeignKey(Member, db_index=True, related_name='draft_picks')
+    round = models.IntegerField()
+    pick_in_round = models.IntegerField()
+    is_keeper = models.BooleanField(default=False)
+    original_team = models.ForeignKey(
+        Member,
+        db_index=True,
+        related_name='traded_picks',
+        blank=True,
+        null=True,
+    )
+    notes = models.TextField(blank=True, null=True)
+
+    _comparison_attr = 'year_round_pick'
+
+    @property
+    def cache_key(self):
+        return str(self.pk)
+
+    @fully_cached_property
+    def year_round_pick(self):
+        return (
+            self.year,
+            self.round,
+            self.pick_in_round,
+        )
+
+    @fully_cached_property
+    def overall_pick(self):
+        picks_per_round = len(Season(self.year).active_teams)
+        return (self.round - 1) * picks_per_round + self.pick_in_round
+
+    def clean(self):
+        errors = {}
+
+        if pick_in_round > len(Season(self.year).active_teams):
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message='Pick in round is greater than number of teams',
+                    code='pick_too_high',
+                ),
+            )
+
+        if round > 16:
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message='Round is greater than 16',
+                    code='round_too_high',
+                ),
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
+        super.clean()
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        clear_cached_properties
+
+    def __str__(self):
+        pick_str = "{}, {}.{:02}: {} - {} - {}".format(
+            self.year,
+            self.round,
+            self.pick_in_round,
+            self.name,
+            self.position,
+            self.team,
+        )
+
+        if self.is_keeper:
+            pick_str = "{} (keeper)".format(pick_str)
+
+        return pick_str
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        unique_together = ('year', 'round', 'pick_in_round')
+        ordering = ['year', 'round', 'pick_in_round']
+
+
 def build_object_cache(obj):
     print("{}: building cache for {}".format(datetime.datetime.now(), obj))
     for attr in dir(obj):
