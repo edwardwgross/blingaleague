@@ -9,7 +9,9 @@
   <h3><a href="{{ level_up_link.href }}">{{ level_up_link.description }}</a></h3>
 {% endfor %}
 
-{% if base_object.headline %}<h2>{{ base_object.headline }}</h2>{% endif %}
+{% for subheading in base_object.subheadings %}
+  <h2>{{ subheading }}</h2>
+{% endfor %}
 
 {% for sub_template in pre_games_sub_templates %}
   {% include sub_template %}

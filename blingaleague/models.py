@@ -1367,22 +1367,26 @@ class TeamSeason(ComparableObject):
         return None
 
     @fully_cached_property
-    def headline(self):
+    def subheadings(self):
         if not self.games:
-            return 'No games played'
+            return ['No games played']
 
-        text = "{}-{} ({:.3f}), {} points, {}".format(
+        subheadings = ["{}-{} ({:.3f}), {} points".format(
             self.headline_season.win_count,
             self.headline_season.loss_count,
             self.headline_season.win_pct,
             intcomma(self.headline_season.points),
-            self.headline_season.place,
-        )
+        )]
 
         if self.playoff_finish and not self.is_partial:
-            text = "{} (regular season), {} (playoffs)".format(text, self.playoff_finish)
+            subheadings.extend([
+                "{} place (regular season)".format(self.headline_season.place),
+                "{} place (playoffs)".format(self.playoff_finish),
+            ])
+        else:
+            subheadings.append("{} place".format(self.headline_season.place))
 
-        return text
+        return subheadings
 
     @fully_cached_property
     def href(self):
@@ -1584,7 +1588,7 @@ class TeamSeason(ComparableObject):
     def gazette_postmortem_str(self):
         return "### [{}, {}, {:.2f} expected wins]({})".format(
             self.team,
-            self.headline,
+            ', '.join(self.subheadings),
             self.expected_wins,
             self.gazette_link,
         )
@@ -2444,21 +2448,21 @@ class Season(ComparableObject):
         )
 
     @fully_cached_property
-    def headline(self):
+    def subheadings(self):
         # if the specified week_max is during the playoffs,
         # but doesn't include the Blingabowl week,
-        # don't populate the headline
+        # leave the subheadings blank
         if regular_season_weeks(self.year) < self.week_max < blingabowl_week(self.year):
-            return None
+            return []
 
         if self.postseason is not None and self.postseason.place_1:
-            return "Blingabowl {}: {} def. {}".format(
+            return ["Blingabowl {}: {} def. {}".format(
                 self.postseason.blingabowl,
                 self.postseason.place_1,
                 self.postseason.place_2,
-            )
+            )]
 
-        return None
+        return []
 
     def __str__(self):
         if self.year:
@@ -2608,17 +2612,17 @@ class Week(ComparableObject):
         return self.team_scores_sorted[-1]['team']
 
     @fully_cached_property
-    def headline(self):
+    def subheadings(self):
         if len(self.games) == 0:
-            return 'No games yet'
+            return ['No games yet']
 
         if self.is_playoffs:
-            return self.games[0].title
+            return [self.games[0].title]
 
-        return "Team Blangums: {} / Slapped Heartbeat: {}".format(
-            self.blangums,
-            self.slapped_heartbeat,
-        )
+        return [
+            "Team Blangums: {}".format(self.blangums),
+            "Slapped Heartbeat: {}".format(self.slapped_heartbeat),
+        ]
 
     @fully_cached_property
     def bracket_headline(self):
@@ -2808,21 +2812,21 @@ class Matchup(object):
     @fully_cached_property
     def gazette_str(self):
         return "[{}.]({}{})".format(
-            self.headline,
+            ', '.join(self.subheadings),
             settings.FULL_SITE_URL,
             self.href,
         )
 
     @fully_cached_property
-    def headline(self):
+    def subheadings(self):
         if self.team1_win_count == self.team2_win_count:
-            return "All-time series tied, {}-{}".format(self.team1_win_count, self.team2_win_count)
+            return ["All-time series tied, {}-{}".format(self.team1_win_count, self.team2_win_count)]
         else:
             text = "{} leads all-time series, {}-{}"
             if self.team1_win_count > self.team2_win_count:
-                return text.format(self.team1.nickname, self.team1_win_count, self.team2_win_count)
+                return [text.format(self.team1.nickname, self.team1_win_count, self.team2_win_count)]
             else:
-                return text.format(self.team2.nickname, self.team2_win_count, self.team1_win_count)
+                return [text.format(self.team2.nickname, self.team2_win_count, self.team1_win_count)]
 
     @fully_cached_property
     def href(self):

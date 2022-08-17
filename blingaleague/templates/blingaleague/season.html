@@ -20,7 +20,9 @@
 {% if week_max %}<a href="{{ season.regular_season.href }}">Full season</a>{% endif %}
 
 <div id="season_details">
-  {% if season.headline %}<h2>{{ season.headline }}</h2>{% endif %}
+  {% for subheading in season.subheadings %}
+    <h2>{{ subheading }}</h2>
+  {% endfor %}
 
   <div class="center">
     {% if season.previous %}
