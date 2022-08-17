@@ -945,6 +945,8 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def strength_of_schedule(self):
+        if len(self.games) == 0:
+            return 0
         return (self.expected_win_pct_against - HALF) / HALF
 
     @fully_cached_property
@@ -953,10 +955,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def future_strength_of_schedule(self):
-        if len(self.games) == 0:
-            return HALF
-
-        if not self.is_partial:
+        if len(self.games) == 0 or not self.is_partial:
             return 0
 
         future_xw_pct_against = []
