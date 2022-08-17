@@ -3128,7 +3128,7 @@ class DraftPick(models.Model, ComparableObject):
     def clean(self):
         errors = {}
 
-        if pick_in_round > len(Season(self.year).active_teams):
+        if self.pick_in_round > len(Season(self.year).active_teams):
             errors.setdefault(NON_FIELD_ERRORS, []).append(
                 ValidationError(
                     message='Pick in round is greater than number of teams',
@@ -3136,7 +3136,7 @@ class DraftPick(models.Model, ComparableObject):
                 ),
             )
 
-        if round > 16:
+        if self.round > 16:
             errors.setdefault(NON_FIELD_ERRORS, []).append(
                 ValidationError(
                     message='Round is greater than 16',
@@ -3172,7 +3172,7 @@ class DraftPick(models.Model, ComparableObject):
         return str(self)
 
     class Meta:
-        unique_together = ('year', 'round', 'pick_in_round')
+        #unique_together = ('year', 'round', 'pick_in_round')
         ordering = ['year', 'round', 'pick_in_round']
 
 

@@ -3,7 +3,7 @@ from django.db import models
 from django.forms.widgets import NumberInput
 
 from .models import Member, Game, Postseason, FakeMember, \
-                    Trade, TradedAsset, Keeper
+                    Trade, TradedAsset, Keeper, DraftPick
 
 
 class GameAdmin(admin.ModelAdmin):
@@ -21,3 +21,4 @@ admin.site.register(FakeMember)
 admin.site.register(Trade)
 admin.site.register(TradedAsset)
 admin.site.register(Keeper)
+admin.site.register(DraftPick)
