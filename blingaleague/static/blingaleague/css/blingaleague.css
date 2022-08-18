@@ -308,6 +308,10 @@ svg.pygal-chart {
     width: 600px;
 }
 
+.wide_graph {
+    margin-bottom: 30px;
+}
+
 .wide_graph svg.pygal-chart {
     width: 800px;
 }
