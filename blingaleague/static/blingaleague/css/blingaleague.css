@@ -245,6 +245,15 @@ table.standings_table td {
     vertical-align: top;
 }
 
+.trade td {
+    vertical-align: middle;
+}
+
+.trade ul {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
 .standings_note {
     font-size: 60%;
     vertical-align: top;
@@ -331,11 +340,6 @@ svg.pygal-chart {
     text-align: center;
     border-bottom: 1px solid #41b6e6;
     width: 600px;
-}
-
-#games .game:first-of-type,
-#trades .trade:first-of-type {
-    /*border-top: 1px solid #41b6e6;*/
 }
 
 #games .game:last-of-type,
