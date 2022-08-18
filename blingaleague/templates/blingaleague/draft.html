@@ -1,0 +1,23 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}{{ draft }}{% endblock %}
+
+{% block content %}
+<h1>{{ draft }}</h1>
+
+<h3><a href="{{ draft.season.href }}">{{ draft.season }}</a></h3>
+
+{% with draft as base_object %}
+  {% include "blingaleague/draft_picks.html" %}
+{% endwith %}
+
+<div class="center">
+  {% if draft.previous %}
+    <a href="{{ draft.previous.href }}" class="link previous">Previous</a>
+  {% endif %}
+
+  {% if draft.next %}
+    <a href="{{ draft.next.href }}" class="link next">Next</a>
+  {% endif %}
+</div>
+{% endblock %}

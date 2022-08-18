@@ -2378,10 +2378,12 @@ class Season(ComparableObject):
         )
 
     @fully_cached_property
+    def draft(self):
+        return Draft(self.year)
+
+    @fully_cached_property
     def draft_picks(self):
-        return DraftPick.objects.filter(
-            year=self.year,
-        )
+        return self.draft.draft_picks
 
     @classmethod
     def all(cls, **kwargs):
@@ -3144,18 +3146,6 @@ class DraftPick(models.Model, ComparableObject):
         picks_per_round = len(Season(self.year).active_teams)
         return (self.round - 1) * picks_per_round + self.pick_in_round
 
-    @fully_cached_property
-    def other_info(self):
-        other_info_parts = []
-
-        if self.original_team:
-            other_info_parts.append("from {}".format(self.original_team))
-
-        if self.is_keeper:
-            other_info_parts.append('keeper')
-
-        return '; '.join(other_info_parts)
-
     def clean(self):
         errors = {}
 
@@ -3205,6 +3195,51 @@ class DraftPick(models.Model, ComparableObject):
     class Meta:
         #unique_together = ('year', 'round', 'pick_in_round')
         ordering = ['year', 'round', 'pick_in_round']
+
+
+class Draft(ComparableObject):
+    _comparison_attr = 'year'
+
+    def __init__(self, year):
+        self.year = int(year)
+
+    @fully_cached_property
+    def draft_picks(self):
+        return DraftPick.objects.filter(
+            year=self.year,
+        ).order_by('round', 'pick_in_round')
+
+    @fully_cached_property
+    def season(self):
+        return Season(self.year)
+
+    @fully_cached_property
+    def href(self):
+        return urlresolvers.reverse_lazy('blingaleague.draft', args=(self.year,))
+
+    @fully_cached_property
+    def previous(self):
+        prev_draft = Draft(self.year - 1)
+
+        if prev_draft.draft_picks.count() == 0:
+            return None
+
+        return prev_draft
+
+    @fully_cached_property
+    def next(self):
+        next_draft = Draft(self.year + 1)
+
+        if next_draft.draft_picks.count() == 0:
+            return None
+
+        return next_draft
+
+    def __str__(self):
+        return "{} draft".format(self.year)
+
+    def __repr__(self):
+        return str(self)
 
 
 def build_object_cache(obj):

@@ -6,7 +6,7 @@ from blingacontent.models import Gazette
 
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
-                    Trade, \
+                    Trade, Draft, \
                     PLAYOFF_TEAMS
 from .utils import line_graph_html, bar_graph_html, rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
@@ -362,4 +362,17 @@ class TradeView(TemplateView):
     def get(self, request, trade):
         trade = Trade.objects.get(id=trade)
         context = {'trade': trade}
+        return self.render_to_response(context)
+
+
+class DraftView(TemplateView):
+    template_name = 'blingaleague/draft.html'
+
+    def get(self, request, year):
+        draft = Draft(year)
+        context = {
+            'draft': draft,
+            'show_pick_team': True,
+            'allow_pick_sorting': True,
+        }
         return self.render_to_response(context)

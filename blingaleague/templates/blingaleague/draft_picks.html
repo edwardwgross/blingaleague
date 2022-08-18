@@ -1,0 +1,30 @@
+<table id="draft_picks" class="table-striped team_transactions {% if allow_pick_sorting %}sortable{% endif %}">
+  <tr>
+    <th>Round</th>
+    <th title="Pick in Round">Pick</th>
+    <th title="Overall Pick in Draft">Overall</th>
+    {% if show_pick_team %}<th>Team</th>{% endif %}
+    <th>Player</th>
+    <th>Position</th>
+    <th/> {# Keeper #}
+    <th/> {# Trade #}
+  </tr>
+  {% for draft_pick in base_object.draft_picks %}
+    <tr>
+      <td style="text-align:right">{{ draft_pick.round }}</td>
+      <td style="text-align:right">{{ draft_pick.pick_in_round }}</td>
+      <td style="text-align:right">{{ draft_pick.overall_pick }}</td>
+      {% if show_pick_team %}
+        <td><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a></td>
+      {% endif %}
+      <td>{{ draft_pick.name }}</td>
+      <td>{{ draft_pick.position }}</td>
+      <td>{% if draft_pick.is_keeper %}Keeper{% endif %}</td>
+      <td style="padding-right:12px">
+        {% if draft_pick.original_team %}
+          Acquired from <a href="{% url 'blingaleague.team_season' draft_pick.original_team.id draft_pick.year %}">{{ draft_pick.original_team }}</a>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>

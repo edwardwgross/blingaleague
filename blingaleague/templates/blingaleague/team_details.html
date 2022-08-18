@@ -93,28 +93,6 @@
       {% endfor %}
     </table>
   {% endif %}
-
-  {% if team.seasons.trades %}
-    <h2>
-      Trades
-      {% with "team_trades" as toggle_section_id %}{% include "blingaleague/toggle_button.html" %}{% endwith %}
-    </h2>
-    <table class="team_transactions table-striped" id="team_trades" style="display:none">
-      <tr>
-        <th>Year</th>
-        <th>Week</th>
-        <th>Traded for</th>
-        <th>Traded away</th>
-      </tr>
-      {% for team_season in team.seasons reversed %}
-        {% for trade in team_season.trades reversed %}
-          {% with True as include_year %}
-            {% include "blingaleague/team_trade_row.html" %}
-          {% endwith %}
-        {% endfor %}
-      {% endfor %}
-    </table>
-  {% endif %}
 </div>
 
 {% endblock content %}

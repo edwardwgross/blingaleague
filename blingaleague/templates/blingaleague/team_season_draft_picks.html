@@ -1,22 +1,4 @@
 {% if base_object.draft_picks %}
   <h3>Draft Picks</h3>
-
-  <table id="draft_picks" class="table-striped team_season_transactions">
-    <tr>
-      <th>Round</th>
-      <th>Pick</th>
-      <th>Player</th>
-      <th>Position</th>
-      <th/> {# Other Info #}
-    </tr>
-    {% for draft_pick in base_object.draft_picks %}
-      <tr>
-        <td style="text-align:right">{{ draft_pick.round }}</td>
-        <td style="text-align:right">{{ draft_pick.pick_in_round }}</td>
-        <td>{{ draft_pick.name }}</td>
-        <td>{{ draft_pick.position }}</td>
-        <td>{{ draft_pick.other_info }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+  {% include "blingaleague/draft_picks.html" %}
 {% endif %}

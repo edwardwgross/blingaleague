@@ -6,7 +6,7 @@ from django.views.generic import RedirectView
 from .views import HomeView, TeamDetailsView, TeamListView,\
                    SeasonListView, SingleSeasonView,\
                    MatchupView, WeekView, TeamSeasonView,\
-                   TradeView
+                   TradeView, DraftView
 
 
 admin.autodiscover()
@@ -26,6 +26,11 @@ urlpatterns = [
         r'^season/(?P<year>\d{4})/$',
         SingleSeasonView.as_view(),
         name='blingaleague.single_season',
+    ),
+    url(
+        r'^draft/(?P<year>\d{4})/$',
+        DraftView.as_view(),
+        name='blingaleague.draft',
     ),
     url(
         r'^matchup/(?P<team1>\d+)/(?P<team2>\d+)/$',

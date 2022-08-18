@@ -57,7 +57,7 @@
 
   {% if season.keepers %}
     <h2>Keepers</h2>
-    <table>
+    <table style="margin-bottom:30px">
       {% for team_season in season.alpha_team_seasons %}
         {% if team_season.keepers %}
           <tr>
@@ -68,6 +68,11 @@
         {% endif %}
       {% endfor %}
     </table>
+  {% endif %}
+
+  {% if season.draft.draft_picks %}
+    <h2>Draft</h2>
+    <div class="team_transactions"><a href="{{ season.draft.href }}">{{ season.draft }}</a></div>
   {% endif %}
 
   {% if season.trades %}
