@@ -13,7 +13,7 @@
   </tr>
   {% for asset in traded_assets %}
     <tr>
-      <td><a href="{{ asset.trade.href }}">{{ asset.trade.public_id }}</a></td>
+      <td style="font-size:80%"><a href="{{ asset.trade.href }}">{{ asset.trade.public_id }}</a></td>
       <td><a href="{% url 'blingaleague.single_season' asset.trade.year %}">{{ asset.trade.year}}</a></td>
       <td><a href="{{ asset.trade.week_object.href }}">{{ asset.trade.week }}</a></td>
       <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.receiver.id asset.trade.year %}">{{ asset.receiver.nickname }}</a></td>

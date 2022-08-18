@@ -363,9 +363,19 @@ svg.pygal-chart {
 
 .blingalytics_table .asset_group {
     display: inline-block;
-    width: 300px;
+    width: 400px;
     white-space: normal;
     vertical-align: middle;
+    font-size: 80%;
+    margin: 6px 0;
+}
+
+.blingalytics_table .asset_group ul {
+    margin: 0;
+}
+
+.blingalytics_table .asset_group small {
+    font-size: 80%;
 }
 
 table.game_table {
