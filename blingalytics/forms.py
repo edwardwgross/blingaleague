@@ -210,6 +210,7 @@ class TradeFinderForm(BaseFinderForm):
             (CHOICE_MATCHING_ASSETS_ONLY, 'Matching assets only'),
         ],
     )
+    player = forms.CharField(required=False, label='Player Name')
 
     filter_threshold = 1
 
@@ -227,6 +228,7 @@ class KeeperFinderForm(BaseFinderForm):
         choices=[(1, 1), (2, 2)]
     )
     teams = _teams_multiple_choice_field()
+    player = forms.CharField(required=False, label='Player Name')
 
     filter_threshold = 1
 
@@ -242,5 +244,6 @@ class DraftPickFinderForm(BaseFinderForm):
     teams = _teams_multiple_choice_field()
     keeper = forms.BooleanField(required=False, label='Keeper')
     traded = forms.BooleanField(required=False, label='Traded')
+    player = forms.CharField(required=False, label='Player Name')
 
     filter_threshold = 1

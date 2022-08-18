@@ -749,6 +749,9 @@ class TradeFinderView(TemplateView):
         if form_data['includes_draft_picks']:
             trades = trades.filter(traded_assets__is_draft_pick=True)
 
+        if form_data['player']:
+            trades = trades.filter(traded_assets__name__icontains=form_data['player'])
+
         return sorted(
             trades.distinct(),
             key=lambda x: (x.year, x.week, x.date, x.id),
@@ -769,6 +772,7 @@ class TradeFinderView(TemplateView):
                 receivers = form_data['receivers']
                 senders = form_data['senders']
                 positions = form_data['positions']
+                player = form_data['player']
 
                 if receivers:
                     traded_assets = traded_assets.filter(receiver_id__in=receivers)
@@ -776,6 +780,8 @@ class TradeFinderView(TemplateView):
                     traded_assets = traded_assets.filter(sender_id__in=senders)
                 if positions:
                     traded_assets = traded_assets.filter(position__in=positions)
+                if player:
+                    traded_assets = traded_assets.filter(name__icontains=player)
 
             assets_to_display.extend(list(traded_assets))
 
@@ -877,6 +883,9 @@ class KeeperFinderView(TemplateView):
         if form_data['positions']:
             keepers = keepers.filter(position__in=form_data['positions'])
 
+        if form_data['player']:
+            keepers = keepers.filter(name__icontains=form_data['player'])
+
         return sorted(
             keepers,
             key=lambda x: (x.year, x.round, x.team),
@@ -946,6 +955,9 @@ class DraftPickFinderView(TemplateView):
 
         if form_data['traded']:
             base_picks = base_picks.filter(original_team__isnull=False)
+
+        if form_data['player']:
+            base_picks = base_picks.filter(name__icontains=form_data['player'])
 
         draft_picks = []
         for pick in base_picks:
