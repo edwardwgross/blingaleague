@@ -3168,7 +3168,7 @@ class DraftPick(models.Model, ComparableObject):
         if errors:
             raise ValidationError(errors)
 
-        super.clean()
+        super().clean()
 
     def save(self, **kwargs):
         super().save(**kwargs)
