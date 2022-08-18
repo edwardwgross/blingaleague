@@ -79,7 +79,7 @@
         </tr>
         {% for draft_pick in draft_picks %}
           <tr>
-            <td><a href="{% url 'blingaleague.single_season' draft_pick.year %}">{{ draft_pick.year}}</a></td>
+            <td><a href="{% url 'blingaleague.draft' draft_pick.year %}">{{ draft_pick.year}}</a></td>
             <td>{{ draft_pick.round }}</td>
             <td>{{ draft_pick.pick_in_round }}</td>
             <td>{{ draft_pick.overall_pick }}</td>
