@@ -71,9 +71,9 @@
           <th>Round</th>
           <th title="Pick in Round">Pick</th>
           <th title="Overall Pick in Draft">Overall</th>
+          <th>Team</th>
           <th>Player</th>
           <th>Position</th>
-          <th>Team</th>
           <th>Keeper</th>
           <th title="Team Pick Originally Belonged To">Orig. Team</th>
         </tr>
@@ -83,9 +83,9 @@
             <td>{{ draft_pick.round }}</td>
             <td>{{ draft_pick.pick_in_round }}</td>
             <td>{{ draft_pick.overall_pick }}</td>
+            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team.nickname }}</a></td>
             <td style="text-align:left">{{ draft_pick.name }}</td>
             <td style="text-align:left">{{ draft_pick.position }}</td>
-            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team.nickname }}</a></td>
             <td style="text-align:left">{% if draft_pick.is_keeper %}Yes{% else %}No{% endif %}</td>
             <td style="text-align:left">
               {% if draft_pick.original_team %}
