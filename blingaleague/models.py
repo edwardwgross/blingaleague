@@ -3142,6 +3142,10 @@ class DraftPick(models.Model, ComparableObject):
         )
 
     @fully_cached_property
+    def round_and_pick(self):
+        return "{}.{:02}".format(self.round, self.pick_in_round)
+
+    @fully_cached_property
     def overall_pick(self):
         picks_per_round = len(Season(self.year).active_teams)
         return (self.round - 1) * picks_per_round + self.pick_in_round
@@ -3175,10 +3179,9 @@ class DraftPick(models.Model, ComparableObject):
         clear_cached_properties
 
     def __str__(self):
-        pick_str = "{}, {}.{:02}: {} - {} - {}".format(
+        pick_str = "{}, {}: {} - {} - {}".format(
             self.year,
-            self.round,
-            self.pick_in_round,
+            self.round_and_pick,
             self.name,
             self.position,
             self.team,

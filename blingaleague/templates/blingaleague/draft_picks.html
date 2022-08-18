@@ -1,7 +1,6 @@
 <table id="draft_picks" class="table-striped team_transactions {% if is_full_draft %}sortable{% endif %}">
   <tr>
-    <th>Round</th>
-    <th title="Pick in Round">Pick</th>
+    <th title="Round and Pick in Round">Pick</th>
     <th title="Overall Pick in Draft">Overall</th>
     {% if is_full_draft %}<th>Team</th>{% endif %}
     <th>Player</th>
@@ -11,8 +10,7 @@
   </tr>
   {% for draft_pick in base_object.draft_picks %}
     <tr>
-      <td style="text-align:right">{{ draft_pick.round }}</td>
-      <td style="text-align:right">{{ draft_pick.pick_in_round }}</td>
+      <td sorttable_customkey="{{ draft_pick.overall_pick }}" style="text-align:right">{{ draft_pick.round_and_pick }}</td>
       <td style="text-align:right">{{ draft_pick.overall_pick }}</td>
       {% if is_full_draft %}
         <td><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a></td>

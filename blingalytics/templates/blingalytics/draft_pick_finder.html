@@ -68,8 +68,7 @@
       <table class="blingalytics_table sortable table-striped">
         <tr>
           <th>Year</th>
-          <th>Round</th>
-          <th title="Pick in Round">Pick</th>
+          <th title="Round and Pick in Round">Pick</th>
           <th title="Overall Pick in Draft">Overall</th>
           <th>Team</th>
           <th>Player</th>
@@ -80,8 +79,7 @@
         {% for draft_pick in draft_picks %}
           <tr>
             <td><a href="{% url 'blingaleague.draft' draft_pick.year %}">{{ draft_pick.year}}</a></td>
-            <td>{{ draft_pick.round }}</td>
-            <td>{{ draft_pick.pick_in_round }}</td>
+            <td sorttable_customkey="{{ draft_pick.overall_pick }}">{{ draft_pick.round_and_pick }}</td>
             <td>{{ draft_pick.overall_pick }}</td>
             <td style="text-align:left"><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team.nickname }}</a></td>
             <td style="text-align:left">{{ draft_pick.name }}</td>
