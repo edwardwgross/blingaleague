@@ -229,3 +229,18 @@ class KeeperFinderForm(BaseFinderForm):
     teams = _teams_multiple_choice_field()
 
     filter_threshold = 1
+
+
+class DraftPickFinderForm(BaseFinderForm):
+    year_min = forms.IntegerField(required=False, label='Start Year')
+    year_max = forms.IntegerField(required=False, label='End Year')
+    round_min = forms.IntegerField(required=False, label='Earliest Round')
+    round_max = forms.IntegerField(required=False, label='Latest Round')
+    overall_pick_min = forms.IntegerField(required=False, label='Earliest Overall Pick')
+    overall_pick_max = forms.IntegerField(required=False, label='Latest Overall Pick')
+    positions = _positions_multiple_choice_field()
+    teams = _teams_multiple_choice_field()
+    keeper = forms.BooleanField(required=False, label='Keeper')
+    traded = forms.BooleanField(required=False, label='Traded')
+
+    filter_threshold = 1

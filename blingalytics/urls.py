@@ -4,7 +4,8 @@ from .views import WeeklyScoresView, ExpectedWinsView, \
                    GameFinderView, SeasonFinderView, \
                    TopSeasonsView, TeamVsTeamView, \
                    BeltHolderView, TradeFinderView, \
-                   KeeperFinderView, GlossaryView
+                   KeeperFinderView, DraftPickFinderView, \
+                   GlossaryView
 
 urlpatterns = [
     url(
@@ -41,6 +42,11 @@ urlpatterns = [
         r'keeper_finder/$',
         KeeperFinderView.as_view(),
         name='blingalytics.keeper_finder',
+    ),
+    url(
+        r'draft_pick_finder/$',
+        DraftPickFinderView.as_view(),
+        name='blingalytics.draft_pick_finder',
     ),
     url(
         r'top_seasons/$',

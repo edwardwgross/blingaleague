@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from blingaleague.models import Game, Week, Member, TeamSeason, \
-                                Season, Matchup, Trade, Keeper, \
+                                Season, Matchup, Trade, Keeper, DraftPick, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
                                 position_sort_key, calculate_expected_wins
 from blingaleague.utils import scatter_graph_html, regular_season_weeks
@@ -22,7 +22,7 @@ from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_ELIMINATED_EARLY, \
                    CHOICE_MATCHING_ASSETS_ONLY, \
                    GameFinderForm, SeasonFinderForm, \
-                   TradeFinderForm, KeeperFinderForm, \
+                   TradeFinderForm, KeeperFinderForm, DraftPickFinderForm, \
                    ExpectedWinsCalculatorForm
 from .utils import sorted_seasons_by_attr, \
                    build_belt_holder_list, \
@@ -883,16 +883,19 @@ class KeeperFinderView(TemplateView):
         )
 
     def build_summary_tables(self, keepers):
+        year_dict = defaultdict(int)
         team_dict = defaultdict(int)
         round_dict = defaultdict(int)
         position_dict = defaultdict(int)
 
         for keeper in keepers:
+            year_dict[keeper.year] += 1
             team_dict[keeper.team] += 1
             round_dict[keeper.round] += 1
             position_dict[keeper.position] += 1
 
         return {
+            'years': sorted(year_dict.items()),
             'teams': sorted(team_dict.items(), key=lambda x: x[0].nickname),
             'rounds': sorted(round_dict.items()),
             'positions': sorted(position_dict.items(), key=lambda x: position_sort_key(x[0])),
@@ -911,6 +914,87 @@ class KeeperFinderView(TemplateView):
             'form': keeper_finder_form,
             'keepers': keepers,
             'summary': self.build_summary_tables(keepers),
+        }
+
+        return self.render_to_response(context)
+
+
+class DraftPickFinderView(TemplateView):
+    template_name = 'blingalytics/draft_pick_finder.html'
+
+    def filter_draft_picks(self, form_data):
+        base_picks = DraftPick.objects.all()
+
+        if form_data['year_min'] is not None:
+            base_picks = base_picks.filter(year__gte=form_data['year_min'])
+        if form_data['year_max'] is not None:
+            base_picks = base_picks.filter(year__lte=form_data['year_max'])
+
+        if form_data['round_min'] is not None:
+            base_picks = base_picks.filter(round__gte=form_data['round_min'])
+        if form_data['round_max'] is not None:
+            base_picks = base_picks.filter(round__lte=form_data['round_max'])
+
+        if form_data['teams']:
+            base_picks = base_picks.filter(team__id__in=form_data['teams'])
+
+        if form_data['positions']:
+            base_picks = base_picks.filter(position__in=form_data['positions'])
+
+        if form_data['keeper']:
+            base_picks = base_picks.filter(is_keeper=True)
+
+        if form_data['traded']:
+            base_picks = base_picks.filter(original_team__isnull=False)
+
+        draft_picks = []
+        for pick in base_picks:
+            if form_data['overall_pick_min'] is not None:
+                if pick.overall_pick < form_data['overall_pick_min']:
+                    continue
+            if form_data['overall_pick_max'] is not None:
+                if pick.overall_pick > form_data['overall_pick_max']:
+                    continue
+
+            draft_picks.append(pick)
+
+        return sorted(
+            draft_picks,
+            key=lambda x: (x.year, x.overall_pick),
+        )
+
+    def build_summary_tables(self, draft_picks):
+        year_dict = defaultdict(int)
+        team_dict = defaultdict(int)
+        round_dict = defaultdict(int)
+        position_dict = defaultdict(int)
+
+        for draft_pick in draft_picks:
+            year_dict[draft_pick.year] += 1
+            team_dict[draft_pick.team] += 1
+            round_dict[draft_pick.round] += 1
+            position_dict[draft_pick.position] += 1
+
+        return {
+            'years': sorted(year_dict.items()),
+            'teams': sorted(team_dict.items(), key=lambda x: x[0].nickname),
+            'rounds': sorted(round_dict.items()),
+            'positions': sorted(position_dict.items(), key=lambda x: position_sort_key(x[0])),
+        }
+
+    def get(self, request):
+        draft_picks = []
+
+        draft_pick_finder_form = DraftPickFinderForm(request.GET)
+        if draft_pick_finder_form.is_valid():
+            form_data = draft_pick_finder_form.cleaned_data
+
+            draft_picks = self.filter_draft_picks(form_data)
+
+        context = {
+            'form': draft_pick_finder_form,
+            'draft_picks': draft_picks,
+            'summary': self.build_summary_tables(draft_picks),
         }
 
         return self.render_to_response(context)

@@ -1,18 +1,18 @@
 {% extends "blingaleague/base.html" %}
 
-{% block title %}Keeper Finder{% endblock %}
+{% block title %}Draft Pick Finder{% endblock %}
 
 {% block content %}
-<h1>Keeper Finder</h1>
+<h1>Draft Pick Finder</h1>
 
-<div id="keeper_finder" class="blingalytics">
-  <div id="keeper_finder_controls">
-    {% with "keeper_finder_form" as form_id %}
+<div id="draft_pick_finder" class="blingalytics">
+  <div id="draft_pick_finder_controls">
+    {% with "draft_pick_finder_form" as form_id %}
       {% include "blingalytics/form.html" %}
     {% endwith %}
   </div>
-  <div id="keepers_found" class="finder_results">
-    {% if keepers %}
+  <div id="draft_picks_found" class="finder_results">
+    {% if draft_picks %}
       <h2>Summary</h2>
       <table class="blingalytics_table table-striped" style="display:inline-table">
         <tr>
@@ -63,30 +63,40 @@
         {% endfor %}
       </table>
 
-      <h2>Keepers</h2>
+      <h2>Draft Picks</h2>
       <em>(click on the column headings to sort)</em>
       <table class="blingalytics_table sortable table-striped">
         <tr>
           <th>Year</th>
           <th>Round</th>
+          <th title="Pick in Round">Pick</th>
+          <th title="Overall Pick in Draft">Overall</th>
           <th>Player</th>
           <th>Position</th>
           <th>Team</th>
-          <th>Times Kept</th>
+          <th>Keeper</th>
+          <th title="Team Pick Originally Belonged To">Orig. Team</th>
         </tr>
-        {% for keeper in keepers %}
+        {% for draft_pick in draft_picks %}
           <tr>
-            <td><a href="{% url 'blingaleague.single_season' keeper.year %}">{{ keeper.year}}</a></td>
-            <td>{{ keeper.round }}</td>
-            <td style="text-align:left">{{ keeper.name }}</td>
-            <td style="text-align:left">{{ keeper.position }}</td>
-            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' keeper.team.id keeper.year %}">{{ keeper.team.nickname }}</a></td>
-            <td>{{ keeper.times_kept }}</td>
+            <td><a href="{% url 'blingaleague.single_season' draft_pick.year %}">{{ draft_pick.year}}</a></td>
+            <td>{{ draft_pick.round }}</td>
+            <td>{{ draft_pick.pick_in_round }}</td>
+            <td>{{ draft_pick.overall_pick }}</td>
+            <td style="text-align:left">{{ draft_pick.name }}</td>
+            <td style="text-align:left">{{ draft_pick.position }}</td>
+            <td style="text-align:left"><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team.nickname }}</a></td>
+            <td style="text-align:left">{% if draft_pick.is_keeper %}Yes{% else %}No{% endif %}</td>
+            <td style="text-align:left">
+              {% if draft_pick.original_team %}
+                <a href="{% url 'blingaleague.team_season' draft_pick.original_team.id draft_pick.year %}">{{ draft_pick.original_team.nickname }}</a>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </table>
     {% else %}
-      <h3 class="no_results_message">No keepers found</h3>
+      <h3 class="no_results_message">No draft picks found</h3>
     {% endif %}
   </div>
 </div>
