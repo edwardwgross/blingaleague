@@ -1558,6 +1558,10 @@ class TeamSeason(ComparableObject):
     def keepers(self):
         return self.team.keepers.filter(year=self.year)
 
+    @fully_cached_property
+    def draft_picks(self):
+        return self.team.draft_picks.filter(year=self.year)
+
     @classmethod
     def all(cls):
         for season in Season.all():
@@ -1815,6 +1819,15 @@ class TeamMultiSeasons(TeamSeason):
             keepers.extend(season.keepers)
 
         return keepers
+
+    @fully_cached_property
+    def draft_picks(self):
+        draft_picks = []
+
+        for season in sorted(self, reverse=True):  # most recent first
+            draft_picks.extend(season.draft_picks)
+
+        return draft_picks
 
     @fully_cached_property
     def championships(self):
@@ -2362,6 +2375,12 @@ class Season(ComparableObject):
             week__lte=self.week_max,
         ).order_by(
             'week', 'date', 'pk',
+        )
+
+    @fully_cached_property
+    def draft_picks(self):
+        return DraftPick.objects.filter(
+            year=self.year,
         )
 
     @classmethod
@@ -3124,6 +3143,18 @@ class DraftPick(models.Model, ComparableObject):
     def overall_pick(self):
         picks_per_round = len(Season(self.year).active_teams)
         return (self.round - 1) * picks_per_round + self.pick_in_round
+
+    @fully_cached_property
+    def other_info(self):
+        other_info_parts = []
+
+        if self.original_team:
+            other_info_parts.append("from {}".format(self.original_team))
+
+        if self.is_keeper:
+            other_info_parts.append('keeper')
+
+        return '; '.join(other_info_parts)
 
     def clean(self):
         errors = {}

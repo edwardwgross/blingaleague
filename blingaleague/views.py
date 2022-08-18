@@ -228,6 +228,7 @@ class TeamSeasonView(GamesView):
     )
     post_games_sub_templates = (
         'blingaleague/team_season_keepers.html',
+        'blingaleague/team_season_draft_picks.html',
         'blingaleague/team_season_trades.html',
         'blingaleague/team_season_rank_by_week.html',
         'blingaleague/similar_seasons.html',

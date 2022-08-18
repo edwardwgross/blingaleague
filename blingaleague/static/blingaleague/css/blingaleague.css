@@ -63,6 +63,7 @@ table, tr, th, td {
 
 table {
     margin-bottom: 12px;
+    border-collapse: separate;
 }
 
 .table-striped {
@@ -229,7 +230,7 @@ table.sortable th {
 }
 
 table.standings_table th,
-table.trades th {
+table.team_transactions th {
     white-space: nowrap;
     text-align: center;
 }
@@ -239,7 +240,7 @@ table.standings_table td {
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
-table.trades td {
+.team_transactions td {
     white-space: nowrap;
     vertical-align: top;
 }
@@ -314,8 +315,7 @@ svg.pygal-chart {
 #games,
 #season_details,
 #trades,
-table.trades,
-#keepers {
+.team_transactions {
     width: fit-content;
     margin-bottom: 30px;
 }

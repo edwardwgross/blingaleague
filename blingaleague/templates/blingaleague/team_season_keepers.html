@@ -3,7 +3,7 @@
 {% if base_object.keepers %}
   <h3>Keepers</h3>
 
-  <ul id="keepers">
+  <ul class="team_season_transactions">
     {% for keeper in base_object.keepers %}
       <li>{{ keeper.name }} ({{ keeper.round|ordinal }})</li>
     {% endfor %}
