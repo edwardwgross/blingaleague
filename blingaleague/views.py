@@ -372,7 +372,6 @@ class DraftView(TemplateView):
         draft = Draft(year)
         context = {
             'draft': draft,
-            'show_pick_team': True,
-            'allow_pick_sorting': True,
+            'is_full_draft': True,
         }
         return self.render_to_response(context)

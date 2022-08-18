@@ -1,9 +1,9 @@
-<table id="draft_picks" class="table-striped team_transactions {% if allow_pick_sorting %}sortable{% endif %}">
+<table id="draft_picks" class="table-striped team_transactions {% if is_full_draft %}sortable{% endif %}">
   <tr>
     <th>Round</th>
     <th title="Pick in Round">Pick</th>
     <th title="Overall Pick in Draft">Overall</th>
-    {% if show_pick_team %}<th>Team</th>{% endif %}
+    {% if is_full_draft %}<th>Team</th>{% endif %}
     <th>Player</th>
     <th>Position</th>
     <th/> {# Keeper #}
@@ -14,7 +14,7 @@
       <td style="text-align:right">{{ draft_pick.round }}</td>
       <td style="text-align:right">{{ draft_pick.pick_in_round }}</td>
       <td style="text-align:right">{{ draft_pick.overall_pick }}</td>
-      {% if show_pick_team %}
+      {% if is_full_draft %}
         <td><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a></td>
       {% endif %}
       <td>{{ draft_pick.name }}</td>
@@ -27,4 +27,8 @@
       </td>
     </tr>
   {% endfor %}
+  {% if not is_full_draft %}
+    <tr>
+      <td colspan="100%" class="table_footer"><a href="{% url 'blingaleague.draft' base_object.year %}">Full {{ base_object.year }} draft</a></td></tr>
+  {% endif %}
 </table>
