@@ -16,17 +16,15 @@ class HomeView(TemplateView):
     template_name = 'blingaleague/home.html'
 
     def get(self, request):
-        season = Season.latest()
+        latest_season = Season.latest()
 
-        # between keepers being entered and the first week,
-        # latest season will have no games;
-        # still show the previous season
-        while season.weeks_with_games == 0:
-            season = season.previous
+        latest_week = Week.latest()
+        if latest_week.year != latest_season.year:
+            latest_week = None
 
         context = {
-            'season': season,
-            'week': Week.latest(),
+            'season': latest_season,
+            'week': latest_week,
             'gazette': Gazette.latest(),
             'trades': Trade.most_recent(),
         }

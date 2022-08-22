@@ -2390,6 +2390,7 @@ class Season(ComparableObject):
         all_years = set(Game.objects.all().values_list('year', flat=True))
         all_years.update(set(Keeper.objects.all().values_list('year', flat=True)))
         all_years.update(set(Trade.objects.all().values_list('year', flat=True)))
+        all_years.update(set(DraftPick.objects.all().values_list('year', flat=True)))
 
         return [
             cls(year=year, **kwargs) for year in all_years
@@ -2404,7 +2405,7 @@ class Season(ComparableObject):
         return max(cls.all())
 
     @classmethod
-    def latest(cls, week_max=None):
+    def latest(cls):
         return cls.max()
 
     @fully_cached_property

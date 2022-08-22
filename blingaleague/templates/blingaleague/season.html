@@ -1,7 +1,5 @@
 {% extends "blingaleague/base.html" %}
 
-{% load humanize %}
-
 {% block title %}
   {{ season }}
   {% if week_max %}
@@ -57,17 +55,7 @@
 
   {% if season.keepers %}
     <h2>Keepers</h2>
-    <table style="margin-bottom:30px">
-      {% for team_season in season.alpha_team_seasons %}
-        {% if team_season.keepers %}
-          <tr>
-            <td><a href="{{ team_season.href }}">{{ team_season.team }}</a></td>
-            <td>{% if team_season.keepers|length > 0 %}{{ team_season.keepers.0.name }} ({{ team_season.keepers.0.round|ordinal }}){% endif %}</td>
-            <td>{% if team_season.keepers|length > 1 %}{{ team_season.keepers.1.name }} ({{ team_season.keepers.1.round|ordinal }}){% endif %}</td>
-          </tr>
-        {% endif %}
-      {% endfor %}
-    </table>
+    {% include "blingaleague/season_keepers.html" %}
   {% endif %}
 
   {% if season.draft.draft_picks %}

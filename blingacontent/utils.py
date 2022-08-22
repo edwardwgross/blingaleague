@@ -37,7 +37,7 @@ def get_gmail_service():
 def new_gazette_body_template():
     last_week = Week.latest()
 
-    current_season = Season.latest(week_max=last_week.week)
+    current_season = Season.latest()
 
     sections = []
 
