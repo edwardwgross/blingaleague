@@ -225,10 +225,10 @@ class TeamSeasonView(GamesView):
         'blingaleague/expected_win_distribution_team.html',
     )
     post_games_sub_templates = (
-        'blingaleague/team_season_keepers.html',
-        'blingaleague/team_season_draft_picks.html',
-        'blingaleague/team_season_trades.html',
         'blingaleague/team_season_rank_by_week.html',
+        'blingaleague/team_season_trades.html',
+        'blingaleague/team_season_draft_picks.html',
+        'blingaleague/team_season_keepers.html',
         'blingaleague/similar_seasons.html',
     )
     games_sub_template = 'blingaleague/team_season_games.html'
@@ -301,8 +301,10 @@ class TeamSeasonView(GamesView):
         )
 
         context = self._context(team_season)
-        context['expected_win_distribution_graph_html'] = self._expected_win_distribution_graph(team_season)  # noqa: E501
-        context['rank_by_week_graph_html'] = self._rank_by_week_graph(team_season)
+
+        if team_season.active:
+            context['expected_win_distribution_graph_html'] = self._expected_win_distribution_graph(team_season)  # noqa: E501
+            context['rank_by_week_graph_html'] = self._rank_by_week_graph(team_season)
 
         return self.render_to_response(context)
 

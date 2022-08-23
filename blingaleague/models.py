@@ -834,7 +834,7 @@ class TeamSeason(ComparableObject):
             return "Blingabowl {} champion".format(self.postseason.blingabowl)
 
         if self.playoff_finish_numeric is not None:
-            return ordinal(self.playoff_finish_numeric)
+            return "{} place".format(ordinal(self.playoff_finish_numeric))
 
         return ''
 
@@ -1380,7 +1380,7 @@ class TeamSeason(ComparableObject):
         if self.playoff_finish and not self.is_partial:
             subheadings.extend([
                 "{} place (regular season)".format(self.headline_season.place),
-                "{} place (playoffs)".format(self.playoff_finish),
+                "{} (playoffs)".format(self.playoff_finish),
             ])
         else:
             subheadings.append("{} place".format(self.headline_season.place))
@@ -1399,22 +1399,33 @@ class TeamSeason(ComparableObject):
         )
 
     @fully_cached_property
+    def active(self):
+        if not self.season_object.active:
+            return False
+
+        if self.season_object.weeks_with_games and not self.games:
+            # team is not part of the season
+            return False
+
+        return True
+
+    @fully_cached_property
     def previous(self):
         prev_ts = TeamSeason(self.team.id, self.year - 1, week_max=self.week_max)
 
-        if len(prev_ts.games) == 0:
-            return None
+        if prev_ts.active:
+            return prev_ts
 
-        return prev_ts
+        return None
 
     @fully_cached_property
     def next(self):
         next_ts = TeamSeason(self.team.id, self.year + 1, week_max=self.week_max)
 
-        if len(next_ts.games) == 0:
-            return None
+        if next_ts.active:
+            return next_ts
 
-        return next_ts
+        return None
 
     @fully_cached_property
     def level_up_links(self):
@@ -2385,16 +2396,20 @@ class Season(ComparableObject):
     def draft_picks(self):
         return self.draft.draft_picks
 
+    @fully_cached_property
+    def active(self):
+        return self.weeks_with_games or \
+            self.keepers or \
+            self.trades or \
+            self.draft_picks
+
     @classmethod
     def all(cls, **kwargs):
-        all_years = set(Game.objects.all().values_list('year', flat=True))
-        all_years.update(set(Keeper.objects.all().values_list('year', flat=True)))
-        all_years.update(set(Trade.objects.all().values_list('year', flat=True)))
-        all_years.update(set(DraftPick.objects.all().values_list('year', flat=True)))
-
-        return [
-            cls(year=year, **kwargs) for year in all_years
+        possible_years = [
+            cls(year=year, **kwargs) for year in range(FIRST_SEASON, datetime.datetime.today().year + 1)
         ]
+
+        return [season for season in possible_years if season.active]
 
     @classmethod
     def min(cls):
