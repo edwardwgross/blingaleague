@@ -14,7 +14,8 @@ from blingaleague.models import Game, Week, Member, TeamSeason, \
                                 position_sort_key, calculate_expected_wins
 from blingaleague.utils import scatter_graph_html, regular_season_weeks
 
-from .forms import CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
+from .forms import CHOICE_YES, CHOICE_NO, \
+                   CHOICE_BLANGUMS, CHOICE_SLAPPED_HEARTBEAT, \
                    CHOICE_WINS, CHOICE_LOSSES, \
                    CHOICE_REGULAR_SEASON, CHOICE_PLAYOFFS, \
                    CHOICE_MADE_PLAYOFFS, CHOICE_MISSED_PLAYOFFS, \
@@ -950,8 +951,10 @@ class DraftPickFinderView(TemplateView):
         if form_data['positions']:
             base_picks = base_picks.filter(position__in=form_data['positions'])
 
-        if form_data['keeper']:
+        if form_data['keeper'] == CHOICE_YES:
             base_picks = base_picks.filter(is_keeper=True)
+        elif form_data['keeper'] == CHOICE_NO:
+            base_picks = base_picks.filter(is_keeper=False)
 
         if form_data['traded']:
             base_picks = base_picks.filter(original_team__isnull=False)

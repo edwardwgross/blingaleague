@@ -6,6 +6,9 @@ from blingaleague.models import Member, Season, BLINGABOWL_TITLE_BASE, \
                                 POSITIONS
 
 
+CHOICE_YES = 'yes'
+CHOICE_NO = 'no'
+
 CHOICE_BLANGUMS = 'team_blangums'
 CHOICE_SLAPPED_HEARTBEAT = 'slapped_heartbeat'
 
@@ -40,6 +43,19 @@ def _teams_multiple_choice_field(label='Team'):
         widget=forms.CheckboxSelectMultiple,
         choices=[(m.id, m) for m in Member.objects.all()],
         coerce=int,
+    )
+
+
+def _yes_no_field(label):
+    return forms.TypedChoiceField(
+        required=False,
+        label=label,
+        widget=forms.RadioSelect,
+        choices=[
+            ('', 'Any'),
+            (CHOICE_YES, 'Yes'),
+            (CHOICE_NO, 'No'),
+        ],
     )
 
 
@@ -242,7 +258,7 @@ class DraftPickFinderForm(BaseFinderForm):
     overall_pick_max = forms.IntegerField(required=False, label='Latest Overall Pick')
     positions = _positions_multiple_choice_field()
     teams = _teams_multiple_choice_field()
-    keeper = forms.BooleanField(required=False, label='Keeper')
+    keeper = _yes_no_field('Keeper')
     traded = forms.BooleanField(required=False, label='Traded')
     player = forms.CharField(required=False, label='Player Name')
 
