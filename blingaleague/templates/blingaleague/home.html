@@ -29,11 +29,25 @@
 
 {% if season.weeks_with_games %}
   {% include "blingaleague/standings_table.html" %}
+
+  {% if week %}
+    <h3>Last Week</h3>
+    <div id="games">
+      {% for game in week.games %}
+        {% include "blingaleague/single_game.html" %}
+      {% endfor %}
+    </div>
+  {% endif %}
 {% endif %}
 
-{% if season.keepers %}
-  <h3>Keepers</h3>
-  {% include "blingaleague/season_keepers.html" %}
+{% if season.trades and trades %}
+  <h3>Recent Trades</h3>
+
+  <div id="trades">
+    {% for trade in trades %}
+      {% include "blingaleague/single_trade.html" %}
+    {% endfor %}
+  </div>
 {% endif %}
 
 {% if season.draft.draft_picks %}
@@ -41,22 +55,8 @@
   <div class="team_transactions"><a href="{{ season.draft.href }}">{{ season.draft }}</a></div>
 {% endif %}
 
-{% if week %}
-  <h2>Last Week</h2>
-  <div id="games">
-    {% for game in week.games %}
-      {% include "blingaleague/single_game.html" %}
-    {% endfor %}
-  </div>
-{% endif %}
-
-{% if trades %}
-  <h2>Recent Trades</h2>
-
-  <div id="trades">
-    {% for trade in trades %}
-      {% include "blingaleague/single_trade.html" %}
-    {% endfor %}
-  </div>
+{% if season.keepers %}
+  <h3>Keepers</h3>
+  {% include "blingaleague/season_keepers.html" %}
 {% endif %}
 {% endblock content %}
