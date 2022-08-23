@@ -16,7 +16,7 @@
         <td><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a></td>
       {% endif %}
       <td>{{ draft_pick.name }}</td>
-      <td>{{ draft_pick.position }}</td>
+      <td class="draft_pick_pos_{{ draft_pick.position|lower }}">{{ draft_pick.position }}</td>
       <td>{% if draft_pick.is_keeper %}Keeper{% endif %}</td>
       <td style="padding-right:12px">
         {% if draft_pick.original_team %}

@@ -136,6 +136,30 @@ td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
     font-style: italic;
 }
 
+td.draft_pick_pos_rb {
+    background-color: #ffcccb;
+}
+
+td.draft_pick_pos_wr {
+    background-color: #add8e6;
+}
+
+td.draft_pick_pos_qb {
+    background-color: #ffffe0;
+}
+
+td.draft_pick_pos_te {
+    background-color: #90ee90;
+}
+
+td.draft_pick_pos_def {
+    background-color: #fed8b1;
+}
+
+td.draft_pick_pos_k {
+    background-color: #e6e6fa;
+}
+
 nav, #footer {
     background-color: #41b6e6;
     border-width: none !important;
