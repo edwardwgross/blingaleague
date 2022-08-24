@@ -38,6 +38,18 @@
       {% endfor %}
     </div>
   {% endif %}
+{% else %}
+  {% if season.draft_teaser.draft_picks %}
+    <h3>Draft</h3>
+    {% with season.draft_teaser as draft %}
+      {% include "blingaleague/draft_picks.html" %}
+    {% endwith %}
+  {% endif %}
+
+  {% if season.keepers %}
+    <h3>Keepers</h3>
+    {% include "blingaleague/season_keepers.html" %}
+  {% endif %}
 {% endif %}
 
 {% if season.trades and trades %}
@@ -48,17 +60,5 @@
       {% include "blingaleague/single_trade.html" %}
     {% endfor %}
   </div>
-{% endif %}
-
-{% if season.draft_teaser.draft_picks %}
-  <h3>Draft</h3>
-  {% with season.draft_teaser as draft %}
-    {% include "blingaleague/draft_picks.html" %}
-  {% endwith %}
-{% endif %}
-
-{% if season.keepers %}
-  <h3>Keepers</h3>
-  {% include "blingaleague/season_keepers.html" %}
 {% endif %}
 {% endblock content %}
