@@ -1,18 +1,18 @@
-<table id="draft_picks" class="table-striped team_transactions {% if is_full_draft %}sortable{% endif %}">
+<table id="draft_picks" class="table-striped team_transactions {% if not draft.is_partial %}sortable{% endif %}">
   <tr>
     <th title="Round and Pick in Round">Pick</th>
     <th title="Overall Pick in Draft">Overall</th>
-    {% if is_full_draft %}<th>Team</th>{% endif %}
+    {% if not draft.team_id %}<th>Team</th>{% endif %}
     <th>Player</th>
     <th>Position</th>
     <th/> {# Keeper #}
-    <th/> {# Trade #}
+    <th></th> {# Trade #}
   </tr>
-  {% for draft_pick in base_object.draft_picks %}
+  {% for draft_pick in draft.draft_picks %}
     <tr>
       <td sorttable_customkey="{{ draft_pick.overall_pick }}" style="text-align:right">{{ draft_pick.round_and_pick }}</td>
       <td style="text-align:right">{{ draft_pick.overall_pick }}</td>
-      {% if is_full_draft %}
+      {% if not draft.team_id %}
         <td><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a></td>
       {% endif %}
       <td>{{ draft_pick.name }}</td>
@@ -25,8 +25,9 @@
       </td>
     </tr>
   {% endfor %}
-  {% if not is_full_draft %}
+  {% if not not draft.is_partial %}
     <tr>
-      <td colspan="100%" class="table_footer"><a href="{% url 'blingaleague.draft' base_object.year %}">Full {{ base_object.year }} draft</a></td></tr>
+      <td colspan="100%" class="table_footer"><a href="{{ draft.href }}">Full {{ draft.year }} draft</a></td>
+    </tr>
   {% endif %}
 </table>

@@ -372,6 +372,5 @@ class DraftView(TemplateView):
         draft = Draft(year)
         context = {
             'draft': draft,
-            'is_full_draft': True,
         }
         return self.render_to_response(context)

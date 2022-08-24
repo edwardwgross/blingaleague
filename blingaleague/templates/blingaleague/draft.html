@@ -7,9 +7,7 @@
 
 <h3><a href="{{ draft.season.href }}">{{ draft.season }}</a></h3>
 
-{% with draft as base_object %}
-  {% include "blingaleague/draft_picks.html" %}
-{% endwith %}
+{% include "blingaleague/draft_picks.html" %}
 
 <div class="center">
   {% if draft.previous %}

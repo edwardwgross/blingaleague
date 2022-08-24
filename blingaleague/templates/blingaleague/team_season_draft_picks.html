@@ -1,4 +1,6 @@
-{% if base_object.draft_picks %}
+{% if base_object.draft.draft_picks %}
   <h3>Draft Picks</h3>
-  {% include "blingaleague/draft_picks.html" %}
+  {% with base_object.draft as draft %}
+    {% include "blingaleague/draft_picks.html" %}
+  {% endwith %}
 {% endif %}

@@ -50,9 +50,11 @@
   </div>
 {% endif %}
 
-{% if season.draft.draft_picks %}
+{% if season.draft_teaser.draft_picks %}
   <h3>Draft</h3>
-  <div class="team_transactions"><a href="{{ season.draft.href }}">{{ season.draft }}</a></div>
+  {% with season.draft_teaser as draft %}
+    {% include "blingaleague/draft_picks.html" %}
+  {% endwith %}
 {% endif %}
 
 {% if season.keepers %}

@@ -1570,8 +1570,8 @@ class TeamSeason(ComparableObject):
         return self.team.keepers.filter(year=self.year)
 
     @fully_cached_property
-    def draft_picks(self):
-        return self.team.draft_picks.filter(year=self.year)
+    def draft(self):
+        return Draft(self.year, team_id=self.team.id)
 
     @classmethod
     def all(cls):
@@ -1832,13 +1832,9 @@ class TeamMultiSeasons(TeamSeason):
         return keepers
 
     @fully_cached_property
-    def draft_picks(self):
-        draft_picks = []
-
-        for season in sorted(self, reverse=True):  # most recent first
-            draft_picks.extend(season.draft_picks)
-
-        return draft_picks
+    def draft(self):
+        # doesn't make sense for multiple seasons
+        return None
 
     @fully_cached_property
     def championships(self):
@@ -2393,15 +2389,15 @@ class Season(ComparableObject):
         return Draft(self.year)
 
     @fully_cached_property
-    def draft_picks(self):
-        return self.draft.draft_picks
+    def draft_teaser(self):
+        return Draft(self.year, round_max=2)
 
     @fully_cached_property
     def active(self):
         return self.weeks_with_games or \
             self.keepers or \
             self.trades or \
-            self.draft_picks
+            self.draft.draft_picks
 
     @classmethod
     def all(cls, **kwargs):
@@ -3166,6 +3162,10 @@ class DraftPick(models.Model, ComparableObject):
         picks_per_round = len(Season(self.year).active_teams)
         return (self.round - 1) * picks_per_round + self.pick_in_round
 
+    @fully_cached_property
+    def draft_object(self):
+        return Draft(self.year)
+
     def clean(self):
         errors = {}
 
@@ -3219,14 +3219,28 @@ class DraftPick(models.Model, ComparableObject):
 class Draft(ComparableObject):
     _comparison_attr = 'year'
 
-    def __init__(self, year):
+    def __init__(self, year, round_max=None, team_id=None):
         self.year = int(year)
+        self.round_max = round_max
+        self.team_id = team_id
+
+        self.is_partial = self.round_max or self.team_id
+
+        self.cache_key = "{}|{}|{}".format(year, round_max, team_id)
 
     @fully_cached_property
     def draft_picks(self):
-        return DraftPick.objects.filter(
+        picks = DraftPick.objects.filter(
             year=self.year,
-        ).order_by('round', 'pick_in_round')
+        )
+
+        if self.round_max:
+            picks = picks.filter(round__lte=self.round_max)
+
+        if self.team_id:
+            picks = picks.filter(team_id=self.team_id)
+
+        return picks.order_by('round', 'pick_in_round')
 
     @fully_cached_property
     def season(self):
@@ -3255,7 +3269,12 @@ class Draft(ComparableObject):
         return next_draft
 
     def __str__(self):
-        return "{} draft".format(self.year)
+        draft_str = "{} draft".format(self.year)
+
+        if self.round_max:
+            draft_str = "{} (through round {})".format(draft_str, self.round_max)
+
+        return draft_str
 
     def __repr__(self):
         return str(self)
