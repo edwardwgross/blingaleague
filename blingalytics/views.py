@@ -539,14 +539,14 @@ class GameFinderView(CSVResponseMixin, TemplateView):
 
             games = self.filter_games(form_data)
 
+        if 'csv' in request.GET:
+            return self.render_to_csv(games)
+
         context = {
             'form': game_finder_form,
             'games': games,
             'summary': self.build_summary_tables(games),
         }
-
-        if 'csv' in request.GET:
-            return self.render_to_csv(games)
 
         return self.render_to_response(context)
 
@@ -708,14 +708,14 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 
             team_seasons = list(self.filter_seasons(form_data))
 
+        if 'csv' in request.GET:
+            return self.render_to_csv(team_seasons)
+
         context = {
             'form': season_finder_form,
             'team_seasons': team_seasons,
             'summary': self.build_summary_tables(team_seasons),
         }
-
-        if 'csv' in request.GET:
-            return self.render_to_csv(team_seasons)
 
         return self.render_to_response(context)
 
@@ -929,7 +929,7 @@ class KeeperFinderView(TemplateView):
         return self.render_to_response(context)
 
 
-class DraftPickFinderView(TemplateView):
+class DraftPickFinderView(CSVResponseMixin, TemplateView):
     template_name = 'blingalytics/draft_pick_finder.html'
 
     def filter_draft_picks(self, form_data):
@@ -997,6 +997,38 @@ class DraftPickFinderView(TemplateView):
             'positions': sorted(position_dict.items(), key=lambda x: position_sort_key(x[0])),
         }
 
+    def generate_csv_data(self, draft_picks):
+        csv_data = [[
+            'Year',
+            'Round',
+            'Pick in Round',
+            'Overall',
+            'Team',
+            'Player',
+            'Position',
+            'Keeper',
+            'Original Team',
+        ]]
+
+        for pick in draft_picks:
+            original_team = pick.original_team
+            if original_team:
+                original_team = original_team.nickname
+
+            csv_data.append([
+                pick.year,
+                pick.round,
+                pick.pick_in_round,
+                pick.overall_pick,
+                pick.team.nickname,
+                pick.name,
+                pick.position,
+                'Yes' if pick.is_keeper else 'No',
+                original_team,
+            ])
+
+        return csv_data
+
     def get(self, request):
         draft_picks = []
 
@@ -1005,6 +1037,9 @@ class DraftPickFinderView(TemplateView):
             form_data = draft_pick_finder_form.cleaned_data
 
             draft_picks = self.filter_draft_picks(form_data)
+
+        if 'csv' in request.GET:
+            return self.render_to_csv(draft_picks)
 
         context = {
             'form': draft_pick_finder_form,
