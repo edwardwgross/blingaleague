@@ -3166,6 +3166,10 @@ class DraftPick(models.Model, ComparableObject):
     def draft_object(self):
         return Draft(self.year)
 
+    @fully_cached_property
+    def team_sort_key(self):
+        return self.draft_object.original_team_order.index(self.team)
+
     def clean(self):
         errors = {}
 
@@ -3245,6 +3249,18 @@ class Draft(ComparableObject):
     @fully_cached_property
     def season(self):
         return Season(self.year)
+
+    @fully_cached_property
+    def original_team_order(self):
+        original_order = []
+
+        for pick in self.draft_picks.filter(round=1):
+            if pick.original_team:
+                original_order.append(pick.original_team)
+            else:
+                original_order.append(pick.team)
+
+        return original_order
 
     @fully_cached_property
     def href(self):

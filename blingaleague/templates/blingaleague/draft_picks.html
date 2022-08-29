@@ -13,7 +13,9 @@
       <td sorttable_customkey="{{ draft_pick.overall_pick }}" style="text-align:right">{{ draft_pick.round_and_pick }}</td>
       <td style="text-align:right">{{ draft_pick.overall_pick }}</td>
       {% if not draft.team_id %}
-        <td><a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a></td>
+        <td sorttable_customkey="{{ draft_pick.team_sort_key }}">
+          <a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a>
+        </td>
       {% endif %}
       <td>{{ draft_pick.name }}</td>
       <td class="draft_pick_pos_{{ draft_pick.position|lower }}">{{ draft_pick.position }}</td>
