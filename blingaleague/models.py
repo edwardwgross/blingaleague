@@ -3328,7 +3328,7 @@ class Player(ComparableObject):
     def traded(self):
         traded = defaultdict(list)
 
-        for asset in TradedAsset.objects.filter(name=self.name):
+        for asset in TradedAsset.objects.filter(name=self.name, is_draft_pick=False):
             traded[asset.trade.year].append(asset)
 
         return traded
