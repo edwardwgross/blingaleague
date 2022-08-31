@@ -17,9 +17,13 @@
 
 <div id="all_gazettes" class="blingacontent">
   <ul id="gazette_list" class="blingacontent_section">
-    {% for gazette in gazette_list %}
-      <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
-    {% endfor %}
+    {% if gazette_list %}
+      {% for gazette in gazette_list %}
+        <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
+      {% endfor %}
+    {% else %}
+      <li>No <em>Gazettes</em> found</li>
+    {% endif %}
   </ul>
   <ul id="gazette_tags" class="blingacontent_section">
     <strong>Tags:</strong>
