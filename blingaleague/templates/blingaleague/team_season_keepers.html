@@ -3,9 +3,9 @@
 {% if base_object.keepers %}
   <h3>Keepers</h3>
 
-  <ul class="team_transactions">
+  <ul class="transactions">
     {% for keeper in base_object.keepers %}
-      <li>{{ keeper.name }} ({{ keeper.round|ordinal }})</li>
+      <li><a href="{% url 'blingaleague.player' keeper.name %}">{{ keeper.name }}</a> ({{ keeper.round|ordinal }})</li>
     {% endfor %}
   </ul>
 {% endif %}

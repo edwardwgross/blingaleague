@@ -1,0 +1,50 @@
+{% extends "blingaleague/base.html" %}
+
+{% load humanize %}
+
+{% block title %}{{ player }}{% endblock %}
+
+{% block content %}
+<h1>{{ player }}</h1>
+
+<div id="player">
+  <table class="table-striped transactions">
+    <tr>
+      <th>Year</th>
+      <th>Drafted</th>
+      <th>Kept</th>
+      <th>Traded</th>
+    </tr>
+    {% for transactions in player.transactions_list reversed %}
+      <tr>
+        <td style="text-align:right"><a href="{% url 'blingaleague.single_season' transactions.year %}">{{ transactions.year }}</a></td>
+        <td>
+          {% if transactions.drafted and not transactions.kept %}
+            <a href="{% url 'blingaleague.team_season' transactions.drafted.team.id transactions.year %}">{{ transactions.drafted.team }}</a>,
+            <a href="{% url 'blingaleague.draft' transactions.year %}">{{ transactions.drafted.round_and_pick }}</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if transactions.kept %}
+            <a href="{% url 'blingaleague.team_season' transactions.kept.team.id transactions.year %}">{{ transactions.kept.team }}</a>, {{ transactions.kept.round|ordinal }} round
+            (<a href="{% url 'blingaleague.draft' transactions.year %}">pick {{ transactions.drafted.round_and_pick }}</a>)
+          {% endif %}
+        </td>
+        <td>
+          {% if transactions.traded %}
+            <ul>
+              {% for traded_asset in transactions.traded %}
+                <li>
+                  <a href="{{ traded_asset.trade.week_object.href }}">{{ traded_asset.trade.week_object }}</a>:
+                  <a href="{{ traded_asset.trade.href }}">Traded</a>
+                  from <a href="{% url 'blingaleague.team_season' traded_asset.sender.id transactions.year %}">{{ traded_asset.sender }}</a>
+                  to <a href="{% url 'blingaleague.team_season' traded_asset.receiver.id transactions.year %}">{{ traded_asset.receiver }}</a>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

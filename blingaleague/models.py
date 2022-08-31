@@ -12,6 +12,8 @@ from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 
+from slugify import slugify
+
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties, \
                    regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week
 
@@ -3291,6 +3293,113 @@ class Draft(ComparableObject):
             draft_str = "{} (through round {})".format(draft_str, self.round_max)
 
         return draft_str
+
+    def __repr__(self):
+        return str(self)
+
+
+class Player(ComparableObject):
+    _comparison_attr = 'name'
+
+    def __init__(self, name):
+        self.name = name
+
+        self.cache_key = slugify(name)
+
+    @fully_cached_property
+    def drafted(self):
+        drafted = {}
+
+        for pick in DraftPick.objects.filter(name=self.name):
+            drafted[pick.year] = pick
+
+        return drafted
+
+    @fully_cached_property
+    def kept(self):
+        kept = {}
+
+        for keeper in Keeper.objects.filter(name=self.name):
+            kept[keeper.year] = keeper
+
+        return kept
+
+    @fully_cached_property
+    def traded(self):
+        traded = defaultdict(list)
+
+        for asset in TradedAsset.objects.filter(name=self.name):
+            traded[asset.trade.year].append(asset)
+
+        return traded
+
+    @fully_cached_property
+    def transactions_by_year(self):
+        if not self.drafted and not self.kept and not self.traded:
+            return {}
+
+        transactions = {}
+
+        all_years = self.drafted.keys() | self.kept.keys() | self.traded.keys()
+
+        year = min(all_years)
+        while year <= max(all_years):
+            transactions[year] = {
+                'drafted': self.drafted.get(year),
+                'kept': self.kept.get(year),
+                'traded': sorted(self.traded[year], key=lambda x: x.trade), # is a defaultdict(list) already
+            }
+
+            year += 1
+
+        return transactions
+
+    @fully_cached_property
+    def transactions_list(self):
+        transactions_list = []
+
+        for year, transactions in sorted(self.transactions_by_year.items()):
+            transactions['year'] = year
+            transactions_list.append(transactions)
+
+        return transactions_list
+
+    def legacy_teams(self, start_year, year_range, min_times_rostered, draft_only=False):
+        legacy_teams = []
+
+        for team in Member.objects.all():
+            times_rostered_by_team = 0
+
+            for year in range(start_year, start_year + year_range):
+                rostered_by_team = False
+
+                transactions = self.transactions_by_year[year]
+
+                drafted = transactions['drafted']
+                kept = transactions['kept']
+                traded = transactions['traded']
+
+                if drafted and drafted.team == team:
+                    rostered_by_team = True
+                elif not draft_only:
+                    if kept and kept.team == team:
+                        rostered_by_team = True
+                    elif traded:
+                        for trade in traded:
+                            if team in trade.teams:
+                                rostered_by_team = True
+                                break
+
+                if rostered_by_team:
+                    times_rostered_by_team += 1
+
+            if times_rostered_by_team >= min_times_rostered:
+                legacy_teams.append(team)
+
+        return legacy_teams
+
+    def __str__(self):
+        return self.name
 
     def __repr__(self):
         return str(self)

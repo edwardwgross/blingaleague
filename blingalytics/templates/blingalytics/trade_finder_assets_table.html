@@ -17,7 +17,9 @@
       <td><a href="{% url 'blingaleague.single_season' asset.trade.year %}">{{ asset.trade.year}}</a></td>
       <td><a href="{{ asset.trade.week_object.href }}">{{ asset.trade.week }}</a></td>
       <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.receiver.id asset.trade.year %}">{{ asset.receiver.nickname }}</a></td>
-      <td style="text-align:left">{{ asset.name }}</td>
+      <td style="text-align:left">
+        {% if asset.is_draft_pick %}{{ asset.name }}{% else %}<a href="{% url 'blingaleague.player' asset.name %}">{{ asset.name }}</a>{% endif %}
+      </td>
       <td style="text-align:left">{{ asset.position|default_if_none:"" }}</td>
       <td>{{ asset.keeper_cost|default_if_none:'' }}</td>
       <td style="text-align:left"><a href="{% url 'blingaleague.team_season' asset.sender.id asset.trade.year %}">{{ asset.sender.nickname }}</a></td>

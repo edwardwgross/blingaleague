@@ -6,7 +6,7 @@ from django.views.generic import RedirectView
 from .views import HomeView, TeamDetailsView, TeamListView,\
                    SeasonListView, SingleSeasonView,\
                    MatchupView, WeekView, TeamSeasonView,\
-                   TradeView, DraftView
+                   TradeView, DraftView, PlayerView
 
 
 admin.autodiscover()
@@ -61,6 +61,11 @@ urlpatterns = [
         r'^trade/(?P<trade>\d+)/$',
         TradeView.as_view(),
         name='blingaleague.trade',
+    ),
+    url(
+        r'^player/(?P<player>.+)/$',
+        PlayerView.as_view(),
+        name='blingaleague.player',
     ),
 
     # deprecated urls

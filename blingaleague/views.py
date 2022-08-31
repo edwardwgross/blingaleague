@@ -1,12 +1,13 @@
 from collections import defaultdict
 
+from django.http import Http404
 from django.views.generic import TemplateView
 
 from blingacontent.models import Gazette
 
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
-                    Trade, Draft, \
+                    Trade, Draft, Player, \
                     PLAYOFF_TEAMS
 from .utils import line_graph_html, bar_graph_html, rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
@@ -373,4 +374,17 @@ class DraftView(TemplateView):
         context = {
             'draft': draft,
         }
+        return self.render_to_response(context)
+
+
+class PlayerView(TemplateView):
+    template_name = 'blingaleague/player.html'
+
+    def get(self, request, player):
+        player = Player(player)
+
+        if not player.transactions_list:
+            raise Http404("No history of player {}".format(player))
+
+        context = {'player': player}
         return self.render_to_response(context)

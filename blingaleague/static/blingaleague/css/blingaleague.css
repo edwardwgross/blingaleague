@@ -260,7 +260,7 @@ table.sortable th {
 }
 
 table.standings_table th,
-table.team_transactions th {
+table.transactions th {
     white-space: nowrap;
     text-align: center;
 }
@@ -270,9 +270,18 @@ table.standings_table td {
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
-.team_transactions td {
+.transactions td {
     white-space: nowrap;
     vertical-align: top;
+}
+
+#player .transactions td {
+    vertical-align: middle;
+    padding: 6px;
+}
+
+#player .transactions ul {
+    margin: 0;
 }
 
 .trade td {
@@ -280,8 +289,11 @@ table.standings_table td {
 }
 
 .trade ul {
-    margin-top: 6px;
     margin-bottom: 6px;
+}
+
+.transactions .trade ul {
+    margin-top: 6px;
 }
 
 .standings_note {
@@ -358,7 +370,7 @@ svg.pygal-chart {
 #games,
 #season_details,
 #trades,
-.team_transactions {
+.transactions {
     width: fit-content;
     margin-bottom: 30px;
 }

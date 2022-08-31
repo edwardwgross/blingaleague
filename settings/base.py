@@ -1,5 +1,7 @@
 from pathlib import Path
 
+#DEBUG = TEMPLATE_DEBUG = True
+
 SECRET_KEY = 's4nders0n'
 
 INFO = False
