@@ -3385,8 +3385,12 @@ class Player(ComparableObject):
                     if kept and kept.team == team:
                         rostered_by_team = True
                     elif traded:
-                        for trade in traded:
-                            if team in trade.teams:
+                        for traded_asset in traded:
+                            # check receiver and sender explicitly,
+                            # not Trade.teams, since that could include
+                            # three-ways and teams that never rostered
+                            # this player
+                            if team in (traded_asset.receiver, traded_asset.sender):
                                 rostered_by_team = True
                                 break
 
