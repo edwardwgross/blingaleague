@@ -3376,27 +3376,38 @@ class Player(ComparableObject):
 
         return teams
 
-    def legacy_teams(self, start_year, year_range, min_times_rostered, draft_only=False):
+    def legacy_teams(self, year_range, min_times_rostered, draft_only=False):
         legacy_teams = []
 
         for team in self.teams_rostered_by:
-            times_rostered_by_team = 0
+            years_active = sorted(self.transactions_by_year.keys())
 
-            for year in range(start_year, start_year + year_range):
-                rostered_by_team = False
+            for start_year in years_active:
+                times_rostered_by_team = 0
 
-                transactions = self.transactions_by_year[year]
+                for year in range(start_year, start_year + year_range):
+                    if year not in years_active:
+                        break
 
-                drafted = transactions['drafted']
-                kept = transactions['kept']
-                traded = transactions['traded']
+                    rostered_by_team = False
 
-                if drafted and drafted.team == team:
-                    rostered_by_team = True
-                elif not draft_only:
-                    if kept and kept.team == team:
-                        rostered_by_team = True
-                    elif traded:
+                    transactions = self.transactions_by_year[year]
+
+                    drafted = transactions['drafted']
+                    kept = transactions['kept']
+                    traded = transactions['traded']
+
+                    for pick in drafted:
+                        if pick.team == team:
+                            rostered_by_team = True
+                            break
+
+                    if not draft_only:
+                        for keeper in kept:
+                            if keeper.team == team:
+                                rostered_by_team = True
+                                break
+
                         for traded_asset in traded:
                             # check receiver and sender explicitly,
                             # not Trade.teams, since that could include
@@ -3406,11 +3417,11 @@ class Player(ComparableObject):
                                 rostered_by_team = True
                                 break
 
-                if rostered_by_team:
-                    times_rostered_by_team += 1
+                    if rostered_by_team:
+                        times_rostered_by_team += 1
 
-            if times_rostered_by_team >= min_times_rostered:
-                legacy_teams.append(team)
+                if times_rostered_by_team >= min_times_rostered:
+                    legacy_teams.append((team, start_year))
 
         return legacy_teams
 
