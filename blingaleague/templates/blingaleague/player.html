@@ -11,38 +11,62 @@
   <table class="table-striped transactions">
     <tr>
       <th>Year</th>
-      <th>Drafted</th>
-      <th>Kept</th>
-      <th>Traded</th>
+      {% if player.drafted %}<th>Drafted</th>{% endif %}
+      {% if player.kept %}<th>Kept</th>{% endif %}
+      {% if player.traded %}<th>Traded</th>{% endif %}
     </tr>
     {% for transactions in player.transactions_list reversed %}
       <tr>
         <td style="text-align:right"><a href="{% url 'blingaleague.single_season' transactions.year %}">{{ transactions.year }}</a></td>
-        <td>
-          {% if transactions.drafted and not transactions.kept %}
-            <a href="{% url 'blingaleague.team_season' transactions.drafted.team.id transactions.year %}">{{ transactions.drafted.team }}</a>,
-            <a href="{% url 'blingaleague.draft' transactions.year %}">{{ transactions.drafted.round_and_pick }}</a>
-          {% endif %}
-        </td>
-        <td>
-          {% if transactions.kept %}
-            <a href="{% url 'blingaleague.team_season' transactions.kept.team.id transactions.year %}">{{ transactions.kept.team }}</a>, {{ transactions.kept.round|ordinal }} round
-            (<a href="{% url 'blingaleague.draft' transactions.year %}">pick {{ transactions.drafted.round_and_pick }}</a>)
-          {% endif %}
-        </td>
-        <td>
-          {% if transactions.traded %}
-            <ul>
-              {% for traded_asset in transactions.traded %}
-                <li>
-                  <a href="{{ traded_asset.trade.week_object.href }}">{{ traded_asset.trade.week_object }}</a>:
-                  <a href="{{ traded_asset.trade.href }}">Traded</a>
-                  from <a href="{% url 'blingaleague.team_season' traded_asset.sender.id transactions.year %}">{{ traded_asset.sender }}</a>
-                  to <a href="{% url 'blingaleague.team_season' traded_asset.receiver.id transactions.year %}">{{ traded_asset.receiver }}</a>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        </td>
+        {% if player.drafted %}
+          <td>
+            {% if transactions.drafted|length > transactions.kept|length %}
+              <ul>
+                {% for draft_pick in transactions.drafted %}
+                  {% if not draft_pick.is_keeper %}
+                    <li>
+                      <a href="{% url 'blingaleague.team_season' draft_pick.team.id transactions.year %}">{{ draft_pick.team }}</a>,
+                      <a href="{% url 'blingaleague.draft' transactions.year %}">{{ draft_pick.round_and_pick }}</a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </td>
+        {% endif %}
+        {% if player.kept %}
+          <td>
+            {% if transactions.kept %}
+              <ul>
+                {% for keeper in transactions.kept %}
+                  <li>
+                    <a href="{% url 'blingaleague.team_season' keeper.team.id transactions.year %}">{{ keeper.team }}</a>, {{ keeper.round|ordinal }} round
+                    {% for draft_pick in transactions.drafted %}
+                      {% if draft_pick.is_keeper and draft_pick.team == keeper.team %}
+                        (<a href="{% url 'blingaleague.draft' transactions.year %}">pick {{ transactions.drafted.0.round_and_pick }}</a>)
+                      {% endif %}
+                    {% endfor %}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </td>
+        {% endif %}
+        {% if player.traded %}
+          <td>
+            {% if transactions.traded %}
+              <ul>
+                {% for traded_asset in transactions.traded %}
+                  <li>
+                    <a href="{{ traded_asset.trade.week_object.href }}">{{ traded_asset.trade.week_object }}</a>:
+                    <a href="{{ traded_asset.trade.href }}">Traded</a>
+                    from <a href="{% url 'blingaleague.team_season' traded_asset.sender.id transactions.year %}">{{ traded_asset.sender }}</a>
+                    to <a href="{% url 'blingaleague.team_season' traded_asset.receiver.id transactions.year %}">{{ traded_asset.receiver }}</a>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </td>
+        {% endif %}
       </tr>
     {% endfor %}
   </table>

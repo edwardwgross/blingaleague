@@ -3308,19 +3308,19 @@ class Player(ComparableObject):
 
     @fully_cached_property
     def drafted(self):
-        drafted = {}
+        drafted = defaultdict(list)
 
         for pick in DraftPick.objects.filter(name=self.name):
-            drafted[pick.year] = pick
+            drafted[pick.year].append(pick)
 
         return drafted
 
     @fully_cached_property
     def kept(self):
-        kept = {}
+        kept = defaultdict(list)
 
         for keeper in Keeper.objects.filter(name=self.name):
-            kept[keeper.year] = keeper
+            kept[keeper.year].append(keeper)
 
         return kept
 
@@ -3397,6 +3397,17 @@ class Player(ComparableObject):
                 legacy_teams.append(team)
 
         return legacy_teams
+
+    @classmethod
+    def all(cls):
+        all_names = set()
+
+        for model in [DraftPick, Keeper, TradedAsset]:
+            all_names.update(model.objects.values_list('name', flat=True))
+
+        return sorted(
+            [Player(name) for name in all_names],
+        )
 
     def __str__(self):
         return self.name
