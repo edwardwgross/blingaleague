@@ -3345,9 +3345,9 @@ class Player(ComparableObject):
         year = min(all_years)
         while year <= max(all_years):
             transactions[year] = {
-                'drafted': self.drafted.get(year),
-                'kept': self.kept.get(year),
-                'traded': sorted(self.traded[year], key=lambda x: x.trade), # is a defaultdict(list) already
+                'drafted': sorted(self.drafted[year]),
+                'kept': sorted(self.kept[year]),
+                'traded': sorted(self.traded[year], key=lambda x: x.trade),
             }
 
             year += 1
@@ -3364,10 +3364,22 @@ class Player(ComparableObject):
 
         return transactions_list
 
+    @fully_cached_property
+    def teams_rostered_by(self):
+        teams = set()
+
+        for year, transactions in self.transactions_by_year.items():
+            teams.update([pick.team for pick in transactions['drafted']])
+            teams.update([keeper.team for keeper in transactions['kept']])
+            teams.update([asset.sender for asset in transactions['traded']])
+            teams.update([asset.receiver for asset in transactions['traded']])
+
+        return teams
+
     def legacy_teams(self, start_year, year_range, min_times_rostered, draft_only=False):
         legacy_teams = []
 
-        for team in Member.objects.all():
+        for team in self.teams_rostered_by:
             times_rostered_by_team = 0
 
             for year in range(start_year, start_year + year_range):
