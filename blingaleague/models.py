@@ -549,7 +549,7 @@ class Postseason(models.Model):
 
     @fully_cached_property
     def regular_season(self):
-        return Season(year=self.year)
+        return Season(self.year)
 
     @fully_cached_property
     def playoff_results(self):
@@ -806,7 +806,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def season_object(self):
-        return Season(year=self.year, week_max=self.week_max)
+        return Season(self.year, week_max=self.week_max)
 
     @fully_cached_property
     def place_numeric(self):
@@ -1793,11 +1793,7 @@ class TeamMultiSeasons(TeamSeason):
 
     @fully_cached_property
     def season_object(self):
-        return Season(
-            all_time=True,
-            include_playoffs=self.include_playoffs,
-            week_max=self.week_max,
-        )
+        return None
 
     @fully_cached_property
     def clinched_playoffs(self):
@@ -1895,9 +1891,8 @@ class TeamMultiSeasons(TeamSeason):
 class Season(ComparableObject):
     _comparison_attr = 'year'
 
-    def __init__(self, year=None, all_time=False, include_playoffs=False, week_max=None):
-        self.year = year
-        self.all_time = all_time
+    def __init__(self, year, include_playoffs=False, week_max=None):
+        self.year = int(year)
         self.include_playoffs = include_playoffs
 
         self.week_max = week_max
@@ -1906,13 +1901,7 @@ class Season(ComparableObject):
             # playoffs are explicitly included
             self.week_max = regular_season_weeks(self.year)
 
-        if self.all_time:
-            self.year = None
-        else:
-            if self.year is None:
-                raise ValueError('Must specify a year or all_time must be True')
-
-        self.cache_key = "|".join(map(str, (year, all_time, include_playoffs, week_max)))
+        self.cache_key = "|".join(map(str, (year, include_playoffs, week_max)))
 
     @fully_cached_property
     def postseason(self):
@@ -2082,24 +2071,18 @@ class Season(ComparableObject):
         return self._most_by_attr('expected_wins')
 
     def _team_season(self, team):
-        if self.all_time:
-            return TeamMultiSeasons(
-                team.id,
-                include_playoffs=self.include_playoffs,
-                week_max=self.week_max,
-            )
-        else:
-            return TeamSeason(
-                team.id,
-                self.year,
-                include_playoffs=self.include_playoffs,
-                week_max=self.week_max,
-            )
+        return TeamSeason(
+            team.id,
+            self.year,
+            include_playoffs=self.include_playoffs,
+            week_max=self.week_max,
+        )
 
-    def _build_standings_table(self, teams):
+    @fully_cached_property
+    def standings_table(self):
         team_seasons = []
 
-        for team in teams:
+        for team in self.active_teams:
             team_season = self._team_season(team)
 
             if len(team_season.games) > 0 or self.is_upcoming_season:
@@ -2115,19 +2098,8 @@ class Season(ComparableObject):
         return sorted(team_seasons, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     @fully_cached_property
-    def standings_table(self):
-        return self._build_standings_table(self.active_teams)
-
-    @fully_cached_property
-    def defunct_standings_table(self):
-        if not self.all_time:
-            return []
-
-        return self._build_standings_table(Member.objects.filter(defunct=True))
-
-    @fully_cached_property
     def active_teams(self):
-        if self.is_upcoming_season or self.all_time:
+        if self.is_upcoming_season:
             return Member.objects.filter(defunct=False).order_by('first_name', 'last_name')
 
         teams = set()
@@ -2172,9 +2144,6 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def is_partial(self):
-        if self.all_time:
-            return True
-
         if not self.standings_table:
             # edge case where season hasn't started yet
             return True
@@ -2187,10 +2156,7 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def regular_season(self):
-        if self.all_time:
-            return None
-
-        return Season(year=self.year)
+        return Season(self.year)
 
     @fully_cached_property
     def playoff_bracket(self):
@@ -2333,7 +2299,7 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def possible_final_outcomes(self):
-        if self.is_upcoming_season or self.all_time:
+        if self.is_upcoming_season:
             return None
 
         remaining_games = set()
@@ -2403,11 +2369,14 @@ class Season(ComparableObject):
 
     @classmethod
     def all(cls, **kwargs):
-        possible_years = [
-            cls(year=year, **kwargs) for year in range(FIRST_SEASON, datetime.datetime.today().year + 1)
-        ]
+        active_seasons = []
 
-        return [season for season in possible_years if season.active]
+        for year in range(FIRST_SEASON, datetime.datetime.today().year + 1):
+            season = cls(year, **kwargs)
+            if season.active:
+                active_seasons.append(season)
+
+        return active_seasons
 
     @classmethod
     def min(cls):
@@ -2428,7 +2397,7 @@ class Season(ComparableObject):
         if prev_year < Season.min().year:
             return None
 
-        return Season(year=prev_year)
+        return Season(prev_year)
 
     @fully_cached_property
     def next(self):
@@ -2437,7 +2406,7 @@ class Season(ComparableObject):
         if next_year > Season.max().year:
             return None
 
-        return Season(year=next_year)
+        return Season(next_year)
 
     @fully_cached_property
     def href(self):
@@ -2448,16 +2417,6 @@ class Season(ComparableObject):
 
             return "{}{}".format(
                 urlresolvers.reverse_lazy('blingaleague.single_season', args=(self.year,)),
-                getargs,
-            )
-
-        elif self.all_time:
-            getargs = ''
-            if self.include_playoffs:
-                getargs = '?include_playoffs'
-
-            return "{}{}".format(
-                urlresolvers.reverse_lazy('blingaleague.all_time'),
                 getargs,
             )
 
@@ -2854,13 +2813,19 @@ class Matchup(object):
     @fully_cached_property
     def subheadings(self):
         if self.team1_win_count == self.team2_win_count:
-            return ["All-time series tied, {}-{}".format(self.team1_win_count, self.team2_win_count)]
+            return [
+                "All-time series tied, {}-{}".format(self.team1_win_count, self.team2_win_count),
+            ]
         else:
             text = "{} leads all-time series, {}-{}"
             if self.team1_win_count > self.team2_win_count:
-                return [text.format(self.team1.nickname, self.team1_win_count, self.team2_win_count)]
+                return [
+                    text.format(self.team1.nickname, self.team1_win_count, self.team2_win_count),
+                ]
             else:
-                return [text.format(self.team2.nickname, self.team2_win_count, self.team1_win_count)]
+                return [
+                    text.format(self.team2.nickname, self.team2_win_count, self.team1_win_count),
+                ]
 
     @fully_cached_property
     def href(self):
@@ -3172,6 +3137,10 @@ class DraftPick(models.Model, ComparableObject):
     def team_sort_key(self):
         return self.draft_object.original_team_order.index(self.team)
 
+    @fully_cached_property
+    def position_sort_key(self):
+        return position_sort_key(self.position)
+
     def clean(self):
         errors = {}
 
@@ -3218,7 +3187,7 @@ class DraftPick(models.Model, ComparableObject):
         return str(self)
 
     class Meta:
-        #unique_together = ('year', 'round', 'pick_in_round')
+        # unique_together = ('year', 'round', 'pick_in_round')
         ordering = ['year', 'round', 'pick_in_round']
 
 
@@ -3468,9 +3437,6 @@ def build_all_objects_cache():
 
         for year in year_range:
             build_object_cache(Season(year))
-
-        build_object_cache(Season(all_time=True))
-        build_object_cache(Season(all_time=True, include_playoffs=True))
 
     except Exception:
         # print if we're in the shell, but don't actually raise

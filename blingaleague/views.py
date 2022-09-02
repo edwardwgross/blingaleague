@@ -120,9 +120,7 @@ class SingleSeasonView(TemplateView):
         return graph_html
 
     def get(self, request, year):
-        season_kwargs = {
-            'year': int(year),
-        }
+        season_kwargs = {}
 
         week_max = None
         hide_playoff_finish = False
@@ -135,7 +133,7 @@ class SingleSeasonView(TemplateView):
                 # ignore if user passed in a non-int
                 pass
 
-        season = Season(**season_kwargs)
+        season = Season(year, **season_kwargs)
 
         weeks_with_games = sorted(set(
             Game.objects.filter(
@@ -200,10 +198,7 @@ class WeekView(GamesView):
 
         context = self._context(Week(year, week))
 
-        context['season'] = Season(
-            year=year,
-            week_max=week,
-        )
+        context['season'] = Season(year, week_max=week)
 
         context['hide_playoff_finish'] = week < blingabowl_week(year)
 

@@ -18,7 +18,7 @@
         </td>
       {% endif %}
       <td><a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a></td>
-      <td class="draft_pick_pos_{{ draft_pick.position|lower }}">{{ draft_pick.position }}</td>
+      <td sorttable_customkey="{{ draft_pick.position_sort_key }}" class="draft_pick_pos_{{ draft_pick.position|lower }}">{{ draft_pick.position }}</td>
       <td>{% if draft_pick.is_keeper %}Keeper{% endif %}</td>
       <td style="padding-right:12px">
         {% if draft_pick.original_team %}

@@ -12,7 +12,7 @@ class Command(LabelCommand):
     label = 'year'
 
     def handle_label(self, year, **kwargs):
-        season = Season(year=int(year))
+        season = Season(int(year))
 
         teams = []
         for ts in season.standings_table[PLAYOFF_TEAMS:]:

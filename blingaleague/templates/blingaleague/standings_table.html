@@ -4,13 +4,3 @@
     <tr>{% include "blingaleague/standings_table_row.html" %}</tr>
   {% endfor %}
 </table>
-
-{% if season.defunct_standings_table %}
-  <div><em>Defunct Teams</em></div>
-  <table class="standings_table defunct_teams sortable">
-    <tr>{% include "blingaleague/standings_table_header.html" %}</tr>
-    {% for team_season in season.defunct_standings_table %}
-      <tr class="defunct">{% include "blingaleague/standings_table_row.html" %}</tr>
-    {% endfor %}
-  </table>
-{% endif %}

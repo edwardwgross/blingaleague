@@ -16,11 +16,7 @@
 <td>{{ team_season.all_play_win_pct|floatformat:3 }}</td>
 <td>{{ team_season.blangums_count }}</td>
 <td>{{ team_season.slapped_heartbeat_count }}</td>
-{% if season.all_time %}
-  <td>{{ team_season.robscore|floatformat:2 }}</td>
-{% else %}
-  <td style="text-align:center">{{ team_season.current_streak }}</td>
-  {% if not hide_playoff_finish %}
-    <td sorttable_customkey="{{ team_season.playoff_finish_sort_key }}" style="text-align:left">{{ team_season.playoff_finish }}</td>
-  {% endif %}
+<td style="text-align:center">{{ team_season.current_streak }}</td>
+{% if not hide_playoff_finish %}
+  <td sorttable_customkey="{{ team_season.playoff_finish_sort_key }}" style="text-align:left">{{ team_season.playoff_finish }}</td>
 {% endif %}
