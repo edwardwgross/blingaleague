@@ -54,8 +54,9 @@
           <th>Points</th>
           <th title="Expected Wins">Exp. W</th>
           <th title="Expected Winning Percentage">Exp. %</th>
-          <th title="Strength of Schedule">SOS</th>
           <th title="All-Play Winning Percentage">All-Play</th>
+          <th title="Points Against">PA</th>
+          <th title="Strength of Schedule">SOS</th>
           <th>Place</th>
           <th>Final Place</th>
           <th title="Team Blangums Awards">Blangums</th>
@@ -77,8 +78,9 @@
             <td>{{ team_season.points|intcomma }}</td>
             <td>{{ team_season.expected_wins|floatformat:2 }}</td>
             <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
-            <td>{{ team_season.strength_of_schedule_str }}</td>
             <td>{{ team_season.all_play_win_pct|floatformat:3 }}</td>
+            <td>{{ team_season.points_against|intcomma }}</td>
+            <td>{{ team_season.strength_of_schedule_str }}</td>
             <td>{{ team_season.place_numeric }}</td>
             <td>
               {% if not team_season.regular_season.is_partial %}
