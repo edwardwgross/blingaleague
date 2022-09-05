@@ -1,3 +1,5 @@
+import random
+
 from collections import defaultdict
 
 from django.http import Http404
@@ -23,11 +25,19 @@ class HomeView(TemplateView):
         if latest_week.year != latest_season.year:
             latest_week = None
 
+        all_ts_list = list(TeamSeason.all())
+        spotlight_team_seasons = []
+        while len(spotlight_team_seasons) < 3:
+            random_ts = random.choice(all_ts_list)
+            if random_ts not in spotlight_team_seasons and not random_ts.is_current_season:
+                spotlight_team_seasons.append(random_ts)
+
         context = {
             'season': latest_season,
             'week': latest_week,
             'gazette': Gazette.latest(),
             'trades': Trade.most_recent(),
+            'spotlight_team_seasons': spotlight_team_seasons,
         }
         return self.render_to_response(context)
 

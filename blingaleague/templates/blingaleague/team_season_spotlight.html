@@ -1,0 +1,8 @@
+<div class="team_season_spotlight">
+  <h3><a href="{{ team_season.href }}">{{ team_season }}</a></h3>
+  <ul>
+    {% for subheading in team_season.subheadings %}
+      <li>{{ subheading }}</li>
+    {% endfor %}
+  </ul>
+</div>

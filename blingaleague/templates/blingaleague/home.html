@@ -3,62 +3,73 @@
 {% block content %}
 <h1>Blingaleague</h1>
 
-<div id="gazette">
-  <h2>Latest Sanderson Gazette</h2>
-  <ul>
-    <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
-  </ul>
-</div>
-
-{% if season.subheadings %}
-  {% for subheading in season.subheadings %}
-    <h2>{{ subheading }}</h2>
-  {% endfor %}
-{% else %}
-  <h2>{{ season.year}} Season</h2>
-{% endif %}
-
-{% if season.playoff_bracket %}
-  {% include "blingaleague/playoff_bracket.html" %}
+<div id="home_main">
+  <div id="gazette">
+    <h2>Latest Sanderson Gazette</h2>
+    <ul>
+      <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
+    </ul>
+  </div>
 
   {% if season.subheadings %}
-    {# if there weren't any subheadings, we already put this text in the above <h2> #}
-    <h3> {{ season.year }} Season</h3>
+    {% for subheading in season.subheadings %}
+      <h2>{{ subheading }}</h2>
+    {% endfor %}
+  {% else %}
+    <h2><a href="{{ season.href }}">{{ season.year}} Season</a></h2>
   {% endif %}
-{% endif %}
 
-{% if season.weeks_with_games %}
-  {% include "blingaleague/standings_table.html" %}
+  {% if season.playoff_bracket %}
+    {% include "blingaleague/playoff_bracket.html" %}
 
-  {% if week %}
-    <h3>Last Week</h3>
-    <div id="games">
-      {% for game in week.games %}
-        {% include "blingaleague/single_game.html" %}
+    {% if season.subheadings %}
+      {# if there weren't any subheadings, we already put this text in the above <h2> #}
+      <h3><a href="{{ season.href }}">{{ season.year }} Season</a></h3>
+    {% endif %}
+  {% endif %}
+
+  {% if season.weeks_with_games %}
+    {% with True as short_form_standings %}
+      {% include "blingaleague/standings_table.html" %}
+    {% endwith %}
+
+    {% if week %}
+      <h3>Last Week</h3>
+      <div id="games">
+        {% for game in week.games %}
+          {% include "blingaleague/single_game.html" %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% else %}
+    {% if season.draft_teaser.draft_picks %}
+      <h3>Draft</h3>
+      {% with season.draft_teaser as draft %}
+        {% include "blingaleague/draft_picks.html" %}
+      {% endwith %}
+    {% endif %}
+
+    {% if season.keepers %}
+      <h3>Keepers</h3>
+      {% include "blingaleague/season_keepers.html" %}
+    {% endif %}
+  {% endif %}
+
+  {% if season.trades and trades %}
+    <h3>Recent Trades</h3>
+
+    <div id="trades">
+      {% for trade in trades %}
+        {% include "blingaleague/single_trade.html" %}
       {% endfor %}
     </div>
   {% endif %}
-{% else %}
-  {% if season.draft_teaser.draft_picks %}
-    <h3>Draft</h3>
-    {% with season.draft_teaser as draft %}
-      {% include "blingaleague/draft_picks.html" %}
-    {% endwith %}
-  {% endif %}
+</div>
 
-  {% if season.keepers %}
-    <h3>Keepers</h3>
-    {% include "blingaleague/season_keepers.html" %}
-  {% endif %}
-{% endif %}
-
-{% if season.trades and trades %}
-  <h3>Recent Trades</h3>
-
-  <div id="trades">
-    {% for trade in trades %}
-      {% include "blingaleague/single_trade.html" %}
-    {% endfor %}
-  </div>
-{% endif %}
+<div id="home_sidebar">
+  <h2>Random Seasons</h2>
+  {% for team_season in spotlight_team_seasons %}
+    {% include "blingaleague/team_season_spotlight.html" %}
+  {% endfor %}
+</div>
 {% endblock content %}
