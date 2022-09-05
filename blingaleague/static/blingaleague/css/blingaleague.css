@@ -146,6 +146,10 @@ th a, th a:hover, th a:visited, th a:focus {
     margin-bottom: 2px;
 }
 
+.team_season_spotlight ul {
+    margin: 0;
+}
+
 table.defunct_teams th,
 table.defunct_teams th a, table.defunct_teams th a:hover,
 table.defunct_teams th a:visited, table.defunct_teams th a:focus {
