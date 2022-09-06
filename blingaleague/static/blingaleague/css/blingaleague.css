@@ -111,6 +111,11 @@ th a, th a:hover, th a:visited, th a:focus {
     content: " \2192";
 }
 
+.previous,
+.next {
+    margin: 12px 0;
+}
+
 .center {
     clear: both;
     text-align: center;
