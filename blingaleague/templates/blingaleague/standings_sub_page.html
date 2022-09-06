@@ -1,3 +1,4 @@
-<h3>Standings</h3>
-
-{% include 'blingaleague/standings_table.html' %}
+{% if season.weeks_with_games %}
+  <h3>Standings</h3>
+  {% include 'blingaleague/standings_table.html' %}
+{% endif %}
