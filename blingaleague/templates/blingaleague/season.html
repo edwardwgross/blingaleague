@@ -27,7 +27,7 @@
       <a href="{{ season.previous.href }}" class="link previous">Previous</a>
     {% endif %}
 
-    <a href="{% url 'blingaleague.seasons' %}">All seasons</a>
+    <a href="{% url 'blingaleague.seasons' %}" style="position:relative; top:12px">All seasons</a>
 
     {% if season.next %}
       <a href="{{ season.next.href }}" class="link next">Next</a>
