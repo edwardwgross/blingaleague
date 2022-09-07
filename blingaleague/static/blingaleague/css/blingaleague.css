@@ -337,7 +337,7 @@ table.standings_table td {
 table#team_vs_team_grid,
 table#team_vs_team_grid th,
 table#team_vs_team_grid td {
-    border: 1px solid #333333;
+    border: 1px solid #a0a0a0;
     text-align: center;
     vertical-align: middle;
     font-size: 90%;
@@ -672,6 +672,10 @@ form .errorlist li {
     float: right;
     font-size: 80%;
  }
+
+.blingalytics .finder_results td {
+    border-right: 1px solid #a0a0a0;
+}
 
 h3.no_results_message {
     white-space: nowrap;
