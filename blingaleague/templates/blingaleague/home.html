@@ -4,13 +4,6 @@
 <h1>Blingaleague</h1>
 
 <div id="home_main">
-  <div id="gazette">
-    <h2>Latest Sanderson Gazette</h2>
-    <ul>
-      <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
-    </ul>
-  </div>
-
   {% if season.subheadings %}
     {% for subheading in season.subheadings %}
       <h2>{{ subheading }}</h2>
@@ -32,23 +25,7 @@
     {% with True as short_form_standings %}
       {% include "blingaleague/standings_table.html" %}
     {% endwith %}
-
-    {% if week %}
-      <h3>Last Week</h3>
-      <div id="games">
-        {% for game in week.games %}
-          {% include "blingaleague/single_game.html" %}
-        {% endfor %}
-      </div>
-    {% endif %}
   {% else %}
-    {% if season.draft_teaser.draft_picks %}
-      <h3>Draft</h3>
-      {% with season.draft_teaser as draft %}
-        {% include "blingaleague/draft_picks.html" %}
-      {% endwith %}
-    {% endif %}
-
     {% if season.keepers %}
       <h3>Keepers</h3>
       {% include "blingaleague/season_keepers.html" %}
@@ -56,7 +33,7 @@
   {% endif %}
 
   {% if season.trades and trades %}
-    <h3>Recent Trades</h3>
+    <h2>Recent Trades</h2>
 
     <div id="trades">
       {% for trade in trades %}
@@ -67,6 +44,33 @@
 </div>
 
 <div id="home_sidebar">
+  <div id="gazette">
+    <h2>Latest Sanderson Gazette</h2>
+    <ul>
+      <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
+    </ul>
+  </div>
+
+  {% if week %}
+    <h2>Last Week</h3>
+    <div id="games">
+      {% for game in week.games %}
+        {% include "blingaleague/single_game.html" %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if not season.weeks_with_games %}
+    {% if season.draft_teaser.draft_picks %}
+      <h3>Draft</h3>
+      {% with season.draft_teaser as draft %}
+        {% include "blingaleague/draft_picks.html" %}
+      {% endwith %}
+    {% endif %}
+  {% endif %}
+</div>
+
+<div id="home_footer">
   <h2>Random Teams</h2>
   {% for team_season in spotlight_team_seasons %}
     {% include "blingaleague/team_season_spotlight.html" %}

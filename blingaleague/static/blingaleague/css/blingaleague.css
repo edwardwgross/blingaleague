@@ -130,20 +130,40 @@ th a, th a:hover, th a:visited, th a:focus {
 
 #home_main {
     display: inline-block;
-    width: 900px;
+    min-width: 720px;
     margin-right: 30px;
     vertical-align: top;
 }
 
 #home_sidebar {
     display: inline-block;
+    width: 400px;
     vertical-align: top;
 }
 
+#home_sidebar #gazette {
+    margin-bottom: 30px;
+}
+
+#home_sidebar #games,
+#home_sidebar #trades {
+    width: 100%;
+}
+
+#home_sidebar #games .game,
+#home_sidebar #trades .trade {
+    width: 100%;
+}
+
+#home_footer {
+    display: block;
+}
+
 .team_season_spotlight {
+    display: inline-block;
+    width: 300px;
     padding: 12px 24px;
-    border-bottom: 1px solid #41b6e6;
-    text-align: center;
+    vertical-align: top;
 }
 
 .team_season_spotlight h3 {
@@ -471,7 +491,7 @@ table.game_table td {
 
 .playoff_bracket {
     margin: 30px 0;
-    min-width: 750px;  /* to ensure no wrapping */
+    min-width: 720px;  /* to ensure no wrapping */
 }
 
 .playoff_bracket .round {
@@ -912,6 +932,10 @@ h3.no_results_message {
     .navbar-collapse {
         height: 100% !important;
         max-height: 100% !important;
+    }
+
+    #home_sidebar {
+        width: 900px;
     }
 
     #top_seasons .table_links {

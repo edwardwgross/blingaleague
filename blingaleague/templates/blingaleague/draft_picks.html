@@ -5,8 +5,10 @@
     {% if not draft.team_id %}<th>Team</th>{% endif %}
     <th>Player</th>
     <th>Position</th>
-    <th/> {# Keeper #}
-    <th></th> {# Trade #}
+    {% if not draft.round_max %}
+      <th/> {# Keeper #}
+      <th></th> {# Trade #}
+    {% endif %}
   </tr>
   {% for draft_pick in draft.draft_picks %}
     <tr>
@@ -19,12 +21,14 @@
       {% endif %}
       <td><a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a></td>
       <td sorttable_customkey="{{ draft_pick.position_sort_key }}" class="draft_pick_pos_{{ draft_pick.position|lower }}">{{ draft_pick.position }}</td>
-      <td>{% if draft_pick.is_keeper %}Keeper{% endif %}</td>
-      <td style="padding-right:12px">
-        {% if draft_pick.original_team %}
-          Acquired from <a href="{% url 'blingaleague.team_season' draft_pick.original_team.id draft_pick.year %}">{{ draft_pick.original_team }}</a>
-        {% endif %}
-      </td>
+      {% if not draft.round_max %}
+        <td>{% if draft_pick.is_keeper %}Keeper{% endif %}</td>
+        <td style="padding-right:12px">
+          {% if draft_pick.original_team %}
+            Acquired from <a href="{% url 'blingaleague.team_season' draft_pick.original_team.id draft_pick.year %}">{{ draft_pick.original_team }}</a>
+          {% endif %}
+        </td>
+      {% endif %}
     </tr>
   {% endfor %}
   {% if not not draft.is_partial %}
