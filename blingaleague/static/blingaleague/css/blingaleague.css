@@ -161,7 +161,7 @@ th a, th a:hover, th a:visited, th a:focus {
 
 .team_season_spotlight {
     display: inline-block;
-    width: 300px;
+    width: 400px;
     padding: 12px 24px;
     vertical-align: top;
 }
@@ -936,6 +936,12 @@ h3.no_results_message {
 
     #home_sidebar {
         width: 900px;
+    }
+
+    .team_season_spotlight {
+        display: block;
+        width: 720px;
+        border-bottom: 1px solid #41b6e6;
     }
 
     #top_seasons .table_links {

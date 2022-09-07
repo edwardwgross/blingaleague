@@ -6,5 +6,28 @@
     {% for subheading in team_season.subheadings %}
       <li>{{ subheading }}</li>
     {% endfor %}
+    {% if team_season.keepers %}
+      <li>
+        Keepers
+        <ul>
+          {% for keeper in team_season.keepers %}
+            <li><a href="{% url 'blingaleague.player' keeper.name %}">{{ keeper.name }}</a> ({{ keeper.round|ordinal }})</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endif %}
+    {% if team_season.live_picks %}
+      <li>
+        First three picks
+        <ul>
+          {% for draft_pick in team_season.live_picks|slice:":3" %}
+            <li>
+              {{ draft_pick.round_and_pick }}:
+              <a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endif %}
   </ul>
 </div>

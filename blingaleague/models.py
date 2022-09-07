@@ -1575,6 +1575,10 @@ class TeamSeason(ComparableObject):
     def draft(self):
         return Draft(self.year, team_id=self.team.id)
 
+    @fully_cached_property
+    def live_picks(self):
+        return self.draft.draft_picks.filter(is_keeper=False)
+
     @classmethod
     def all(cls):
         for season in Season.all():
