@@ -667,12 +667,14 @@ form .errorlist li {
     width: min-content;
     padding-right: 60px;
 }
+
 .blingalytics a.download_link {
     font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     float: right;
     font-size: 80%;
  }
 
+.blingalytics .finder_results th,
 .blingalytics .finder_results td {
     border-right: 1px solid #a0a0a0;
 }
