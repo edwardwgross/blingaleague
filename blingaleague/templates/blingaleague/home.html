@@ -52,7 +52,7 @@
   </div>
 
   {% if week %}
-    <h2>Last Week</h3>
+    <h2>Last Week</h2>
     <div id="games">
       {% for game in week.games %}
         {% include "blingaleague/single_game.html" %}
@@ -62,7 +62,7 @@
 
   {% if not season.weeks_with_games %}
     {% if season.draft_teaser.draft_picks %}
-      <h3>Draft</h3>
+      <h2><a href="{{ season.draft.href }}">{{ season.draft }}</a></h2>
       {% with season.draft_teaser as draft %}
         {% include "blingaleague/draft_picks.html" %}
       {% endwith %}
