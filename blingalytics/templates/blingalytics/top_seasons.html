@@ -35,10 +35,8 @@
       {% for row in table.rows %}
         <tr>
           <td>{{ row.rank }}</td>
-          <td {% if row.team_season.is_current_season %}class="emphasize"{% endif %}>
+          <td {% if row.team_season.is_current_season %}class="emphasize"{% endif %} style="text-align:left; width: auto">
             <a href="{{ row.team_season.season_object.href }}">{{ row.team_season.year }}</a>
-          </td>
-          <td style="text-align:left; width:auto" {% if row.team_season.is_current_season %}class="emphasize"{% endif %}>
             <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
             {% if row.team_season.is_partial %}
               <small>{{ row.team_season.games|length }} game{{ row.team_season.games|pluralize }}</small>
