@@ -53,8 +53,7 @@
           <th>Team</td>
           <th>W/L</th>
           <th>Score</th>
-          <th>{# - #}</th>
-          <th>OppScore</th>
+          <th title="Opponent's Score">OppScore</th>
           <th>Opponent</th>
           <th>Margin</th>
           <th>Streak</th>
@@ -67,7 +66,6 @@
             <td style="text-align:left"><a href="{% url 'blingaleague.team_season' game.team.id game.year %}">{{ game.team.nickname }}</a></td>
             <td style="text-align:center">{{ game.outcome }}</td>
             <td>{{ game.score }}</td>
-            <td style="text-align:center">&ndash;</td>
             <td>{{ game.opponent_score }}</td>
             <td style="text-align:left"><a href="{% url 'blingaleague.team_season' game.opponent.id game.year %}">{{ game.opponent.nickname }}</a></td>
             <td>{{ game.margin }}</td>

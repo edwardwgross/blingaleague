@@ -562,6 +562,7 @@ table.blingalytics_table.sortable tbody tr::before {
     display: table-cell;
     text-align: right;
     padding: 0 6px;
+    border-right: 1px solid #a0a0a0;
 }
 
 #top_seasons a {
@@ -694,7 +695,6 @@ form .errorlist li {
     font-size: 80%;
  }
 
-.blingalytics .finder_results th,
 .blingalytics .finder_results td {
     border-right: 1px solid #a0a0a0;
 }
