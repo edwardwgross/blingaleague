@@ -943,6 +943,10 @@ h3.no_results_message {
         width: 900px;
     }
 
+    #home_sidebar #games {
+        width: 400px;
+    }
+
     .team_season_spotlight {
         display: block;
         width: 720px;
