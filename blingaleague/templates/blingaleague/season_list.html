@@ -25,15 +25,19 @@
       </td>
       {% if season.weeks_with_games %}
         <td class="team">
-          <a href="{{ season.champion.href }}">{{ season.champion.team }}</a>
-          {% if season.champion != season.first_place %}
-            <small>#{{ season.champion.place_numeric }} seed</small>
+          {% if season.champion %}
+            <a href="{{ season.champion.href }}">{{ season.champion.team }}</a>
+            {% if season.champion != season.first_place %}
+              <small>#{{ season.champion.place_numeric }} seed</small>
+            {% endif %}
           {% endif %}
         </td>
         <td class="team">
-          <a href="{{ season.runner_up.href }}">{{ season.runner_up.team }}</a>
-          {% if season.runner_up.place_numeric != 2 %}
-            <small>#{{ season.runner_up.place_numeric }} seed</small>
+          {% if season.runner_up %}
+            <a href="{{ season.runner_up.href }}">{{ season.runner_up.team }}</a>
+            {% if season.runner_up.place_numeric != 2 %}
+              <small>#{{ season.runner_up.place_numeric }} seed</small>
+            {% endif %}
           {% endif %}
         </td>
         <td class="team"><a href="{{ season.first_place.href }}">{{ season.first_place.team }}</a></td>
