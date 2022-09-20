@@ -1505,6 +1505,9 @@ class TeamSeason(ComparableObject):
         base_season = self
         week_max = base_season.week_max
 
+        if base_season.is_partial:
+            week_max = len(base_season.games)
+
         if week_max > regular_season_weeks(self.year):
             base_season = self.regular_season
             week_max = None
@@ -1518,11 +1521,13 @@ class TeamSeason(ComparableObject):
                 other_team_season.year,
                 week_max=week_max,
             )
+            print("{} vs {}".format(base_season, other_comp_season))
 
             if base_season.is_partial and len(other_comp_season.games) != len(base_season.games):
                 continue
 
             sim_score = base_season.similarity_score(other_comp_season)
+            print(" - {:.0f}".format(sim_score))
             if sim_score >= threshold:
                 yield {'season': other_comp_season, 'score': sim_score}
 

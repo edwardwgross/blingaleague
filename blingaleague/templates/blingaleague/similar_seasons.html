@@ -22,11 +22,11 @@
       <th>Playoff Finish</th>
     </tr>
     {% for similar_season in base_object.most_similar %}
-      <tr {% if similar_season.season.is_current_season %}class="emphasize"{% endif %}>
+      <tr>
         <td>{{ forloop.counter }}</td>
         <td><strong>{{ similar_season.score|floatformat:0 }}</strong></td>
-        <td><a href="{{ similar_season.season.season_object.href }}">{{ similar_season.season.year }}</a></td>
-        <td style="text-align:left"><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
+        <td {% if similar_season.season.is_current_season %}class="emphasize"{% endif %}><a href="{{ similar_season.season.season_object.href }}">{{ similar_season.season.year }}</a></td>
+        <td style="text-align:left" {% if similar_season.season.is_current_season %}class="emphasize"{% endif %}><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
         <td style="text-align:center">{{ similar_season.season.record }}</td>
         <td>{{ similar_season.season.points|intcomma }}</td>
         <td>{{ similar_season.season.expected_win_pct|floatformat:3 }}</td>
