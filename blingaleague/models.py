@@ -1413,7 +1413,11 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def previous(self):
-        prev_ts = TeamSeason(self.team.id, self.year - 1, week_max=self.week_max)
+        week_max = None
+        if self.week_max and self.is_partial:
+            week_max = self.week_max
+
+        prev_ts = TeamSeason(self.team.id, self.year - 1, week_max=week_max)
 
         if prev_ts.active:
             return prev_ts
@@ -1422,7 +1426,11 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def next(self):
-        next_ts = TeamSeason(self.team.id, self.year + 1, week_max=self.week_max)
+        week_max = None
+        if self.week_max and self.is_partial:
+            week_max = self.week_max
+
+        next_ts = TeamSeason(self.team.id, self.year + 1)
 
         if next_ts.active:
             return next_ts
