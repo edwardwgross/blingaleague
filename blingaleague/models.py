@@ -1529,13 +1529,14 @@ class TeamSeason(ComparableObject):
                 other_team_season.year,
                 week_max=week_max,
             )
-            print("{} vs {}".format(base_season, other_comp_season))
 
-            if base_season.is_partial and len(other_comp_season.games) != len(base_season.games):
+            if len(base_season.games) != len(other_comp_season.games)\
+                and (base_season.is_partial or other_comp_season.is_partial):
+                # only allow seasons with mismatched numbers of games if they
+                # are both complete seasons
                 continue
 
             sim_score = base_season.similarity_score(other_comp_season)
-            print(" - {:.0f}".format(sim_score))
             if sim_score >= threshold:
                 yield {'season': other_comp_season, 'score': sim_score}
 
