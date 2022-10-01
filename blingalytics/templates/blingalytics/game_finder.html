@@ -14,7 +14,7 @@
   <div id="games_found" class="finder_results">
     {% if games %}
       <h2>Summary</h2>
-      <table class="blingalytics_table table-striped">
+      <table class="blingalytics_table table-striped" style="display:inline-table">
         <tr>
           <th>Team</th>
           <th>Wins</th>
@@ -41,6 +41,18 @@
           <th/> {# points against #}
           <th style="text-align:right">{{ summary.total }}</th>
         </tr>
+      </table>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
+          <th>Year</th>
+          <th>{# Total #}</th>
+        </tr>
+        {% for year, total in summary.years %}
+          <tr>
+            <td>{{ year }}</td>
+            <td>{{ total }}</td>
+          </tr>
+        {% endfor %}
       </table>
 
       <h2>Games</h2>

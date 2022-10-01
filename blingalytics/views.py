@@ -460,7 +460,13 @@ class GameFinderView(CSVResponseMixin, TemplateView):
         games_counted = set()
         game_dict = defaultdict(lambda: defaultdict(int))
 
+        year_dict = defaultdict(int)
+
         for game in games:
+            # we don't ignore games_counted for year table, because
+            # both the winner and loser should contribute to the counts
+            year_dict[game['year']] += 1
+
             if game['id'] in games_counted:
                 continue
 
@@ -495,6 +501,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
 
         return {
             'teams': teams,
+            'years': sorted(year_dict.items()),
             'total': len(games_counted),
         }
 
