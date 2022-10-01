@@ -348,7 +348,7 @@ table.standings_table td {
     margin-top: 6px;
 }
 
-.standings_note {
+.blinganote {
     font-size: 60%;
     vertical-align: top;
     cursor: help;

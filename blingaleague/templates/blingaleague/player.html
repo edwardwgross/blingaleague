@@ -5,7 +5,17 @@
 {% block title %}{{ player }}{% endblock %}
 
 {% block content %}
-<h1>{{ player }}</h1>
+<h1>
+  {{ player }}
+  {% if player.notes %}
+    {% if player.notes.nickname %}
+      ({{ player.notes.nickname }})
+    {% endif %}
+    {% if player.notes.rip_in_peace %}
+      <span class="blinganote">RIP in Peace</span>
+    {% endif %}
+  {% endif %}
+</h1>
 
 <div id="player">
   <table class="table-striped transactions">

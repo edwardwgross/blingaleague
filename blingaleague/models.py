@@ -3293,6 +3293,12 @@ class Player(ComparableObject):
 
         self.cache_key = slugify(name)
 
+    def notes(self):
+        try:
+            return PlayerNotes.objects.get(pk=self.name)
+        except PlayerNotes.DoesNotExist:
+            return None
+
     @fully_cached_property
     def drafted(self):
         drafted = defaultdict(list)
@@ -3425,6 +3431,36 @@ class Player(ComparableObject):
 
     def __str__(self):
         return self.name
+
+    def __repr__(self):
+        return str(self)
+
+
+class PlayerNotes(models.Model, ComparableObject):
+    name = models.CharField(primary_key=True, max_length=200)
+    nickname = models.CharField(max_length=200, blank=True, null=True)
+    rip_in_peace = models.BooleanField(default=False)
+
+    _comparison_attr = 'name'
+
+    @property
+    def cache_key(self):
+        return slugify(self.pk)
+
+    @fully_cached_property
+    def player(self):
+        return Player(self.name)
+
+    def __str__(self):
+        base_str = str(self.player)
+
+        if self.nickname:
+            base_str = "{} ({})".format(base_str, self.nickname)
+
+        if self.rip_in_peace:
+            base_str = "{} - RIP in Peace".format(base_str)
+
+        return base_str
 
     def __repr__(self):
         return str(self)
