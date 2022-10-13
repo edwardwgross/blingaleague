@@ -1,0 +1,15 @@
+{% if rank_by_week_graph_html or all_play_wins_by_week_graph or expected_wins_by_week_graph %}
+  <h3>Season Trajectory</h3>
+{% endif %}
+
+{% if rank_by_week_graph_html %}
+  <div class="wide_graph">{{ rank_by_week_graph_html|safe }}</div>
+{% endif %}
+
+{% if expected_wins_by_week_graph %}
+  <div class="wide_graph">{{ expected_wins_by_week_graph|safe }}</div>
+{% endif %}
+
+{% if all_play_wins_by_week_graph %}
+  <div class="wide_graph">{{ all_play_wins_by_week_graph|safe }}</div>
+{% endif %}

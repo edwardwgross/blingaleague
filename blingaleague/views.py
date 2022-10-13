@@ -1,3 +1,4 @@
+import math
 import random
 
 from collections import defaultdict
@@ -10,7 +11,7 @@ from blingacontent.models import Gazette
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
                     Trade, Draft, Player, \
-                    PLAYOFF_TEAMS
+                    PLAYOFF_TEAMS, OUTCOME_WIN, OUTCOME_TIE
 from .utils import line_graph_html, bar_graph_html, rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
 
@@ -231,10 +232,10 @@ class TeamSeasonView(GamesView):
         'blingaleague/expected_win_distribution_team.html',
     )
     post_games_sub_templates = (
-        'blingaleague/team_season_rank_by_week.html',
         'blingaleague/team_season_trades.html',
         'blingaleague/team_season_draft_picks.html',
         'blingaleague/team_season_keepers.html',
+        'blingaleague/team_season_by_week_graphs.html',
         'blingaleague/similar_seasons.html',
     )
     games_sub_template = 'blingaleague/team_season_games.html'
@@ -287,6 +288,84 @@ class TeamSeasonView(GamesView):
 
         return graph_html
 
+
+    def _expected_wins_by_week_graph(self, team_season):
+        if team_season.season_object.is_upcoming_season:
+            return
+
+        weeks = []
+        expected_wins = []
+
+        for week, xw_val in enumerate(team_season.expected_wins_by_game, 1):
+            if week > regular_season_weeks(team_season.year):
+                break
+
+            weeks.append(week)
+            expected_wins.append(xw_val)
+
+        custom_options = {
+            'title': 'Expected Wins by Week',
+            'height': 240,
+            'show_legend': False,
+            'min_scale': 0,
+            'max_scale': 1,
+            'x_title': 'Week',
+            'y_labels': [0, 0.5, 1],
+            'value_formatter': lambda x: "{:.3f}".format(x),
+        }
+
+        graph_html = bar_graph_html(
+            weeks,  # x_data
+            [('', expected_wins)],  # y_series
+            **custom_options,
+        )
+
+        return graph_html
+
+    def _all_play_wins_by_week_graph(self, team_season):
+        if team_season.season_object.is_upcoming_season:
+            return ''
+
+        weeks = []
+        all_play_wins = []
+
+        value_format = '{:.0f}'
+
+        for game in team_season.games:
+            if game.week_object.is_playoffs:
+                break
+
+            weeks.append(game.week)
+
+            all_play_record = game.week_object.all_play_record(team_season.team)
+            all_play_wins.append(all_play_record[OUTCOME_WIN] + all_play_record[OUTCOME_TIE] / 2)
+
+            if all_play_record[OUTCOME_TIE] > 0:
+                value_format = '{:.1f}'
+
+        total_teams = len(team_season.season_object.standings_table)
+
+        custom_options = {
+            'title': 'All-Play Wins by Week',
+            'height': 240,
+            'show_legend': False,
+            'min_scale': total_teams - 1,
+            'max_scale': total_teams - 1,
+            'range': (0, total_teams - 1),
+            'x_title': 'Week',
+            'y_labels': list(range(total_teams)),
+            'y_labels_major': [0, math.ceil(total_teams / 2), total_teams - 1],
+            'value_formatter': lambda x: value_format.format(x),
+        }
+
+        graph_html = bar_graph_html(
+            weeks,  # x_data
+            [('', all_play_wins)],  # y_series
+            **custom_options,
+        )
+
+        return graph_html
+
     def get(self, request, team, year):
         week_max = request.GET.get('week_max', None)
 
@@ -311,6 +390,8 @@ class TeamSeasonView(GamesView):
         if team_season.active:
             context['expected_win_distribution_graph_html'] = self._expected_win_distribution_graph(team_season)  # noqa: E501
             context['rank_by_week_graph_html'] = self._rank_by_week_graph(team_season)
+            context['expected_wins_by_week_graph'] = self._expected_wins_by_week_graph(team_season)
+            context['all_play_wins_by_week_graph'] = self._all_play_wins_by_week_graph(team_season)
 
         return self.render_to_response(context)
 

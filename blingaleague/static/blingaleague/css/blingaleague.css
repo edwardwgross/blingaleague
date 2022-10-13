@@ -419,6 +419,10 @@ svg.pygal-chart {
     width: 800px;
 }
 
+.wide_graph svg.pygal-chart xtext.title {
+    font-size: 20px !important;
+}
+
 #games,
 #season_details,
 #trades,
