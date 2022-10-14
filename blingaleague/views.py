@@ -232,6 +232,7 @@ class TeamSeasonView(GamesView):
         'blingaleague/expected_win_distribution_team.html',
     )
     post_games_sub_templates = (
+        'blingaleague/team_season_trajectory_graph.html',
         'blingaleague/team_season_trades.html',
         'blingaleague/team_season_draft_picks.html',
         'blingaleague/team_season_keepers.html',
@@ -353,8 +354,7 @@ class TeamSeasonView(GamesView):
             'max_scale': total_teams - 1,
             'range': (0, total_teams - 1),
             'x_title': 'Week',
-            'y_labels': list(range(total_teams)),
-            'y_labels_major': [0, math.ceil(total_teams / 2), total_teams - 1],
+            'y_labels': [0, math.ceil(total_teams / 2), total_teams - 1],
             'value_formatter': lambda x: value_format.format(x),
         }
 
