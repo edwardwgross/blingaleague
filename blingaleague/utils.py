@@ -131,8 +131,12 @@ def line_graph_html(x_data, y_series, **custom_options):
     return _graph_html(pygal.Line, x_data, y_series, **custom_options)
 
 
-def bar_graph_html(x_data, y_series, **custom_options):
+def basic_bar_graph_html(x_data, y_series, **custom_options):
     return _graph_html(pygal.Bar, x_data, y_series, **custom_options)
+
+
+def stacked_bar_graph_html(x_data, y_series, **custom_options):
+    return _graph_html(pygal.StackedBar, x_data, y_series, **custom_options)
 
 
 def scatter_graph_html(x_data, y_series, **custom_options):

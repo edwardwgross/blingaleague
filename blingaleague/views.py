@@ -11,8 +11,10 @@ from blingacontent.models import Gazette
 from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
                     Trade, Draft, Player, \
-                    PLAYOFF_TEAMS, OUTCOME_WIN, OUTCOME_TIE
-from .utils import line_graph_html, bar_graph_html, rank_over_time_graph_html, \
+                    PLAYOFF_TEAMS, \
+                    OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_TIE, OUTCOME_SORT_ORDER
+from .utils import line_graph_html, basic_bar_graph_html, stacked_bar_graph_html, \
+                   rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
 
 
@@ -254,7 +256,7 @@ class TeamSeasonView(GamesView):
             'value_formatter': lambda x: "{:.1f}%".format(100 * x),
         }
 
-        graph_html = bar_graph_html(
+        graph_html = basic_bar_graph_html(
             wins,  # x_data
             [('', odds)],  # y_series
             **custom_options,
@@ -295,19 +297,21 @@ class TeamSeasonView(GamesView):
             return
 
         weeks = []
-        expected_wins = []
+        expected_wins_by_outcome = defaultdict(lambda: [None] * len(team_season.games))
 
-        for week, xw_val in enumerate(team_season.expected_wins_by_game, 1):
+        for week, expected_wins in enumerate(team_season.expected_wins_by_game, 1):
             if week > regular_season_weeks(team_season.year):
                 break
 
             weeks.append(week)
-            expected_wins.append(xw_val)
+
+            outcome = team_season.week_outcome(week)
+
+            expected_wins_by_outcome[outcome][week - 1] = expected_wins
 
         custom_options = {
             'title': 'Expected Wins by Week',
             'height': 240,
-            'show_legend': False,
             'min_scale': 0,
             'max_scale': 1,
             'x_title': 'Week',
@@ -315,9 +319,14 @@ class TeamSeasonView(GamesView):
             'value_formatter': lambda x: "{:.3f}".format(x),
         }
 
-        graph_html = bar_graph_html(
+        by_outcome_data = [
+            ('Won game', expected_wins_by_outcome[OUTCOME_WIN]),
+            ('Lost game', expected_wins_by_outcome[OUTCOME_LOSS]),
+        ]
+
+        graph_html = stacked_bar_graph_html(
             weeks,  # x_data
-            [('', expected_wins)],  # y_series
+            by_outcome_data,  # y_series
             **custom_options,
         )
 
@@ -330,26 +339,31 @@ class TeamSeasonView(GamesView):
         weeks = []
         all_play_wins = []
 
+        all_play_wins_by_outcome = defaultdict(lambda: [None] * len(team_season.games))
+
         value_format = '{:.0f}'
 
-        for game in team_season.games:
+        for i, game in enumerate(team_season.games):
             if game.week_object.is_playoffs:
                 break
 
             weeks.append(game.week)
 
+            outcome = team_season.week_outcome(game.week)
+
             all_play_record = game.week_object.all_play_record(team_season.team)
-            all_play_wins.append(all_play_record[OUTCOME_WIN] + all_play_record[OUTCOME_TIE] / 2)
 
             if all_play_record[OUTCOME_TIE] > 0:
                 value_format = '{:.1f}'
+
+            all_play_wins = all_play_record[OUTCOME_WIN] + all_play_record[OUTCOME_TIE] / 2
+            all_play_wins_by_outcome[outcome][i] = all_play_wins
 
         total_teams = len(team_season.season_object.standings_table)
 
         custom_options = {
             'title': 'All-Play Wins by Week',
             'height': 240,
-            'show_legend': False,
             'min_scale': total_teams - 1,
             'max_scale': total_teams - 1,
             'range': (0, total_teams - 1),
@@ -358,9 +372,14 @@ class TeamSeasonView(GamesView):
             'value_formatter': lambda x: value_format.format(x),
         }
 
-        graph_html = bar_graph_html(
+        by_outcome_data = [
+            ('Won game', all_play_wins_by_outcome[OUTCOME_WIN]),
+            ('Lost game', all_play_wins_by_outcome[OUTCOME_LOSS]),
+        ]
+
+        graph_html = stacked_bar_graph_html(
             weeks,  # x_data
-            [('', all_play_wins)],  # y_series
+            by_outcome_data,  # y_series
             **custom_options,
         )
 
