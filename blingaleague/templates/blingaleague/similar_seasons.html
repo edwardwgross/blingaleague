@@ -34,12 +34,12 @@
         {% if base_object.is_partial %}
           <td style="text-align:center">
             {% if not similar_season.season.regular_season.is_partial %}
-              {{ similar_season.season.regular_season.record }}
+              <a href="{{ similar_season.season.regular_season.href }}">{{ similar_season.season.regular_season.record }}</a>
             {% endif%}
           </td>
           <td>
             {% if not similar_season.season.regular_season.is_partial %}
-              {{ similar_season.season.regular_season.place_numeric }}
+              <a href="{{ similar_season.season.regular_season.season_object.href }}">{{ similar_season.season.regular_season.place_numeric }}</a>
             {% endif%}
           </td>
         {% else %}
