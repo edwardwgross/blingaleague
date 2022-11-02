@@ -1419,11 +1419,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def previous(self):
-        week_max = None
-        if self.week_max and self.is_partial:
-            week_max = self.week_max
-
-        prev_ts = TeamSeason(self.team.id, self.year - 1, week_max=week_max)
+        prev_ts = TeamSeason(self.team.id, self.year - 1)
 
         if prev_ts.active:
             return prev_ts
@@ -1432,10 +1428,6 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def next(self):
-        week_max = None
-        if self.week_max and self.is_partial:
-            week_max = self.week_max
-
         next_ts = TeamSeason(self.team.id, self.year + 1)
 
         if next_ts.active:
@@ -1536,8 +1528,7 @@ class TeamSeason(ComparableObject):
                 week_max=week_max,
             )
 
-            if len(base_season.games) != len(other_comp_season.games)\
-                and (base_season.is_partial or other_comp_season.is_partial):
+            if len(base_season.games) != len(other_comp_season.games) and (base_season.is_partial or other_comp_season.is_partial):  # noqa: E501
                 # only allow seasons with mismatched numbers of games if they
                 # are both complete seasons
                 continue
