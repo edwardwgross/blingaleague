@@ -108,7 +108,6 @@ def int_to_roman(integer):
 
 def _graph_html(graph_class, x_data, y_series, **custom_options):
     graph_options = GRAPH_DEFAULT_OPTIONS.copy()
-    graph_options.update(custom_options)
 
     graph_options['style'] = pygal.style.RotateStyle(
         '#e4002b',
@@ -116,6 +115,8 @@ def _graph_html(graph_class, x_data, y_series, **custom_options):
         # for graphs with less than 4 series
         step=max(len(y_series), 4),
     )
+
+    graph_options.update(custom_options)
 
     graph = graph_class(**graph_options)
 
@@ -133,6 +134,13 @@ def line_graph_html(x_data, y_series, **custom_options):
 
 def basic_bar_graph_html(x_data, y_series, **custom_options):
     return _graph_html(pygal.Bar, x_data, y_series, **custom_options)
+
+
+def outcome_series_graph_html(x_data, y_series, **custom_options):
+    custom_options['style'] = pygal.style.Style(
+        colors=('#41b6e6', '#e4002b'),
+    )
+    return stacked_bar_graph_html(x_data, y_series, **custom_options)
 
 
 def stacked_bar_graph_html(x_data, y_series, **custom_options):

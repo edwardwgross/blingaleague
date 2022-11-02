@@ -12,9 +12,9 @@ from .models import Season, Game, Member, \
                     TeamSeason, Week, Matchup, \
                     Trade, Draft, Player, \
                     PLAYOFF_TEAMS, \
-                    OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_TIE, OUTCOME_SORT_ORDER
-from .utils import line_graph_html, basic_bar_graph_html, stacked_bar_graph_html, \
-                   rank_over_time_graph_html, \
+                    OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_TIE
+from .utils import line_graph_html, basic_bar_graph_html, \
+                   outcome_series_graph_html, rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
 
 
@@ -291,7 +291,6 @@ class TeamSeasonView(GamesView):
 
         return graph_html
 
-
     def _expected_wins_by_week_graph(self, team_season):
         if team_season.season_object.is_upcoming_season:
             return
@@ -324,7 +323,7 @@ class TeamSeasonView(GamesView):
             ('Lost game', expected_wins_by_outcome[OUTCOME_LOSS]),
         ]
 
-        graph_html = stacked_bar_graph_html(
+        graph_html = outcome_series_graph_html(
             weeks,  # x_data
             by_outcome_data,  # y_series
             **custom_options,
@@ -377,7 +376,7 @@ class TeamSeasonView(GamesView):
             ('Lost game', all_play_wins_by_outcome[OUTCOME_LOSS]),
         ]
 
-        graph_html = stacked_bar_graph_html(
+        graph_html = outcome_series_graph_html(
             weeks,  # x_data
             by_outcome_data,  # y_series
             **custom_options,
