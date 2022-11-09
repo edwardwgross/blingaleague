@@ -2880,14 +2880,10 @@ class Trade(models.Model, ComparableObject):
 
     @fully_cached_property
     def public_id(self):
-        date_str = self.date.strftime('%Y%m%d')
-        team_id_str = ''.join(
-            map(
-                lambda x: "{:02}".format(x),
-                sorted(self.team_ids),
-            ),
+        return "{}.{:04}".format(
+            self.date.strftime('%Y%m%d'),
+            self.pk,
         )
-        return "{}.{}".format(date_str, team_id_str)
 
     @fully_cached_property
     def week_object(self):
