@@ -58,7 +58,7 @@ ELIMINATION_GAMES = [
 
 MAX_SIMILARITY_SCORE = decimal.Decimal(1000)
 
-MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3+ and it throws an OOM error
+MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES = 2  # 3 just takes too long
 
 POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
@@ -1317,15 +1317,17 @@ class TeamSeason(ComparableObject):
             if self.eliminated_simple:
                 return True
 
-            possible_outcomes = self.season_object.possible_final_outcomes
-            if possible_outcomes:
-                for outcome in possible_outcomes:
-                    team_wins = outcome[self.team]
-                    sorted_wins = sorted(outcome.values(), reverse=True)
+            possible_outcomes = self.season_object.possible_final_outcomes()
+            outcome_count = 0  # need this, as possible_outcomes is a generator
+            for outcome in possible_outcomes:
+                outcome_count += 1
+                team_wins = outcome[self.team]
+                sorted_wins = sorted(outcome.values(), reverse=True)
 
-                    if team_wins >= sorted_wins[PLAYOFF_TEAMS - 1]:
-                        return False
+                if team_wins >= sorted_wins[PLAYOFF_TEAMS - 1]:
+                    return False
 
+            if outcome_count:
                 return True
 
         # if it's a complete season, it's not an early elimination
@@ -1341,18 +1343,20 @@ class TeamSeason(ComparableObject):
         if self.clinched_simple(target_place):
             return True
 
-        possible_outcomes = self.season_object.possible_final_outcomes
-        if possible_outcomes:
-            for outcome in possible_outcomes:
-                team_wins = outcome[self.team]
-                sorted_wins = sorted(outcome.values(), reverse=True)
+        possible_outcomes = self.season_object.possible_final_outcomes()
+        outcome_count = 0  # need this, as possible_outcomes is a generator
+        for outcome in possible_outcomes:
+            outcome_count += 1
+            team_wins = outcome[self.team]
+            sorted_wins = sorted(outcome.values(), reverse=True)
 
-                # don't subtract one because we actually want to measure the place
-                # after the target; i.e. to make the playoffs, we need to have more
-                # wins than the 7th place team
-                if team_wins <= sorted_wins[target_place]:
-                    return False
+            # don't subtract one because we actually want to measure the place
+            # after the target; i.e. to make the playoffs, we need to have more
+            # wins than the 7th place team
+            if team_wins <= sorted_wins[target_place]:
+                return False
 
+        if outcome_count:
             return True
 
         return False
@@ -2333,10 +2337,9 @@ class Season(ComparableObject):
 
         return remaining_games
 
-    @fully_cached_property
     def possible_final_outcomes(self):
         if self.is_upcoming_season:
-            return None
+            return []
 
         current_win_counts = dict((ts.team, ts.win_count) for ts in self.standings_table)
 
@@ -2347,11 +2350,9 @@ class Season(ComparableObject):
         max_games_to_run = MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES * len(self.standings_table) / 2
 
         if num_games > max_games_to_run:
-            return None
+            return []
 
         outcome_combos = itertools.product([0, 1], repeat=num_games)
-
-        possible_outcomes = []
 
         for outcome_combo in outcome_combos:
             win_counts = current_win_counts.copy()
@@ -2359,9 +2360,7 @@ class Season(ComparableObject):
                 winner = remaining_games[i][outcome]
                 win_counts[winner] += 1
 
-            possible_outcomes.append(win_counts)
-
-        return possible_outcomes
+            yield win_counts
 
     @fully_cached_property
     def keepers(self):
