@@ -2323,21 +2323,24 @@ class Season(ComparableObject):
         }
 
     @fully_cached_property
-    def possible_final_outcomes(self):
-        if self.is_upcoming_season:
-            return None
-
+    def _remaining_games(self):
         remaining_games = set()
-        current_win_counts = {}
 
         for team_season in self.standings_table:
-            current_win_counts[team_season.team] = team_season.win_count
-
             for opponent in team_season.yet_to_play:
                 game_tuple = tuple(sorted((team_season.team, opponent)))
                 remaining_games.add(game_tuple)
 
-        remaining_games = list(remaining_games)
+        return remaining_games
+
+    @fully_cached_property
+    def possible_final_outcomes(self):
+        if self.is_upcoming_season:
+            return None
+
+        current_win_counts = dict((ts.team, ts.win_count) for ts in self.standings_table)
+
+        remaining_games = list(self._remaining_games)
 
         num_games = len(remaining_games)
 
