@@ -705,6 +705,16 @@ class TeamSeason(ComparableObject):
 
         return "{}{}".format(outcome, streak)
 
+    @fully_cached_property
+    def current_streak_sort_key(self):
+        outcome = self.current_streak[0]
+        value = int(self.current_streak[1:])
+
+        if outcome == OUTCOME_LOSS:
+            return -1 * value
+
+        return value
+
     def longest_streak(self, outcome_to_match):
         longest_streak = 0
         running_streak = 0
@@ -2868,14 +2878,15 @@ class Trade(models.Model, ComparableObject):
     week = models.IntegerField(db_index=True)
     date = models.DateField(default=None, db_index=True)
 
-    _comparison_attr = 'year_week_date'
+    _comparison_attr = 'year_week_date_id'
 
     @fully_cached_property
-    def year_week_date(self):
+    def year_week_date_id(self):
         return (
             self.year,
             self.week,
             self.date,
+            self.id,
         )
 
     @fully_cached_property
@@ -3415,8 +3426,17 @@ class Player(ComparableObject):
     def all(cls):
         all_names = set()
 
-        for model in [DraftPick, Keeper, TradedAsset]:
+        for model in [DraftPick, Keeper]:
             all_names.update(model.objects.values_list('name', flat=True))
+
+        all_names.update(
+            TradedAsset.objects.filter(
+                is_draft_pick=False,
+            ).values_list(
+                'name',
+                flat=True,
+            ),
+        )
 
         return sorted(
             [Player(name) for name in all_names],

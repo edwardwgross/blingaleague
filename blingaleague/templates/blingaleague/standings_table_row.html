@@ -19,7 +19,7 @@
 {% endif %}
 <td>{{ team_season.blangums_count }}</td>
 <td>{{ team_season.slapped_heartbeat_count }}</td>
-<td style="text-align:center">{{ team_season.current_streak }}</td>
+<td sorttable_customkey="{{ team_season.current_streak_sort_key }}" style="text-align:center">{{ team_season.current_streak }}</td>
 {% if not hide_playoff_finish and not short_form_standings %}
   <td sorttable_customkey="{{ team_season.playoff_finish_sort_key }}" style="text-align:left">{{ team_season.playoff_finish }}</td>
 {% endif %}
