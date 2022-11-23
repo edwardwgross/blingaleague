@@ -2337,7 +2337,7 @@ class Season(ComparableObject):
 
         return remaining_games
 
-    def possible_final_outcomes(self):
+    def possible_final_outcomes(self, max_weeks_to_run=MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES):
         if self.is_upcoming_season:
             return []
 
@@ -2347,7 +2347,7 @@ class Season(ComparableObject):
 
         num_games = len(remaining_games)
 
-        max_games_to_run = MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES * len(self.standings_table) / 2
+        max_games_to_run = max_weeks_to_run * len(self.standings_table) / 2
 
         if num_games > max_games_to_run:
             return []
