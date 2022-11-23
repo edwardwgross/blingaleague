@@ -318,9 +318,10 @@ class TeamSeasonView(GamesView):
             'value_formatter': lambda x: "{:.3f}".format(x),
         }
 
+        # len(weeks) ensures that there won't be more y values than x values
         by_outcome_data = [
-            ('Won game', expected_wins_by_outcome[OUTCOME_WIN]),
-            ('Lost game', expected_wins_by_outcome[OUTCOME_LOSS]),
+            ('Won game', expected_wins_by_outcome[OUTCOME_WIN][:len(weeks)]),
+            ('Lost game', expected_wins_by_outcome[OUTCOME_LOSS][:len(weeks)]),
         ]
 
         graph_html = outcome_series_graph_html(
