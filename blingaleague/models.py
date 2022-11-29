@@ -276,6 +276,14 @@ class Game(models.Model, ComparableObject):
         return TeamSeason(self.loser.id, self.year, week_max=self.week - 1)
 
     @fully_cached_property
+    def winner_team_season_after_game(self):
+        return TeamSeason(self.winner.id, self.year, week_max=self.week)
+
+    @fully_cached_property
+    def loser_team_season_after_game(self):
+        return TeamSeason(self.loser.id, self.year, week_max=self.week)
+
+    @fully_cached_property
     def blangums(self):
         return self.winner == self.week_object.blangums
 
@@ -1948,6 +1956,8 @@ class Season(ComparableObject):
 
         if self.week_max is not None:
             all_games = all_games.filter(week__lte=self.week_max)
+        elif not self.include_playoffs:
+            all_games = all_games.filter(week__lte=regular_season_weeks(self.year))
 
         return all_games
 
@@ -1984,6 +1994,10 @@ class Season(ComparableObject):
     @fully_cached_property
     def median_game_score(self):
         return statistics.median(self.all_game_scores)
+
+    @fully_cached_property
+    def average_game_margin(self):
+        return statistics.mean([g.margin for g in self.all_games])
 
     @fully_cached_property
     def average_team_points(self):
