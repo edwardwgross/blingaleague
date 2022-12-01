@@ -82,7 +82,7 @@
             <td>{{ game.opponent_score }}</td>
             <td style="text-align:left"><a href="{% url 'blingaleague.team_season' game.opponent.id game.year %}">{{ game.opponent.nickname }}</a></td>
             <td>{{ game.margin }}</td>
-            <td sorttable_customkey="{{ game.team_season.current_streak_sort_key }}">{{ game.team_season.current_streak }}</td>
+            <td sorttable_customkey="{{ game.team_season.current_streak_sort_key }}" style="text-align:center">{{ game.team_season.current_streak }}</td>
             <td>{{ game.team_season.place_numeric }}</td>
             <td style="text-align:left">{{ game.extra_description }}</td>
           </tr>
