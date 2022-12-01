@@ -421,10 +421,10 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                         continue
 
                 outcome = OUTCOME_WIN
-                streak = game.winner_streak
+                team_season = game.winner_team_season_after_game
                 if team_prefix == PREFIX_LOSER:
                     outcome = OUTCOME_LOSS
-                    streak = game.loser_streak
+                    team_season = game.loser_team_season_after_game
 
                 game_dict = {
                     'id': game.id,
@@ -436,7 +436,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                     'opponent_score': getattr(game, "{}_score".format(opponent_prefix)),
                     'margin': game.margin,
                     'outcome': outcome,
-                    'streak': streak,
+                    'team_season': team_season,
                 }
 
                 extra_description = ''
@@ -531,7 +531,7 @@ class GameFinderView(CSVResponseMixin, TemplateView):
                 game['opponent_score'],
                 game['opponent'].nickname,
                 game['margin'],
-                game['streak'],
+                game['team_season'].current_streak,
                 game['extra_description'],
             ])
 
