@@ -1,0 +1,115 @@
+table.blingalytics_table.sortable tbody {
+    counter-reset: blingalytics_tabletablescope;
+}
+
+table.blingalytics_table.sortable thead tr::before {
+    content: "";
+    display: table-cell;
+}
+
+table.blingalytics_table.sortable tbody tr::before {
+    content: counter(blingalytics_tabletablescope);
+    counter-increment: blingalytics_tabletablescope;
+    display: table-cell;
+    text-align: right;
+    padding: 0 6px;
+}
+
+.finder_results table.blingalytics_table.sortable tbody tr::before {
+    border-right: 1px solid #a0a0a0;
+}
+
+#top_seasons a {
+    white-space: nowrap;
+}
+
+#top_seasons .table_links {
+    column-count: 4;
+}
+
+#top_seasons .table_links ul {
+    margin-left: 4px;
+    text-indent: -4px;
+}
+
+#top_seasons .table_links ul li {
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+#top_seasons .table_links a {
+    white-space: normal;
+    line-height: 1;
+}
+
+#top_seasons table.blingalytics_table {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 50px;
+    padding-top: 60px;  /* account for fixed navbar */
+}
+
+#top_seasons table.blingalytics_table th {
+    width: 20em;
+    white-space: normal;
+}
+
+#top_seasons table.blingalytics_table td {
+    width: 50px;
+}
+
+#top_seasons .emphasize small {
+    font-style: normal;
+}
+
+.blingalytics th,
+.blingalytics td,
+.blingalytics thead tr::before,
+.blingalytics tbody tr::before,
+.blingalytics a {
+    font-family: "JetBrains Mono", "Courier New", Courier, monospace;
+    white-space: nowrap;
+}
+
+.blingalytics th {
+    text-align: center;
+}
+
+.blingalytics td {
+    text-align: right;
+}
+
+form.blingalytics_form {
+    font-size: 75%;
+    max-width: 600px;
+}
+
+.blingalytics button,
+.blingalytics input[type=submit] {
+    color: #3344dd;
+    background-color: transparent;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #a0a0a0;
+    border-radius: 4px;
+    margin: 12px 0;
+}
+
+.blingalytics .finder_results {
+    width: min-content;
+    padding-right: 60px;
+}
+
+.blingalytics a.download_link {
+    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    float: right;
+    font-size: 80%;
+ }
+
+.blingalytics .finder_results td {
+    border-right: 1px solid #a0a0a0;
+}
+
+h3.no_results_message {
+    white-space: nowrap;
+}

@@ -3,8 +3,8 @@
 
 <div id="single_gazette" class="blingacontent" {% if for_email %}style="font-size:14px"{% endif %}>
   <h1 class="gazette_headline">The Sanderson Gazette - {{ gazette }}</h1>
-  <div id="gazette_detail" {% if for_email %}style="width:90%"{% endif %}>
-    <div id="gazette_body" class="blingacontent_section">
+  <div id="gazette_detail">
+    <div id="gazette_body" class="blingacontent_section" {% if for_email %}style="width:100%"{% endif %}>
       {% if for_email %}
         <p>
           <a href="{{ gazette.full_url }}" class="link">

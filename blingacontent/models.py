@@ -118,9 +118,15 @@ class Gazette(models.Model):
         )
 
         if include_css:
-            css_path = Path(settings.STATIC_ROOT) / 'blingaleague' / 'css' / 'blingaleague.css'
-            css_fh = open(css_path, 'r')
-            head_str = "<head><style>{}</style></head>".format(css_fh.read())
+            css_tags = []
+
+            css_dir = Path(settings.STATIC_ROOT) / 'blingaleague' / 'css'
+            for filename in ['base', 'blingaleague', 'blingalytics', 'blingacontent', 'media']:
+                css_path = css_dir / "{}.css".format(filename)
+                css_fh = open(css_path, 'r')
+                css_tags.append("<style>{}</style>".format(css_fh.read()))
+
+            head_str = "<head>{}</head>".format(''.join(css_tags))
             body_str = "<body>{}</body>".format(html_str)
             html_str = "<html>{}{}</html>".format(head_str, body_str)
 

@@ -1,0 +1,212 @@
+/* Basic color scheme taken from the Chicago flag: https://design.chicago.gov/2019/08/26/choosing-the-cds-color-set.html */
+
+html, body {
+    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    height: 100%;
+}
+
+nav, div, p, a, img, h1, h2, h3, h4, h5, h6, form,
+span, label, input, textarea, table, tr, th, td, ul, ol, li {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.5;
+    color: #333333;
+    margin-top: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    clear: both;
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 180%;
+}
+
+h2 {
+    font-size: 140%;
+}
+
+h3 {
+    font-size: 110%;
+}
+
+small {
+    font-size: 60%;
+    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+}
+
+ul {
+    padding: 0 6px;
+}
+
+li {
+    list-style-type: none;
+}
+
+ol li {
+    list-style-type: decimal;
+}
+
+a, a:hover, a:visited, a:focus {
+    color: #3344dd;
+    font-size: inherit;
+    font-weight: inherit;
+    font-family: inherit;
+}
+
+table, tr, th, td {
+    font-size: inherit;
+}
+
+table {
+    margin-bottom: 12px;
+    border-collapse: separate;
+}
+
+.table-striped {
+    border: 1px solid #333333;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f4f4f4;
+}
+
+tbody tr:hover,
+.table-striped > tbody > tr:nth-of-type(odd):hover,
+table.game_table tr.playoffs:hover {
+    background-color: #eaeaea;
+}
+
+th, td {
+    padding: 0 6px;
+}
+
+th, td, tr::before {
+    vertical-align: middle;
+}
+
+th, thead tr::before,
+th a, th a:hover, th a:visited, th a:focus {
+    font-weight: bold;
+    color: white;
+    background-color: #41b6e6;
+}
+
+form input[type=submit] {
+    clear: both;
+}
+
+form input[type=checkbox],
+form input[type=radio] {
+    vertical-align: top;
+    margin-top: 2px;
+}
+
+form input[type=text],
+form input[type=number] {
+    border: 1px solid #ababab;
+}
+
+form label {
+    width: 200px;
+}
+
+form ul li {
+    display: block;
+    clear: both;
+}
+
+form ul li ul li {
+    width: 150px;
+    float: left;
+    clear: none;
+}
+
+form ul li ul li label {
+    font-weight: normal;
+}
+
+form .errorlist li {
+    font-style: italic;
+    font-weight: bold;
+    color: #e4002b;
+    font-size: 100%;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+nav, #footer {
+    background-color: #41b6e6;
+    border-width: none !important;
+    border-radius: 0 !important;
+}
+
+nav {
+    border-bottom: 4px solid #e4002b !important;
+}
+
+footer {
+    border-top: 2px solid #e4002b !important;
+    color: white;
+    text-align: center;
+    padding: 4px 8px;
+    font-size: 75%;
+}
+
+#footer a,
+#footer a:focus,
+#footer a:visited {
+    color: white;
+}
+
+.navbar-brand {
+    padding: 5px;
+}
+
+nav .icon-bar {
+    background-color: #e4002b;
+}
+
+.nav li a, nav li a,
+.nav li a:visited, nav li a:visited,
+.nav li a:focus, nav li a:focus {
+    color: white;
+    background-color: #41b6e6;
+    font-size: 90%;
+    font-weight: bold;
+    padding: 15px 10px;
+}
+
+.nav li a span {
+    color: white;
+}
+
+.nav li a:hover span {
+    color: #e4002b;
+}
+
+.nav ul.dropdown-menu li a {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.nav li a:hover,
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
+    color: #e4002b;
+    background-color: white;
+}
+
+.nav a.navbar-brand:hover {
+    background-color: inherit;
+}
+
+.dropdown-menu {
+    padding: 0;
+    border-width: 0;
+}
+

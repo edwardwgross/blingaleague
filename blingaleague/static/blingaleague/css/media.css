@@ -1,0 +1,170 @@
+@media screen and (max-device-width: 992px) {
+    body {
+        font-size: 32px;
+    }
+
+    #main_outer {
+        overflow-x: scroll;
+        margin-top: 0;
+        padding: 0 30px 60px 30px;
+    }
+
+    nav.navbar {
+        min-height: 100px;
+    }
+
+    #nav_shield {
+        width: 80px;
+        height: 80px;
+    }
+
+    .navbar-brand {
+        padding: 10px;
+    }
+
+    nav.navbar-fixed-top {
+        position: relative;
+    }
+
+    .navbar-toggle .icon-bar {
+        width: 44px;
+        height: 4px;
+        border-radius: 2px;
+        margin: 8px 0;
+    }
+
+    .navbar-header {
+        float: none;
+    }
+
+    .navbar-left,.navbar-right {
+        float: none !important;
+    }
+
+    .navbar-toggle {
+        display: block;
+        margin-top: 15px;
+    }
+
+    .navbar-collapse {
+        border-top: 1px solid transparent;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .navbar-fixed-top {
+        top: 0;
+        border-width: 0 0 1px;
+    }
+
+    .navbar-collapse.collapse {
+        display: none!important;
+    }
+
+    .navbar-nav {
+        float: none!important;
+        margin-top: 7.5px;
+    }
+
+    .navbar-nav ul {
+        background-color: #41b6e6;
+    }
+
+    .navbar-nav>li {
+        float: none;
+    }
+
+    .navbar-nav li {
+        padding: 5px 0;
+        clear: both;
+    }
+
+    .navbar-nav li a,
+    .nav ul.dropdown-menu li a,
+    .nav .open > a,
+    .nav .open > a:hover,
+    .nav .open > a:focus  {
+        font-size: 32px !important;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        line-height: 1;
+    }
+
+    .collapse.in{
+        display: block !important;
+        max-height: 100% !important;
+        height: 100% !important;
+    }
+
+    .dropdown-menu {
+        position: relative;
+        box-shadow: none;
+        margin-left: 24px;
+    }
+
+    .playoff_bracket .round:last-of-type .game {
+        margin-top: 72px;  /* blingabowl centering */
+    }
+
+    .playoff_bracket .round .game .team {
+        min-height: 60px;
+    }
+
+    #gazette_body,
+    #gazette_footer {
+        width: 100%;
+    }
+
+    #single_gazette #gazette_tags {
+        clear: both;
+        text-align: left;
+        width: 100%;
+        padding-left: 0;
+        margin: 48px 0;
+    }
+
+    #single_gazette #gazette_tags strong,
+    #single_gazette #gazette_tags li {
+        display: inline-block;
+        float: left;
+        margin-right: 6px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .nav li a, nav li a,
+    .nav li a:visited, nav li a:visited,
+    .nav li a:focus, nav li a:focus {
+        font-size: 12px;
+    }
+
+    .navbar-collapse {
+        height: 100% !important;
+        max-height: 100% !important;
+    }
+
+    #home_sidebar {
+        width: 900px;
+    }
+
+    #home_sidebar #games {
+        width: 720px;
+    }
+
+    .team_season_spotlight {
+        display: block;
+        width: 720px;
+        border-bottom: 1px solid #41b6e6;
+    }
+
+    #top_seasons .table_links {
+        column-count: 2;
+    }
+}
+
+@media screen and (max-width: 750px) {
+    .nav li a, nav li a,
+    .nav li a:visited, nav li a:visited,
+    .nav li a:focus, nav li a:focus {
+        padding: 6px 10px;
+    }
+}
