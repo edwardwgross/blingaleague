@@ -45,13 +45,11 @@ TOP_SEASONS_STATS = [
         'title': 'Best Record',
         'attr': 'win_pct',
         'sort_desc': True,
-        'require_full_season': True,
         'display_attr': 'record',
     },
     {
         'title': 'Worst Record',
         'attr': 'win_pct',
-        'require_full_season': True,
         'display_attr': 'record',
     },
     {
