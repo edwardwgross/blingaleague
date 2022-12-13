@@ -38,6 +38,10 @@
     vertical-align: top;
 }
 
+#home_main .standings_table td {
+    padding: 0 12px;
+}
+
 #home_sidebar {
     display: inline-block;
     width: 400px;
