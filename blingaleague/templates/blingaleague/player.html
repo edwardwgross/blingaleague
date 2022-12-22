@@ -21,14 +21,14 @@
   <table class="table-striped transactions">
     <tr>
       <th>Year</th>
-      {% if player.drafted %}<th>Drafted</th>{% endif %}
+      {% if player.drafted_live %}<th>Drafted</th>{% endif %}
       {% if player.kept %}<th>Kept</th>{% endif %}
       {% if player.traded %}<th>Traded</th>{% endif %}
     </tr>
     {% for transactions in player.transactions_list reversed %}
       <tr>
         <td style="text-align:right"><a href="{% url 'blingaleague.single_season' transactions.year %}">{{ transactions.year }}</a></td>
-        {% if player.drafted %}
+        {% if player.drafted_live %}
           <td>
             {% if transactions.drafted|length > transactions.kept|length %}
               <ul>

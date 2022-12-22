@@ -3321,9 +3321,19 @@ class Player(ComparableObject):
 
     @fully_cached_property
     def drafted(self):
+        return self._drafted()
+
+    @fully_cached_property
+    def drafted_live(self):
+        return self._drafted(live_picks_only=True)
+
+    def _drafted(self, live_picks_only=False):
         drafted = defaultdict(list)
 
         for pick in DraftPick.objects.filter(name=self.name):
+            if live_picks_only and pick.is_keeper:
+                continue
+
             drafted[pick.year].append(pick)
 
         return drafted
