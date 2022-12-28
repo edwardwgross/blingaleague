@@ -2082,17 +2082,17 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def champion(self):
-        if self.postseason is None:
+        try:
+            return TeamSeason(self.postseason.place_1.id, self.year)
+        except Exception:
             return None
-
-        return TeamSeason(self.postseason.place_1.id, self.year)
 
     @fully_cached_property
     def runner_up(self):
-        if self.postseason is None:
+        try:
+            return TeamSeason(self.postseason.place_2.id, self.year)
+        except Exception:
             return None
-
-        return TeamSeason(self.postseason.place_2.id, self.year)
 
     @fully_cached_property
     def first_place(self):
