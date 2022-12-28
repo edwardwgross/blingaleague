@@ -1004,7 +1004,7 @@ class TeamSeason(ComparableObject):
         if raw_strength_of_schedule > 0:
             prefix = '+'
 
-        return "{}{:.1f}%".format(prefix, 100 * raw_strength_of_schedule)
+        return "{}{:.1f%}".format(prefix, raw_strength_of_schedule)
 
     @fully_cached_property
     def expected_wins_luck(self):
