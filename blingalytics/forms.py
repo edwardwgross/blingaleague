@@ -191,7 +191,11 @@ class SeasonFinderForm(BaseFinderForm):
     points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
     points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
     place_min = forms.IntegerField(required=False, label='Minimum Place')
-    place_max = forms.IntegerField(required=False, label='Maximum Place')
+    place_max = forms.IntegerField(
+        required=False,
+        label='Maximum Place',
+        help_text='Place filters will be ignored if \"Timespan (in Years)\" is greater than 1.',
+    )
     playoffs = forms.TypedChoiceField(
         required=False,
         label='Finish',
