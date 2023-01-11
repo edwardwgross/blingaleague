@@ -28,25 +28,26 @@
           </tr>
         {% endfor %}
       </table>
-      <table class="blingalytics_table table-striped" style="display:inline-table">
-        <tr>
-          <th>Year</th>
-          <th>{# Total #}</th>
-        </tr>
-        {% for year, total in summary.years %}
+      {% if not is_multi_season_view %}
+        <table class="blingalytics_table table-striped" style="display:inline-table">
           <tr>
-            <td style="text-align:left">{{ year }}</td>
-            <td>{{ total }}</td>
+            <th>Year</th>
+            <th>{# Total #}</th>
           </tr>
-        {% endfor %}
-      </table>
+          {% for year, total in summary.years %}
+            <tr>
+              <td style="text-align:left">{{ year }}</td>
+              <td>{{ total }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
 
       <h2>Seasons</h2>
       <em>(click on the column headings to sort)</em>
-      <a class="download_link" href="{{ request.get_full_path }}&csv">Download to CSV</a>
       <table class="blingalytics_table sortable table-striped">
         <tr>
-          <th>Year</th>
+          <th>Year{% if is_multi_season_view %}s{% endif %}</th>
           <th>Team</th>
           <th>Wins</th>
           <th>Losses</th>
@@ -57,20 +58,37 @@
           <th title="All-Play Winning Percentage">All-Play</th>
           <th title="Points Against">PA</th>
           <th title="Strength of Schedule">SOS</th>
-          <th>Streak</th>
-          <th>Place</th>
-          <th>Final Place</th>
+          {% if not is_multi_season_view %}
+            <th>Streak</th>
+            <th>Place</th>
+            <th>Final Place</th>
+          {% endif %}
           <th title="Team Blangums Awards">Blangums</th>
           <th title="Slapped Heartbeat Awards">SH</th>
-          <th>Playoff Finish</th>
+          {% if is_multi_season_view %}
+            <th>Playoffs</th>
+            <th>Championships</th>
+          {% else %}
+            <th>Playoff Finish</th>
+          {% endif %}
         </tr>
         {% for team_season in team_seasons %}
           <tr>
-            <td><a href="{{ team_season.season_object.href }}">{{ team_season.year }}</a></td>
+            <td>
+              {% if is_multi_season_view %}
+                {{ team_season.year_min }}-{{ team_season.year_max }}
+              {% else %}
+                <a href="{{ team_season.season_object.href }}">{{ team_season.year }}</a>
+              {% endif %}
+            </td>
             <td style="text-align:left">
-              <a href="{{ team_season.href }}">{{ team_season.team.nickname }}</a>
-              {% if team_season.standings_note %}
-                <span class="blinganote" title="{{ team_season.standings_note.1 }}">{{ team_season.standings_note.0 }}</span>
+              {% if is_multi_season_view %}
+                <a href="{{ team_season.team.href }}">{{ team_season.team.nickname }}</a>
+              {% else %}
+                <a href="{{ team_season.href }}">{{ team_season.team.nickname }}</a>
+                {% if team_season.standings_note %}
+                  <span class="blinganote" title="{{ team_season.standings_note.1 }}">{{ team_season.standings_note.0 }}</span>
+                {% endif %}
               {% endif %}
             </td>
             <td>{{ team_season.win_count }}</td>
@@ -82,20 +100,27 @@
             <td>{{ team_season.all_play_win_pct|floatformat:3 }}</td>
             <td>{{ team_season.points_against|intcomma }}</td>
             <td>{{ team_season.strength_of_schedule_str }}</td>
-            <td sorttable_customkey="{{ team_season.current_streak_sort_key }}" style="text-align:center">
-              {{ team_season.current_streak }}
-            </td>
-            <td>{{ team_season.place_numeric }}</td>
-            <td>
-              {% if not team_season.regular_season.is_partial %}
-                <a href="{{ team_season.regular_season.href }}">{{ team_season.regular_season.place_numeric }}</a>
-              {% endif %}
-            </td>
+            {% if not is_multi_season_view %}
+              <td sorttable_customkey="{{ team_season.current_streak_sort_key }}" style="text-align:center">
+                {{ team_season.current_streak }}
+              </td>
+              <td>{{ team_season.place_numeric }}</td>
+              <td>
+                {% if not team_season.regular_season.is_partial %}
+                  <a href="{{ team_season.regular_season.href }}">{{ team_season.regular_season.place_numeric }}</a>
+                {% endif %}
+              </td>
+            {% endif %}
             <td>{{ team_season.blangums_count }}</td>
             <td>{{ team_season.slapped_heartbeat_count }}</td>
-            <td style="text-align:left">
-              <a href="{{ team_season.regular_season.season_object.href }}">{{ team_season.playoff_finish }}</a>
-            </td>
+            {% if is_multi_season_view %}
+              <td>{{ team_season.playoff_appearances }}</td>
+              <td>{{ team_season.championships }}</td>
+            {% else %}
+              <td style="text-align:left">
+                <a href="{{ team_season.regular_season.season_object.href }}">{{ team_season.playoff_finish }}</a>
+              </td>
+            {% endif %}
           </tr>
         {% endfor %}
       </table>

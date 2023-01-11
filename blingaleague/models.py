@@ -159,11 +159,8 @@ class Member(models.Model, ComparableObject):
 
     def last_x_seasons(self, num_seasons):
         last_season = Season.latest()
-        years_range = range(
-            last_season.year - num_seasons + 1,
-            last_season.year + 1,
-        )
-        return TeamMultiSeasons(self.id, years=years_range)
+        year_min = last_season.year - num_seasons + 1
+        return TeamMultiSeasons(self.id, year_min=year_min)
 
     @fully_cached_property
     def blangums_games(self):
@@ -846,9 +843,6 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def playoff_finish_numeric(self):
-        if not self.is_single_season:
-            return None
-
         if self.postseason is None:
             return None
 
@@ -1004,7 +998,7 @@ class TeamSeason(ComparableObject):
         if raw_strength_of_schedule > 0:
             prefix = '+'
 
-        return "{}{:.1f%}".format(prefix, raw_strength_of_schedule)
+        return "{}{:.1%}".format(prefix, raw_strength_of_schedule)
 
     @fully_cached_property
     def expected_wins_luck(self):
@@ -1674,21 +1668,23 @@ class TeamSeason(ComparableObject):
 
 
 class TeamMultiSeasons(TeamSeason):
-    _comparison_attr = 'team'
+    _comparison_attr = 'team_year_range'
 
     is_single_season = False
 
-    def __init__(self, team_id, years=None, include_playoffs=False, week_max=None):
-        if years is None:
-            years = [season.year for season in Season.all()]
+    def __init__(self, team_id, year_min=None, year_max=None, include_playoffs=False, week_max=None):  # noqa: E501
+        if year_min is None:
+            year_min = Season.min().year
+        if year_max is None:
+            year_max = Season.max().year
 
-        self.years = sorted(years)
+        self.year_min = year_min
+        self.year_max = year_max
         self.team = Member.objects.get(id=team_id)
         self.include_playoffs = include_playoffs
         self.week_max = week_max
 
-        years_string = ','.join(map(str, self.years))
-        self.cache_key = '|'.join(map(str, (team_id, years_string, include_playoffs, week_max)))
+        self.cache_key = '|'.join(map(str, (team_id, year_min, year_max, include_playoffs, week_max)))  # noqa: E501
 
     def _sum_seasonal_values(self, prop_name):
         return sum(getattr(ts, prop_name, 0) for ts in self)
@@ -1699,10 +1695,21 @@ class TeamMultiSeasons(TeamSeason):
             full_list.extend(getattr(team_season, prop_name, []))
         return full_list
 
+    def _any_season_true(self, prop_name):
+        return any([getattr(team_season, prop_name, False) for team_season in self])
+
+    def _all_seasons_true(self, prop_name):
+        return all([getattr(team_season, prop_name, False) for team_season in self])
+
+    @fully_cached_property
+    def team_year_range(self):
+        return (self.team, self.year_min, self.year_max)
+
     @fully_cached_property
     def team_seasons(self):
         team_seasons = []
-        for year in self.years:
+        year = self.year_min
+        while year <= self.year_max:
             team_season = TeamSeason(
                 self.team.id,
                 year,
@@ -1712,6 +1719,8 @@ class TeamMultiSeasons(TeamSeason):
 
             if len(team_season.games) > 0 or team_season.is_upcoming_season:
                 team_seasons.append(team_season)
+
+            year += 1
 
         return team_seasons
 
@@ -1833,16 +1842,44 @@ class TeamMultiSeasons(TeamSeason):
         return None
 
     @fully_cached_property
-    def clinched_playoffs(self):
+    def regular_season(self):
         return None
+
+    @fully_cached_property
+    def place_numeric(self):
+        return None
+
+    @fully_cached_property
+    def playoff_finish_numeric(self):
+        return None
+
+    @fully_cached_property
+    def made_playoffs(self):
+        return self._any_season_true('made_playoffs')
+
+    @fully_cached_property
+    def missed_playoffs(self):
+        return self._any_season_true('missed_playoffs')
+
+    @fully_cached_property
+    def bye(self):
+        return self._any_season_true('bye')
+
+    @fully_cached_property
+    def champion(self):
+        return self._any_season_true('champion')
+
+    @fully_cached_property
+    def clinched_playoffs(self):
+        return self._any_season_true('clinched_playoffs')
 
     @fully_cached_property
     def clinched_bye(self):
-        return None
+        return self._any_season_true('clinched_bye')
 
     @fully_cached_property
     def eliminated_early(self):
-        return None
+        return self._any_season_true('eliminate_early')
 
     @fully_cached_property
     def trades(self):

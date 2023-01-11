@@ -81,7 +81,14 @@ table.blingalytics_table.sortable tbody tr::before {
 
 form.blingalytics_form {
     font-size: 75%;
+}
+
+form.blingalytics_form ul li ul {
     max-width: 600px;
+}
+
+form.blingalytics_form label {
+    white-space: nowrap;
 }
 
 .blingalytics button,

@@ -119,22 +119,41 @@ form ul li {
     clear: both;
 }
 
+form ul li {
+    padding-top: 12px;
+}
+
+form ul li:first-of-type {
+    padding-top: 0;
+}
+
 form ul li ul li {
     width: 150px;
     float: left;
     clear: none;
+    padding-top: 0;
 }
 
 form ul li ul li label {
     font-weight: normal;
 }
 
+form .helptext,
 form .errorlist li {
     font-style: italic;
-    font-weight: bold;
-    color: #e4002b;
     font-size: 100%;
     width: 100%;
+}
+
+form .helptext {
+    margin-left: 12px;
+    font-size: 75%;
+    display: block;
+}
+
+form .errorlist li {
+    font-weight: bold;
+    color: #e4002b;
     margin-bottom: 12px;
 }
 

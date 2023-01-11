@@ -165,7 +165,16 @@ class GameFinderForm(BaseFinderForm):
 class SeasonFinderForm(BaseFinderForm):
     year_min = forms.IntegerField(required=False, label='Start Year')
     year_max = forms.IntegerField(required=False, label='End Year')
-    week_max = forms.IntegerField(required=False, label='Through Week')
+    year_span = forms.IntegerField(
+        required=False,
+        label='Timespan (in Years)',
+        help_text='Find results that span multiple seasons, e.g. \"3\" returns results such as \"2019-2021 Ed\".  Leaving blank is the same as entering 1.',  # noqa: E501
+    )
+    week_max = forms.IntegerField(
+        required=False,
+        label='Through Week',
+        help_text='Find partial seasons, e.g. \"7\" returns results such as \"2018 Rob (through week 7)\".  Leaving blank will result in only full seasons being returned.',  # noqa: E501
+    )
     teams = _teams_multiple_choice_field()
     wins_min = forms.IntegerField(required=False, label='Minimum Wins')
     wins_max = forms.IntegerField(required=False, label='Maximum Wins')

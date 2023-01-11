@@ -1,14 +1,10 @@
-import csv
-import datetime
-
 from collections import defaultdict
 
 from django.core.cache import caches
 from django.db.models import F, ExpressionWrapper, DecimalField
-from django.http import HttpResponse
 from django.views.generic import TemplateView
 
-from blingaleague.models import Game, Week, Member, TeamSeason, \
+from blingaleague.models import Game, Week, Member, TeamSeason, TeamMultiSeasons, \
                                 Season, Matchup, Trade, Keeper, DraftPick, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
                                 position_sort_key, calculate_expected_wins
@@ -229,30 +225,6 @@ TOP_SEASONS_STATS = [
 ]
 
 
-class CSVResponseMixin(object):
-
-    base_csv_filename = 'blingaleague_{}.csv'
-
-    @property
-    def filename(self):
-        return self.base_csv_filename.format(
-            datetime.datetime.now().strftime('%Y%m%d%H%M%S'),
-        )
-
-    def generate_csv_data(self, result_list):
-        raise NotImplementedError('Must be defined by the subclass')
-
-    def render_to_csv(self, result_list):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = "attachment; filename={}".format(self.filename)
-
-        csv_writer = csv.writer(response)
-        for row in self.generate_csv_data(result_list):
-            csv_writer.writerow(row)
-
-        return response
-
-
 class WeeklyScoresView(TemplateView):
     template_name = 'blingalytics/weekly_scores.html'
 
@@ -334,10 +306,8 @@ class ExpectedWinsView(TemplateView):
         return self.render_to_response(context)
 
 
-class GameFinderView(CSVResponseMixin, TemplateView):
+class GameFinderView(TemplateView):
     template_name = 'blingalytics/game_finder.html'
-
-    base_csv_filename = 'game_finder_{}.csv'
 
     def filter_games(self, form_data):
         base_games = Game.objects.all()
@@ -503,38 +473,6 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             'total': len(games_counted),
         }
 
-    def generate_csv_data(self, games):
-        csv_data = [
-            [
-                'Year',
-                'Week',
-                'Team',
-                'W/L',
-                'Score',
-                'OppScore',
-                'Opponent',
-                'Margin',
-                'Streak',
-                'Notes',
-            ],
-        ]
-
-        for game in games:
-            csv_data.append([
-                game['year'],
-                game['week'],
-                game['team'].nickname,
-                game['outcome'],
-                game['score'],
-                game['opponent_score'],
-                game['opponent'].nickname,
-                game['margin'],
-                game['team_season'].current_streak,
-                game['extra_description'],
-            ])
-
-        return csv_data
-
     def get(self, request):
         games = []
 
@@ -543,9 +481,6 @@ class GameFinderView(CSVResponseMixin, TemplateView):
             form_data = game_finder_form.cleaned_data
 
             games = self.filter_games(form_data)
-
-        if 'csv' in request.GET:
-            return self.render_to_csv(games)
 
         context = {
             'form': game_finder_form,
@@ -556,10 +491,8 @@ class GameFinderView(CSVResponseMixin, TemplateView):
         return self.render_to_response(context)
 
 
-class SeasonFinderView(CSVResponseMixin, TemplateView):
+class SeasonFinderView(TemplateView):
     template_name = 'blingalytics/season_finder.html'
-
-    base_csv_filename = 'season_finder_{}.csv'
 
     def filter_seasons(self, form_data):
         year_min = Season.min().year
@@ -569,6 +502,8 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
         if form_data['year_max'] is not None:
             year_max = form_data['year_max']
 
+        year_span = form_data['year_span']
+
         team_ids = form_data['teams']
         if len(team_ids) == 0:
             team_ids = Member.objects.all().order_by(
@@ -577,9 +512,32 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 
         for year in range(year_min, year_max + 1):
             for team_id in team_ids:
-                ts = TeamSeason(team_id, year, week_max=form_data['week_max'])
+                if year_span and year_span > 1:
+                    # only include multi-season spans that fall completely within
+                    # the minimum and maximum year parameters
+                    if (year + year_span - 1) > year_max:
+                        continue
 
-                game_count = len(ts.games)
+                    team_season = TeamMultiSeasons(
+                        team_id,
+                        year_min=year,
+                        year_max=year + year_span - 1,
+                        week_max=form_data['week_max'],
+                    )
+
+                    # only include multi-season spans that have as many seasons with games
+                    # as the year span parameter
+                    years_with_games = 0
+                    for single_season in team_season:
+                        if len(single_season.games) > 0:
+                            years_with_games += 1
+
+                    if years_with_games < year_span:
+                        continue
+                else:
+                    team_season = TeamSeason(team_id, year, week_max=form_data['week_max'])
+
+                game_count = len(team_season.games)
                 if game_count == 0:
                     continue
 
@@ -588,69 +546,74 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
                     # and the value given is in the regular season,
                     # don't show seasons that haven't yet reached that week
                     # playoffs are special, though - teams with byes won't have the same logic
-                    if form_data['week_max'] <= regular_season_weeks(year) or not ts.bye:
+                    if form_data['week_max'] <= regular_season_weeks(year) or not team_season.bye:
                         if game_count < form_data['week_max']:
                             continue
-                    elif ts.bye:
+                    elif team_season.bye:
                         if game_count < (form_data['week_max'] - 1):
                             continue
 
                 if form_data['wins_min'] is not None:
-                    if ts.win_count < form_data['wins_min']:
+                    if team_season.win_count < form_data['wins_min']:
                         continue
                 if form_data['wins_max'] is not None:
-                    if ts.win_count > form_data['wins_max']:
+                    if team_season.win_count > form_data['wins_max']:
                         continue
 
                 if form_data['expected_wins_min'] is not None:
-                    if ts.expected_wins < form_data['expected_wins_min']:
+                    if team_season.expected_wins < form_data['expected_wins_min']:
                         continue
                 if form_data['expected_wins_max'] is not None:
-                    if ts.expected_wins > form_data['expected_wins_max']:
+                    if team_season.expected_wins > form_data['expected_wins_max']:
                         continue
 
                 if form_data['points_min'] is not None:
-                    if ts.points < form_data['points_min']:
+                    if team_season.points < form_data['points_min']:
                         continue
                 if form_data['points_max'] is not None:
-                    if ts.points > form_data['points_max']:
+                    if team_season.points > form_data['points_max']:
                         continue
 
                 if form_data['place_min'] is not None:
-                    if ts.place_numeric < form_data['place_min']:
+                    if team_season.place_numeric < form_data['place_min']:
                         continue
                 if form_data['place_max'] is not None:
-                    if ts.place_numeric > form_data['place_max']:
+                    if team_season.place_numeric > form_data['place_max']:
                         continue
 
-                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not ts.made_playoffs:
+                if form_data['playoffs'] == CHOICE_MADE_PLAYOFFS and not team_season.made_playoffs:
                     continue
-                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and not ts.missed_playoffs:
+                elif form_data['playoffs'] == CHOICE_MISSED_PLAYOFFS and not team_season.missed_playoffs:  # noqa: E501
                     continue
 
                 clinched = form_data['clinched']
-                if clinched == CHOICE_CLINCHED_BYE and not ts.clinched_bye:
+                if clinched == CHOICE_CLINCHED_BYE and not team_season.clinched_bye:
                     continue
-                elif clinched == CHOICE_CLINCHED_PLAYOFFS and not ts.clinched_playoffs:
+                elif clinched == CHOICE_CLINCHED_PLAYOFFS and not team_season.clinched_playoffs:
                     continue
-                elif clinched == CHOICE_ELIMINATED_EARLY and not ts.eliminated_early:
-                    continue
-
-                if form_data['bye'] and not ts.bye:
+                elif clinched == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_early:
                     continue
 
-                if form_data['champion'] and not ts.champion:
+                if form_data['bye'] and not team_season.bye:
                     continue
 
-                yield ts
+                if form_data['champion'] and not team_season.champion:
+                    continue
 
-    def build_summary_tables(self, seasons):
+                yield team_season
+
+    def build_summary_tables(self, team_seasons):
         team_dict = defaultdict(int)
         year_dict = defaultdict(int)
 
-        for season in seasons:
-            team_dict[season.team] += 1
-            year_dict[season.year] += 1
+        for team_season in team_seasons:
+            team_dict[team_season.team] += 1
+
+            if team_season.is_single_season:
+                year_dict[team_season.year] += 1
+            else:
+                for single_season in team_season:
+                    year_dict[single_season.year] += 1
 
         team_table = sorted(team_dict.items(), key=lambda x: x[0].nickname)
         year_table = sorted(year_dict.items())
@@ -660,52 +623,10 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
             'years': year_table,
         }
 
-    def generate_csv_data(self, seasons):
-        csv_data = [
-            [
-                'Year',
-                'Team',
-                'Wins',
-                'Losses',
-                'W%',
-                'Points',
-                'Exp. W',
-                'Exp. %',
-                'Strength of Schedule',
-                'Place',
-                'Final Place',
-                'Blangums',
-                'Slapped Heartbeats',
-                'Playoff Finish',
-            ],
-        ]
-
-        for season in seasons:
-            final_place = season.regular_season.place_numeric
-            if season.regular_season.is_partial:
-                final_place = None
-
-            csv_data.append([
-                season.year,
-                season.team.nickname,
-                season.win_count,
-                season.loss_count,
-                season.win_pct,
-                season.points,
-                season.expected_wins,
-                season.expected_win_pct,
-                season.strength_of_schedule,
-                season.place_numeric,
-                final_place,
-                season.blangums_count,
-                season.slapped_heartbeat_count,
-                season.playoff_finish,
-            ])
-
-        return csv_data
-
     def get(self, request):
         team_seasons = []
+
+        is_multi_season_view = False
 
         season_finder_form = SeasonFinderForm(request.GET)
         if season_finder_form.is_valid():
@@ -713,13 +634,14 @@ class SeasonFinderView(CSVResponseMixin, TemplateView):
 
             team_seasons = list(self.filter_seasons(form_data))
 
-        if 'csv' in request.GET:
-            return self.render_to_csv(team_seasons)
+            if form_data['year_span'] and form_data['year_span'] > 1:
+                is_multi_season_view = True
 
         context = {
             'form': season_finder_form,
             'team_seasons': team_seasons,
             'summary': self.build_summary_tables(team_seasons),
+            'is_multi_season_view': is_multi_season_view,
         }
 
         return self.render_to_response(context)
@@ -934,7 +856,7 @@ class KeeperFinderView(TemplateView):
         return self.render_to_response(context)
 
 
-class DraftPickFinderView(CSVResponseMixin, TemplateView):
+class DraftPickFinderView(TemplateView):
     template_name = 'blingalytics/draft_pick_finder.html'
 
     def filter_draft_picks(self, form_data):
@@ -1002,38 +924,6 @@ class DraftPickFinderView(CSVResponseMixin, TemplateView):
             'positions': sorted(position_dict.items(), key=lambda x: position_sort_key(x[0])),
         }
 
-    def generate_csv_data(self, draft_picks):
-        csv_data = [[
-            'Year',
-            'Round',
-            'Pick in Round',
-            'Overall',
-            'Team',
-            'Player',
-            'Position',
-            'Keeper',
-            'Original Team',
-        ]]
-
-        for pick in draft_picks:
-            original_team = pick.original_team
-            if original_team:
-                original_team = original_team.nickname
-
-            csv_data.append([
-                pick.year,
-                pick.round,
-                pick.pick_in_round,
-                pick.overall_pick,
-                pick.team.nickname,
-                pick.name,
-                pick.position,
-                'Yes' if pick.is_keeper else 'No',
-                original_team,
-            ])
-
-        return csv_data
-
     def get(self, request):
         draft_picks = []
 
@@ -1042,9 +932,6 @@ class DraftPickFinderView(CSVResponseMixin, TemplateView):
             form_data = draft_pick_finder_form.cleaned_data
 
             draft_picks = self.filter_draft_picks(form_data)
-
-        if 'csv' in request.GET:
-            return self.render_to_csv(draft_picks)
 
         context = {
             'form': draft_pick_finder_form,
