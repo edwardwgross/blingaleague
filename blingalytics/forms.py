@@ -1,5 +1,7 @@
 from django import forms
 
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 from blingaleague.models import Member, Season, BLINGABOWL_TITLE_BASE, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
                                 THIRD_PLACE_TITLE_BASE, FIFTH_PLACE_TITLE_BASE, \
@@ -36,16 +38,6 @@ CHOICES_PLAYOFF_GAME_TYPE = (
 CHOICE_MATCHING_ASSETS_ONLY = 'matching_assets'
 
 
-def _teams_multiple_choice_field(label='Team'):
-    return forms.TypedMultipleChoiceField(
-        required=False,
-        label=label,
-        widget=forms.CheckboxSelectMultiple,
-        choices=[(m.id, m) for m in Member.objects.all()],
-        coerce=int,
-    )
-
-
 def _yes_no_field(label):
     return forms.TypedChoiceField(
         required=False,
@@ -56,6 +48,44 @@ def _yes_no_field(label):
             (CHOICE_YES, 'Yes'),
             (CHOICE_NO, 'No'),
         ],
+    )
+
+
+def _positive_integer_field(**kwargs):
+    kwargs.update(validators=[MinValueValidator(1)])
+    return forms.IntegerField(**kwargs)
+
+
+def _year_field(prefix=None):
+    label = 'Year'
+    if prefix:
+        label = prefix.strip() + ' Year'
+
+    return forms.IntegerField(
+        required=False,
+        label=label,
+        validators=[
+            MinValueValidator(Season.min().year),
+            MaxValueValidator(Season.max().year),
+        ],
+    )
+
+
+def _start_year_field():
+    return _year_field('Start')
+
+
+def _end_year_field():
+    return _year_field('End')
+
+
+def _teams_multiple_choice_field(label='Team'):
+    return forms.TypedMultipleChoiceField(
+        required=False,
+        label=label,
+        widget=forms.CheckboxSelectMultiple,
+        choices=[(m.id, m) for m in Member.objects.all()],
+        coerce=int,
     )
 
 
@@ -70,7 +100,7 @@ def _positions_multiple_choice_field(label='Position'):
 
 class ExpectedWinsCalculatorForm(forms.Form):
     score = forms.DecimalField(required=False, label='Score', decimal_places=2)
-    year = forms.IntegerField(required=False, label='Year')
+    year = _positive_integer_field(required=False, label='Year')
 
     def is_valid(self):
         if not super().is_valid():
@@ -115,10 +145,10 @@ class BaseFinderForm(forms.Form):
 
 
 class GameFinderForm(BaseFinderForm):
-    year_min = forms.IntegerField(required=False, label='Start Year')
-    year_max = forms.IntegerField(required=False, label='End Year')
-    week_min = forms.IntegerField(required=False, label='Start Week')
-    week_max = forms.IntegerField(required=False, label='End Week')
+    year_min = _start_year_field()
+    year_max = _end_year_field()
+    week_min = _positive_integer_field(required=False, label='Start Week')
+    week_max = _positive_integer_field(required=False, label='End Week')
     week_type = forms.TypedChoiceField(
         required=False,
         label='Game Type',
@@ -159,18 +189,18 @@ class GameFinderForm(BaseFinderForm):
             (CHOICE_LOSSES, 'Loser only'),
         ],
     )
-    streak_min = forms.IntegerField(required=False, label='Minimum W/L Streak')
+    streak_min = _positive_integer_field(required=False, label='Minimum W/L Streak')
 
 
 class SeasonFinderForm(BaseFinderForm):
-    year_min = forms.IntegerField(required=False, label='Start Year')
-    year_max = forms.IntegerField(required=False, label='End Year')
-    year_span = forms.IntegerField(
+    year_min = _start_year_field()
+    year_max = _end_year_field()
+    year_span = _positive_integer_field(
         required=False,
         label='Timespan (in Years)',
         help_text='Find results that span multiple seasons, e.g. \"3\" returns results such as \"2019-2021 Ed\".  Leaving blank is the same as entering 1.',  # noqa: E501
     )
-    week_max = forms.IntegerField(
+    week_max = _positive_integer_field(
         required=False,
         label='Through Week',
         help_text='Find partial seasons, e.g. \"7\" returns results such as \"2018 Rob (through week 7)\".  Leaving blank will result in only full seasons being returned.',  # noqa: E501
@@ -190,8 +220,8 @@ class SeasonFinderForm(BaseFinderForm):
     )
     points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
     points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
-    place_min = forms.IntegerField(required=False, label='Minimum Place')
-    place_max = forms.IntegerField(
+    place_min = _positive_integer_field(required=False, label='Minimum Place')
+    place_max = _positive_integer_field(
         required=False,
         label='Maximum Place',
         help_text='Place filters will be ignored if \"Timespan (in Years)\" is greater than 1.',
@@ -222,10 +252,10 @@ class SeasonFinderForm(BaseFinderForm):
 
 
 class TradeFinderForm(BaseFinderForm):
-    year_min = forms.IntegerField(required=False, label='Start Year')
-    year_max = forms.IntegerField(required=False, label='End Year')
-    week_min = forms.IntegerField(required=False, label='Start Week')
-    week_max = forms.IntegerField(required=False, label='End Week')
+    year_min = _start_year_field()
+    year_max = _end_year_field()
+    week_min = _positive_integer_field(required=False, label='Start Week')
+    week_max = _positive_integer_field(required=False, label='End Week')
     receivers = _teams_multiple_choice_field(label='Receiver')
     senders = _teams_multiple_choice_field('Sender')
     positions = _positions_multiple_choice_field()
@@ -245,10 +275,10 @@ class TradeFinderForm(BaseFinderForm):
 
 
 class KeeperFinderForm(BaseFinderForm):
-    year_min = forms.IntegerField(required=False, label='Start Year')
-    year_max = forms.IntegerField(required=False, label='End Year')
-    round_min = forms.IntegerField(required=False, label='Earliest Round')
-    round_max = forms.IntegerField(required=False, label='Latest Round')
+    year_min = _start_year_field()
+    year_max = _end_year_field()
+    round_min = _positive_integer_field(required=False, label='Earliest Round')
+    round_max = _positive_integer_field(required=False, label='Latest Round')
     positions = _positions_multiple_choice_field()
     times_kept = forms.TypedMultipleChoiceField(
         required=False,
@@ -263,12 +293,12 @@ class KeeperFinderForm(BaseFinderForm):
 
 
 class DraftPickFinderForm(BaseFinderForm):
-    year_min = forms.IntegerField(required=False, label='Start Year')
-    year_max = forms.IntegerField(required=False, label='End Year')
-    round_min = forms.IntegerField(required=False, label='Earliest Round')
-    round_max = forms.IntegerField(required=False, label='Latest Round')
-    overall_pick_min = forms.IntegerField(required=False, label='Earliest Overall Pick')
-    overall_pick_max = forms.IntegerField(required=False, label='Latest Overall Pick')
+    year_min = _start_year_field()
+    year_max = _end_year_field()
+    round_min = _positive_integer_field(required=False, label='Earliest Round')
+    round_max = _positive_integer_field(required=False, label='Latest Round')
+    overall_pick_min = _positive_integer_field(required=False, label='Earliest Overall Pick')
+    overall_pick_max = _positive_integer_field(required=False, label='Latest Overall Pick')
     positions = _positions_multiple_choice_field()
     teams = _teams_multiple_choice_field()
     keeper = _yes_no_field('Keeper')

@@ -139,7 +139,7 @@ form ul li ul li label {
 }
 
 form .helptext,
-form .errorlist li {
+form .errorlist {
     font-style: italic;
     font-size: 100%;
     width: 100%;
@@ -151,10 +151,15 @@ form .helptext {
     display: block;
 }
 
+form .errorlist {
+    margin-bottom: 12px;
+    display: table-cell;
+}
+
 form .errorlist li {
     font-weight: bold;
     color: #e4002b;
-    margin-bottom: 12px;
+    width: 100%;
 }
 
 nav, #footer {

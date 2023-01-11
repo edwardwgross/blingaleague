@@ -91,6 +91,10 @@ form.blingalytics_form label {
     white-space: nowrap;
 }
 
+form.blingalytics_form .errorlist {
+    font-family: "JetBrains Mono", "Courier New", Courier, monospace;
+}
+
 .blingalytics button,
 .blingalytics input[type=submit] {
     color: #3344dd;
