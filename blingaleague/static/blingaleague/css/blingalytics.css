@@ -87,8 +87,16 @@ form.blingalytics_form ul li ul {
     max-width: 600px;
 }
 
-form.blingalytics_form label {
+form.blingalytics_form ul li label {
     white-space: nowrap;
+    width: 300px;
+}
+
+form.blingalytics_form ul li ul li label {
+    white-space: normal;
+    width: 150px;
+    text-indent: -20px;
+    padding-left: 20px;
 }
 
 form.blingalytics_form .errorlist {

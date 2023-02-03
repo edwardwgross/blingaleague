@@ -101,6 +101,12 @@
         margin-left: 24px;
     }
 
+    form input[type=checkbox],
+    form input[type=radio] {
+        vertical-align: top;
+        margin-top: 10px;
+    }
+
     .playoff_bracket .round:last-of-type .game {
         margin-top: 72px;  /* blingabowl centering */
     }
