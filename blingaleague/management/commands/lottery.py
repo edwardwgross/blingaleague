@@ -105,4 +105,4 @@ class Command(LabelCommand):
 
         print()
         print("RESULTS FOR RANDOMLY SELECTED RUN (#{})".format(run_to_use))
-        print(outcomes[run_to_use-1])
+        print('\n'.join(["{}. {}".format(pick, team) for pick, team in enumerate(outcomes[run_to_use-1], 1)]))
