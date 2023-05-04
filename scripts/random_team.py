@@ -24,7 +24,10 @@ random.shuffle(team_rows)
 team_rows_1_2 = []
 team_rows_3_16 = []
 
-for region, seed, team in team_rows:
+for row in team_rows:
+    region = row[0]
+    seed = row[1]
+    team = row[2]
     seed = int(seed)
     if seed <= 2:
         team_rows_1_2.append((region, seed, team))
