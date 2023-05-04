@@ -222,6 +222,13 @@ TOP_SEASONS_STATS = [
         'require_full_season': True,
         'num_format': '{:.2%}',
     },
+    {
+        'title': 'Highest Odds of First Pick (the following season)',
+        'attr': 'first_pick_odds',
+        'sort_desc': True,
+        'require_full_season': True,
+        'num_format': '{:.2%}',
+    },
 ]
 
 

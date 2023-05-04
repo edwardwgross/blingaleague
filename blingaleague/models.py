@@ -1565,6 +1565,20 @@ class TeamSeason(ComparableObject):
         return self.expected_win_distribution.get(win_count, 0)
 
     @fully_cached_property
+    def first_pick_odds(self):
+        if self.week_max > regular_season_weeks(self.year):
+            season = self.regular_season.first_pick_odds
+
+        if self.is_partial:
+            return 0
+
+        for team, odds in self.season_object.first_pick_odds:
+            if team == self.team:
+                return odds
+
+        return 0
+
+    @fully_cached_property
     def trades(self):
         trade_dict = {}
 
