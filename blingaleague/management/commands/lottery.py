@@ -14,46 +14,12 @@ class Command(LabelCommand):
     def handle_label(self, year, **kwargs):
         season = Season(int(year))
 
-        teams = []
-        for ts in season.standings_table[PLAYOFF_TEAMS:]:
-            team_tuple = (
-                ts.team.nickname,
-                ts.loss_count,
-                ts.points,
-            )
-            teams.append(team_tuple)
-
-        teams = teams[::-1]  # order worst to best
-
-        losses_weight = decimal.Decimal(0.9)
-        points_weight = decimal.Decimal(0.1)
-
-        team_count = len(teams)
-
-        losses_array = []
-        points_array = []
-
-        for team in teams:
-            losses_array.append(team[1])
-            points_array.append(team[2])
-
-        losses_base = min(losses_array) - 1
-        points_base = max(points_array) + 50
-
-        total_losses = sum(losses_array) - (team_count * losses_base)
-        total_points = (team_count * points_base) - sum(points_array)
-
-        chances = []
         print('Likelihood of getting first pick:')
-        for team in teams:
-            name = team[0]
-            losses = team[1]
-            points = team[2]
-            losses_chances = losses_weight * (losses - losses_base) / total_losses
-            points_chances = points_weight * (points_base - points) / total_points
-            overall_chances = losses_chances + points_chances
-            print("{}: {:.2f}%".format(name, (100 * overall_chances)))
-            chances.append([name, overall_chances])
+        first_pick_odds = [(str(team), odds) for team, odds in season.first_pick_odds]
+        for team, odds in first_pick_odds:
+            print("{}: {:.2f}%".format(team, (100 * odds)))
+
+        team_count = len(first_pick_odds)
 
         print()
 
@@ -70,17 +36,15 @@ class Command(LabelCommand):
                 while not pick_assigned:
                     random_value = random.random()
                     total_level = 0
-                    for chance in chances:
-                        name = chance[0]
-                        level = chance[1]
+                    for team, level in first_pick_odds:
                         total_level = total_level + level
                         if random_value < total_level:
-                            if name in used_teams:
+                            if team in used_teams:
                                 # don't move onto next team, instead re-generate random number
                                 break
                             else:
-                                used_teams[name] = 1
-                                order.append(name)
+                                used_teams[team] = 1
+                                order.append(team)
                                 pick_index = pick_index + 1
                                 pick_assigned = True
                                 break
@@ -88,9 +52,8 @@ class Command(LabelCommand):
             i = i + 1
 
         results_by_team = {}
-        for team in teams:
-            name = team[0]
-            results_by_team[name] = [0] * team_count
+        for team, _odds in first_pick_odds:
+            results_by_team[team] = [0] * team_count
 
         for order in outcomes:
             pick_index = 0
@@ -99,9 +62,8 @@ class Command(LabelCommand):
                 pick_index = pick_index + 1
 
         print("Actual results after {} runs:".format(max_runs))
-        for team in teams:
-            name = team[0]
-            print("{} {}".format(name.ljust(16), results_by_team[name]))
+        for team, _odds in first_pick_odds:
+            print("{} {}".format(str(team).ljust(16), results_by_team[team]))
 
         print()
         print("RESULTS FOR RANDOMLY SELECTED RUN (#{})".format(run_to_use))

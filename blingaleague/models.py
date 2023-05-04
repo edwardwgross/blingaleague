@@ -2439,6 +2439,47 @@ class Season(ComparableObject):
         return Draft(self.year, round_max=2)
 
     @fully_cached_property
+    def first_pick_odds(self):
+        if self.is_partial or self.is_upcoming_season:
+            return []
+
+        losses_weight = decimal.Decimal(0.9)
+        points_weight = decimal.Decimal(0.1)
+
+        teams = []
+        losses_list = []
+        points_list = []
+        for team_season in self.standings_table[::-1]:
+            if team_season.made_playoffs:
+                break
+
+            teams.append((
+                team_season.team,
+                team_season.loss_count,
+                team_season.points,
+            ))
+
+            losses_list.append(team_season.loss_count)
+            points_list.append(team_season.points)
+
+        losses_base = min(losses_list) - 1
+        points_base = max(points_list) + 50
+
+        team_count = len(teams)
+
+        total_losses = sum(losses_list) - (team_count * losses_base)
+        total_points = (team_count * points_base) - sum(points_list)
+
+        odds = []
+        for team, losses, points in teams:
+            losses_odds = losses_weight * (losses - losses_base) / total_losses
+            points_odds = points_weight * (points_base - points) / total_points
+            overall_odds = losses_odds + points_odds
+            odds.append((team, overall_odds))
+
+        return odds
+
+    @fully_cached_property
     def active(self):
         return self.weeks_with_games or \
             self.keepers or \
