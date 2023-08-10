@@ -1,10 +1,9 @@
-import decimal
 import math
 import random
 
 from django.core.management.base import LabelCommand
 
-from blingaleague.models import Season, PLAYOFF_TEAMS
+from blingaleague.models import Season
 
 
 class Command(LabelCommand):
@@ -67,4 +66,8 @@ class Command(LabelCommand):
 
         print()
         print("RESULTS FOR RANDOMLY SELECTED RUN (#{})".format(run_to_use))
-        print('\n'.join(["{}. {}".format(pick, team) for pick, team in enumerate(outcomes[run_to_use-1], 1)]))
+        print(
+            '\n'.join(
+                ["{}. {}".format(pick, team) for pick, team in enumerate(outcomes[run_to_use-1], 1)]
+            )
+        )
