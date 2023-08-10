@@ -14,7 +14,7 @@ from django.db import models
 
 from slugify import slugify
 
-from .utils import int_to_roman, fully_cached_property, clear_cached_properties, \
+from .utils import int_to_roman, fully_cached_property, clear_cached_properties, value_by_pick, \
                    regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week
 
 
@@ -1567,7 +1567,7 @@ class TeamSeason(ComparableObject):
     @fully_cached_property
     def first_pick_odds(self):
         if self.week_max > regular_season_weeks(self.year):
-            season = self.regular_season.first_pick_odds
+            return self.regular_season.first_pick_odds
 
         if self.is_partial:
             return 0
@@ -1619,6 +1619,14 @@ class TeamSeason(ComparableObject):
     @fully_cached_property
     def live_picks(self):
         return self.draft.draft_picks.filter(is_keeper=False)
+
+    @fully_cached_property
+    def total_keeper_spend(self):
+        return sum(
+            [pick.pick_value for pick in self.draft.draft_picks.filter(
+                is_keeper=True,
+            )]
+        )
 
     @classmethod
     def all(cls):
@@ -3197,6 +3205,15 @@ class Keeper(models.Model, ComparableObject):
             self.year,
         )
 
+    @fully_cached_property
+    def overall_pick(self):
+        picks_per_round = len(Season(self.year).active_teams)
+        return (self.round - 1) * picks_per_round + self.pick_in_round
+
+    @fully_cached_property
+    def value_spent(self):
+        return value_by_pick(self.overall_pick)
+
     def save(self, **kwargs):
         super().save(**kwargs)
         clear_cached_properties()
@@ -3270,6 +3287,10 @@ class DraftPick(models.Model, ComparableObject):
     @fully_cached_property
     def position_sort_key(self):
         return position_sort_key(self.position)
+
+    @fully_cached_property
+    def pick_value(self):
+        return value_by_pick(self.overall_pick)
 
     def clean(self):
         errors = {}

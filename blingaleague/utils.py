@@ -1,3 +1,4 @@
+import math
 import pygal
 
 from django.contrib.humanize.templatetags.humanize import ordinal
@@ -104,6 +105,13 @@ def int_to_roman(integer):
                 break
 
     return roman
+
+
+def value_by_pick(overall_pick_number):
+    return max(
+        0,
+        85.8 - 16.3 * math.log(overall_pick_number),
+    )
 
 
 def _graph_html(graph_class, x_data, y_series, **custom_options):
