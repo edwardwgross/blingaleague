@@ -2212,7 +2212,7 @@ class Season(ComparableObject):
         return sorted(teams)
 
     @fully_cached_property
-    def alpha_team_seasons(self):
+    def team_seasons_alphabetically(self):
         if self.standings_table:
             return sorted(
                 self.standings_table,
