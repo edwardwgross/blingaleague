@@ -597,6 +597,15 @@ class FutureGame(models.Model, AbstractGame):
         pass
 
 
+class FutureGameStub(object):
+
+    def __init__(self, year, week, team_1, team_2):
+        self.year = year
+        self.week = week
+        self.team_1 = team_1
+        self.team_2 = team_2
+
+
 def _place_field(related_name):
     return models.ForeignKey(
         Member,
@@ -737,18 +746,18 @@ class TeamSeason(ComparableObject):
         )
 
         # for when someone requests a partial historical season;
-        # items in list are dicts, not objects, but template will
-        # handle that all the same
         if self.is_partial and not future_games:
             for game in self.regular_season.games:
                 if game.week > last_week_played:
                     team_1, team_2 = sorted([game.winner, game.loser])
-                    future_games.append({
-                        'year': self.year,
-                        'week': game.week,
-                        'team_1': team_1,
-                        'team_2': team_2,
-                    })
+                    future_games.append(
+                        FutureGameStub(
+                            self.year,
+                            game.week,
+                            team_1,
+                            team_2,
+                        ),
+                    )
 
         return future_games
 
@@ -1366,6 +1375,28 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def yet_to_play(self):
+        yet_to_play = []
+
+        if self.is_partial and not self.future_games:
+            # hopefully shouldn't get here, but if future schedule
+            # hasn't been imported prior to games being played,
+            # this is the only way to build this list
+            return self._calculate_yet_to_play()
+
+        for game in self.future_games:
+            if game.team_1 == self.team:
+                yet_to_play.append(game.team_2)
+            else:
+                yet_to_play.append(game.team_1)
+
+        return yet_to_play
+
+    def _calculate_yet_to_play(self):
+        import logging
+        logging.getLogger('blingaleague').warn(
+            "Manually calculating yet_to_play for {}".format(self),
+        )
+
         yet_to_play = []
 
         if self.year >= EXPANSION_SEASON:
