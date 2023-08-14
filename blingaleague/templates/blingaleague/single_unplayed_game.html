@@ -1,0 +1,10 @@
+<div class="game">
+  <div class="week">
+    <a href="{{ game.week_object.href }}">{{ game.title }}</a>
+  </div>
+  <div class="teams">
+    <a href="{% url 'blingaleague.team_season' game.team_1.id game.year %}">{{ game.team_1 }}</a>
+    vs.
+    <a href="{% url 'blingaleague.team_season' game.team_2.id game.year %}">{{ game.team_2 }}</a>
+  </div>
+</div>

@@ -352,6 +352,7 @@ class Game(models.Model, AbstractGame):
                 )
 
         return ''
+
     @fully_cached_property
     def margin(self):
         return self.winner_score - self.loser_score
@@ -547,6 +548,10 @@ class FutureGame(models.Model, AbstractGame):
     team_1 = models.ForeignKey(Member, db_index=True, related_name='future_games_team_1')
     team_2 = models.ForeignKey(Member, db_index=True, related_name='future_games_team_2')
 
+    @fully_cached_property
+    def title(self):
+        return str(self.week_object)
+
     def other_weekly_games(self):
         return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
@@ -720,17 +725,32 @@ class TeamSeason(ComparableObject):
         if self.games:
             last_week_played = self.games[-1].week
 
-        return list(
+        future_games = list(
             FutureGame.objects.filter(
                 models.Q(team_1=self.team) | models.Q(team_2=self.team),
             ).filter(
                 year=self.year,
                 week__gt=last_week_played,
-                week__lte=self.week_max,
             ).order_by(
                 'year', 'week',
             ),
         )
+
+        # for when someone requests a partial historical season;
+        # items in list are dicts, not objects, but template will
+        # handle that all the same
+        if self.is_partial and not future_games:
+            for game in self.regular_season.games:
+                if game.week > last_week_played:
+                    team_1, team_2 = sorted([game.winner, game.loser])
+                    future_games.append({
+                        'year': self.year,
+                        'week': game.week,
+                        'team_1': team_1,
+                        'team_2': team_2,
+                    })
+
+        return future_games
 
     @fully_cached_property
     def wins(self):
@@ -2727,6 +2747,19 @@ class Week(ComparableObject):
         )
 
     @fully_cached_property
+    def unplayed_games(self):
+        if self.games:
+            return []
+
+        return sorted(
+            FutureGame.objects.filter(
+                year=self.year,
+                week=self.week,
+            ),
+            key=lambda x: x.team_1,
+        )
+
+    @fully_cached_property
     def season_object(self):
         return Season(self.year)
 
@@ -2811,19 +2844,25 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def blangums(self):
-        if self.week > regular_season_weeks(self.year):
+        if self.week > regular_season_weeks(self.year) or not self.games:
             return None
+
         return self.team_scores_sorted[0]['team']
 
     @fully_cached_property
     def slapped_heartbeat(self):
-        if self.week > regular_season_weeks(self.year):
+        if self.week > regular_season_weeks(self.year) or not self.games:
             return None
+
         return self.team_scores_sorted[-1]['team']
 
     @fully_cached_property
     def subheadings(self):
-        if len(self.games) == 0:
+        if not self.games:
+            if self.unplayed_games:
+                # this won't be a blank page, so don't *need* a subheading
+                return []
+
             return ['No games yet']
 
         if self.is_playoffs:

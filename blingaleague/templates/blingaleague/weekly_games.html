@@ -1,3 +1,6 @@
 {% for game in base_object.games %}
   {% include "blingaleague/single_game.html" %}
 {% endfor %}
+{% for game in base_object.unplayed_games %}
+  {% include "blingaleague/single_unplayed_game.html" %}
+{% endfor %}

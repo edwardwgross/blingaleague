@@ -1,4 +1,4 @@
-{% if base_object.games %}
+{% if base_object.games or base_object.future_games %}
   <table class="game_table sortable">
     <tr>
       <th>Week</th>
@@ -43,6 +43,23 @@
             {% endif %}
           </td>
         {% endif %}
+      </tr>
+    {% endfor %}
+    {% for game in base_object.future_games %}
+      <tr>
+        <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
+        <td/> {# W/L #}
+        <td/> {# PF #}
+        <td/> {# PA #}
+        <td style="text-align:left">
+          {% if base_object.team == game.team_1 %}
+            <a href="{% url 'blingaleague.team_season' game.team_2.id game.year %}">{{ game.team_2 }}</a>
+          {% else %}
+            <a href="{% url 'blingaleague.team_season' game.team_1.id game.year %}">{{ game.team_1 }}</a>
+          {% endif %}
+        </td>
+        <td/> {# Margin #}
+        <td/> {# Notes #}
       </tr>
     {% endfor %}
   </table>
