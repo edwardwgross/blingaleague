@@ -2,11 +2,9 @@ import sys
 
 from collections import defaultdict
 
-from io import StringIO
-
 from django.core.management.base import LabelCommand
 
-from blingaleague.models import Member, FutureGame
+from blingaleague.models import FutureGame
 
 
 RAW_NAME_TO_ID = {
