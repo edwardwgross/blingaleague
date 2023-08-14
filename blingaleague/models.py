@@ -99,7 +99,7 @@ class ComparableObject(object):
 
     @property
     def _comparison_attr(self):
-        return NotImplementedError('Must be defined by the subclass')
+        raise NotImplementedError('Must be defined by the subclass')
 
     @fully_cached_property
     def _comparison_val(self):
@@ -233,15 +233,7 @@ class FakeMember(models.Model):
         ordering = ['name']
 
 
-class Game(models.Model, ComparableObject):
-    year = models.IntegerField(db_index=True)
-    week = models.IntegerField(db_index=True)
-    winner = models.ForeignKey(Member, db_index=True, related_name='games_won')
-    loser = models.ForeignKey(Member, db_index=True, related_name='games_lost')
-    winner_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
-    loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
-    notes = models.TextField(blank=True, null=True)
-
+class AbstractGame(ComparableObject):
     _comparison_attr = 'year_week_id'
 
     @property
@@ -255,6 +247,24 @@ class Game(models.Model, ComparableObject):
     @fully_cached_property
     def week_object(self):
         return Week(self.year, self.week)
+
+    def week_is_full(self):
+        other_games_count = self.other_weekly_games().count()
+
+        if (self.year < EXPANSION_SEASON and other_games_count >= 6) or other_games_count >= 7:
+            return True
+
+        return False
+
+
+class Game(models.Model, AbstractGame):
+    year = models.IntegerField(db_index=True)
+    week = models.IntegerField(db_index=True)
+    winner = models.ForeignKey(Member, db_index=True, related_name='games_won')
+    loser = models.ForeignKey(Member, db_index=True, related_name='games_lost')
+    winner_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
+    loser_score = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
+    notes = models.TextField(blank=True, null=True)
 
     @fully_cached_property
     def winner_team_season(self):
@@ -342,7 +352,6 @@ class Game(models.Model, ComparableObject):
                 )
 
         return ''
-
     @fully_cached_property
     def margin(self):
         return self.winner_score - self.loser_score
@@ -453,14 +462,6 @@ class Game(models.Model, ComparableObject):
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
-    def week_is_full(self):
-        other_games_count = self.other_weekly_games().count()
-
-        if (self.year < EXPANSION_SEASON and other_games_count >= 6) or other_games_count >= 7:
-            return True
-
-        return False
-
     def clean(self):
         errors = {}
 
@@ -489,7 +490,7 @@ class Game(models.Model, ComparableObject):
                 ),
             )
 
-        if self.week > 1 and self.week <= 13:
+        if self.week > 1 and self.week <= regular_season_weeks(self.year):
             target_game_count = 7
             if self.year < EXPANSION_SEASON:
                 target_game_count = 6
@@ -523,6 +524,57 @@ class Game(models.Model, ComparableObject):
 
     def __str__(self):
         return "{}: {} def. {}".format(self.title, self.winner, self.loser)
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        # important note! do not add any ordering attribute to this Meta class,
+        # as that causes .distinct() to not actually return distinct values
+        # see https://stackoverflow.com/questions/2466496/select-distinct-values-from-a-table-field
+        pass
+
+
+class FutureGame(models.Model, AbstractGame):
+    year = models.IntegerField(db_index=True)
+    week = models.IntegerField(db_index=True)
+    team_1 = models.ForeignKey(Member, db_index=True, related_name='future_games_team_1')
+    team_2 = models.ForeignKey(Member, db_index=True, related_name='future_games_team_2')
+
+    def other_weekly_games(self):
+        return FutureGame.objects.exclude(self.pk).filter(year=self.year, week=self.week)
+
+    def clean(self):
+        errors = {}
+
+        if self.week_is_full():
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message='Too many games',
+                    code='too_many_games',
+                ),
+            )
+
+        for game in self.other_weekly_games():
+            if set([self.team_1, self.team_2]) & set([game.team_1, game.team_2]):
+                errors.setdefault(NON_FIELD_ERRORS, []).append(
+                    ValidationError(
+                        message='Duplicate team',
+                        code='duplicate_team',
+                    ),
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
+        super().clean()
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        clear_cached_properties()
+
+    def __str__(self):
+        return "{}: {} vs. {}".format(self.week_object, self.winner, self.loser)
 
     def __repr__(self):
         return str(self)
