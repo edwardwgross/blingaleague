@@ -511,6 +511,12 @@ class Game(models.Model, AbstractGame):
 
     def save(self, **kwargs):
         super().save(**kwargs)
+
+        for future_game in FutureGame.objects.filter(year=self.year, week=self.week):
+            teams = set([future_game.team_1, future_game.team_2])
+            if self.winner in teams and self.loser in teams:
+                future_game.delete()
+
         clear_cached_properties()
 
     @fully_cached_property
@@ -542,7 +548,7 @@ class FutureGame(models.Model, AbstractGame):
     team_2 = models.ForeignKey(Member, db_index=True, related_name='future_games_team_2')
 
     def other_weekly_games(self):
-        return FutureGame.objects.exclude(self.pk).filter(year=self.year, week=self.week)
+        return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
     def clean(self):
         errors = {}
