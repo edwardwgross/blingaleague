@@ -574,7 +574,7 @@ class FutureGame(models.Model, AbstractGame):
         clear_cached_properties()
 
     def __str__(self):
-        return "{}: {} vs. {}".format(self.week_object, self.winner, self.loser)
+        return "{}: {} vs. {}".format(self.week_object, self.team_1, self.team_2)
 
     def __repr__(self):
         return str(self)
