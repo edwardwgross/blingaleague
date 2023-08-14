@@ -715,6 +715,24 @@ class TeamSeason(ComparableObject):
         return sorted(self.wins + self.losses, key=lambda x: (x.year, x.week))
 
     @fully_cached_property
+    def future_games(self):
+        last_week_played = 0
+        if self.games:
+            last_week_played = self.games[-1].week
+
+        return list(
+            FutureGame.objects.filter(
+                models.Q(team_1=self.team) | models.Q(team_2=self.team),
+            ).filter(
+                year=self.year,
+                week__gt=last_week_played,
+                week__lte=self.week_max,
+            ).order_by(
+                'year', 'week',
+            ),
+        )
+
+    @fully_cached_property
     def wins(self):
         wins = self.team.games_won.filter(year=self.year, week__lte=self.week_max)
         return list(wins)
