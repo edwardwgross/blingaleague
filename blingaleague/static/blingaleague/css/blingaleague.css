@@ -95,6 +95,10 @@ td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
     font-style: italic;
 }
 
+#draft_picks {
+    clear: both;
+}
+
 td.draft_pick_pos_rb {
     background-color: #ffcccb;
 }
