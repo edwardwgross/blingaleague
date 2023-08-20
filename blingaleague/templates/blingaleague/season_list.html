@@ -17,7 +17,7 @@
     <th colspan="2">Highest Expected Win Pct</th>
   </tr>
   {% for season in season_list %}
-    <tr {% if season.is_current_season %}class="emphasize"{% endif %}>
+    <tr {% if season.is_current_season or season.is_upcoming_season %}class="emphasize"{% endif %}>
       <td>
         <a href="{{ season.href }}">
           {{ season.year }}
@@ -61,9 +61,10 @@
         <td class="value">{{ season.most_expected_wins.expected_win_pct|floatformat:3 }}</td>
       {% else %}
         <td/> {# Champion #}
+        <td/> {# Runner-Up #}
         <td/><td/> {# First Place #}
         <td/><td/> {# Most Points #}
-        <td/><td/> {# Most Expected Wins #}
+        <td/><td/> {# Highest Expected Win Pct #}
       {% endif %}
     </tr>
   {% endfor %}
