@@ -26,7 +26,12 @@
       {% include "blingaleague/standings_table.html" %}
     {% endwith %}
   {% else %}
-    {% if season.keepers %}
+    {% if season.draft_teaser.draft_picks %}
+      <h2><a href="{{ season.draft.href }}">{{ season.draft|title }}</a></h2>
+      {% with season.draft_teaser as draft %}
+        {% include "blingaleague/draft_picks.html" %}
+      {% endwith %}
+    {% else %}
       <h3>Keepers</h3>
       {% include "blingaleague/season_keepers.html" %}
     {% endif %}
@@ -62,10 +67,9 @@
 
   {% if not season.weeks_with_games %}
     {% if season.draft_teaser.draft_picks %}
-      <h2><a href="{{ season.draft.href }}">{{ season.draft }}</a></h2>
-      {% with season.draft_teaser as draft %}
-        {% include "blingaleague/draft_picks.html" %}
-      {% endwith %}
+      {# if the draft hasn't happened, we've included the keepers in the main section #}
+      <h3>Keepers</h3>
+      {% include "blingaleague/season_keepers.html" %}
     {% endif %}
   {% endif %}
 </div>
