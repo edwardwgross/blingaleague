@@ -21,8 +21,8 @@
           </td>
           <td>{{ game.margin }}</td>
           <td style="text-align:left">
-            {% if game.playoff_title %}
-              {{ game.playoff_title }}
+            {% if game.playoff_title_base %}
+              {{ game.playoff_title_base }}
             {% elif game.blangums %}
               Team Blangums
             {% endif %}
@@ -36,8 +36,8 @@
           </td>
           <td>-{{ game.margin }}</td>
           <td style="text-align:left">
-            {% if game.playoff_title %}
-              {{ game.playoff_title }}
+            {% if game.playoff_title_base %}
+              {{ game.playoff_title_base }}
             {% elif game.slapped_heartbeat %}
               Slapped Heartbeat
             {% endif %}
