@@ -31,7 +31,9 @@
       {% with season.draft_teaser as draft %}
         {% include "blingaleague/draft_picks.html" %}
       {% endwith %}
-    {% else %}
+    {% endif %}
+
+    {% if season.keepers %}
       <h3>Keepers</h3>
       {% include "blingaleague/season_keepers.html" %}
     {% endif %}
@@ -43,15 +45,6 @@
     <div id="trades">
       {% for trade in trades %}
         {% include "blingaleague/single_trade.html" %}
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  {% if not season.playoff_bracket and upcoming_week and upcoming_week.unplayed_games %}
-    <h2>Next Week</h2>
-    <div id="upcoming_games">
-      {% for game in upcoming_week.unplayed_games %}
-        {% include "blingaleague/single_unplayed_game.html" %}
       {% endfor %}
     </div>
   {% endif %}
@@ -74,12 +67,13 @@
     </div>
   {% endif %}
 
-  {% if not season.weeks_with_games %}
-    {% if season.draft_teaser.draft_picks %}
-      {# if the draft hasn't happened, we've included the keepers in the main section #}
-      <h2>Keepers</h2>
-      {% include "blingaleague/season_keepers.html" %}
-    {% endif %}
+  {% if not season.playoff_bracket and upcoming_week and upcoming_week.unplayed_games %}
+    <h2>Next Week</h2>
+    <div id="upcoming_games">
+      {% for game in upcoming_week.unplayed_games %}
+        {% include "blingaleague/single_unplayed_game.html" %}
+      {% endfor %}
+    </div>
   {% endif %}
 </div>
 
