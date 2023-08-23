@@ -25,8 +25,11 @@ class HomeView(TemplateView):
         latest_season = Season.latest()
 
         latest_week = Week.latest()
+        upcoming_week = latest_week.next
+
         if latest_week.year != latest_season.year:
             latest_week = None
+            upcoming_week = Week(latest_season.year, 1)
 
         all_ts_list = list(TeamSeason.all())
         spotlight_team_seasons = []
@@ -37,7 +40,8 @@ class HomeView(TemplateView):
 
         context = {
             'season': latest_season,
-            'week': latest_week,
+            'latest_week': latest_week,
+            'upcoming_week': upcoming_week,
             'gazette': Gazette.latest(),
             'trades': Trade.most_recent(),
             'spotlight_team_seasons': spotlight_team_seasons,

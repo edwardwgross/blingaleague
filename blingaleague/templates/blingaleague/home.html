@@ -46,6 +46,15 @@
       {% endfor %}
     </div>
   {% endif %}
+
+  {% if not season.playoff_bracket and upcoming_week and upcoming_week.unplayed_games %}
+    <h2>Next Week</h2>
+    <div id="upcoming_games">
+      {% for game in upcoming_week.unplayed_games %}
+        {% include "blingaleague/single_unplayed_game.html" %}
+      {% endfor %}
+    </div>
+  {% endif %}
 </div>
 
 <div id="home_sidebar">
@@ -56,10 +65,10 @@
     </ul>
   </div>
 
-  {% if week %}
+  {% if latest_week %}
     <h2>Last Week</h2>
     <div id="games">
-      {% for game in week.games %}
+      {% for game in latest_week.games %}
         {% include "blingaleague/single_game.html" %}
       {% endfor %}
     </div>

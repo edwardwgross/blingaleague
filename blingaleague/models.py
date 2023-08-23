@@ -2965,7 +2965,7 @@ class Week(ComparableObject):
         else:
             next_week = Week(self.year, self.week + 1)
 
-        if len(next_week.games) == 0:
+        if max(len(next_week.games), len(next_week.unplayed_games)) == 0:
             return None
 
         return next_week

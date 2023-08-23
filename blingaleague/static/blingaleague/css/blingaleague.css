@@ -263,6 +263,7 @@ svg.pygal-chart {
 }
 
 #games,
+#upcoming_games,
 #season_details,
 #trades,
 .transactions {
@@ -271,6 +272,7 @@ svg.pygal-chart {
 }
 
 #games .game,
+#upcoming_games .game,
 #trades .trade {
     clear: both;
     padding: 12px 24px;
@@ -280,17 +282,21 @@ svg.pygal-chart {
 }
 
 #games .game:last-of-type,
+#upcoming_games .game:last-of-type,
 #trades .trade:last-of-type {
     margin-bottom: 30px;
 }
 
 #games .game .week,
+#upcoming_games .game .week,
 #trades .trade .week {
     font-size: 75%;
 }
 
 #games .game .teams,
-#games .game .score {
+#games .game .score,
+#upcoming_games .game .teams,
+#upcoming_games .game .score {
     font-size: 100%;
 }
 
