@@ -2726,10 +2726,7 @@ class Season(ComparableObject):
         return []
 
     def __str__(self):
-        if self.year:
-            text = "{} season".format(self.year)
-        else:
-            text = 'All-time'
+        text = "{} Season".format(self.year)
 
         if self.include_playoffs:
             text = "{} (including playoffs)".format(text)
@@ -3553,7 +3550,7 @@ class Draft(ComparableObject):
         return next_draft
 
     def __str__(self):
-        draft_str = "{} draft".format(self.year)
+        draft_str = "{} Draft".format(self.year)
 
         if self.round_max:
             draft_str = "{} (through round {})".format(draft_str, self.round_max)

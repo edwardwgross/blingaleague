@@ -1,9 +1,9 @@
 {% extends "blingaleague/base.html" %}
 
-{% block title %}{{ draft }}{% endblock %}
+{% block title %}{{ draft|title }}{% endblock %}
 
 {% block content %}
-<h1>{{ draft }}</h1>
+<h1>{{ draft|title }}</h1>
 
 <h3><a href="{{ draft.season.href }}">{{ draft.season }}</a></h3>
 

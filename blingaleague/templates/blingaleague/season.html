@@ -1,7 +1,7 @@
 {% extends "blingaleague/base.html" %}
 
 {% block title %}
-  {{ season }}
+  {{ season|title }}
   {% if week_max %}
     (through week {{ week_max }})
   {% endif %}
