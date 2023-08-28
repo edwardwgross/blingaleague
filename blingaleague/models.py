@@ -3655,6 +3655,28 @@ class Player(ComparableObject):
 
         return teams
 
+    @fully_cached_property
+    def positions(self):
+        positions = set()
+
+        for year, transactions in self.transactions_by_year.items():
+            positions.update([pick.position for pick in transactions['drafted']])
+            positions.update([keeper.position for keeper in transactions['kept']])
+
+        return positions
+
+    @fully_cached_property
+    def average_draft_slot(self):
+        overall_pick_slots = []
+
+        for picks in self.drafted.values():
+            overall_pick_slots.extend([pick.overall_pick for pick in picks])
+
+        if overall_pick_slots:
+            return statistics.mean(overall_pick_slots)
+
+        return None
+
     def legacy_teams(self, year_range, min_times_rostered, draft_only=False):
         legacy_teams = []
 
