@@ -13,7 +13,7 @@ from .models import Season, Game, Member, \
                     Trade, Draft, Player, \
                     PLAYOFF_TEAMS, \
                     OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_TIE
-from .utils import line_graph_html, basic_bar_graph_html, \
+from .utils import basic_bar_graph_html, box_graph_html, \
                    outcome_series_graph_html, rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
 
@@ -52,46 +52,38 @@ class HomeView(TemplateView):
 class SeasonListView(TemplateView):
     template_name = 'blingaleague/season_list.html'
 
-    def _season_average_graph(self):
+    def _season_scores_graph(self):
         seasons = sorted(Season.all())
-
-        averages_series = defaultdict(list)
 
         all_time_min = 999
         all_time_max = 0
 
-        years_to_graph = []
+        scores_series = {}
         for season in seasons:
             if season.weeks_with_games == 0:
                 continue
 
-            mean_score = season.average_game_score
-            median_score = season.median_game_score
+            scores_series[str(season.year)] = season.all_game_scores
 
-            averages_series['mean'].append(mean_score)
-            averages_series['median'].append(median_score)
+            all_time_min = min(all_time_min, min(season.all_game_scores))
+            all_time_max = max(all_time_max, max(season.all_game_scores))
 
-            all_time_min = min(all_time_min, mean_score, median_score)
-            all_time_max = max(all_time_max, mean_score, median_score)
-
-            years_to_graph.append(season.year)
-
-        interval = 5
+        interval = 25
         graph_min = int(interval * (all_time_min // interval))
         graph_max = int(interval * (all_time_max // interval) + interval)  # add interval to round up  # noqa: E501
         graph_increments = range(graph_min, graph_max + interval, interval)
 
         custom_options = {
-            'title': 'Average Score',
-            'value_formatter': lambda x: '{:.2f}'.format(x),
+            'title': 'Median Score',
+            'value_formatter': lambda x: "{:.2f}".format(x),
             'truncate_label': 4,
             'range': (graph_min, graph_max),
             'y_labels': graph_increments,
         }
 
-        graph_html = line_graph_html(
-            years_to_graph,  # x_data
-            sorted(averages_series.items()),  # y_series
+        graph_html = box_graph_html(
+            sorted(scores_series.keys()),  # x_data
+            sorted(scores_series.items()),  # y_series
             **custom_options,
         )
 
@@ -100,7 +92,7 @@ class SeasonListView(TemplateView):
     def get(self, request):
         context = {
             'season_list': sorted(Season.all(), reverse=True),
-            'season_averages_graph_html': self._season_average_graph(),
+            'season_scores_graph_html': self._season_scores_graph(),
         }
         return self.render_to_response(context)
 

@@ -114,15 +114,20 @@ def value_by_pick(overall_pick_number):
     )
 
 
-def _graph_html(graph_class, x_data, y_series, **custom_options):
-    graph_options = GRAPH_DEFAULT_OPTIONS.copy()
-
-    graph_options['style'] = pygal.style.RotateStyle(
+def _graph_color_rotation_style(y_series, **custom_options):
+    return pygal.style.RotateStyle(
         '#e4002b',
         # a minimum step of 4 produces the right spread of colors
         # for graphs with less than 4 series
         step=max(len(y_series), 4),
+        **custom_options,
     )
+
+
+def _graph_html(graph_class, x_data, y_series, **custom_options):
+    graph_options = GRAPH_DEFAULT_OPTIONS.copy()
+
+    graph_options['style'] = _graph_color_rotation_style(y_series)
 
     graph_options.update(custom_options)
 
@@ -165,6 +170,17 @@ def scatter_graph_html(x_data, y_series, **custom_options):
         graph.add(y_name, list(zip(x_data, y_data)))
 
     return graph.render()
+
+
+def box_graph_html(x_data, y_series, **custom_options):
+    custom_options['box_mode'] = 'pstdev'
+    custom_options['show_legend'] = False
+    custom_options['style'] = _graph_color_rotation_style(
+        y_series,
+        tooltip_font_size=8,
+    )
+
+    return _graph_html(pygal.Box, x_data, y_series, **custom_options)
 
 
 def rank_over_time_graph_html(
