@@ -560,22 +560,39 @@ class FutureGame(models.Model, AbstractGame):
         team_1 = self.team_1
         team_2 = self.team_2
 
-        if self.week > 1 and self.previous.games:
-            team_1_place = TeamSeason(team_1.id, self.year).place_numeric
-            team_2_place = TeamSeason(team_2.id, self.year).place_numeric
+        team_season_1 = TeamSeason(team_1.id, self.year)
+        team_season_2 = TeamSeason(team_2.id, self.year)
+        if self.week > 1 and self.week_object.previous.games:
+            team_1_place = team_season_1.place_numeric
+            team_2_place = team_season_2.place_numeric
         else:
             # 'or 999' handles case where this is a team's first season
-            team_1_place = TeamSeason(team_1.id, self.year - 1).place_numeric or 999
-            team_2_place = TeamSeason(team_2.id, self.year - 1).place_numeric or 999
+            team_1_place = team_season_1.previous and team_season_1.previous.place_numeric or 999
+            team_2_place = team_season_2.previous and team_season_2.previous.place_numeric or 999
 
         if team_2_place < team_1_place:
             team_1, team_2 = team_2, team_1
+            team_season_1, team_season_2, = team_season_2, team_season_1
 
         matchup = Matchup(team_1.id, team_2.id)
 
-        return "{} vs. {}\n\n_{}_".format(
-            team_1.nickname,
-            team_2.nickname,
+        def _team_notes(team_season):
+            team_notes = team_season.team.nickname
+
+            if team_season.games:
+                team_notes = "{}, {}, {}".format(
+                    team_notes,
+                    team_season.record,
+                    team_season.place,
+                )
+
+            return team_notes
+
+        return "{} ({}) vs. {} ({})\n\n_{}_".format(
+            team_1.nickname.upper(),  # all caps so that it's clear it should be replaced
+            _team_notes(team_season_1),
+            team_2.nickname.upper(),  # all caps so that it's clear it should be replaced
+            _team_notes(team_season_2),
             matchup.gazette_str,
         )
 
@@ -2975,11 +2992,11 @@ class Week(ComparableObject):
     @fully_cached_property
     def previous(self):
         if self.week == 1:
-            prev_week = Week(self.year - 1, blingabowl_week(self.year))
+            prev_week = Week(self.year - 1, blingabowl_week(self.year - 1))
         else:
             prev_week = Week(self.year, self.week - 1)
 
-        if len(prev_week.games) == 0:
+        if max(len(prev_week.games), len(prev_week.unplayed_games)) == 0:
             return None
 
         return prev_week
