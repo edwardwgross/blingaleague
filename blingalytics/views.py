@@ -266,8 +266,7 @@ class ExpectedWinsView(TemplateView):
 
         xw_values = []
         for score in scores:
-            xw_value = float(scaling_function(calculate_expected_wins(score)))
-            xw_values.append(min(xw_value, 1))
+            xw_values.append(float(scaling_function(calculate_expected_wins(score))))
 
         custom_options = {
             'title': 'Expected Wins',
