@@ -557,9 +557,26 @@ class FutureGame(models.Model, AbstractGame):
 
     @fully_cached_property
     def gazette_str(self):
-        return "{} vs. {}".format(
-            self.team_1.nickname,
-            self.team_2.nickname,
+        team_1 = self.team_1
+        team_2 = self.team_2
+
+        if self.week > 1 and self.previous.games:
+            team_1_place = TeamSeason(team_1.id, self.year).place_numeric
+            team_2_place = TeamSeason(team_2.id, self.year).place_numeric
+        else:
+            # 'or 999' handles case where this is a team's first season
+            team_1_place = TeamSeason(team_1.id, self.year - 1).place_numeric or 999
+            team_2_place = TeamSeason(team_2.id, self.year - 1).place_numeric or 999
+
+        if team_2_place < team_1_place:
+            team_1, team_2 = team_2, team_1
+
+        matchup = Matchup(team_1.id, team_2.id)
+
+        return "{} vs. {}\n\n_{}_".format(
+            team_1.nickname,
+            team_2.nickname,
+            matchup.gazette_str,
         )
 
     def clean(self):
