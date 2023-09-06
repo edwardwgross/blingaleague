@@ -36,6 +36,7 @@ def get_gmail_service():
 
 def new_gazette_body_template():
     last_week = Week.latest()
+    current_week = last_week.next
 
     current_season = Season.latest()
 
@@ -93,7 +94,7 @@ def new_gazette_body_template():
     else:
         sections.append(postmortems_section(last_week, current_season))
 
-    if last_week.week == blingabowl_week(last_week.year):
+    if last_week.week == blingabowl_week(last_week.year) and last_week.year == current_season.year:
         sections.append(['# Blingapower Rankings'])
         sections.append(['# Draft Lottery'])
     else:
@@ -102,10 +103,11 @@ def new_gazette_body_template():
 
         sections.append([
             "# {} Preview".format(
-                Week.week_to_title(last_week.year, last_week.week + 1),
+                Week.week_to_title(current_week.year, current_week.week),
             ),
             '## Game of the Blingaweek',
             '## Other Blingamatches',
+            current_week.gazette_str,
         ])
 
     sections.append([

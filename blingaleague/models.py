@@ -555,6 +555,13 @@ class FutureGame(models.Model, AbstractGame):
     def other_weekly_games(self):
         return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
+    @fully_cached_property
+    def gazette_str(self):
+        return "{} vs. {}".format(
+            self.team_1.nickname,
+            self.team_2.nickname,
+        )
+
     def clean(self):
         errors = {}
 
@@ -2923,8 +2930,13 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def gazette_str(self):
+        games = self.games
+
+        if not games:
+            games = self.unplayed_games
+
         return '\n\n'.join(
-            ["### {}".format(game.gazette_str) for game in self.games],
+            ["### {}".format(game.gazette_str) for game in games],
         )
 
     @fully_cached_property
