@@ -39,6 +39,7 @@
 
 #single_gazette #gazette_tags {
     width: 15%;
+    padding-left: 24px;
 }
 
 #gazette_detail p,
