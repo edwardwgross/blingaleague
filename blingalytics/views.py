@@ -2,7 +2,8 @@ from collections import defaultdict
 
 from django.core.cache import caches
 from django.db.models import F, ExpressionWrapper, DecimalField
-from django.views.generic import TemplateView
+from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView, RedirectView
 
 from blingaleague.models import Game, Week, Member, TeamSeason, TeamMultiSeasons, \
                                 Season, Matchup, Trade, Keeper, DraftPick, \
@@ -21,6 +22,7 @@ from .forms import CHOICE_YES, CHOICE_NO, \
                    GameFinderForm, SeasonFinderForm, \
                    TradeFinderForm, KeeperFinderForm, DraftPickFinderForm, \
                    ExpectedWinsCalculatorForm
+from .models import ShortUrl
 from .utils import sorted_seasons_by_attr, \
                    build_belt_holder_list, \
                    TOP_SEASONS_DEFAULT_NUM_FORMAT
@@ -312,7 +314,20 @@ class ExpectedWinsView(TemplateView):
         return self.render_to_response(context)
 
 
-class GameFinderView(TemplateView):
+class LongUrlView(TemplateView):
+
+    def render_to_response(self, context):
+        url_object, is_new = ShortUrl.objects.get_or_create(full_url=self.request.get_full_path())
+
+        if is_new:
+            url_object.save()
+
+        context['short_url'] = url_object.short_url
+
+        return super().render_to_response(context)
+
+
+class GameFinderView(LongUrlView):
     template_name = 'blingalytics/game_finder.html'
 
     def filter_games(self, form_data):
@@ -497,7 +512,7 @@ class GameFinderView(TemplateView):
         return self.render_to_response(context)
 
 
-class SeasonFinderView(TemplateView):
+class SeasonFinderView(LongUrlView):
     template_name = 'blingalytics/season_finder.html'
 
     def filter_seasons(self, form_data):
@@ -654,7 +669,7 @@ class SeasonFinderView(TemplateView):
         return self.render_to_response(context)
 
 
-class TradeFinderView(TemplateView):
+class TradeFinderView(LongUrlView):
     template_name = 'blingalytics/trade_finder.html'
 
     def filter_trades(self, form_data):
@@ -793,7 +808,7 @@ class TradeFinderView(TemplateView):
         return self.render_to_response(context)
 
 
-class KeeperFinderView(TemplateView):
+class KeeperFinderView(LongUrlView):
     template_name = 'blingalytics/keeper_finder.html'
 
     def filter_keepers(self, form_data):
@@ -863,7 +878,7 @@ class KeeperFinderView(TemplateView):
         return self.render_to_response(context)
 
 
-class DraftPickFinderView(TemplateView):
+class DraftPickFinderView(LongUrlView):
     template_name = 'blingalytics/draft_pick_finder.html'
 
     def filter_draft_picks(self, form_data):
@@ -1059,3 +1074,10 @@ class BeltHolderView(TemplateView):
 
 class GlossaryView(TemplateView):
     template_name = 'blingalytics/glossary.html'
+
+
+class ShortUrlView(RedirectView):
+
+    def get_redirect_url(self, short_url, **kwargs):
+        url_object = get_object_or_404(ShortUrl, short_url=short_url)
+        return url_object.full_url

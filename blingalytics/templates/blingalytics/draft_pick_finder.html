@@ -65,6 +65,7 @@
 
       <h2>Draft Picks</h2>
       <em>(click on the column headings to sort)</em>
+      <em style="float:right">Short URL: {{ request.get_host }}{% url 'blingalytics.short_url' short_url %}</em>
       <table class="blingalytics_table sortable table-striped">
         <tr>
           <th>Year</th>

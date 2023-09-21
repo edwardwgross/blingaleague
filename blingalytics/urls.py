@@ -5,7 +5,7 @@ from .views import WeeklyScoresView, ExpectedWinsView, \
                    TopSeasonsView, TeamVsTeamView, \
                    BeltHolderView, TradeFinderView, \
                    KeeperFinderView, DraftPickFinderView, \
-                   GlossaryView
+                   GlossaryView, ShortUrlView
 
 urlpatterns = [
     url(
@@ -62,5 +62,10 @@ urlpatterns = [
         r'glossary/$',
         GlossaryView.as_view(),
         name='blingalytics.glossary',
+    ),
+    url(
+        r'u/(?P<short_url>[\w]+)/$',
+        ShortUrlView.as_view(),
+        name='blingalytics.short_url',
     ),
 ]
