@@ -44,8 +44,8 @@
       {% endif %}
 
       <h2>Seasons</h2>
-      <em>(click on the column headings to sort)</em>
-      <em style="float:right">Short URL: {{ request.get_host }}{% url 'blingalytics.short_url' short_url %}</em>
+      <em style="font-size:smaller">(click on the column headings to sort)</em>
+      <em style="float:right; font-size:smaller">Shareable URL: <a href="{% url 'blingalytics.short_url' short_url %}">{{ request.get_host }}{% url 'blingalytics.short_url' short_url %}</a></em>
       <table class="blingalytics_table sortable table-striped">
         <tr>
           <th>Year{% if is_multi_season_view %}s{% endif %}</th>
