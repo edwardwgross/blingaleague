@@ -132,3 +132,8 @@ form.blingalytics_form .errorlist {
 h3.no_results_message {
     white-space: nowrap;
 }
+
+.blingalytics_table_note {
+    font-style: italic;
+    font-size: smaller;
+}
