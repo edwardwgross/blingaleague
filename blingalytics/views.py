@@ -1001,7 +1001,7 @@ class TopSeasonsView(TemplateView):
                     tied_group['rank'] = max_rank
                     tied_group['count'] = count_of_max
                     tied_group['value'] = table_rows[-1]['value']
-                    table_rows = table_rows[0 : len(table_rows) - count_of_max]
+                    table_rows = table_rows[0:len(table_rows) - count_of_max]
 
             if table_rows or tied_group:
                 top_seasons_tables.append({
