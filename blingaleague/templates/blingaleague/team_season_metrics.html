@@ -1,0 +1,5 @@
+{% if base_object.headline_season.games %}
+  <h3>{{ base_object.headline_season.expected_wins|floatformat:2 }} expected wins ({{ base_object.headline_season.expected_win_pct|floatformat:3 }})</h3>
+  <h3>{{ base_object.headline_season.all_play_record_str }} all-play record ({{ base_object.headline_season.all_play_win_pct|floatformat:3 }})</h3>
+  <h3>{{ base_object.headline_season.strength_of_schedule_str }} strength of schedule</h3>
+{% endif %}

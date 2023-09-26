@@ -227,9 +227,7 @@ class TeamListView(TemplateView):
 
 class TeamSeasonView(GamesView):
     pre_games_sub_templates = (
-        # moved to post_games_sub_templates prior to the 2023 season
-        # comented out instead of deleted here in case we want to bring it back
-        # 'blingaleague/expected_win_distribution_team.html',
+        'blingaleague/team_season_metrics.html',
     )
     post_games_sub_templates = (
         'blingaleague/expected_win_distribution_team.html',
