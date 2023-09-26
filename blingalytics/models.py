@@ -4,7 +4,7 @@ from django.db import models
 
 
 class ShortUrl(models.Model):
-    full_url = models.CharField(unique=True, max_length=1000)
+    full_url = models.CharField(unique=True, max_length=255)
     short_url = models.CharField(unique=True, max_length=200)
 
     def _generate_short_url(self):

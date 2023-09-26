@@ -934,13 +934,13 @@ class TeamSeason(ComparableObject):
     @fully_cached_property
     def average_margin_win(self):
         if len(self.win_margins) == 0:
-            return decimal.Decimal(0)
+            return None
         return statistics.mean(self.win_margins)
 
     @fully_cached_property
     def average_margin_loss(self):
         if len(self.loss_margins) == 0:
-            return decimal.Decimal(0)
+            return None
         return statistics.mean(self.loss_margins)
 
     @classmethod
@@ -1741,13 +1741,13 @@ class TeamSeason(ComparableObject):
             return self.regular_season.first_pick_odds
 
         if self.is_partial:
-            return 0
+            return None
 
         for team, odds in self.season_object.first_pick_odds:
             if team == self.team:
                 return odds
 
-        return 0
+        return None
 
     @fully_cached_property
     def trades(self):

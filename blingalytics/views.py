@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from django.core.cache import caches
 from django.db.models import F, ExpressionWrapper, DecimalField
@@ -989,10 +989,26 @@ class TopSeasonsView(TemplateView):
                 num_format=num_format,
                 week_max=week_max,
             )
-            top_seasons_tables.append({
-                'title': title,
-                'rows': table_rows,
-            })
+
+            # clean up when there is a long list tied for the last spot
+            tied_group = {}
+            if len(table_rows) > (1.5 * row_limit):
+                counts_by_rank = Counter([row['rank'] for row in table_rows])
+                max_rank = max(counts_by_rank.keys())
+                count_of_max = counts_by_rank[max_rank]
+
+                if count_of_max > (0.5 * row_limit):
+                    tied_group['rank'] = max_rank
+                    tied_group['count'] = count_of_max
+                    tied_group['value'] = table_rows[-1]['value']
+                    table_rows = table_rows[0 : len(table_rows) - count_of_max]
+
+            if table_rows or tied_group:
+                top_seasons_tables.append({
+                    'title': title,
+                    'rows': table_rows,
+                    'tied_group': tied_group,
+                })
 
         return top_seasons_tables
 

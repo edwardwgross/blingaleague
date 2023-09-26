@@ -45,6 +45,13 @@
           <td>{{ row.value|intcomma }}</td>
         </tr>
       {% endfor %}
+      {% if table.tied_group %}
+        <tr>
+          <td>{{ table.tied_group.rank }}</td>
+          <td class="emphasize" style="text-align:center; width:auto">{{ table.tied_group.count }} tied</td>
+          <td>{{ table.tied_group.value|intcomma }}</td>
+        </tr>
+      {% endif %}
     </table>
   {% endfor %}
 </div>

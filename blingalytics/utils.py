@@ -31,7 +31,9 @@ def sorted_seasons_by_attr(
                 if require_full_season or len(team_season.games) < min_games:
                     continue
 
-        all_attrs.append((team_season, getattr(team_season, attr)))
+        attr_value = getattr(team_season, attr)
+        if attr_value is not None:
+            all_attrs.append((team_season, getattr(team_season, attr)))
 
     return build_ranked_seasons_table(
         all_attrs,
