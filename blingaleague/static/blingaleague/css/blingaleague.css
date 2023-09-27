@@ -53,12 +53,12 @@
 }
 
 #home_sidebar #games,
-#home_sidebar #trades {
+#home_sidebar #upcoming_games {
     width: 100%;
 }
 
 #home_sidebar #games .game,
-#home_sidebar #trades .trade {
+#home_sidebar #upcoming_games .game {
     width: 100%;
 }
 
