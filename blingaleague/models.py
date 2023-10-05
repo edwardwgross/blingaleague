@@ -638,13 +638,18 @@ class FutureGame(models.Model, AbstractGame):
         pass
 
 
-class FutureGameStub(object):
+class FutureGameStub(AbstractGame):
+    _comparison_attr = 'year_week_teams'
 
     def __init__(self, year, week, team_1, team_2):
         self.year = year
         self.week = week
         self.team_1 = team_1
         self.team_2 = team_2
+
+    @property
+    def year_week_teams(self):
+        return (self.year, self.week, self.team_1, self.team_2)
 
 
 def _place_field(related_name):
