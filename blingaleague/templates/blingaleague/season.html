@@ -24,13 +24,13 @@
 
   <div class="center">
     {% if season.previous %}
-      <a href="{{ season.previous.href }}" class="link previous">Previous</a>
+      <a href="{{ season.previous.href }}" class="link previous">{{ season.previous }}</a>
     {% endif %}
 
     <a href="{% url 'blingaleague.seasons' %}" style="position:relative; top:12px">All seasons</a>
 
     {% if season.next %}
-      <a href="{{ season.next.href }}" class="link next">Next</a>
+      <a href="{{ season.next.href }}" class="link next">{{ season.next }}</a>
     {% endif %}
   </div>
 

@@ -9,11 +9,11 @@
 
 <div class="center">
   {% if draft.previous %}
-    <a href="{{ draft.previous.href }}" class="link previous">Previous</a>
+    <a href="{{ draft.previous.href }}" class="link previous">{{ draft.previous|title }}</a>
   {% endif %}
 
   {% if draft.next %}
-    <a href="{{ draft.next.href }}" class="link next">Next</a>
+    <a href="{{ draft.next.href }}" class="link next">{{ draft.next|title }}</a>
   {% endif %}
 </div>
 
