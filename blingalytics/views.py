@@ -740,6 +740,8 @@ class TradeFinderView(LongUrlView):
     def build_summary_tables(self, traded_assets):
         all_trade_ids = set()
 
+        year_dict = defaultdict(set)
+
         team_dict = defaultdict(lambda: {
             'trade_ids': set(),
             'assets_sent': 0,
@@ -752,6 +754,8 @@ class TradeFinderView(LongUrlView):
         })
 
         for asset in traded_assets:
+            year_dict[asset.trade.year].add(asset.trade.id)
+
             team_dict[asset.sender]['assets_sent'] += 1
             team_dict[asset.receiver]['assets_received'] += 1
             team_dict[asset.sender]['trade_ids'].add(asset.trade.id)
@@ -761,6 +765,10 @@ class TradeFinderView(LongUrlView):
             position_dict[asset.position_display]['trade_ids'].add(asset.trade.id)
 
             all_trade_ids.add(asset.trade.id)
+
+        years = []
+        for year, trade_ids in sorted(year_dict.items()):
+            years.append((year, len(trade_ids)))
 
         teams = []
         for team, stats in sorted(team_dict.items(), key=lambda x: x[0].nickname):
@@ -773,6 +781,7 @@ class TradeFinderView(LongUrlView):
             positions.append(stats)
 
         return {
+            'years': years,
             'teams': teams,
             'positions': positions,
             'total': len(all_trade_ids),

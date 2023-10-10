@@ -16,6 +16,21 @@
       <h2>Summary</h2>
       <table class="blingalytics_table table-striped" style="display:inline-table">
         <tr>
+          <th>Year</th>
+          <th>Trades</th>
+        </tr>
+        {% for year, trade_count in summary.years %}
+          <tr>
+            <td style="text-align:left">{{ year }}</td>
+            <td>{{ trade_count }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <th style="text-align:left">Total</th>
+          <th style="text-align:right">{{ summary.total }}</th>
+        </tr>
+      <table class="blingalytics_table table-striped" style="display:inline-table">
+        <tr>
           <th>Team</th>
           <th>Trades</th>
           <th>Assets Sent</th>
