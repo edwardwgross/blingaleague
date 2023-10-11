@@ -3710,6 +3710,41 @@ class Player(ComparableObject):
         return teams
 
     @fully_cached_property
+    def final_team_rostered_by(self):
+        final_teams = {}
+
+        for year, transactions in self.transactions_by_year.items():
+            transactions = self.transactions_by_year.get(year, {})
+
+            final_team = None
+
+            if self.transactions_by_year.get(year + 1, {}).get('kept'):
+                # the clearest indicator of being on a final team in year N
+                # is if they were kept in year N+1
+                final_team = self.transactions_by_year[year + 1]['kept'][0].team
+            elif transactions['traded']:
+                final_team = transactions['traded'][-1].receiver
+            elif transactions['drafted']:
+                final_team = transactions['drafted'][0].team
+            elif transactions['kept']:
+                final_team = transactions['kept'][0].team
+
+            if final_team:
+                final_teams[year] = TeamSeason(final_team.id, year)
+
+        return final_teams
+
+    @fully_cached_property
+    def championships(self):
+        championships = 0
+
+        for year, team_season in self.final_team_rostered_by.items():
+            if team_season.champion:
+                championships += 1
+
+        return championships
+
+    @fully_cached_property
     def positions(self):
         positions = set()
 
