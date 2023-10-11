@@ -152,7 +152,8 @@
         width: 900px;
     }
 
-    #home_sidebar #games {
+    #home_sidebar #games,
+    #home_sidebar #upcoming_games {
         width: 720px;
     }
 
