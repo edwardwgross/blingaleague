@@ -205,11 +205,15 @@ class WeekView(GamesView):
         year = int(year)
         week = int(week)
 
-        context = self._context(Week(year, week))
+        week_object = Week(year, week)
+
+        context = self._context(week_object)
 
         context['season'] = Season(year, week_max=week)
 
         context['hide_playoff_finish'] = week < blingabowl_week(year)
+
+        context['hide_standings'] = week_object.is_upcoming_week
 
         return self.render_to_response(context)
 

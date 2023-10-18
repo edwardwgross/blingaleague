@@ -2837,6 +2837,10 @@ class Week(ComparableObject):
         )
 
     @fully_cached_property
+    def is_upcoming_week(self):
+        return self.unplayed_games and not self.games
+
+    @fully_cached_property
     def season_object(self):
         return Season(self.year)
 
