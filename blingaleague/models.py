@@ -1628,7 +1628,7 @@ class TeamSeason(ComparableObject):
     def level_up_links(self):
         level_up_links = [
             {
-                'description': "{} Franchise Index".format(self.team),
+                'description': "{} franchise Index".format(self.team),
                 'href': self.team.href,
             },
             {
@@ -1640,7 +1640,7 @@ class TeamSeason(ComparableObject):
         if self.is_partial and len(self.games) != len(self.regular_season.games):
             level_up_links.append(
                 {
-                    'description': "{} - Full {} Season".format(
+                    'description': "{} - full {} season".format(
                         self.team,
                         self.year,
                     ),
