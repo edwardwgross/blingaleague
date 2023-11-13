@@ -595,6 +595,13 @@ class SeasonFinderView(LongUrlView):
                     if team_season.points > form_data['points_max']:
                         continue
 
+                if form_data['avg_score_min'] is not None:
+                    if team_season.average_score < form_data['avg_score_min']:
+                        continue
+                if form_data['avg_score_max'] is not None:
+                    if team_season.average_score > form_data['avg_score_max']:
+                        continue
+
                 if year_span is None or year_span == 1:
                     if form_data['place_min'] is not None:
                         if team_season.place_numeric < form_data['place_min']:

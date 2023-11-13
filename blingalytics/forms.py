@@ -220,6 +220,8 @@ class SeasonFinderForm(BaseFinderForm):
     )
     points_min = forms.DecimalField(required=False, label='Minimum Points', decimal_places=2)
     points_max = forms.DecimalField(required=False, label='Maximum Points', decimal_places=2)
+    avg_score_min = forms.DecimalField(required=False, label='Minimum Average Score', decimal_places=2)
+    avg_score_max = forms.DecimalField(required=False, label='Maximum Average Score', decimal_places=2)
     place_min = _positive_integer_field(required=False, label='Minimum Place')
     place_max = _positive_integer_field(
         required=False,

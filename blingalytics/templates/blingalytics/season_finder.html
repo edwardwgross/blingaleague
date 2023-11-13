@@ -53,6 +53,7 @@
           <th>Losses</th>
           <th title="Winning Percentage">W%</th>
           <th>Points</th>
+          <th title="Average Score">Avg.</th>
           <th title="Expected Wins">Exp. W</th>
           <th title="Expected Winning Percentage">Exp. %</th>
           <th title="All-Play Winning Percentage">All-Play</th>
@@ -95,6 +96,7 @@
             <td>{{ team_season.loss_count }}</td>
             <td>{{ team_season.win_pct|floatformat:3 }}</td>
             <td>{{ team_season.points|intcomma }}</td>
+            <td>{{ team_season.average_score|floatformat:2 }}</td>
             <td>{{ team_season.expected_wins|floatformat:2 }}</td>
             <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
             <td>{{ team_season.all_play_win_pct|floatformat:3 }}</td>
