@@ -9,11 +9,11 @@ from django.views.generic import TemplateView
 from blingacontent.models import Gazette
 
 from .models import Season, Game, Member, \
-                    TeamSeason, Week, Matchup, \
+                    TeamSeason, TeamMultiSeasons, Week, Matchup, \
                     Trade, Draft, Player, \
                     PLAYOFF_TEAMS, \
                     OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_TIE
-from .utils import basic_bar_graph_html, box_graph_html, \
+from .utils import basic_bar_graph_html, line_graph_html, box_graph_html, \
                    outcome_series_graph_html, rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
 
@@ -221,10 +221,55 @@ class WeekView(GamesView):
 class TeamListView(TemplateView):
     template_name = 'blingaleague/team_list.html'
 
+    def _above_500_graph(self):
+        years = [s.year for s in sorted(Season.all())]
+
+        team_data = defaultdict(list)
+        max_above_500 = 0
+        min_above_500 = 0
+        for team in Member.objects.all():
+            for year in years:
+                above_500 = None
+
+                if team.seasons.first_active_year <= year <= team.seasons.last_active_year:
+                    team_seasons = TeamMultiSeasons(
+                        team.id,
+                        year_max=year,
+                    )
+
+                    above_500 = team_seasons.win_count - team_seasons.loss_count
+
+                    max_above_500 = max(above_500, max_above_500)
+                    min_above_500 = min(above_500, min_above_500)
+
+                team_data[team.nickname].append(above_500)
+
+        y_interval = 10
+        overall_max = max(max_above_500, -1 * min_above_500)
+        range_edge = y_interval * math.ceil(overall_max / y_interval)
+        y_range = list(range(-1 * range_edge, range_edge + y_interval, y_interval))
+
+        custom_options = {
+            'title': 'Games above .500',
+            'x_title': 'Year',
+            'width': 800,
+            'y_labels_major': [0],
+            'y_labels': y_range,
+        }
+
+        graph_html = line_graph_html(
+            years,  # x_data
+            sorted(team_data.items()),  # y_series
+            **custom_options,
+        )
+
+        return graph_html
+
     def get(self, request):
         context = {
             'team_list': Member.objects.all(),
             'include_playoffs': 'include_playoffs' in request.GET,
+            'above_500_graph_html': self._above_500_graph(),
         }
         return self.render_to_response(context)
 
