@@ -221,7 +221,7 @@ class WeekView(GamesView):
 class TeamListView(TemplateView):
     template_name = 'blingaleague/team_list.html'
 
-    def _above_500_graph(self):
+    def _above_500_graph(self, include_playoffs=False):
         years = [s.year for s in sorted(Season.all())]
 
         team_data = defaultdict(list)
@@ -235,6 +235,7 @@ class TeamListView(TemplateView):
                     team_seasons = TeamMultiSeasons(
                         team.id,
                         year_max=year,
+                        include_playoffs=include_playoffs,
                     )
 
                     above_500 = team_seasons.win_count - team_seasons.loss_count
@@ -253,6 +254,7 @@ class TeamListView(TemplateView):
             'title': 'Games above .500',
             'x_title': 'Year',
             'width': 800,
+            'height': 600,
             'y_labels_major': [0],
             'y_labels': y_range,
         }
@@ -266,10 +268,11 @@ class TeamListView(TemplateView):
         return graph_html
 
     def get(self, request):
+        include_playoffs = 'include_playoffs' in request.GET
         context = {
             'team_list': Member.objects.all(),
-            'include_playoffs': 'include_playoffs' in request.GET,
-            'above_500_graph_html': self._above_500_graph(),
+            'include_playoffs': include_playoffs,
+            'above_500_graph_html': self._above_500_graph(include_playoffs=include_playoffs),
         }
         return self.render_to_response(context)
 
