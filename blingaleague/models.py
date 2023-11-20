@@ -1,6 +1,7 @@
 import datetime
 import decimal
 import itertools
+import math
 import statistics
 
 from collections import defaultdict
@@ -3265,7 +3266,7 @@ class Trade(models.Model, ComparableObject):
 
         latest_week = Week.latest()
 
-        for trade in cls.objects.order_by('-year', '-week'):
+        for trade in cls.objects.order_by('-year', '-week', '-date'):
             if trade.week_object < latest_week:
                 break
             most_recent.append(trade)
@@ -3409,7 +3410,18 @@ class Keeper(models.Model, ComparableObject):
     @fully_cached_property
     def overall_pick(self):
         picks_per_round = len(Season(self.year).active_teams)
-        return (self.round - 1) * picks_per_round + self.pick_in_round
+        # base assumption: pick is midway through round
+        pick_in_round = math.floor(picks_per_round / 2)
+
+        draft = Draft(self.year)
+
+        if draft.draft_picks.count() > 0:
+            pick_in_round = draft.team_to_original_order(self.team)
+
+        if self.round % 2 == 0:
+            pick_in_round = picks_per_round + 1 - pick_in_round
+
+        return (self.round - 1) * picks_per_round + pick_in_round
 
     @fully_cached_property
     def value_spent(self):
@@ -3584,6 +3596,12 @@ class Draft(ComparableObject):
                 original_order.append(pick.team)
 
         return original_order
+
+    def team_to_original_order(self, team):
+        try:
+            return self.original_team_order.index(team) + 1
+        except ValueError:
+            return None
 
     @fully_cached_property
     def href(self):
