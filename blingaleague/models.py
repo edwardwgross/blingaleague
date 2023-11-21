@@ -589,12 +589,35 @@ class FutureGame(models.Model, AbstractGame):
 
             return team_notes
 
-        return "{} ({}) vs. {} ({})\n\n_{}_".format(
+        def _yet_to_play(team_season):
+            future_teams = []
+
+            for future_game in team_season.future_games:
+                if future_game.week > self.week:  # self = this Game
+                    if team_season.team == future_game.team_1:
+                        future_teams.append(future_game.team_2)
+                    else:
+                        future_teams.append(future_game.team_1)
+
+            return "{} still plays: {}".format(
+                team_season.team,
+                ', '.join([str(team) for team in future_teams]),
+            )
+
+        yet_to_play_str = ''
+        if self.week >= (regular_season_weeks(self.year) - 3):
+            yet_to_play_str = "\n\n- {}\n- {}".format(
+                _yet_to_play(team_season_1),
+                _yet_to_play(team_season_2),
+            )
+
+        return "{} ({}) vs. {} ({})\n\n_{}_{}".format(
             team_1.nickname.upper(),  # all caps so that it's clear it should be replaced
             _team_notes(team_season_1),
             team_2.nickname.upper(),  # all caps so that it's clear it should be replaced
             _team_notes(team_season_2),
             matchup.gazette_str,
+            yet_to_play_str,
         )
 
     def clean(self):
