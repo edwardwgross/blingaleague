@@ -816,7 +816,7 @@ class TeamSeason(ComparableObject):
         )
 
         # for when someone requests a partial historical season;
-        if self.is_partial and not future_games:
+        if self.is_partial:
             for game in self.regular_season.games:
                 if game.week > last_week_played:
                     team_1, team_2 = sorted([game.winner, game.loser])
@@ -829,7 +829,7 @@ class TeamSeason(ComparableObject):
                         ),
                     )
 
-        return future_games
+        return sorted(future_games, key=lambda x: x.week)
 
     @fully_cached_property
     def wins(self):
