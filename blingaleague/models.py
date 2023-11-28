@@ -2770,9 +2770,22 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def gazette_str(self):
-        return '\n'.join(
+        standings_str = '\n'.join(
             [ts.gazette_standings_str for ts in self.standings_table],
         )
+
+        notes = set()
+        for team_season in self.standings_table:
+            if team_season.standings_note:
+                notes.add(team_season.standings_note)
+
+        if notes:
+            sorted_notes = sorted(notes, key=lambda x: x[1])  # works out that the full text sorts logically  # noqa: E501
+            notes_str = '\n'.join(["- ({}) - {}".format(n[0], n[1]) for n in sorted_notes])
+
+            standings_str = "{}\n\n{}".format(standings_str, notes_str)
+
+        return standings_str
 
     @fully_cached_property
     def gazette_link(self):
