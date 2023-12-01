@@ -73,6 +73,10 @@
       {% endfor %}
     </div>
   {% endif %}
+
+  {% with season as base_object %}
+    {% include "blingaleague/gazette_list.html" %}
+  {% endwith %}
 </div>
 
 {% endblock %}

@@ -150,6 +150,10 @@ table.sortable th {
     cursor: pointer;
 }
 
+table.standings_table {
+    margin-bottom: 24px;
+}
+
 table.standings_table th,
 table.transactions th {
     white-space: nowrap;

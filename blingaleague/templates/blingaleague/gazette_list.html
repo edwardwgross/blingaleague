@@ -1,0 +1,9 @@
+{% if base_object.gazette_list %}
+  <h3>The Sanderson Gazette</h3>
+
+  <ul id="gazette_list" class="blingacontent_section">
+    {% for gazette in base_object.gazette_list %}
+      <li><a href="{% url 'blingacontent.gazette_detail' gazette.slug %}">{{ gazette }}</a></li>
+    {% endfor %}
+  </ul>
+{% endif %}

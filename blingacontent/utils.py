@@ -1,3 +1,7 @@
+import base64
+
+from email.mime.text import MIMEText
+
 from httplib2 import Http
 
 from pathlib import Path
@@ -9,6 +13,7 @@ from googleapiclient.discovery import build
 from oauth2client import file, client, tools
 
 from blingaleague.models import Week, Season, TeamSeason, PLAYOFF_TEAMS, \
+                                Member, FakeMember, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
                                 BLINGABOWL_TITLE_BASE
 from blingaleague.utils import regular_season_weeks, blingabowl_week, semifinals_week
@@ -32,6 +37,38 @@ def get_gmail_service():
         creds = tools.run_flow(flow, store, flags=flags)
     service = build('gmail', 'v1', http=creds.authorize(Http()))
     return service
+
+
+def send_gazette_to_members(gazette):
+    gmail_service = get_gmail_service()
+
+    recipients = []
+    for member in Member.objects.filter(defunct=False):
+        recipients.append("{} {} <{}>".format(
+        member.first_name,
+        member.last_name,
+        member.email,
+        ))
+
+    for fake_member in FakeMember.objects.filter(active=True):
+        recipients.append("{} <{}>".format(
+        fake_member.name,
+        fake_member.email,
+        ))
+
+    message = MIMEText(gazette.to_email(include_css=True), 'html')
+    message['to'] = ', '.join(sorted(recipients))
+    message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
+    message['subject'] = "The Sanderson Gazette - {}".format(gazette)
+
+    message64 = base64.urlsafe_b64encode(message.as_string().encode())
+
+    gmail_service.users().messages().send(
+        userId='me',
+        body={
+        'raw': message64.decode(),
+        },
+    ).execute()
 
 
 def new_gazette_body_template():

@@ -198,6 +198,7 @@ class WeekView(GamesView):
     post_games_sub_templates = (
         'blingaleague/trade_list.html',
         'blingaleague/standings_sub_page.html',
+        'blingaleague/gazette_list.html',
     )
     games_sub_template = 'blingaleague/weekly_games.html'
 

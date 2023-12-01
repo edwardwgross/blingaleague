@@ -1,6 +1,7 @@
 import math
 import pygal
 
+from django.apps import apps
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core.cache import caches
 
@@ -211,3 +212,27 @@ def rank_over_time_graph_html(
         sorted(rank_series.items()),  # y_series
         **graph_options,
     )
+
+
+def get_gazette_issues(*tags):
+    tagged_item_model = apps.get_model('tagging', 'TaggedItem')
+    gazette_model = apps.get_model('blingacontent', 'Gazette')
+
+    all_tagged_ids = None
+
+    for tag in tags:
+        tagged_ids = set(tagged_item_model.objects.filter(
+            tag__name=tag,
+        ).values_list('object_id', flat=True))
+
+        if all_tagged_ids is None:
+            all_tagged_ids = tagged_ids
+        else:
+            all_tagged_ids.intersection_update(tagged_ids)
+
+    return gazette_model.objects.filter(
+        pk__in=all_tagged_ids,
+    ).order_by(
+        'published_date', 'headline',
+    )
+

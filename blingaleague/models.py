@@ -16,7 +16,8 @@ from django.db import models
 from slugify import slugify
 
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties, value_by_pick, \
-                   regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week
+                   regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week, \
+                   get_gazette_issues
 
 
 CACHE = caches['blingaleague']
@@ -2768,6 +2769,11 @@ class Season(ComparableObject):
 
         return None
 
+    def gazette_list(self):
+        return get_gazette_issues(
+            self.year,
+        )
+
     @fully_cached_property
     def gazette_str(self):
         standings_str = '\n'.join(
@@ -3010,6 +3016,12 @@ class Week(ComparableObject):
             return special_weeks[week]
 
         return "Week {}".format(week)
+
+    def gazette_list(self):
+        return get_gazette_issues(
+            self.year,
+            "week{}".format(self.week),
+        )
 
     @fully_cached_property
     def gazette_str(self):

@@ -1,7 +1,3 @@
-import base64
-
-from email.mime.text import MIMEText
-
 from pathlib import Path
 
 from django.conf import settings
@@ -16,7 +12,7 @@ from tagging.fields import TagField
 
 from blingaleague.models import Member, FakeMember
 
-from .utils import get_gmail_service, new_gazette_body_template
+from .utils import send_gazette_to_members, new_gazette_body_template
 
 
 class Meme(models.Model):
@@ -136,35 +132,7 @@ class Gazette(models.Model):
         return self.to_html(for_email=True, include_css=include_css)
 
     def send(self):
-        gmail_service = get_gmail_service()
-
-        recipients = []
-        for member in Member.objects.filter(defunct=False):
-            recipients.append("{} {} <{}>".format(
-                member.first_name,
-                member.last_name,
-                member.email,
-            ))
-
-        for fake_member in FakeMember.objects.filter(active=True):
-            recipients.append("{} <{}>".format(
-                fake_member.name,
-                fake_member.email,
-            ))
-
-        message = MIMEText(self.to_email(include_css=True), 'html')
-        message['to'] = ', '.join(sorted(recipients))
-        message['from'] = 'Blingaleague Commissioner <blingaleaguecommissioner@gmail.com>'
-        message['subject'] = "The Sanderson Gazette - {}".format(self)
-
-        message64 = base64.urlsafe_b64encode(message.as_string().encode())
-
-        gmail_service.users().messages().send(
-            userId='me',
-            body={
-                'raw': message64.decode(),
-            },
-        ).execute()
+        send_gazette_to_members(self)
 
     def clean(self):
         errors = {}
