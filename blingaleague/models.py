@@ -606,7 +606,9 @@ class FutureGame(models.Model, AbstractGame):
             )
 
         yet_to_play_str = ''
-        if self.week >= (regular_season_weeks(self.year) - 3):
+        final_week = regular_season_weeks(self.year)
+
+        if (final_week - 3) <= self.week < final_week:
             yet_to_play_str = "\n\n- {}\n- {}".format(
                 _yet_to_play(team_season_1),
                 _yet_to_play(team_season_2),
@@ -1665,7 +1667,7 @@ class TeamSeason(ComparableObject):
         if self.is_partial and len(self.games) != len(self.regular_season.games):
             level_up_links.append(
                 {
-                    'description': "{} - full season".format(self),
+                    'description': "{} - full season".format(self.regular_season),
                     'href': self.regular_season.href,
                 },
             )
