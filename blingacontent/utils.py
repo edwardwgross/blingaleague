@@ -45,15 +45,15 @@ def send_gazette_to_members(gazette):
     recipients = []
     for member in Member.objects.filter(defunct=False):
         recipients.append("{} {} <{}>".format(
-        member.first_name,
-        member.last_name,
-        member.email,
+            member.first_name,
+            member.last_name,
+            member.email,
         ))
 
     for fake_member in FakeMember.objects.filter(active=True):
         recipients.append("{} <{}>".format(
-        fake_member.name,
-        fake_member.email,
+            fake_member.name,
+            fake_member.email,
         ))
 
     message = MIMEText(gazette.to_email(include_css=True), 'html')
@@ -66,7 +66,7 @@ def send_gazette_to_members(gazette):
     gmail_service.users().messages().send(
         userId='me',
         body={
-        'raw': message64.decode(),
+            'raw': message64.decode(),
         },
     ).execute()
 

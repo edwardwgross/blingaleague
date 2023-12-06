@@ -10,8 +10,6 @@ from slugify import slugify
 
 from tagging.fields import TagField
 
-from blingaleague.models import Member, FakeMember
-
 from .utils import send_gazette_to_members, new_gazette_body_template
 
 

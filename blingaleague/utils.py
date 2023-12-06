@@ -235,4 +235,3 @@ def get_gazette_issues(*tags):
     ).order_by(
         'published_date', 'headline',
     )
-
