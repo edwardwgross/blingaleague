@@ -232,6 +232,7 @@ def get_gazette_issues(*tags):
 
     return gazette_model.objects.filter(
         pk__in=all_tagged_ids,
+        publish_flag=True,
     ).order_by(
         'published_date', 'headline',
     )
