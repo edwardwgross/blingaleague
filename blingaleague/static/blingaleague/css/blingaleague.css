@@ -1,5 +1,12 @@
+.previous,
+.next {
+    margin: 12px 0;
+}
+
 .previous {
     float: left;
+    margin-left: 0;
+    margin-right: 12px;
 }
 
 .previous::before {
@@ -8,15 +15,12 @@
 
 .next {
     float: right;
+    margin-left: 12px;
+    margin-right: 0;
 }
 
 .next::after {
     content: " \2192";
-}
-
-.previous,
-.next {
-    margin: 12px 0;
 }
 
 .center {
