@@ -197,6 +197,7 @@ class MatchupView(GamesView):
 class WeekView(GamesView):
     post_games_sub_templates = (
         'blingaleague/trade_list.html',
+        'blingaleague/playoff_bracket_sub_page.html',
         'blingaleague/standings_sub_page.html',
         'blingaleague/gazette_list.html',
     )
@@ -215,6 +216,8 @@ class WeekView(GamesView):
         context['hide_playoff_finish'] = week < blingabowl_week(year)
 
         context['hide_standings'] = week_object.is_upcoming_week
+
+        context['hide_playoff_bracket'] = not week_object.is_playoffs
 
         return self.render_to_response(context)
 

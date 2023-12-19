@@ -1,0 +1,4 @@
+{% if season.weeks_with_games and season.playoff_bracket and not hide_playoff_bracket %}
+  <h3>Playoff Bracket</h3>
+  {% include 'blingaleague/playoff_bracket.html' %}
+{% endif %}
