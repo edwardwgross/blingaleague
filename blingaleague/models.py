@@ -2983,15 +2983,16 @@ class Week(ComparableObject):
 
     @fully_cached_property
     def subheadings(self):
+        if self.is_playoffs:
+            # we'll be showing the bracket, and we also don't have weekly awards
+            return []
+
         if not self.games:
             if self.unplayed_games:
                 # this won't be a blank page, so don't *need* a subheading
                 return []
 
             return ['No games yet']
-
-        if self.is_playoffs:
-            return [self.games[0].title]
 
         return [
             "Team Blangums: {}".format(self.blangums),
@@ -3142,6 +3143,12 @@ class Week(ComparableObject):
         return week_diff
 
     def __str__(self):
+        if self.is_playoffs:
+            return "{} {}".format(
+                self.year,
+                self.week_to_title(self.year, self.week),
+            )
+
         return "Week {}, {}".format(self.week, self.year)
 
     def __repr__(self):
