@@ -3071,8 +3071,7 @@ class Week(ComparableObject):
         else:
             next_week = Week(self.year, self.week + 1)
 
-        if max(len(next_week.games), len(next_week.unplayed_games)) == 0 \
-            and not next_week.is_playoffs:
+        if max(len(next_week.games), len(next_week.unplayed_games)) == 0 and not next_week.is_playoffs:  # noqa: E501
             return None
 
         return next_week
@@ -3702,6 +3701,7 @@ class Player(ComparableObject):
 
         self.cache_key = slugify(name)
 
+    @fully_cached_property
     def notes(self):
         try:
             return PlayerNotes.objects.get(pk=self.name)
@@ -3894,6 +3894,10 @@ class Player(ComparableObject):
 
         return legacy_teams
 
+    @fully_cached_property
+    def rings_of_honor(self):
+        return RingOfHonoree.objects.filter(name=self.name)
+
     @classmethod
     def all(cls):
         all_names = set()
@@ -3946,6 +3950,34 @@ class PlayerNotes(models.Model, ComparableObject):
             base_str = "{} - RIP in Peace".format(base_str)
 
         return base_str
+
+    def __repr__(self):
+        return str(self)
+
+
+class RingOfHonoree(models.Model, ComparableObject):
+    name = models.CharField(max_length=200)
+    team = models.ForeignKey(Member, db_index=True, related_name='rin_of_honorees')
+
+    _comparison_attr = 'name_team'
+
+    @property
+    def cache_key(self):
+        return slugify(self.pk)
+
+    @fully_cached_property
+    def name_team(self):
+        return "{}|{}".format(self.name, self.team)
+
+    @fully_cached_property
+    def player(self):
+        return Player(self.name)
+
+    def __str__(self):
+        return "{}, {} Ring of Honor".format(
+            self.player,
+            self.team,
+        )
 
     def __repr__(self):
         return str(self)
