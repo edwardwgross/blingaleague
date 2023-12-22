@@ -95,6 +95,16 @@
       {% endfor %}
     </table>
   {% endif %}
+
+  {% if team.ring_of_honorees.all %}
+    <h2>Ring of Honor</h2>
+    <table id="team_ring_of_honor">
+      {% for ring_of_honoree in team.ring_of_honorees.all %}
+        <tr><td><a href="{% url 'blingaleague.player' ring_of_honoree.name %}">{{ ring_of_honoree.name }}</a></td></tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
 </div>
 
 {% endblock content %}

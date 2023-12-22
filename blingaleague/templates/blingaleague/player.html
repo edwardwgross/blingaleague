@@ -18,6 +18,11 @@
 </h1>
 
 <div id="player">
+  {% if player.rings_of_honor %}
+    {% for ring_of_honoree in player.rings_of_honor %}
+    <h3>{{ ring_of_honoree.team }}'s Ring of Honor</h3>
+    {% endfor %}
+  {% endif %}
   <table class="table-striped transactions">
     <tr>
       <th>Year</th>

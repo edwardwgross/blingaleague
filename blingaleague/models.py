@@ -3957,13 +3957,13 @@ class PlayerNotes(models.Model, ComparableObject):
 
 class RingOfHonoree(models.Model, ComparableObject):
     name = models.CharField(max_length=200)
-    team = models.ForeignKey(Member, db_index=True, related_name='rin_of_honorees')
+    team = models.ForeignKey(Member, db_index=True, related_name='ring_of_honorees')
 
     _comparison_attr = 'name_team'
 
     @property
     def cache_key(self):
-        return slugify(self.pk)
+        return self.pk
 
     @fully_cached_property
     def name_team(self):
