@@ -62,6 +62,15 @@ TOP_SEASONS_STATS = [
         'require_full_season': True,
     },
     {
+        'title': 'Highest Average Score',
+        'attr': 'average_score',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Average Score',
+        'attr': 'average_score',
+    },
+    {
         'title': 'Best Expected Win Pct',
         'attr': 'expected_win_pct',
         'sort_desc': True,
@@ -84,17 +93,6 @@ TOP_SEASONS_STATS = [
         'num_format': '{:.3f}',
     },
     {
-        'title': 'Hardest Schedule',
-        'attr': 'strength_of_schedule',
-        'sort_desc': True,
-        'display_attr': 'strength_of_schedule_str',
-    },
-    {
-        'title': 'Easiest Schedule',
-        'attr': 'strength_of_schedule',
-        'display_attr': 'strength_of_schedule_str',
-    },
-    {
         'title': 'Most Points Against',
         'attr': 'points_against',
         'sort_desc': True,
@@ -104,6 +102,26 @@ TOP_SEASONS_STATS = [
         'title': 'Fewest Points Against',
         'attr': 'points_against',
         'require_full_season': True,
+    },
+    {
+        'title': 'Highest Average Score Against',
+        'attr': 'average_score_against',
+        'sort_desc': True,
+    },
+    {
+        'title': 'Lowest Average Score Against',
+        'attr': 'average_score_against',
+    },
+    {
+        'title': 'Hardest Schedule',
+        'attr': 'strength_of_schedule',
+        'sort_desc': True,
+        'display_attr': 'strength_of_schedule_str',
+    },
+    {
+        'title': 'Easiest Schedule',
+        'attr': 'strength_of_schedule',
+        'display_attr': 'strength_of_schedule_str',
     },
     {
         'title': 'Most Team Blangums',
@@ -116,15 +134,6 @@ TOP_SEASONS_STATS = [
         'attr': 'slapped_heartbeat_count',
         'sort_desc': True,
         'min_games': 1,
-    },
-    {
-        'title': 'Highest Average Score',
-        'attr': 'average_score',
-        'sort_desc': True,
-    },
-    {
-        'title': 'Lowest Average Score',
-        'attr': 'average_score',
     },
     {
         'title': 'Highest Median Score',
