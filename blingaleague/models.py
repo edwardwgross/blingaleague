@@ -552,7 +552,7 @@ class FutureGame(models.Model, AbstractGame):
 
     @fully_cached_property
     def title(self):
-        return str(self.week_object)
+        return "Week {}, {}".format(week, year)
 
     def other_weekly_games(self):
         return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
