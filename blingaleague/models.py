@@ -250,6 +250,10 @@ class AbstractGame(ComparableObject):
     def week_object(self):
         return Week(self.year, self.week)
 
+    @fully_cached_property
+    def is_playoffs(self):
+        return self.week > regular_season_weeks(self.year)
+
     def week_is_full(self):
         other_games_count = self.other_weekly_games().count()
 
@@ -305,10 +309,6 @@ class Game(models.Model, AbstractGame):
         if self.playoff_title:
             return self.playoff_title
         return str(self.week_object)
-
-    @fully_cached_property
-    def is_playoffs(self):
-        return self.week > regular_season_weeks(self.year)
 
     @fully_cached_property
     def is_elimination(self):

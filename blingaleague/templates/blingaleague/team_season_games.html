@@ -46,7 +46,7 @@
       </tr>
     {% endfor %}
     {% for game in base_object.future_games %}
-      <tr>
+      <tr {% if game.is_playoffs %}class="playoffs"{% endif %}>
         <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
         <td/> {# W/L #}
         <td/> {# PF #}
