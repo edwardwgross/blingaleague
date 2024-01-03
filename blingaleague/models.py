@@ -3982,6 +3982,10 @@ class RingOfHonoree(models.Model, ComparableObject):
     def __repr__(self):
         return str(self)
 
+    class Meta:
+        unique_together = ('name', 'team')
+        ordering = ('team', 'name')
+
 
 def build_object_cache(obj):
     print("{}: building cache for {}".format(datetime.datetime.now(), obj))
