@@ -1117,14 +1117,7 @@ class TeamSeason(ComparableObject):
         return self.season_object.is_upcoming_season and not self.team.defunct
 
     @fully_cached_property
-    def raw_expected_wins_by_game(self):
-        return list(map(
-            lambda x: calculate_expected_wins(x),
-            self.game_scores,
-        ))
-
-    @property
-    def era_year_range(self):  # XXX
+    def era_year_range(self):
         for start_year, end_year in ERAS:
             after_start = start_year is None or self.year >= start_year
             before_end = end_year is None or self.year <= end_year
@@ -1137,9 +1130,16 @@ class TeamSeason(ComparableObject):
             )
         )
 
+    @fully_cached_property
+    def _all_time_raw_expected_wins_by_game(self):
+        return list(map(
+            lambda x: calculate_expected_wins(x),
+            self.game_scores,
+        ))
+
     @property
-    def raw_expected_wins_YEAR(self):  # XXX
-        return sum(map(
+    def _year_based_raw_expected_wins_by_game(self):
+        return list(map(
             lambda x: calculate_expected_wins(
                 x,
                 year_min=self.year,
@@ -1149,8 +1149,8 @@ class TeamSeason(ComparableObject):
         ))
 
     @property
-    def raw_expected_wins_ERA(self):  # XXX
-        return sum(map(
+    def _era_based_raw_expected_wins_by_game(self):
+        return list(map(
             lambda x: calculate_expected_wins(
                 x,
                 year_min=self.era_year_range[0],
@@ -1158,6 +1158,10 @@ class TeamSeason(ComparableObject):
             ),
             self.game_scores,
         ))
+
+    @fully_cached_property
+    def raw_expected_wins_by_game(self):
+        return self._era_based_raw_expected_wins_by_game
 
     @fully_cached_property
     def expected_wins_by_game(self):
@@ -1175,8 +1179,28 @@ class TeamSeason(ComparableObject):
         return sum(self.expected_wins_by_game)
 
     @fully_cached_property
-    def raw_expected_wins_against(self):
+    def _all_time_raw_expected_wins_against(self):
         return calculate_expected_wins(*self.game_scores_against)
+
+    @fully_cached_property
+    def _year_based_time_raw_expected_wins_against(self):
+        return calculate_expected_wins(
+            *self.game_scores_against,
+            year_min=self.year,
+            year_max=self.year,
+        )
+
+    @fully_cached_property
+    def _era_based_raw_expected_wins_against(self):
+        return calculate_expected_wins(
+            *self.game_scores_against,
+            year_min=self.era_year_range[0],
+            year_max=self.era_year_range[-1],
+        )
+
+    @fully_cached_property
+    def raw_expected_wins_against(self):
+        return self._era_based_raw_expected_wins_against
 
     @fully_cached_property
     def expected_wins_against(self):
@@ -2334,7 +2358,7 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def total_raw_expected_wins(self):
-        return calculate_expected_wins(*self.all_game_scores)
+        return sum([ts.raw_expected_wins for ts in self.standings_table])
 
     def scale_expected_wins(self, raw_expected_wins, is_season_sum=False):
         # make sure we aren't including playoff games in the normalization
@@ -2353,7 +2377,7 @@ class Season(ComparableObject):
 
         return raw_expected_wins + per_game_delta
 
-    def scale_expected_wins_deprecated(self, raw_expected_wins, is_season_sum=False):
+    def _scale_expected_wins_deprecated(self, raw_expected_wins, is_season_sum=False):
         # make sure we aren't including playoff games in the normalization
         if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.scale_expected_wins(raw_expected_wins)
