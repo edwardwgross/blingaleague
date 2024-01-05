@@ -27,6 +27,14 @@ PLAYOFF_TEAMS = 6
 FIRST_SEASON = 2008
 EXPANSION_SEASON = 2012
 
+# format of each entry is (start_year, end_year)
+ERAS = (
+    (FIRST_SEASON, FIRST_SEASON),
+    (FIRST_SEASON + 1, EXPANSION_SEASON - 1),
+    (EXPANSION_SEASON, 2017),  # Allen's last year
+    (2018, datetime.datetime.today().year),
+)
+
 OUTCOME_WIN = 'W'
 OUTCOME_LOSS = 'L'
 OUTCOME_TIE = 'T'
@@ -83,8 +91,8 @@ def compare_two_scores(score1, score2):
     return OUTCOME_TIE
 
 
-def calculate_expected_wins(*game_scores, include_playoffs=False):
-    all_scores = Game.all_scores(include_playoffs=include_playoffs)
+def calculate_expected_wins(*game_scores, year_min=None, year_max=None, include_playoffs=False):
+    all_scores = Game.all_scores(year_min=year_min, year_max=year_max, include_playoffs=include_playoffs)
 
     all_scores_count = decimal.Decimal(len(all_scores))
 
@@ -375,8 +383,8 @@ class Game(models.Model, AbstractGame):
         return (score - self.week_object.average_score) / self.week_object.stdev_score
 
     @classmethod
-    def all_scores(cls, include_playoffs=False):
-        cache_key = "blingaleague_game_all_scores|{}".format(include_playoffs)
+    def all_scores(cls, year_min=None, year_max=None, include_playoffs=False):
+        cache_key = "blingaleague_game_all_scores|{}|{}|{}".format(year_min, year_max, include_playoffs)
 
         all_scores = CACHE.get(cache_key)
 
@@ -384,6 +392,12 @@ class Game(models.Model, AbstractGame):
             all_scores = []
 
             games = cls.objects.all()
+
+            if year_min is not None:
+                games = games.filter(year__gte=year_min)
+
+            if year_max is not None:
+                games = games.filter(year__lte=year_max)
 
             game_attrs = games.values_list(
                 'winner_score',
@@ -1106,6 +1120,42 @@ class TeamSeason(ComparableObject):
     def raw_expected_wins_by_game(self):
         return list(map(
             lambda x: calculate_expected_wins(x),
+            self.game_scores,
+        ))
+
+    @property
+    def era_year_range(self):  # XXX
+        for start_year, end_year in ERAS:
+            after_start = start_year is None or self.year >= start_year
+            before_end = end_year is None or self.year <= end_year
+            if after_start and before_end:
+                return (start_year, end_year)
+
+        raise Exception(
+            "Team season {} doesn't fit in any defined era".format(
+                self,
+            )
+        )
+
+    @property
+    def raw_expected_wins_YEAR(self):  # XXX
+        return sum(map(
+            lambda x: calculate_expected_wins(
+                x,
+                year_min=self.year,
+                year_max=self.year,
+            ),
+            self.game_scores,
+        ))
+
+    @property
+    def raw_expected_wins_ERA(self):  # XXX
+        return sum(map(
+            lambda x: calculate_expected_wins(
+                x,
+                year_min=self.era_year_range[0],
+                year_max=self.era_year_range[-1],
+            ),
             self.game_scores,
         ))
 
