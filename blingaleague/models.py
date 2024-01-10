@@ -1161,7 +1161,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def raw_expected_wins_by_game(self):
-        return self._era_based_raw_expected_wins_by_game
+        return self._all_time_raw_expected_wins_by_game
 
     @fully_cached_property
     def expected_wins_by_game(self):
@@ -1200,7 +1200,7 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def raw_expected_wins_against(self):
-        return self._era_based_raw_expected_wins_against
+        return self._all_time_raw_expected_wins_against
 
     @fully_cached_property
     def expected_wins_against(self):
