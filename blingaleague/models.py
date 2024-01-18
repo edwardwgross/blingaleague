@@ -428,7 +428,7 @@ class Game(models.Model, AbstractGame):
             else:
                 week_obj = week_obj.next
 
-            if week_obj is None:
+            if week_obj is None or week_obj.year != self.year:
                 return None
 
             sequential_team_game = week_obj.team_to_game.get(team)
