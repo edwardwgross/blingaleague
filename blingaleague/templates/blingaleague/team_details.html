@@ -29,7 +29,7 @@
       <th title="All-Play Winning Percentage">All-Play</th>
       <th title="Team Blangums Awards">Blangums</th>
       <th title="Slapped Heartbeat Awards">SH</th>
-      <th/>{# Playoff Finish #}
+      {% if team.playoff_seasons %}<th title="Playoff Finish">Playoffs</th>{% endif %}
     </tr>
     {% for team_season in team.seasons reversed %}
       {% if team_season.games %}
@@ -46,7 +46,7 @@
           <td>{{ team_season.all_play_win_pct|floatformat:3 }}</td>
           <td>{{ team_season.blangums_count }}</td>
           <td>{{ team_season.slapped_heartbeat_count }}</td>
-          <td style="text-align:left">{{ team_season.playoff_finish }}</td>
+          {% if team.playoff_seasons %}<td style="text-align:left">{{ team_season.playoff_finish }}</td>{% endif %}
         </tr>
       {% endif %}
     {% endfor %}
