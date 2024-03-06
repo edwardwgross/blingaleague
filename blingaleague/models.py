@@ -688,12 +688,9 @@ class FutureGameStub(AbstractGame):
         self.team_1 = team_1
         self.team_2 = team_2
 
-        self.cache_key = '|'.join(
-            map(
-                str,
-                (self.year, self.week, self.team_1, self.team_2),
-            ),
-        )
+    @property
+    def cache_key(self):
+        return '|'.join(map(str,(self.year, self.week, self.team_1, self.team_2)))
 
     @fully_cached_property
     def year_week_teams(self):
