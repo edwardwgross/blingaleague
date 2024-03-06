@@ -1,3 +1,4 @@
+import logging
 import math
 import pygal
 
@@ -30,6 +31,11 @@ class fully_cached_property(object):
             return self
 
         if not hasattr(obj, 'cache_key'):
+            logging.getLogger('blingaleague').warn(
+                "Class {} has no cache_key defined, but has fully_cached_properties".format(
+                    cls.__name__,
+                ),
+            )
             return self.func(obj)
 
         cache_key = "{}|{}:{}".format(cls.__name__, obj.cache_key, self.func.__name__)
