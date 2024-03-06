@@ -3378,7 +3378,7 @@ class Trade(models.Model, ComparableObject):
     @fully_cached_property
     def grouped_assets(self):
         assets_by_receiver = defaultdict(list)
-        for asset in self.traded_assets.all():
+        for asset in sorted(self.traded_assets.all()):
             assets_by_receiver[asset.receiver].append(asset)
 
         grouped_assets = []
@@ -3457,7 +3457,7 @@ class Trade(models.Model, ComparableObject):
         ordering = ['-year', '-week', '-date', '-pk']
 
 
-class TradedAsset(models.Model):
+class TradedAsset(models.Model, ComparableObject):
     trade = models.ForeignKey(Trade, db_index=True, related_name='traded_assets')
     receiver = models.ForeignKey(Member, db_index=True, related_name='assets_received')
     sender = models.ForeignKey(Member, db_index=True, related_name='assets_sent')
@@ -3471,6 +3471,8 @@ class TradedAsset(models.Model):
         max_length=10,
         choices=[(p, p) for p in POSITIONS],
     )
+
+    _comparison_attr = 'asset_sort_key'
 
     @fully_cached_property
     def keeper_cost_str(self):
@@ -3496,6 +3498,35 @@ class TradedAsset(models.Model):
             return 'Pick'
 
         return ''
+
+    @fully_cached_property
+    def asset_sort_key(self):
+        return (
+            self.trade,
+            self.receiver,
+            self.keeper_cost_sort_key,
+            self.name_sort_key,
+            self.sender,
+        )
+
+    @fully_cached_property
+    def name_sort_key(self):
+        if self.is_draft_pick:
+            # all picks *should* be entered as "Pick X.Y"
+            cutoff_char = len('Pick ')
+            try:
+                return decimal.Decimal(self.name[cutoff_char:])
+            except decimal.InvalidOperation:
+                pass  # fall through to default logic, whatever it may be
+
+        return self.name
+
+    @fully_cached_property
+    def keeper_cost_sort_key(self):
+        if self.keeper_cost is None:
+            return 0
+
+        return self.keeper_cost
 
     def save(self, **kwargs):
         super().save(**kwargs)
