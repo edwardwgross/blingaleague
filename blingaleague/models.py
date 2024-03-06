@@ -688,7 +688,14 @@ class FutureGameStub(AbstractGame):
         self.team_1 = team_1
         self.team_2 = team_2
 
-    @property
+        self.cache_key = '|'.join(
+            map(
+                str,
+                (self.year, self.week, self.team_1, self.team_2),
+            ),
+        )
+
+    @fully_cached_property
     def year_week_teams(self):
         return (self.year, self.week, self.team_1, self.team_2)
 
@@ -3328,6 +3335,10 @@ class Trade(models.Model, ComparableObject):
 
     _comparison_attr = 'year_week_date_id'
 
+    @property
+    def cache_key(self):
+        return str(self.pk)
+
     @fully_cached_property
     def year_week_date_id(self):
         return (
@@ -3473,6 +3484,10 @@ class TradedAsset(models.Model, ComparableObject):
     )
 
     _comparison_attr = 'asset_sort_key'
+
+    @property
+    def cache_key(self):
+        return str(self.pk)
 
     @fully_cached_property
     def keeper_cost_str(self):
