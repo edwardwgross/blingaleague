@@ -1899,6 +1899,16 @@ class TeamSeason(ComparableObject):
         return self.draft.draft_picks.filter(is_keeper=False)
 
     @fully_cached_property
+    def draft_position(self):
+        # only care about first round
+        draft_order = Draft(self.year).original_team_order
+
+        try:
+            return 1 + draft_order.index(self.team)
+        except ValueError:
+            return None
+
+    @fully_cached_property
     def total_keeper_spend(self):
         return sum(
             [pick.pick_value for pick in self.draft.draft_picks.filter(
