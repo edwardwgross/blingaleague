@@ -1,9 +1,9 @@
 import csv
 import random
 
-team_rows = list(csv.reader(
-    open('/data/blingaleague/scripts/teams.csv', 'r'),
-))[1:]
+#team_rows = list(csv.reader(
+#    open('/data/blingaleague/scripts/teams.csv', 'r'),
+#))[1:]
 
 output_order = []
 
@@ -19,20 +19,20 @@ try:
 except Exception:
     pass
 
-random.shuffle(team_rows)
+#random.shuffle(team_rows)
 
-team_rows_1_2 = []
-team_rows_3_16 = []
+#team_rows_1_2 = []
+#team_rows_3_16 = []
 
-for row in team_rows:
-    region = row[0]
-    seed = row[1]
-    team = row[2]
-    seed = int(seed)
-    if seed <= 2:
-        team_rows_1_2.append((region, seed, team))
-    else:
-        team_rows_3_16.append((region, seed, team))
+#for row in team_rows:
+#    region = row[0]
+#    seed = row[1]
+#    team = row[2]
+#    seed = int(seed)
+#    if seed <= 2:
+#        team_rows_1_2.append((region, seed, team))
+#    else:
+#        team_rows_3_16.append((region, seed, team))
 
 if len(output_order) == 0:
     output_fh = open('/data/blingaleague/scripts/random_order.txt', 'w')
