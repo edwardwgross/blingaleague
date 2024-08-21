@@ -1733,7 +1733,7 @@ class TeamSeason(ComparableObject):
     def level_up_links(self):
         level_up_links = [
             {
-                'description': "{} franchise Index".format(self.team),
+                'description': "{} franchise index".format(self.team),
                 'href': self.team.href,
             },
             {
