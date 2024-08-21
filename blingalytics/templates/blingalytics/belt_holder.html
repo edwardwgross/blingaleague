@@ -6,7 +6,7 @@
 <h1>Belt Holders</h1>
 
 {% with belt_holder_list|last as current_belt_holder %}
-  <h2>Current Belt Holder: {{ current_belt_holder.holder }} (since {{ current_belt_holder.starting_game.week_object }})</h2>
+  <h2>Current Belt Holder: {{ current_belt_holder.holder }} <small>(since {{ current_belt_holder.starting_game.week_object }})</small></h2>
 {% endwith %}
 
 <div class="blingalytics">
