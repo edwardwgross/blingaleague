@@ -1,7 +1,7 @@
 /* Basic color scheme taken from the Chicago flag: https://design.chicago.gov/2019/08/26/choosing-the-cds-color-set.html */
 
 html, body {
-    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     font-size: 16px;
     line-height: 1.5;
     height: 100%;
@@ -22,20 +22,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-    font-size: 180%;
+    font-family: "New Amsterdam", Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-size: 240%;
 }
 
 h2 {
+    font-family: Viga, Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     font-size: 140%;
 }
 
 h3 {
-    font-size: 110%;
+    font-size: 120%;
 }
 
 small {
     font-size: 60%;
-    font-family: Nunito, "Segoe UI", Optima, "DejaVu Sans", "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-family: Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
 }
 
 ul {
@@ -199,9 +201,9 @@ nav .icon-bar {
 .nav li a:focus, nav li a:focus {
     color: white;
     background-color: #41b6e6;
-    font-size: 90%;
-    font-weight: bold;
     padding: 15px 10px;
+    font-family: "New Amsterdam", Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-size: 120%;
 }
 
 .nav li a span {

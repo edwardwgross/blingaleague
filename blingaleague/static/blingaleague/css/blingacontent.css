@@ -52,24 +52,25 @@
     margin-bottom: 16px;
 }
 
-#gazette_detail h1,
-#gazette_detail h2,
-#gazette_detail h3 {
-    font-weight: bold;
-    font-family: "JetBrains Mono", "Courier New", Courier, monospace;
-}
-
 #gazette_detail h1 {
-    font-size: 160%;
-    margin-top: 24px
+    margin-top: 24px;
+    font-family: Viga, Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-size: 180%;
 }
 
 #gazette_detail h1:first-of-type {
     margin-top: 0;
 }
 
-#gazette_detail h2,
+#gazette_detail h2 {
+    font-family: Viga, Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    font-size: 140%;
+}
+
 #gazette_detail h3 {
+    font-weight: bold;
+    font-family: "Anonymous Pro", "Courier New", Courier, monospace;
+    font-size: 120%;
 }
 
 #gazette_detail p,
@@ -83,4 +84,9 @@
 
 #gazette_detail a.link {
     font-size: 100%;
+}
+
+.gazette_headline {
+    font-size: 240%;
+    font-family: "New Amsterdam", Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
 }

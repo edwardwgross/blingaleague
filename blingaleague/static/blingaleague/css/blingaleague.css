@@ -29,6 +29,11 @@
     max-width: 900px;
 }
 
+.level_up_link {
+    display: inline-block;
+    margin-right: 12px;
+}
+
 .table_footer {
     font-style: italic;
     font-size: 80%;
@@ -413,81 +418,4 @@ table.game_table td {
 .blingacontent_section {
     display: inline-block;
     float: left;
-}
-
-#gazette_list,
-#gazette_detail {
-    max-width: 900px;
-}
-
-#gazette_body,
-#gazette_footer {
-    width: 85%;
-    clear: both;
-}
-
-#gazette_tags {
-}
-
-#gazette_tags li {
-    font-size: 80%;
-    overflow-x: visible;
-}
-
-#all_gazettes #gazette_list {
-    width: 60%;
-}
-
-#all_gazettes #gazette_tags {
-    width: 35%;
-}
-
-#single_gazette #gazette_detail {
-}
-
-#single_gazette #gazette_tags {
-    width: 15%;
-}
-
-#gazette_detail p,
-#gazette_detail li {
-    font-weight: normal;
-}
-
-#gazette_detail ul,
-#gazette_detail ol {
-    margin-bottom: 16px;
-}
-
-#gazette_detail h1,
-#gazette_detail h2,
-#gazette_detail h3 {
-    font-weight: bold;
-    font-family: "JetBrains Mono", "Courier New", Courier, monospace;
-}
-
-#gazette_detail h1 {
-    font-size: 160%;
-    margin-top: 24px
-}
-
-#gazette_detail h1:first-of-type {
-    margin-top: 0;
-}
-
-#gazette_detail h2,
-#gazette_detail h3 {
-}
-
-#gazette_detail p,
-#gazette_detail li {
-    font-size: 100%;
-}
-
-#gazette_detail p {
-    clear: both;
-}
-
-#gazette_detail a.link {
-    font-size: 100%;
 }
