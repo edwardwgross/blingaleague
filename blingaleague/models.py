@@ -92,7 +92,11 @@ def compare_two_scores(score1, score2):
 
 
 def calculate_expected_wins(*game_scores, year_min=None, year_max=None, include_playoffs=False):
-    all_scores = Game.all_scores(year_min=year_min, year_max=year_max, include_playoffs=include_playoffs)
+    all_scores = Game.all_scores(
+        year_min=year_min,
+        year_max=year_max,
+        include_playoffs=include_playoffs,
+    )
 
     all_scores_count = decimal.Decimal(len(all_scores))
 
@@ -384,7 +388,11 @@ class Game(models.Model, AbstractGame):
 
     @classmethod
     def all_scores(cls, year_min=None, year_max=None, include_playoffs=False):
-        cache_key = "blingaleague_game_all_scores|{}|{}|{}".format(year_min, year_max, include_playoffs)
+        cache_key = "blingaleague_game_all_scores|{}|{}|{}".format(
+            year_min,
+            year_max,
+            include_playoffs,
+        )
 
         all_scores = CACHE.get(cache_key)
 
@@ -690,7 +698,7 @@ class FutureGameStub(AbstractGame):
 
     @property
     def cache_key(self):
-        return '|'.join(map(str,(self.year, self.week, self.team_1.id, self.team_2.id)))
+        return '|'.join(map(str, (self.year, self.week, self.team_1.id, self.team_2.id)))
 
     @fully_cached_property
     def year_week_teams(self):
