@@ -4089,6 +4089,9 @@ class PlayerNotes(models.Model, ComparableObject):
     def __repr__(self):
         return str(self)
 
+    class Meta:
+        verbose_name_plural = 'player notes'
+
 
 class RingOfHonoree(models.Model, ComparableObject):
     name = models.CharField(max_length=200)
