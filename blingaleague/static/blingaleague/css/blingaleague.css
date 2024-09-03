@@ -203,6 +203,9 @@ table.standings_table td {
 .blinganote {
     font-size: 60%;
     vertical-align: top;
+}
+
+.blinganote[title] {
     cursor: help;
 }
 
