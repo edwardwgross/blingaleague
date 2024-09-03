@@ -134,7 +134,10 @@ def _graph_color_rotation_style(y_series, **custom_options):
 def _graph_html(graph_class, x_data, y_series, **custom_options):
     graph_options = GRAPH_DEFAULT_OPTIONS.copy()
 
-    graph_options['style'] = _graph_color_rotation_style(y_series)
+    graph_options['style'] = _graph_color_rotation_style(
+        y_series,
+        **custom_options,
+    )
 
     graph_options.update(custom_options)
 
