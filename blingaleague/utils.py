@@ -180,7 +180,7 @@ def scatter_graph_html(x_data, y_series, **custom_options):
 
 
 def box_graph_html(x_data, y_series, **custom_options):
-    custom_options['box_mode'] = 'pstdev'
+    custom_options['box_mode'] = 'tukey'
     custom_options['show_legend'] = False
     custom_options['style'] = _graph_color_rotation_style(
         y_series,
