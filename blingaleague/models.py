@@ -1669,7 +1669,7 @@ class TeamSeason(ComparableObject):
         if self.clinched_bye:
             return ('b', 'clinched bye')
         elif self.clinched_playoffs:
-            return ('x', 'clinched playoff spot')
+            return ('x', 'clinched playoff berth')
         elif self.eliminated_early:
             return ('e', 'eliminated from playoff contention')
 
