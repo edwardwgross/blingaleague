@@ -132,6 +132,10 @@ td.draft_pick_pos_k {
     background-color: #e6e6fa;
 }
 
+#draft_board {
+    clear: both;
+}
+
 #draft_board th,
 #draft_board td {
     width: 100px;
