@@ -532,6 +532,7 @@ class DraftView(TemplateView):
         draft = Draft(year)
         context = {
             'draft': draft,
+            'board_view': 'board_view' in request.GET,
         }
         return self.render_to_response(context)
 

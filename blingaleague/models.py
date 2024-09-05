@@ -3773,6 +3773,22 @@ class Draft(ComparableObject):
         return picks.order_by('round', 'pick_in_round')
 
     @fully_cached_property
+    def draft_board_picks(self):
+        all_rounds_dict = defaultdict(list)
+
+        for pick in self.draft_picks:
+            all_rounds_dict[pick.round].append(pick)
+
+        all_rounds_list = []
+        for round, picks in sorted(all_rounds_dict.items()):
+            if round % 2:
+                all_rounds_list.append(picks)
+            else:
+                all_rounds_list.append(picks[::-1])
+
+        return all_rounds_list
+
+    @fully_cached_property
     def season(self):
         return Season(self.year)
 
