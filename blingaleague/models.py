@@ -4033,6 +4033,21 @@ class Player(ComparableObject):
     def rings_of_honor(self):
         return RingOfHonoree.objects.filter(name=self.name)
 
+    def change_name(self, new_name):
+        db_models = (
+            DraftPick,
+            Keeper,
+            TradedAsset,
+            PlayerNotes,
+            RingOfHonoree,
+        )
+
+        for db_model in db_models:
+            for player_obj in db_model.objects.filter(name=self.name):
+                print(player_obj)
+                player_obj.name = new_name
+                player_obj.save()
+
     @classmethod
     def all(cls):
         all_names = set()
