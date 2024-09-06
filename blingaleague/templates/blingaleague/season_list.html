@@ -19,9 +19,8 @@
   {% for season in season_list %}
     <tr {% if season.is_current_season or season.is_upcoming_season %}class="emphasize"{% endif %}>
       <td>
-        <a href="{{ season.href }}">
-          {{ season.year }}
-        </a>
+        <a href="{{ season.href }}">{{ season.year }}</a>
+        {% if season.draft %}<a href="{{ season.draft.href }}"><small>[Draft]</small></a>{% endif %}
       </td>
       {% if season.weeks_with_games %}
         <td class="team">

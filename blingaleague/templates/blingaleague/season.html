@@ -59,7 +59,7 @@
   {% endif %}
 
   {% if season.draft_teaser.draft_picks %}
-    <h2><a href="{{ draft.href }}">Draft</a></h2>
+    <h2><a href="{{ season.draft_teaser.href }}">Draft</a></h2>
     {% with season.draft_teaser as draft %}
       {% include "blingaleague/draft_picks.html" %}
     {% endwith %}
