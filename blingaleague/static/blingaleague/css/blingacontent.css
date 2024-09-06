@@ -7,6 +7,10 @@
     float: left;
 }
 
+.blingacontent_section .center {
+    max-width: 900px;
+}
+
 #gazette_list,
 #gazette_detail {
     max-width: 900px;
