@@ -183,6 +183,7 @@ td.draft_pick_pos_k {
 #draft_board td p.keeper {
     font-family: "New Amsterdam", Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
     border: 1px solid #333333;
+    background-color: white;
 }
 
 #main_outer {
