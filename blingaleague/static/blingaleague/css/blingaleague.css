@@ -145,6 +145,7 @@ td.draft_pick_pos_k {
     border-style: solid;
     border-color: #333333;
     border-width: 0 1px 1px 0;
+    padding: 3px 6px
 }
 
 #draft_board th,
@@ -152,20 +153,36 @@ td.draft_pick_pos_k {
     background-color: #333333;
 }
 
+#draft_board tr.round:nth-of-type(even) th.round_number::after {
+    content: " \2192";
+}
+
+#draft_board tr.round:nth-of-type(odd) th.round_number::before {
+    content: " \2190";
+}
+
 #draft_board th.round_number {
-    width: 40px;
+    width: 60px;
 }
 
 #draft_board td p {
     margin: 0;
 }
 
-#draft_board td p.alternate_team a {
+#draft_board td p.alternate_team {
     color: white;
     background-color: #333333;
     width: 100%;
     display: inline-block;  /* needs this to get width to work */
+}
+
+#draft_board td p.alternate_team[title] {
     cursor: help;
+}
+
+#draft_board td p.keeper {
+    font-family: "New Amsterdam", Nunito, "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    border: 1px solid #333333;
 }
 
 #main_outer {
