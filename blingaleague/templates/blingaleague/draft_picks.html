@@ -23,7 +23,7 @@
       <td sorttable_customkey="{{ draft_pick.position_sort_key }}" class="draft_pick_pos_{{ draft_pick.position|lower }}">{{ draft_pick.position }}</td>
     </tr>
   {% endfor %}
-  {% if not not draft.is_partial %}
+  {% if draft.is_partial %}
     <tr>
       <td colspan="100%" class="table_footer"><a href="{{ draft.href }}">Full {{ draft.year }} draft</a></td>
     </tr>
