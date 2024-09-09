@@ -195,6 +195,9 @@ class MatchupView(GamesView):
 
 
 class WeekView(GamesView):
+    pre_games_sub_templates = (
+        'blingaleague/week_metrics.html',
+    )
     post_games_sub_templates = (
         'blingaleague/trade_list.html',
         'blingaleague/playoff_bracket_sub_page.html',
