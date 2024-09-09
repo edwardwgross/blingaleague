@@ -15,6 +15,7 @@
     <th colspan="2">First Place</th>
     <th colspan="2">Most Points</th>
     <th colspan="2">Most Expected Wins</th>
+    <th colspan="2">Last Place</th>
   </tr>
   {% for season in season_list %}
     <tr {% if season.is_current_season or season.is_upcoming_season %}class="emphasize"{% endif %}>
@@ -58,12 +59,15 @@
           {% endif %}
         </td>
         <td class="value">{{ season.most_expected_wins.expected_wins|floatformat:2 }}</td>
+        <td class="team"><a href="{{ season.last_place.href }}">{{ season.last_place.team }}</a></td>
+        <td class="value">{{ season.last_place.record }}</td>
       {% else %}
         <td/> {# Champion #}
         <td/> {# Runner-Up #}
         <td/><td/> {# First Place #}
         <td/><td/> {# Most Points #}
         <td/><td/> {# Most Expected Wins #}
+        <td/><td/> {# Last Place #}
       {% endif %}
     </tr>
   {% endfor %}

@@ -2453,6 +2453,10 @@ class Season(ComparableObject):
     def first_place(self):
         return self.standings_table[0]
 
+    @fully_cached_property
+    def last_place(self):
+        return self.standings_table[-1]
+
     def _most_by_attr(self, attr):
         return sorted(
             self.standings_table,
