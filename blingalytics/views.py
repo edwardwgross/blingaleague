@@ -1113,10 +1113,6 @@ class BeltHolderView(TemplateView):
         return self.render_to_response(context)
 
 
-class GlossaryView(TemplateView):
-    template_name = 'blingalytics/glossary.html'
-
-
 class ShortUrlView(RedirectView):
 
     def get_redirect_url(self, short_url, **kwargs):

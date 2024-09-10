@@ -66,7 +66,6 @@
                 <li><a href="{% url 'blingalytics.trade_finder' %}">Historical Trade Finder</a></li>
                 <li><a href="{% url 'blingalytics.keeper_finder' %}">Historical Keeper Finder</a></li>
                 <li><a href="{% url 'blingalytics.draft_pick_finder' %}">Historical Draft Pick Finder</a></li>
-                <li><a href="{% url 'blingalytics.glossary' %}">Glossary</a></li>
               </ul>
             </li>
             {% comment %}
@@ -82,6 +81,7 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Extras <span class="caret"></span></a>
               <ul class="dropdown-menu">
+                <li><a href="{% url 'blingaleague.glossary' %}">Glossary</a></li>
                 {% if auth_member %}
                   <li><a href="http://football.fantasysports.yahoo.com/league/blingaleague" target="_blank">Yahoo League Home</a></li>
                   <li><a href="https://drive.google.com/drive/folders/0BzjwZZ1eHJfnQ0V2Q19rdWdiUTA" target="_blank">Google Drive</a></li>

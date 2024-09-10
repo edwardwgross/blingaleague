@@ -1,11 +1,12 @@
 from django.conf.urls import url
+from django.views.generic import RedirectView
 
 from .views import WeeklyScoresView, ExpectedWinsView, \
                    GameFinderView, SeasonFinderView, \
                    TopSeasonsView, TeamVsTeamView, \
                    BeltHolderView, TradeFinderView, \
                    KeeperFinderView, DraftPickFinderView, \
-                   GlossaryView, ShortUrlView
+                   ShortUrlView
 
 urlpatterns = [
     url(
@@ -59,13 +60,17 @@ urlpatterns = [
         name='blingalytics.belt_holders',
     ),
     url(
-        r'glossary/$',
-        GlossaryView.as_view(),
-        name='blingalytics.glossary',
-    ),
-    url(
         r'u/(?P<short_url>[\w]+)/$',
         ShortUrlView.as_view(),
         name='blingalytics.short_url',
+    ),
+
+    # deprecated urls
+    url(
+        r'^glossary/$',
+        RedirectView.as_view(
+            pattern_name='blingaleague.glossary',
+            permanent=True,
+        ),
     ),
 ]

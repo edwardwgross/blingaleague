@@ -1,0 +1,55 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Glossary{% endblock %}
+
+{% block content %}
+<h1>Glossary</h1>
+
+<h2 id="blessed_cahoots">Blessed Cahoots</h2>
+<p>
+  Blessed Cahoots is an award given out in <a href="{% url 'blingacontent.gazette_list' %}"><em>The Sanderson Gazette</em></a> to a team that was on the receiving end of notably good fortune.  The term originated in the Blingachat after Keenan Allen was put on IR shortly after <a href="{% url 'blingaleague.trade' 46 %}">Dave traded him to Rob</a> and subsequently used both words as hashtags in the same message.
+</p>
+
+<h2 id="dernest_doh">D'Ernest D'oh</h2>
+<p>
+  D'Ernest D'oh is an award given out in <a href="{% url 'blingacontent.gazette_list' %}"><em>The Sanderson Gazette</em></a> to a team that makes an especially baffling transaction.  It is named after D'Ernest Johnson, who was Nick Chubb's backup in 2021 and had a few good games, yet was <a href="{% url 'blingacontent.gazette_detail' '2021-11-17-rock-bottom' %}">perpelexingly dropped by Richie and ignored by Babel</a> during a week when Chubb was out.
+</p>
+
+<h2 id="expected_wins">Expected Wins</h2>
+<p>
+  Expected wins uses <a href="{% url 'blingalytics.expected_wins' %}">historical game scores</a> to determine a team's odds of winning each game and sums that for all the team's games in a season.  The totals are then adjusted so that the sum of expected wins for all teams in a season equals the total number of games played for the season.
+</p>
+
+<h2 id="pryor_play_of_the_week">Pryor Play of the Week</h2>
+<p>
+  Pryor Play of the Week is an award given out in <a href="{% url 'blingacontent.gazette_list' %}"><em>The Sanderson Gazette</em></a> to an underperformeing player that finally has a good game.  It is named after Terrelle Pryor, Sr., who was <a href="{% url 'blingaleague.team_season' 6 2017 %}">kept by Mike R. in 2017</a> and consistently disappointed before delivering on his potential once.
+</p>
+
+<h2 id="robscore">RobScore</h2>
+<p>
+  RobScore is an unscientific measure of historic success of a franchise.  For a given season, a team gets:
+  <ul>
+    <li>1 point for making the playoffs</li>
+    <li>1 point for winning the Sanderson Cup</li>
+    <li>0.5 points for losing in the Blingabowl</li>
+    <li>0.25 points for winning the third-place game</li>
+    <li>0.5 points for finishing the regular season in first place</li>
+    <li>0.25 points for finishing the regular season in second place</li>
+  </ul>
+</p>
+
+<h2 id="slapped_heartbeat">Slapped Heartbeat</h2>
+<p>
+  Slapped Heartbeat is awarded to the team with the lowest score of a given week.  The term was once used by a member of the Theta Xi fraternity as a threat for not cleaning up after yourself in the weight room.
+</p>
+
+<h2 id="sos">Strength of Schedule</h2>
+<p>
+  Strength of schedule looks at <a href="#expected_wins">expected wins</a> based on a team's opponents' scores over the course of a season.  Positive values indicate a more difficult schedule.  A value of +10% means your opponents' scores added up to an expected wins total of 10% above 0.500 (i.e. a expected win percentage against of 0.550).
+</p>
+
+<h2 id="team_blangums">Team Blangums</h2>
+<p>
+  Team Blangums is awarded to the team with the highest score of a given week.  The term "blangums" is the superlative form of the term "blingums", which can be used as a synonym for "excellent" and is the source of the name "Blingaleague".
+</p>
+{% endblock content %}

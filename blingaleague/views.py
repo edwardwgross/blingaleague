@@ -551,3 +551,7 @@ class PlayerView(TemplateView):
 
         context = {'player': player}
         return self.render_to_response(context)
+
+
+class GlossaryView(TemplateView):
+    template_name = 'blingaleague/glossary.html'
