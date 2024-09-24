@@ -48,6 +48,30 @@ def in_season_correl(attr1, attr2, cutoff_week, min_year=None, max_year=None):
     return numpy.corrcoef(list_part, list_remain)[0][1]
 
 
+def final_place_correl(attr, cutoff_week, min_year=None, max_year=None):
+    list_attr = []
+    list_place = []
+
+    for ts_full in TeamSeason.all():
+        if ts_full.is_partial:
+            continue
+
+        if min_year is not None and ts_full.year < min_year:
+            continue
+
+        if max_year is not None and ts_full.year > max_year:
+            continue
+
+        ts_part = TeamSeason(ts_full.team.id, ts_full.year, week_max=cutoff_week)
+
+        attr_part = getattr(ts_part, attr)
+
+        list_attr.append(float(attr_part))
+        list_place.append(float(ts_full.place_numeric))
+
+    return numpy.corrcoef(list_attr, list_place)[0][1]
+
+
 def full_season_correl(year, attr1, attr2):
     standings = Season(year)
     list1 = [float(getattr(ts, attr1)) for ts in standings.table]
