@@ -17,7 +17,7 @@ from slugify import slugify
 
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties, value_by_pick, \
                    regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week, \
-                   get_gazette_issues
+                   get_gazette_issues, calculate_log5_probability
 
 
 CACHE = caches['blingaleague']
@@ -487,6 +487,20 @@ class Game(models.Model, AbstractGame):
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
+    def win_probabilties(self):
+        if self.week <= 1:
+            return {self.winner: TIE_VALUE, self.loser: TIE_VALUE}
+
+        prob_winner = calculate_log5_probability(
+            self.winner_team_season_before_game,
+            self.loser_team_season_before_game,
+        )
+
+        return {
+            self.winner: prob_winner,
+            self.loser: 1 - prob_winner,
+        }
+
     def clean(self):
         errors = {}
 
@@ -578,6 +592,20 @@ class FutureGame(models.Model, AbstractGame):
 
     def other_weekly_games(self):
         return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
+
+    def win_probabilties(self):
+        if self.week <= 1:
+            return {self.team_1: TIE_VALUE, self.team_2: TIE_VALUE}
+
+        team_season_1 = TeamSeason(self.team_1.id, self.year, week_max=self.week - 1)
+        team_season_2 = TeamSeason(self.team_2.id, self.year, week_max=self.week - 1)
+
+        prob_1 = calculate_log5_probability(team_season_1, team_season_2)
+
+        return {
+            self.team_1: prob_1,
+            self.team_2: 1 - prob_1,
+        }
 
     @fully_cached_property
     def gazette_str(self):

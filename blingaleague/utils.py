@@ -1,3 +1,4 @@
+import decimal
 import logging
 import math
 import pygal
@@ -245,3 +246,19 @@ def get_gazette_issues(*tags):
     ).order_by(
         'published_date', 'headline',
     )
+
+
+def _clean_expected_win_pct(xw_pct):
+    min_pct = decimal.Decimal(1 / 1000)
+    max_pct = 1 - min_pct
+
+    return min(max_pct, max(min_pct, xw_pct))
+
+
+def calculate_log5_probability(team_season_1, team_season_2):
+    xw_pct_1 = _clean_expected_win_pct(team_season_1.expected_win_pct)
+    xw_pct_2 = _clean_expected_win_pct(team_season_2.expected_win_pct)
+
+    return (xw_pct_1 - xw_pct_1 * xw_pct_2) / (xw_pct_1 + xw_pct_2 - 2 * xw_pct_1 * xw_pct_2)
+
+
