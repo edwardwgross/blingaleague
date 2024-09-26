@@ -260,5 +260,3 @@ def calculate_log5_probability(team_season_1, team_season_2):
     xw_pct_2 = _clean_expected_win_pct(team_season_2.expected_win_pct)
 
     return (xw_pct_1 - xw_pct_1 * xw_pct_2) / (xw_pct_1 + xw_pct_2 - 2 * xw_pct_1 * xw_pct_2)
-
-
