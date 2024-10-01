@@ -5,21 +5,44 @@
 
   <table id="similar_seasons" class="standings_table">
     <tr>
-      <th/>
+      <th/> {# Rank #}
       <th>Score</th>
       <th/> {# Year #}
       <th/> {# Team #}
       <th>Record</th>
-      <th>Points</th>
-      <th>Exp. %</th>
-      <th title="Strength of Schedule">SOS</th>
+      <th>Place</th>
+      <th title="Average game score">Avg.</th>
+      <th title="Expected winning percentage">Exp. %</th>
+      <th title="Standard deviation of game scores">SD</th>
       {% if base_object.is_partial %}
         <th>Final Record</th>
         <th>Final Place</th>
-      {% else %}
-        <th>Place</th>
       {% endif %}
       <th>Playoff Finish</th>
+    </tr>
+    <tr class="strong">
+      <td/> {# Rank #}
+      <td/> {# Score #}
+      <td>{{ base_object.year }}</td>
+      <td style="text-align:left">{{ base_object.team.nickname }}</td>
+      <td style="text-align:center">{{ base_object.record }}</td>
+      <td>{{ base_object.place }}</td>
+      <td>{{ base_object.average_score|floatformat:2 }}</td>
+      <td>{{ base_object.expected_win_pct|floatformat:3 }}</td>
+      <td>{{ base_object.stdev_score|floatformat:2 }}</td>
+      {% if base_object.is_partial %}
+        <td style="text-align:center">
+          {% if not base_object.regular_season.is_partial %}
+            <a href="{{ base_object.regular_season.href }}">{{ base_object.regular_season.record }}</a>
+          {% endif%}
+        </td>
+        <td>
+          {% if not base_object.regular_season.is_partial %}
+            <a href="{{ base_object.regular_season.season_object.href }}">{{ base_object.regular_season.place }}</a>
+          {% endif%}
+        </td>
+      {% endif %}
+      <td style="text-align:left">{{ base_object.regular_season.playoff_finish }}</td>
     </tr>
     {% for similar_season in base_object.most_similar %}
       <tr>
@@ -28,9 +51,10 @@
         <td {% if similar_season.season.is_current_season %}class="emphasize"{% endif %}><a href="{{ similar_season.season.season_object.href }}">{{ similar_season.season.year }}</a></td>
         <td style="text-align:left" {% if similar_season.season.is_current_season %}class="emphasize"{% endif %}><a href="{{ similar_season.season.href }}">{{ similar_season.season.team.nickname }}</a></td>
         <td style="text-align:center">{{ similar_season.season.record }}</td>
-        <td>{{ similar_season.season.points|intcomma }}</td>
+        <td>{{ similar_season.season.place }}</td>
+        <td>{{ similar_season.season.average_score|floatformat:2 }}</td>
         <td>{{ similar_season.season.expected_win_pct|floatformat:3 }}</td>
-        <td>{{ similar_season.season.strength_of_schedule_str }}</td>
+        <td>{{ similar_season.season.stdev_score|floatformat:2 }}</td>
         {% if base_object.is_partial %}
           <td style="text-align:center">
             {% if not similar_season.season.regular_season.is_partial %}
@@ -39,11 +63,9 @@
           </td>
           <td>
             {% if not similar_season.season.regular_season.is_partial %}
-              <a href="{{ similar_season.season.regular_season.season_object.href }}">{{ similar_season.season.regular_season.place_numeric }}</a>
+              <a href="{{ similar_season.season.regular_season.season_object.href }}">{{ similar_season.season.regular_season.place }}</a>
             {% endif%}
           </td>
-        {% else %}
-          <td>{{ similar_season.season.place_numeric }}</td>
         {% endif %}
         <td style="text-align:left">{{ similar_season.season.regular_season.playoff_finish }}</td>
       </tr>

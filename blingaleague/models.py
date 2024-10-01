@@ -1821,21 +1821,17 @@ class TeamSeason(ComparableObject):
         return list(map(_ss_display, sorted_seasons))
 
     def similarity_score(self, other_season):
-        attr_weights = {
-            'win_pct': 50,
-            'expected_win_pct': 40,
-            'expected_win_pct_against': 10,
-        }
+        average_score_diff = abs(self.average_score - other_season.average_score)
+        stdev_score_diff = abs(self.stdev_score - other_season.stdev_score)
+        expected_win_pct_diff = abs(self.expected_win_pct - other_season.expected_win_pct)
 
-        combined_score = 0
-        for attr, weight in attr_weights.items():
-            # multiply by 2, since it's extremely rare that two seasons are ever
-            # more than .500 apart in any pct metric
-            attr_diff = 2 * abs(getattr(self, attr) - getattr(other_season, attr))
-            attr_score = max(1 - attr_diff, 0)
-            combined_score += weight * attr_score
+        similarity_score = MAX_SIMILARITY_SCORE
+        # formula = weight * adj_value_to_equalize * attribute_diff / 10
+        similarity_score -= 4 * 1000 * expected_win_pct_diff / 10
+        similarity_score -= 4 * 2 * average_score_diff / 10
+        similarity_score -= 2 * 2 * stdev_score_diff / 10
 
-        return MAX_SIMILARITY_SCORE * combined_score / sum(attr_weights.values())
+        return max(similarity_score, 0)
 
     def _filter_similar_seasons(self, threshold):
         base_season = self

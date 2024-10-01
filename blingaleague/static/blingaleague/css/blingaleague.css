@@ -209,6 +209,10 @@ td.draft_pick_pos_k {
     font-style: italic;
 }
 
+.strong {
+    font-weight: bold;
+}
+
 table.sortable th {
     cursor: pointer;
 }
