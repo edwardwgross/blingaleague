@@ -248,15 +248,24 @@ def get_gazette_issues(*tags):
     )
 
 
-def _clean_expected_win_pct(xw_pct):
-    min_pct = decimal.Decimal(1 / 1000)
+def _adjust_expected_win_pct(team_season):
+    games_played = len(team_season.games)
+    games_total = regular_season_weeks(team_season.year)
+    games_left = games_total - games_played
+
+    xw_pct = team_season.expected_win_pct
+
+    # regress toward .500 based on how far into the season we are
+    xw_pct = (games_played * xw_pct + games_left * decimal.Decimal(0.5)) / games_total
+
+    min_pct = decimal.Decimal(0.001)
     max_pct = 1 - min_pct
 
     return min(max_pct, max(min_pct, xw_pct))
 
 
 def calculate_log5_probability(team_season_1, team_season_2):
-    xw_pct_1 = _clean_expected_win_pct(team_season_1.expected_win_pct)
-    xw_pct_2 = _clean_expected_win_pct(team_season_2.expected_win_pct)
+    xw_pct_1 = _adjust_expected_win_pct(team_season_1)
+    xw_pct_2 = _adjust_expected_win_pct(team_season_2)
 
     return (xw_pct_1 - xw_pct_1 * xw_pct_2) / (xw_pct_1 + xw_pct_2 - 2 * xw_pct_1 * xw_pct_2)

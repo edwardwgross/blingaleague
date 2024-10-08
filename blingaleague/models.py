@@ -2,6 +2,7 @@ import datetime
 import decimal
 import itertools
 import math
+import random
 import statistics
 
 from collections import defaultdict
@@ -487,7 +488,7 @@ class Game(models.Model, AbstractGame):
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
-    @fully_cached_property
+    @property
     def win_probabilties(self):
         if self.week <= 1:
             return {self.winner: TIE_VALUE, self.loser: TIE_VALUE}
@@ -594,7 +595,7 @@ class FutureGame(models.Model, AbstractGame):
     def other_weekly_games(self):
         return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
-    @fully_cached_property
+    @property
     def win_probabilties(self):
         if self.week <= 1:
             return {self.team_1: TIE_VALUE, self.team_2: TIE_VALUE}
@@ -2794,6 +2795,67 @@ class Season(ComparableObject):
                 win_counts[winner] += 1
 
             yield win_counts
+
+    def _generate_future_winners(self):
+        unplayed_week = self.weeks_with_games + 1
+        while unplayed_week <= regular_season_weeks(self.year):
+            week_obj = Week(self.year, unplayed_week)
+
+            games = week_obj.unplayed_games
+            if not games:
+                # we are (hopefully) looking at a historical point in time
+                # so the games will be played already
+                games = week_obj.games
+
+            for game in games:
+                win_probs = list(game.win_probabilties.items())
+
+                random_value = random.random()
+                # win_probs will be a list of tuples: (team, win_probability)
+                if random_value <= win_probs[0][1]:
+                    yield win_probs[0][0]
+                else:
+                    yield win_probs[1][0]
+
+            unplayed_week += 1
+
+    def _simulate_remaining_games(self):
+        simulated_future_wins = defaultdict(int)
+
+        simulated_total_wins = {}
+        for team_season in self.standings_table:
+            simulated_total_wins[team_season.team] = {
+                'wins': team_season.win_count,
+                'points': team_season.points,
+            }
+
+        for winner in self._generate_future_winners():
+            simulated_total_wins[winner]['wins'] += 1
+
+        return simulated_total_wins
+
+    def playoff_odds(self):
+        playoff_finishes = defaultdict(int)
+
+        max_simulations = 1000
+        sim_run = 1
+        while sim_run <= max_simulations:
+            simulated_games = self._simulate_remaining_games().items()
+
+            simulated_standings = sorted(
+                simulated_games,
+                key=lambda x: (x[1]['wins'], x[1]['points']),
+                reverse=True,
+            )
+
+            for place, (team, (win_count, points)) in enumerate(simulated_standings, 1):
+                if place <= PLAYOFF_TEAMS:
+                    playoff_finishes[team] += 1 / decimal.Decimal(max_simulations)
+
+            sim_run += 1
+
+        return playoff_finishes
+
 
     @fully_cached_property
     def keepers(self):
