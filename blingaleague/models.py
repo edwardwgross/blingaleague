@@ -487,6 +487,7 @@ class Game(models.Model, AbstractGame):
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
+    @fully_cached_property
     def win_probabilties(self):
         if self.week <= 1:
             return {self.winner: TIE_VALUE, self.loser: TIE_VALUE}
@@ -593,6 +594,7 @@ class FutureGame(models.Model, AbstractGame):
     def other_weekly_games(self):
         return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
+    @fully_cached_property
     def win_probabilties(self):
         if self.week <= 1:
             return {self.team_1: TIE_VALUE, self.team_2: TIE_VALUE}
@@ -1342,6 +1344,38 @@ class TeamSeason(ComparableObject):
                 win_distribution[win_count] = 0
 
         return dict(win_distribution)
+
+    @fully_cached_property
+    def predicted_future_wins(self):
+        if not self.is_partial or not self.future_games:
+            return 0
+
+        future_expected_wins = 0
+
+        for game in self.future_games:
+            future_expected_wins += game.win_probabilties[self.team]
+
+        return future_expected_wins
+
+    @fully_cached_property
+    def predicted_future_win_pct(self):
+        if not self.is_partial or not self.future_games:
+            return 0
+
+        return self.predicted_future_wins / len(self.future_games)
+
+    @fully_cached_property
+    def predicted_total_wins(self):
+        return self.win_count + self.predicted_future_wins
+
+    @fully_cached_property
+    def predicted_total_win_pct(self):
+        total_games = len(self.games) + len(self.future_games)
+
+        if total_games == 0:
+            return 0
+
+        return decimal.Decimal(self.predicted_total_wins) / decimal.Decimal(total_games)
 
     @fully_cached_property
     def _all_play_record(self):
