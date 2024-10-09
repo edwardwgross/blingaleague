@@ -488,8 +488,18 @@ class Game(models.Model, AbstractGame):
     def other_weekly_games(self):
         return Game.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
+    # a bit of a hack - define team_1 and team_2 so that other classes don't need
+    # to check if it is an already played Game or a FutureGame
+    @fully_cached_property
+    def team_1(self):
+        return self.winner
+
+    @fully_cached_property
+    def team_2(self):
+        return self.loser
+
     @property
-    def win_probabilties(self):
+    def win_probabilities(self):
         if self.week <= 1:
             return {self.winner: TIE_VALUE, self.loser: TIE_VALUE}
 
@@ -596,7 +606,7 @@ class FutureGame(models.Model, AbstractGame):
         return FutureGame.objects.exclude(pk=self.pk).filter(year=self.year, week=self.week)
 
     @property
-    def win_probabilties(self):
+    def win_probabilities(self):
         if self.week <= 1:
             return {self.team_1: TIE_VALUE, self.team_2: TIE_VALUE}
 
@@ -1354,7 +1364,7 @@ class TeamSeason(ComparableObject):
         future_expected_wins = 0
 
         for game in self.future_games:
-            future_expected_wins += game.win_probabilties[self.team]
+            future_expected_wins += game.win_probabilities[self.team]
 
         return future_expected_wins
 
@@ -2762,12 +2772,21 @@ class Season(ComparableObject):
 
     @fully_cached_property
     def _remaining_games(self):
-        remaining_games = set()
+        remaining_games = []
 
-        for team_season in self.standings_table:
-            for opponent in team_season.yet_to_play:
-                game_tuple = tuple(sorted((team_season.team, opponent)))
-                remaining_games.add(game_tuple)
+        unplayed_week = self.weeks_with_games + 1
+        while unplayed_week <= regular_season_weeks(self.year):
+            week_obj = Week(self.year, unplayed_week)
+
+            games = week_obj.unplayed_games
+            if not games:
+                # we are (hopefully) looking at a historical point in time
+                # so the games will be played already
+                games = week_obj.games
+
+            remaining_games.extend(games)
+
+            unplayed_week += 1
 
         return remaining_games
 
@@ -2777,9 +2796,9 @@ class Season(ComparableObject):
 
         current_win_counts = dict((ts.team, ts.win_count) for ts in self.standings_table)
 
-        remaining_games = list(self._remaining_games)
+        remaining_pairs = [sorted((g.team_1, g.team_2)) for g in self._remaining_games]
 
-        num_games = len(remaining_games)
+        num_games = len(remaining_pairs)
 
         max_games_to_run = max_weeks_to_run * len(self.standings_table) / 2
 
@@ -2791,33 +2810,21 @@ class Season(ComparableObject):
         for outcome_combo in outcome_combos:
             win_counts = current_win_counts.copy()
             for i, outcome in enumerate(outcome_combo):
-                winner = remaining_games[i][outcome]
+                winner = remaining_pairs[i][outcome]
                 win_counts[winner] += 1
 
             yield win_counts
 
     def _generate_future_winners(self):
-        unplayed_week = self.weeks_with_games + 1
-        while unplayed_week <= regular_season_weeks(self.year):
-            week_obj = Week(self.year, unplayed_week)
+        for game in self._remaining_games:
+            win_probs = list(game.win_probabilities.items())
 
-            games = week_obj.unplayed_games
-            if not games:
-                # we are (hopefully) looking at a historical point in time
-                # so the games will be played already
-                games = week_obj.games
-
-            for game in games:
-                win_probs = list(game.win_probabilties.items())
-
-                random_value = random.random()
-                # win_probs will be a list of tuples: (team, win_probability)
-                if random_value <= win_probs[0][1]:
-                    yield win_probs[0][0]
-                else:
-                    yield win_probs[1][0]
-
-            unplayed_week += 1
+            random_value = random.random()
+            # win_probs will be a list of tuples: (team, win_probability)
+            if random_value <= win_probs[0][1]:
+                yield win_probs[0][0]
+            else:
+                yield win_probs[1][0]
 
     def _simulate_remaining_games(self):
         simulated_total_wins = {}
