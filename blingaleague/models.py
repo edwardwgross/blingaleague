@@ -2820,8 +2820,6 @@ class Season(ComparableObject):
             unplayed_week += 1
 
     def _simulate_remaining_games(self):
-        simulated_future_wins = defaultdict(int)
-
         simulated_total_wins = {}
         for team_season in self.standings_table:
             simulated_total_wins[team_season.team] = {
@@ -2831,6 +2829,8 @@ class Season(ComparableObject):
 
         for winner in self._generate_future_winners():
             simulated_total_wins[winner]['wins'] += 1
+            # in addition to the win, add a slightly coservative proxy for margin of victory
+            simulated_total_wins[winner]['points'] += 20
 
         return simulated_total_wins
 
@@ -2855,7 +2855,6 @@ class Season(ComparableObject):
             sim_run += 1
 
         return playoff_finishes
-
 
     @fully_cached_property
     def keepers(self):
