@@ -562,7 +562,7 @@ class PlayoffOddsView(TemplateView):
 
     def get(self, request, year, week):
         year = int(year)
-        week = min(int(week), regular_season_weeks(year))
+        week = int(week)
 
         bypass_cache = 'bypass_cache' in request.GET
 

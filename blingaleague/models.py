@@ -2847,6 +2847,9 @@ class Season(ComparableObject):
         return simulated_total_wins
 
     def playoff_odds(self, bypass_cache=False):
+        if self.weeks_with_games > regular_season_weeks(self.year):
+            return self.regular_season.playoff_odds(bypass_cache=bypass_cache)
+
         cache_key = "blingaleague_playoff_odds|{}|{}".format(
             self.year,
             self.weeks_with_games,
