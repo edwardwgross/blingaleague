@@ -2817,14 +2817,19 @@ class Season(ComparableObject):
 
     def _generate_future_winners(self):
         for game in self._remaining_games:
-            win_probs = list(game.win_probabilities.items())
+            # don't use game.win_probabilities, as that will use the expected win pct
+            # from the week before the game; for already-played games, that means we aren't
+            # calculating the odds as they looked at *this* point in the season
+            team_season_1 = TeamSeason(game.team_1.id, game.year, week_max=self.weeks_with_games)
+            team_season_2 = TeamSeason(game.team_2.id, game.year, week_max=self.weeks_with_games)
+
+            prob_1 = calculate_log5_probability(team_season_1, team_season_2)
 
             random_value = random.random()
-            # win_probs will be a list of tuples: (team, win_probability)
-            if random_value <= win_probs[0][1]:
-                yield win_probs[0][0]
+            if random_value <= prob_1:
+                yield game.team_1
             else:
-                yield win_probs[1][0]
+                yield game.team_2
 
     def _simulate_remaining_games(self):
         simulated_total_wins = {}
@@ -2841,9 +2846,15 @@ class Season(ComparableObject):
 
         return simulated_total_wins
 
-    def playoff_odds(self):
-        playoff_finishes = defaultdict(int)
+    def playoff_odds(self, bypass_cache=False):
+        cache_key = "blingaleague_playoff_odds|{}|{}".format(
+            self.year,
+            self.weeks_with_games,
+        )
+        if cache_key in CACHE and not bypass_cache:
+            return CACHE.get(cache_key)
 
+        finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
         max_simulations = 1000
         sim_run = 1
         while sim_run <= max_simulations:
@@ -2857,11 +2868,18 @@ class Season(ComparableObject):
 
             for place, (team, (win_count, points)) in enumerate(simulated_standings, 1):
                 if place <= PLAYOFF_TEAMS:
-                    playoff_finishes[team] += 1 / decimal.Decimal(max_simulations)
+                    finishes[team]['playoffs'] += 1 / decimal.Decimal(max_simulations)
+                    if place <= BYE_TEAMS:
+                        finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
 
             sim_run += 1
 
-        return playoff_finishes
+        finishes = dict(finishes)
+
+        if not bypass_cache:
+            CACHE.set(cache_key, finishes)
+
+        return finishes
 
     @fully_cached_property
     def keepers(self):

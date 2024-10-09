@@ -7,7 +7,7 @@ from .views import HomeView, TeamDetailsView, TeamListView,\
                    SeasonListView, SingleSeasonView,\
                    MatchupView, WeekView, TeamSeasonView,\
                    TradeView, DraftView, PlayerView,\
-                   GlossaryView
+                   GlossaryView, PlayoffOddsView
 
 
 admin.autodiscover()
@@ -72,6 +72,11 @@ urlpatterns = [
         r'glossary/$',
         GlossaryView.as_view(),
         name='blingaleague.glossary',
+    ),
+    url(
+        r'^playoff_odds/(?P<year>\d{4})/(?P<week>\d+)/$',
+        PlayoffOddsView.as_view(),
+        name='blingaleague.playoff_odds',
     ),
 
     # deprecated urls

@@ -555,3 +555,28 @@ class PlayerView(TemplateView):
 
 class GlossaryView(TemplateView):
     template_name = 'blingaleague/glossary.html'
+
+
+class PlayoffOddsView(TemplateView):
+    template_name = 'blingaleague/playoff_odds.html'
+
+    def get(self, request, year, week):
+        year = int(year)
+        week = int(week)
+        bypass_cache = 'bypass_cache' in request.GET
+
+        season = Season(year, week_max=week)
+        playoff_odds = season.playoff_odds()
+
+        playoff_odds_table = []
+        for team_season in season.standings_table:
+            playoff_odds_table.append({
+                'team_season': team_season,
+                'playoff_odds': "{:.1%}".format(playoff_odds.get(team_season.team, {}).get('playoffs', 0)),
+                'bye_odds': "{:.1%}".format(playoff_odds.get(team_season.team, {}).get('bye', 0)),
+            })
+
+        return self.render_to_response({
+            'season': season,
+            'playoff_odds_table': playoff_odds_table,
+        })
