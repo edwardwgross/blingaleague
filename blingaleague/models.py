@@ -570,6 +570,12 @@ class Game(models.Model, AbstractGame):
 
         clear_cached_properties()
 
+        # immediately start rebuilding the playoff odds in the background for the current season once
+        # all games have been entered for the week, since it takes several minutes
+        if self.week_is_full():
+            pass
+
+
     @fully_cached_property
     def gazette_str(self):
         return "{} def. {}, {}-{}".format(
@@ -2817,16 +2823,27 @@ class Season(ComparableObject):
 
     def _generate_future_winners(self):
         for game in self._remaining_games:
+            weeks_played = self.weeks_with_games
+
             # don't use game.win_probabilities, as that will use the expected win pct
             # from the week before the game; for already-played games, that means we aren't
             # calculating the odds as they looked at *this* point in the season
-            team_season_1 = TeamSeason(game.team_1.id, game.year, week_max=self.weeks_with_games)
-            team_season_2 = TeamSeason(game.team_2.id, game.year, week_max=self.weeks_with_games)
+            team_season_1 = TeamSeason(game.team_1.id, self.year, week_max=weeks_played)
+            team_season_2 = TeamSeason(game.team_2.id, self.year, week_max=weeks_played)
 
-            prob_1 = calculate_log5_probability(team_season_1, team_season_2)
+            raw_prob_1 = calculate_log5_probability(team_season_1, team_season_2)
+
+            weeks_until_game = game.week - weeks_played
+            weeks_total = regular_season_weeks(self.year)
+            weeks_left = weeks_total - weeks_played
+
+            weight_50 = decimal.Decimal(weeks_until_game) / (weeks_left + 1)
+            weight_past = 1 - weight_50
+
+            adj_prob_1 = raw_prob_1 * weight_past + decimal.Decimal(0.5) * weight_50
 
             random_value = random.random()
-            if random_value <= prob_1:
+            if random_value <= adj_prob_1:
                 yield game.team_1
             else:
                 yield game.team_2
@@ -2841,8 +2858,9 @@ class Season(ComparableObject):
 
         for winner in self._generate_future_winners():
             simulated_total_wins[winner]['wins'] += 1
-            # in addition to the win, add a slightly coservative proxy for margin of victory
-            simulated_total_wins[winner]['points'] += 20
+            # randomize the points added so that the teams with more points now don't always stay ahead
+            # let it go negative, because teams can win with bad scores, so even losers could gain ground there
+            simulated_total_wins[winner]['points'] += (decimal.Decimal(random.random()) * 80) - 20
 
         return simulated_total_wins
 

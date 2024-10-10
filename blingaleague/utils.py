@@ -255,8 +255,8 @@ def _adjust_expected_win_pct(team_season):
 
     xw_pct = team_season.expected_win_pct
 
-    # regress toward .500 based on how far into the season we are
-    xw_pct = (games_played * xw_pct + games_left * decimal.Decimal(0.5)) / games_total
+    # regress toward .500
+    xw_pct = (xw_pct + decimal.Decimal(0.5)) / 2
 
     min_pct = decimal.Decimal(0.001)
     max_pct = 1 - min_pct
