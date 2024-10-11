@@ -1,0 +1,34 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Playoff Odds{% endblock %}
+
+{% block content %}
+<h1>Playoff Odds - <a href="{{ season.href }}">{{ season }}{% if week_max %} (through week {{ week_max }}){% endif %}</a></h1>
+
+<em>(odds based on 1000 simulations of the remaining games using <a href="https://en.wikipedia.org/wiki/Log5">Log5</a> methodology and expected winning percentage)</em>
+
+<div id="playoff_odds" class="blingalytics">
+  <table class="blingalytics_table sortable">
+    <th>Team</th>
+    <th>Record</th>
+    <th>Place</th>
+    <th>Playoffs</th>
+    <th>Bye</th>
+    {% for odds_dict in playoff_odds_table %}
+      <tr>
+        <td style="text-align:left">
+          <a href="{{ odds_dict.team_season.href }}">{{ odds_dict.team_season.team }}</a>
+          {% if odds_dict.team_season.standings_note %}
+            <span class="blinganote" title="{{ odds_dict.team_season.standings_note.1 }}">{{ odds_dict.team_season.standings_note.0 }}</span>
+          {% endif %}
+        </td>
+        <td sorttable_customkey="{{ odds_dict.team_season.win_pct }}" style="text-align:center">{{ odds_dict.team_season.record }}</td>
+        <td sorttable_customkey="{{ odds_dict.team_season.place_numeric }}">{{ odds_dict.team_season.place }}</td>
+        <td>{{ odds_dict.playoff_odds|floatformat:1 }}%</td>
+        <td>{{ odds_dict.bye_odds|floatformat:1 }}%</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}

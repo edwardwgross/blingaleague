@@ -1118,3 +1118,41 @@ class ShortUrlView(RedirectView):
     def get_redirect_url(self, short_url, **kwargs):
         url_object = get_object_or_404(ShortUrl, short_url=short_url)
         return url_object.full_url
+
+
+class PlayoffOddsView(TemplateView):
+    template_name = 'blingalytics/playoff_odds.html'
+
+    def get(self, request):
+        bypass_cache = False
+        if 'bypass_cache' in request.GET:
+            bypass_cache = True
+
+        season = Season.latest()
+
+        week_max = None
+        if 'year' in request.GET or 'week_max' in request.GET:
+            try:
+                year = int(request.GET.get('year', season.year))
+                week_max = int(request.GET.get('week_max', regular_season_weeks(year)))
+                season = Season(year, week_max=week_max)
+            except (ValueError, TypeError):
+                # ignore both if user passed in a non-int
+                pass
+
+        playoff_odds = season.playoff_odds(bypass_cache=bypass_cache)
+
+        playoff_odds_table = []
+        for team_season in season.standings_table:
+            playoff_odds_table.append({
+                'team_season': team_season,
+                # multiply by 100 to convert to percentages, will handle decimal formatting in template
+                'playoff_odds': 100 * playoff_odds.get(team_season.team, {}).get('playoffs', 0),
+                'bye_odds': 100 * playoff_odds.get(team_season.team, {}).get('bye', 0),
+            })
+
+        return self.render_to_response({
+            'season': season,
+            'playoff_odds_table': playoff_odds_table,
+            'week_max': week_max,
+        })
