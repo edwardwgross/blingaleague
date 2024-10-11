@@ -2902,7 +2902,9 @@ class Season(ComparableObject):
             if not bypass_cache:
                 CACHE.set(cache_key, finishes)
 
-            logger.info("[{}] Playoff odds finished; took {:.1f} seconds".format(cache_key, time.time() - t0))
+            logger.info(
+                "[{}] Playoff odds finished; took {:.1f} seconds".format(cache_key, time.time() - t0),
+            )
 
             return finishes
         except Exception:
