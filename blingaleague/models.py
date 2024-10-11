@@ -4,6 +4,7 @@ import itertools
 import math
 import random
 import statistics
+import threading
 
 from collections import defaultdict
 
@@ -569,12 +570,6 @@ class Game(models.Model, AbstractGame):
                 future_game.delete()
 
         clear_cached_properties()
-
-        # immediately start rebuilding the playoff odds in the background for the current season once
-        # all games have been entered for the week, since it takes several minutes
-        if self.week_is_full():
-            pass
-
 
     @fully_cached_property
     def gazette_str(self):
@@ -1631,7 +1626,7 @@ class TeamSeason(ComparableObject):
 
     def _calculate_yet_to_play(self):
         import logging
-        logging.getLogger('blingaleague').warn(
+        logging.getLogger('blingaleague').info(
             "Manually calculating yet_to_play for {}".format(self),
         )
 
@@ -2370,6 +2365,11 @@ class Season(ComparableObject):
 
         self.cache_key = "|".join(map(str, (year, include_playoffs, week_max)))
 
+        if self.playoff_odds_actively_running_cache_key not in CACHE:
+            thread = threading.Thread(target=self.playoff_odds)
+            thread.daemon = True
+            thread.start()
+
     @fully_cached_property
     def postseason(self):
         try:
@@ -2837,7 +2837,7 @@ class Season(ComparableObject):
             weeks_total = regular_season_weeks(self.year)
             weeks_left = weeks_total - weeks_played
 
-            weight_50 = decimal.Decimal(weeks_until_game) / (weeks_left + 1)
+            weight_50 = decimal.Decimal(weeks_until_game - 1) / weeks_left
             weight_past = 1 - weight_50
 
             adj_prob_1 = raw_prob_1 * weight_past + decimal.Decimal(0.5) * weight_50
@@ -2858,8 +2858,9 @@ class Season(ComparableObject):
 
         for winner in self._generate_future_winners():
             simulated_total_wins[winner]['wins'] += 1
-            # randomize the points added so that the teams with more points now don't always stay ahead
-            # let it go negative, because teams can win with bad scores, so even losers could gain ground there
+            # randomize the points added so that the teams with more points
+            # don't always stay ahead; let it go negative, because teams
+            # can win with bad scores, so even losers could gain ground there
             simulated_total_wins[winner]['points'] += (decimal.Decimal(random.random()) * 80) - 20
 
         return simulated_total_wins
@@ -2868,12 +2869,12 @@ class Season(ComparableObject):
         if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.playoff_odds(bypass_cache=bypass_cache)
 
-        cache_key = "blingaleague_playoff_odds|{}|{}".format(
-            self.year,
-            self.weeks_with_games,
-        )
+        cache_key = self.playoff_odds_cache_key
         if cache_key in CACHE and not bypass_cache:
             return CACHE.get(cache_key)
+
+        if not bypass_cache:
+            CACHE.set(self.playoff_odds_actively_running_cache_key, True)
 
         finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
         max_simulations = 1000
@@ -2899,8 +2900,20 @@ class Season(ComparableObject):
 
         if not bypass_cache:
             CACHE.set(cache_key, finishes)
+            CACHE.delete(self.playoff_odds_actively_running_cache_key)
 
         return finishes
+
+    @fully_cached_property
+    def playoff_odds_cache_key(self):
+        return "blingaleague_playoff_odds|{}|{}".format(
+            self.year,
+            self.weeks_with_games,
+        )
+
+    @fully_cached_property
+    def playoff_odds_actively_running_cache_key(self):
+        return "{}-ACTIVELY_RUNNING".format(self.playoff_odds_cache_key)
 
     @fully_cached_property
     def keepers(self):

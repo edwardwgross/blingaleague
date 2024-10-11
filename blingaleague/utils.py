@@ -249,10 +249,6 @@ def get_gazette_issues(*tags):
 
 
 def _adjust_expected_win_pct(team_season):
-    games_played = len(team_season.games)
-    games_total = regular_season_weeks(team_season.year)
-    games_left = games_total - games_played
-
     xw_pct = team_season.expected_win_pct
 
     # regress toward .500

@@ -1146,7 +1146,7 @@ class PlayoffOddsView(TemplateView):
         for team_season in season.standings_table:
             playoff_odds_table.append({
                 'team_season': team_season,
-                # multiply by 100 to convert to percentages, will handle decimal formatting in template
+                # multiply by 100 to convert to percentages, decimal formatting done in template
                 'playoff_odds': 100 * playoff_odds.get(team_season.team, {}).get('playoffs', 0),
                 'bye_odds': 100 * playoff_odds.get(team_season.team, {}).get('bye', 0),
             })
