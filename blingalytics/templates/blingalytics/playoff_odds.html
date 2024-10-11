@@ -6,9 +6,7 @@
 <h1>Playoff Odds - <a href="{{ season.href }}">{{ season }}{% if week_max %} (through week {{ week_max }}){% endif %}</a></h1>
 
 <div id="playoff_odds" class="blingalytics">
-  {% if is_actively_running %}
-    <h3 class="no_results_message">Playoff odds are currently being run and are not yet ready.  Please try again in a few minutes.</h3>
-  {% else %}
+  {% if results_ready %}
     <em>(odds based on 500 simulations of the remaining games using <a href="https://en.wikipedia.org/wiki/Log5">Log5</a> methodology and expected winning percentage)</em>
 
     <table class="blingalytics_table sortable">
@@ -32,6 +30,8 @@
         </tr>
       {% endfor %}
     </table>
+  {% else %}
+    <h3 class="no_results_message">Playoff odds are currently being run and are not yet ready.  Please try again in a few minutes.</h3>
   {% endif %}
 </div>
 

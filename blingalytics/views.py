@@ -1,3 +1,5 @@
+import threading
+
 from collections import defaultdict, Counter
 
 from django.core.cache import caches
@@ -1140,14 +1142,11 @@ class PlayoffOddsView(TemplateView):
                 # ignore both if user passed in a non-int
                 pass
 
-        is_actively_running = False
-        if season.playoff_odds_actively_running() and not bypass_cache:
-            is_actively_running = True
-            playoff_odds_table = []
-        else:
+        playoff_odds_table = []
+        results_ready = False
+        if bypass_cache or season.playoff_odds_cached():
             playoff_odds = season.playoff_odds(bypass_cache=bypass_cache)
 
-            playoff_odds_table = []
             for team_season in season.standings_table:
                 playoff_odds_table.append({
                     'team_season': team_season,
@@ -1156,9 +1155,16 @@ class PlayoffOddsView(TemplateView):
                     'bye_odds': 100 * playoff_odds.get(team_season.team, {}).get('bye', 0),
                 })
 
+            results_ready = True
+        else:
+            if not season.playoff_odds_actively_running():
+                # start it, but still return
+                thread = threading.Thread(target=season.playoff_odds, daemon=True)
+                thread.start()
+
         return self.render_to_response({
             'season': season,
             'playoff_odds_table': playoff_odds_table,
             'week_max': week_max,
-            'is_actively_running': is_actively_running,
+            'results_ready': results_ready,
         })

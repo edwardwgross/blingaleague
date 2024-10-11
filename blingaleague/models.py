@@ -2866,15 +2866,14 @@ class Season(ComparableObject):
 
         cache_key = self._playoff_odds_cache_key
 
-        t_start = time.time()
         logger = logging.getLogger('blingaleague')
-        logger.info("[{}] Generating playoff odds".format(cache_key))
 
         try:
             if cache_key in CACHE and not bypass_cache:
-                logger.info("[{}] Found playoff odds in cache".format(cache_key))
                 return CACHE.get(cache_key)
 
+            logger.info("[{}] Playoff odds running".format(cache_key))
+            t0 = time.time()
             if not bypass_cache:
                 CACHE.set(self._playoff_odds_actively_running_cache_key, True)
 
@@ -2902,25 +2901,14 @@ class Season(ComparableObject):
 
             if not bypass_cache:
                 CACHE.set(cache_key, finishes)
-                CACHE.delete(self._playoff_odds_actively_running_cache_key)
 
-            logger.info(
-                "[{}] Playoff odds finished; took {} seconds".format(
-                    cache_key,
-                    time.time() - t_start,
-                ),
-            )
+            logger.info("[{}] Playoff odds finished; took {:.1f} seconds".format(cache_key, time.time() - t0))
 
             return finishes
         except Exception:
             pass
         finally:
             # no matter what, we need to make sure the actively running key is gone
-            logger.info(
-                "[{}] Playoff odds interrupted; deleting actively_running key from cache".format(
-                    cache_key,
-                ),
-            )
             CACHE.delete(self._playoff_odds_actively_running_cache_key)
 
     @fully_cached_property
