@@ -2907,8 +2907,6 @@ class Season(ComparableObject):
             )
 
             return finishes
-        except Exception:
-            pass
         finally:
             # no matter what, we need to make sure the actively running key is gone
             CACHE.delete(self._playoff_odds_actively_running_cache_key)

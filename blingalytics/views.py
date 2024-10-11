@@ -1158,7 +1158,7 @@ class PlayoffOddsView(TemplateView):
             results_ready = True
         else:
             if not season.playoff_odds_actively_running():
-                # start it, but still return
+                # start it, but in the background, and don't set results_ready to True
                 thread = threading.Thread(target=season.playoff_odds, daemon=True)
                 thread.start()
 
