@@ -25,7 +25,7 @@ runfastcgi(
     maxspare=4,
     minspare=1,
     maxchildren=16,
-    maxrequests=30,
+    maxrequests='30',
     workdir=this_dir,
     daemonize="no",
     umask='002',
