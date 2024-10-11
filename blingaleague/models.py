@@ -1,10 +1,11 @@
 import datetime
 import decimal
 import itertools
+import logging
 import math
 import random
 import statistics
-import threading
+import time
 
 from collections import defaultdict
 
@@ -1625,7 +1626,6 @@ class TeamSeason(ComparableObject):
         return yet_to_play
 
     def _calculate_yet_to_play(self):
-        import logging
         logging.getLogger('blingaleague').info(
             "Manually calculating yet_to_play for {}".format(self),
         )
@@ -2365,11 +2365,6 @@ class Season(ComparableObject):
 
         self.cache_key = "|".join(map(str, (year, include_playoffs, week_max)))
 
-        if self.playoff_odds_actively_running_cache_key not in CACHE:
-            thread = threading.Thread(target=self.playoff_odds)
-            thread.daemon = True
-            thread.start()
-
     @fully_cached_property
     def postseason(self):
         try:
@@ -2869,51 +2864,81 @@ class Season(ComparableObject):
         if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.playoff_odds(bypass_cache=bypass_cache)
 
-        cache_key = self.playoff_odds_cache_key
-        if cache_key in CACHE and not bypass_cache:
-            return CACHE.get(cache_key)
+        cache_key = self._playoff_odds_cache_key
 
-        if not bypass_cache:
-            CACHE.set(self.playoff_odds_actively_running_cache_key, True)
+        t_start = time.time()
+        logger = logging.getLogger('blingaleague')
+        logger.info("[{}] Generating playoff odds".format(cache_key))
 
-        finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
-        max_simulations = 1000
-        sim_run = 1
-        while sim_run <= max_simulations:
-            simulated_games = self._simulate_remaining_games().items()
+        try:
+            if cache_key in CACHE and not bypass_cache:
+                logger.info("[{}] Found playoff odds in cache".format(cache_key))
+                return CACHE.get(cache_key)
 
-            simulated_standings = sorted(
-                simulated_games,
-                key=lambda x: (x[1]['wins'], x[1]['points']),
-                reverse=True,
+            if not bypass_cache:
+                CACHE.set(self._playoff_odds_actively_running_cache_key, True)
+
+            finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
+            max_simulations = 500
+            sim_run = 1
+            while sim_run <= max_simulations:
+                simulated_games = self._simulate_remaining_games().items()
+
+                simulated_standings = sorted(
+                    simulated_games,
+                    key=lambda x: (x[1]['wins'], x[1]['points']),
+                    reverse=True,
+                )
+
+                for place, (team, (win_count, points)) in enumerate(simulated_standings, 1):
+                    if place <= PLAYOFF_TEAMS:
+                        finishes[team]['playoffs'] += 1 / decimal.Decimal(max_simulations)
+                        if place <= BYE_TEAMS:
+                            finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
+
+                sim_run += 1
+
+            finishes = dict(finishes)
+
+            if not bypass_cache:
+                CACHE.set(cache_key, finishes)
+                CACHE.delete(self._playoff_odds_actively_running_cache_key)
+
+            logger.info(
+                "[{}] Playoff odds finished; took {} seconds".format(
+                    cache_key,
+                    time.time() - t_start,
+                ),
             )
 
-            for place, (team, (win_count, points)) in enumerate(simulated_standings, 1):
-                if place <= PLAYOFF_TEAMS:
-                    finishes[team]['playoffs'] += 1 / decimal.Decimal(max_simulations)
-                    if place <= BYE_TEAMS:
-                        finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
-
-            sim_run += 1
-
-        finishes = dict(finishes)
-
-        if not bypass_cache:
-            CACHE.set(cache_key, finishes)
-            CACHE.delete(self.playoff_odds_actively_running_cache_key)
-
-        return finishes
+            return finishes
+        except Exception:
+            pass
+        finally:
+            # no matter what, we need to make sure the actively running key is gone
+            logger.info(
+                "[{}] Playoff odds interrupted; deleting actively_running key from cache".format(
+                    cache_key,
+                ),
+            )
+            CACHE.delete(self._playoff_odds_actively_running_cache_key)
 
     @fully_cached_property
-    def playoff_odds_cache_key(self):
+    def _playoff_odds_cache_key(self):
         return "blingaleague_playoff_odds|{}|{}".format(
             self.year,
             self.weeks_with_games,
         )
 
     @fully_cached_property
-    def playoff_odds_actively_running_cache_key(self):
-        return "{}-ACTIVELY_RUNNING".format(self.playoff_odds_cache_key)
+    def _playoff_odds_actively_running_cache_key(self):
+        return "{}-ACTIVELY_RUNNING".format(self._playoff_odds_cache_key)
+
+    def playoff_odds_cached(self):
+        return self._playoff_odds_cache_key in CACHE
+
+    def playoff_odds_actively_running(self):
+        return self._playoff_odds_actively_running_cache_key in CACHE
 
     @fully_cached_property
     def keepers(self):

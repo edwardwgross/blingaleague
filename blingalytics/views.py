@@ -1140,19 +1140,25 @@ class PlayoffOddsView(TemplateView):
                 # ignore both if user passed in a non-int
                 pass
 
-        playoff_odds = season.playoff_odds(bypass_cache=bypass_cache)
+        is_actively_running = False
+        if season.playoff_odds_actively_running() and not bypass_cache:
+            is_actively_running = True
+            playoff_odds_table = []
+        else:
+            playoff_odds = season.playoff_odds(bypass_cache=bypass_cache)
 
-        playoff_odds_table = []
-        for team_season in season.standings_table:
-            playoff_odds_table.append({
-                'team_season': team_season,
-                # multiply by 100 to convert to percentages, decimal formatting done in template
-                'playoff_odds': 100 * playoff_odds.get(team_season.team, {}).get('playoffs', 0),
-                'bye_odds': 100 * playoff_odds.get(team_season.team, {}).get('bye', 0),
-            })
+            playoff_odds_table = []
+            for team_season in season.standings_table:
+                playoff_odds_table.append({
+                    'team_season': team_season,
+                    # multiply by 100 to convert to percentages, decimal formatting done in template
+                    'playoff_odds': 100 * playoff_odds.get(team_season.team, {}).get('playoffs', 0),
+                    'bye_odds': 100 * playoff_odds.get(team_season.team, {}).get('bye', 0),
+                })
 
         return self.render_to_response({
             'season': season,
             'playoff_odds_table': playoff_odds_table,
             'week_max': week_max,
+            'is_actively_running': is_actively_running,
         })

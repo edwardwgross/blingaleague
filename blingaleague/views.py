@@ -46,6 +46,7 @@ class HomeView(TemplateView):
             'trades': Trade.most_recent(),
             'spotlight_team_seasons': spotlight_team_seasons,
         }
+
         return self.render_to_response(context)
 
 
