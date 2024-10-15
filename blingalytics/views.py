@@ -422,9 +422,11 @@ class GameFinderView(LongUrlView):
 
                 outcome = OUTCOME_WIN
                 team_season = game.winner_team_season_after_game
+                team_season_before_game = game.winner_team_season_before_game
                 if team_prefix == PREFIX_LOSER:
                     outcome = OUTCOME_LOSS
                     team_season = game.loser_team_season_after_game
+                    team_season_before_game = game.loser_team_season_before_game
 
                 game_dict = {
                     'id': game.id,
@@ -437,6 +439,7 @@ class GameFinderView(LongUrlView):
                     'margin': game.margin,
                     'outcome': outcome,
                     'team_season': team_season,
+                    'team_season_before_game': team_season_before_game,
                 }
 
                 extra_description = ''
