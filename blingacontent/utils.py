@@ -225,3 +225,16 @@ def blingalytics_ratings_section(season):
         )
 
     return '\n'.join(ratings_rows)
+
+
+def print_current_playoff_odds(season=None):
+    if season is None:
+        season = Season.latest()
+
+    odds = season.playoff_odds()
+
+    for type in ('playoffs', 'bye'):
+        print(type.upper())
+        for team, team_odds in sorted(odds.items(), key=lambda x: x[1][type], reverse=True):
+            print("{:.0%}: {}".format(team_odds[type], team))
+        print('')
