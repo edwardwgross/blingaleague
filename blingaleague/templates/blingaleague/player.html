@@ -37,7 +37,7 @@
           <td>
             {% if transactions.drafted|length > transactions.kept|length %}
               <ul>
-                {% for draft_pick in transactions.drafted %}
+                {% for draft_pick in transactions.drafted reversed %}
                   {% if not draft_pick.is_keeper %}
                     <li>
                       <a href="{% url 'blingaleague.team_season' draft_pick.team.id transactions.year %}">{{ draft_pick.team }}</a>,
@@ -53,7 +53,7 @@
           <td>
             {% if transactions.kept %}
               <ul>
-                {% for keeper in transactions.kept %}
+                {% for keeper in transactions.kept reversed %}
                   <li>
                     <a href="{% url 'blingaleague.team_season' keeper.team.id transactions.year %}">{{ keeper.team }}</a>, {{ keeper.round|ordinal }} round
                     {% for draft_pick in transactions.drafted %}
@@ -71,7 +71,7 @@
           <td>
             {% if transactions.traded %}
               <ul>
-                {% for traded_asset in transactions.traded %}
+                {% for traded_asset in transactions.traded reversed %}
                   <li>
                     <a href="{{ traded_asset.trade.week_object.href }}">{{ traded_asset.trade.week_object }}</a>:
                     <a href="{{ traded_asset.trade.href }}">Traded</a>
