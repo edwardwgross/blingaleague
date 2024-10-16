@@ -268,28 +268,6 @@ table.standings_table td {
     cursor: help;
 }
 
-table#team_vs_team_grid,
-table#team_vs_team_grid th,
-table#team_vs_team_grid td {
-    border: 1px solid #a0a0a0;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 90%;
-}
-
-table#team_vs_team_grid {
-    width: 100%;
-}
-
-table#team_vs_team_grid th,
-table#team_vs_team_grid th a {
-    white-space: normal;
-}
-
-table#team_vs_team_grid .empty {
-    background-color: #eaeaea;
-}
-
 table#season_list {
 }
 

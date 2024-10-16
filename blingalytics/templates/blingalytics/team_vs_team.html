@@ -3,9 +3,11 @@
 {% block title %}Team vs. Team{% endblock %}
 
 {% block content %}
-<h1>Team vs. Team Records</h1>
+<h1>Team vs. Team</h1>
 
-<table id="team_vs_team_grid" class="blingalytics">
+<h2>Records</h2>
+
+<table class="team_vs_team_grid blingalytics">
   <tr>
     <th>W\L</th>
     {% for team in teams %}
@@ -20,6 +22,31 @@
           <td class="empty"/>
         {% else %}
           <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}><a href="{{ matchup.href }}">{{ matchup.record }}</a></td>
+        {% endifequal %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
+</table>
+
+<h2>Trades</h2>
+
+<table class="team_vs_team_grid blingalytics">
+  <tr>
+    <th/>
+    {% for team in teams %}
+      <th {% if team.defunct %}class="defunct"{% endif %}><a href="{{ team.href }}">{{ team }}</a></th>
+    {% endfor %}
+  </tr>
+  {% for row in grid %}
+    <tr>
+      <th {% if row.team.defunct %}class="defunct"{% endif %}><a href="{{ row.team.href }}">{{ row.team }}</a></th>
+      {% for matchup in row.matchups %}
+        {% ifequal matchup.team1 matchup.team2 %}
+          <td class="empty"/>
+        {% else %}
+          <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}>
+            <a href="{% url 'blingalytics.trade_finder' %}?receivers={{ matchup.team1.id }}&senders={{ matchup.team2.id }}">{{ matchup.trades|length }}</a>
+          </td>
         {% endifequal %}
       {% endfor %}
     </tr>
