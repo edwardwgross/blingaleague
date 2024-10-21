@@ -372,6 +372,7 @@ class GameFinderView(LongUrlView):
         losses_only = form_data['outcome'] == CHOICE_LOSSES
 
         teams = form_data['teams']
+        opponents = form_data['opponents']
         score_min = form_data['score_min']
         score_max = form_data['score_max']
         week_type = form_data['week_type']
@@ -392,12 +393,14 @@ class GameFinderView(LongUrlView):
             if len(teams) > 0:
                 type_kwargs["{}__id__in".format(team_prefix)] = teams
 
+            opponent_prefix = PREFIX_LOSER if team_prefix == PREFIX_WINNER else PREFIX_WINNER
+            if len(opponents) > 0:
+                type_kwargs["{}__id__in".format(opponent_prefix)] = opponents
+
             if score_min is not None:
                 type_kwargs["{}_score__gte".format(team_prefix)] = score_min
             if score_max is not None:
                 type_kwargs["{}_score__lte".format(team_prefix)] = score_max
-
-            opponent_prefix = PREFIX_LOSER if team_prefix == PREFIX_WINNER else PREFIX_WINNER
 
             for game in base_games.filter(**type_kwargs):
                 if week_type == CHOICE_REGULAR_SEASON and game.is_playoffs:
@@ -462,53 +465,52 @@ class GameFinderView(LongUrlView):
             key=lambda x: (x['year'], x['week'], -x['score']),
         )
 
-    def build_summary_tables(self, games):
-        games_counted = set()
+    def _build_team_summary_table(self, games, use_opponent=False):
         game_dict = defaultdict(lambda: defaultdict(int))
 
-        year_dict = defaultdict(int)
-
         for game in games:
-            # we don't ignore games_counted for year table, because
-            # both the winner and loser should contribute to the counts
-            year_dict[game['year']] += 1
+            team = game['team']
+            points_for = game['score']
+            points_against = game['opponent_score']
+            is_win = game['outcome'] == OUTCOME_WIN
+            if use_opponent:
+                team = game['opponent']
+                points_for = game['opponent_score']
+                points_against = game['score']
+                is_win = game['outcome'] == OUTCOME_LOSS
 
-            if game['id'] in games_counted:
-                continue
-
-            if game['outcome'] == OUTCOME_WIN:
-                winner = game['team']
-                loser = game['opponent']
-                winner_score = game['score']
-                loser_score = game['opponent_score']
+            game_dict[team]['total'] += 1
+            game_dict[team]['points_for'] += points_for
+            game_dict[team]['points_against'] += points_against
+            if is_win:
+                game_dict[team]['wins'] += 1
             else:
-                winner = game['opponent']
-                loser = game['team']
-                winner_score = game['opponent_score']
-                loser_score = game['score']
-
-            game_dict[winner]['wins'] += 1
-            game_dict[loser]['losses'] += 1
-            game_dict[winner]['total'] += 1
-            game_dict[loser]['total'] += 1
-            game_dict[winner]['points_for'] += winner_score
-            game_dict[loser]['points_for'] += loser_score
-            game_dict[winner]['points_against'] += loser_score
-            game_dict[loser]['points_against'] += winner_score
-
-            games_counted.add(game['id'])
+                game_dict[team]['losses'] += 1
 
         teams = []
-        for team, stats in sorted(game_dict.items(), key=lambda x: x[0].nickname):
+        for team, stats in sorted(game_dict.items()):
             stats['team'] = team
             stats['avg_points_for'] = stats['points_for'] / stats['total']
             stats['avg_points_against'] = stats['points_against'] / stats['total']
             teams.append(stats)
 
+        return teams
+
+    def build_summary_tables(self, games):
+        game_ids = set()
+
+        year_dict = defaultdict(int)
+        for game in games:
+            game_ids.add(game['id'])
+            # we don't ignore games_counted for year table, because
+            # both the winner and loser should contribute to the counts
+            year_dict[game['year']] += 1
+
         return {
-            'teams': teams,
+            'teams': self._build_team_summary_table(games),
+            'opponents': self._build_team_summary_table(games, use_opponent=True),
             'years': sorted(year_dict.items()),
-            'total': len(games_counted),
+            'total': len(game_ids),
         }
 
     def get(self, request):

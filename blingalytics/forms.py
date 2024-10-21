@@ -166,6 +166,7 @@ class GameFinderForm(BaseFinderForm):
         choices=[(c, c) for c in CHOICES_PLAYOFF_GAME_TYPE],
     )
     teams = _teams_multiple_choice_field()
+    opponents = _teams_multiple_choice_field(label='Opponent')
     awards = forms.TypedMultipleChoiceField(
         required=False,
         label='Weekly Awards',

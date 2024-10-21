@@ -14,34 +14,8 @@
   <div id="games_found" class="finder_results">
     {% if games %}
       <h2>Summary</h2>
-      <table class="blingalytics_table table-striped" style="display:inline-table">
-        <tr>
-          <th>Team</th>
-          <th>Wins</th>
-          <th>Losses</th>
-          <th>Avg. PF</th>
-          <th>Avg. PA</th>
-          <th>Total</th>
-        </tr>
-        {% for team_summary in summary.teams %}
-          <tr>
-            <td style="text-align:left">{{ team_summary.team.nickname }}</td>
-            <td>{{ team_summary.wins }}</td>
-            <td>{{ team_summary.losses }}</td>
-            <td>{{ team_summary.avg_points_for|floatformat:2 }}</td>
-            <td>{{ team_summary.avg_points_against|floatformat:2 }}</td>
-            <td>{{ team_summary.total }}</td>
-          </tr>
-        {% endfor %}
-        <tr>
-          <th style="text-align:left">Total</th>
-          <th/> {# wins #}
-          <th/> {# losses #}
-          <th/> {# points for #}
-          <th/> {# points against #}
-          <th style="text-align:right">{{ summary.total }}</th>
-        </tr>
-      </table>
+      {% with summary.teams as teams_summary_table %}{% with "Team" as table_title %}{% include "blingalytics/game_finder_teams_summary_table.html" %}{% endwith %}{% endwith %}
+      {% with summary.opponents as teams_summary_table %}{% with "Opponent" as table_title %}{% include "blingalytics/game_finder_teams_summary_table.html" %}{% endwith %}{% endwith %}
       <table class="blingalytics_table table-striped" style="display:inline-table">
         <tr>
           <th>Year</th>
