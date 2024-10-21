@@ -75,4 +75,19 @@
 
 <div class="wide_graph">{{ season_scores_graph_html|safe }}</div>
 
+<table class="blingalytics">
+  <th>Season</th>
+  <th>Average</th>
+  <th>Median</th>
+  {% for season in season_list reversed %}
+    {% if not season.is_upcoming_season %}
+      <tr {% if season.is_current_season %}class="emphasize"{% endif %}>
+        <td><a href="{{ season.href }}">{{ season.year }}</a></td>
+        <td>{{ season.average_game_score|floatformat:2 }}</td>
+        <td>{{ season.median_game_score|floatformat:2 }}</td>
+      </tr>
+    {% endif %}
+  {% endfor %}
+</table>
+
 {% endblock %}
