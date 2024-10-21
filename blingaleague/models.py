@@ -312,6 +312,14 @@ class Game(models.Model, AbstractGame):
         return TeamSeason(self.loser.id, self.year, week_max=self.week)
 
     @fully_cached_property
+    def winner_weekly_rank(self):
+        return self.week_object.all_play_record(self.winner)[OUTCOME_LOSS] + 1
+
+    @fully_cached_property
+    def loser_weekly_rank(self):
+        return self.week_object.all_play_record(self.loser)[OUTCOME_LOSS] + 1
+
+    @fully_cached_property
     def blangums(self):
         return self.winner == self.week_object.blangums
 
