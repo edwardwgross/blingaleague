@@ -67,6 +67,7 @@
           <th title="Opponent's Score">OppScore</th>
           <th>Opponent</th>
           <th>Margin</th>
+          <th title="Weekly Rank">Rank</th>
           <th>Streak</th>
           <th title="Place After Game Was Played">Place Before</th>
           <th title="Place After Game Was Played">Place After</th>
@@ -82,6 +83,7 @@
             <td>{{ game.opponent_score }}</td>
             <td style="text-align:left"><a href="{% url 'blingaleague.team_season' game.opponent.id game.year %}">{{ game.opponent.nickname }}</a></td>
             <td>{{ game.margin }}</td>
+            <td>{{ game.weekly_rank }}</td>
             <td sorttable_customkey="{{ game.team_season.current_streak_sort_key }}" style="text-align:center">{{ game.team_season.current_streak }}</td>
             <td>{% if game.team_season_before_game.place_numeric %}{{ game.team_season_before_game.place_numeric }}{% endif %}</td>
             <td>{{ game.team_season.place_numeric }}</td>

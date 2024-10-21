@@ -421,10 +421,12 @@ class GameFinderView(LongUrlView):
                         continue
 
                 outcome = OUTCOME_WIN
+                weekly_rank = game.winner_weekly_rank
                 team_season = game.winner_team_season_after_game
                 team_season_before_game = game.winner_team_season_before_game
                 if team_prefix == PREFIX_LOSER:
                     outcome = OUTCOME_LOSS
+                    weekly_rank = game.loser_weekly_rank
                     team_season = game.loser_team_season_after_game
                     team_season_before_game = game.loser_team_season_before_game
 
@@ -438,6 +440,7 @@ class GameFinderView(LongUrlView):
                     'opponent_score': getattr(game, "{}_score".format(opponent_prefix)),
                     'margin': game.margin,
                     'outcome': outcome,
+                    'weekly_rank': weekly_rank,
                     'team_season': team_season,
                     'team_season_before_game': team_season_before_game,
                 }
