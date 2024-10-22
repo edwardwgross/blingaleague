@@ -26,7 +26,7 @@
       {% if season.weeks_with_games %}
         <td class="team">
           {% if season.champion %}
-            <a href="{{ season.champion.href }}">{{ season.champion.team }}</a>
+            <a href="{{ season.champion.href }}"><strong>{{ season.champion.team }}</strong></a>
             <small>
               {{ season.champion.record }}
               {% if season.champion != season.first_place %}
