@@ -1,5 +1,3 @@
-import threading
-
 from collections import defaultdict, Counter
 
 from django.core.cache import caches
@@ -27,6 +25,7 @@ from .forms import CHOICE_YES, CHOICE_NO, \
 from .models import ShortUrl
 from .utils import sorted_seasons_by_attr, \
                    build_belt_holder_list, \
+                   run_playoff_odds_in_background, \
                    TOP_SEASONS_DEFAULT_NUM_FORMAT
 
 
@@ -1134,10 +1133,6 @@ class PlayoffOddsView(TemplateView):
     template_name = 'blingalytics/playoff_odds.html'
 
     def get(self, request):
-        bypass_cache = False
-        if 'bypass_cache' in request.GET:
-            bypass_cache = True
-
         season = Season.latest()
 
         week_max = None
@@ -1152,8 +1147,8 @@ class PlayoffOddsView(TemplateView):
 
         playoff_odds_table = []
         results_ready = False
-        if bypass_cache or season.playoff_odds_cached():
-            playoff_odds = season.playoff_odds(bypass_cache=bypass_cache)
+        if season.playoff_odds_cached():
+            playoff_odds = season.playoff_odds()
 
             for team_season in season.standings_table:
                 playoff_odds_table.append({
@@ -1165,10 +1160,7 @@ class PlayoffOddsView(TemplateView):
 
             results_ready = True
         else:
-            if not season.playoff_odds_actively_running():
-                # start it, but in the background, and don't set results_ready to True
-                thread = threading.Thread(target=season.playoff_odds, daemon=True)
-                thread.start()
+            run_playoff_odds_in_background(season)
 
         return self.render_to_response({
             'season': season,

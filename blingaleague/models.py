@@ -5,7 +5,6 @@ import logging
 import math
 import random
 import statistics
-import time
 
 from collections import defaultdict
 
@@ -2868,73 +2867,54 @@ class Season(ComparableObject):
 
         return simulated_total_wins
 
-    def playoff_odds(self, bypass_cache=False):
+    def playoff_odds(self, max_simulations=200, force_new_run=False):
         if self.weeks_with_games > regular_season_weeks(self.year):
-            return self.regular_season.playoff_odds(bypass_cache=bypass_cache)
+            return self.regular_season.playoff_odds(force_new_run=force_new_run)
 
-        cache_key = self._playoff_odds_cache_key
+        cache_key = self.playoff_odds_cache_key
 
-        logger = logging.getLogger('blingaleague')
+        if cache_key in CACHE and not force_new_run:
+            return CACHE.get(cache_key)
 
-        try:
-            if cache_key in CACHE and not bypass_cache:
-                return CACHE.get(cache_key)
+        finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
+        sim_run = 1
+        while sim_run <= max_simulations:
+            simulated_games = self._simulate_remaining_games().items()
 
-            logger.info("[{}] Playoff odds running".format(cache_key))
-            t0 = time.time()
-            if not bypass_cache:
-                CACHE.set(self._playoff_odds_actively_running_cache_key, True)
-
-            finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
-            max_simulations = 500
-            sim_run = 1
-            while sim_run <= max_simulations:
-                simulated_games = self._simulate_remaining_games().items()
-
-                simulated_standings = sorted(
-                    simulated_games,
-                    key=lambda x: (x[1]['wins'], x[1]['points']),
-                    reverse=True,
-                )
-
-                for place, (team, (win_count, points)) in enumerate(simulated_standings, 1):
-                    if place <= PLAYOFF_TEAMS:
-                        finishes[team]['playoffs'] += 1 / decimal.Decimal(max_simulations)
-                        if place <= BYE_TEAMS:
-                            finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
-
-                sim_run += 1
-
-            finishes = dict(finishes)
-
-            if not bypass_cache:
-                CACHE.set(cache_key, finishes)
-
-            logger.info(
-                "[{}] Playoff odds finished; took {:.1f} seconds".format(cache_key, time.time() - t0),
+            simulated_standings = sorted(
+                simulated_games,
+                key=lambda x: (x[1]['wins'], x[1]['points']),
+                reverse=True,
             )
 
-            return finishes
-        finally:
-            # no matter what, we need to make sure the actively running key is gone
-            CACHE.delete(self._playoff_odds_actively_running_cache_key)
+            for place, (team, (win_count, points)) in enumerate(simulated_standings, 1):
+                if place <= PLAYOFF_TEAMS:
+                    finishes[team]['playoffs'] += 1 / decimal.Decimal(max_simulations)
+                    if place <= BYE_TEAMS:
+                        finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
+
+            sim_run += 1
+
+        finishes = dict(finishes)
+
+        CACHE.set(cache_key, finishes)
+
+        return finishes
 
     @fully_cached_property
-    def _playoff_odds_cache_key(self):
+    def playoff_odds_cache_key(self):
         return "blingaleague_playoff_odds|{}|{}".format(
             self.year,
             self.weeks_with_games,
         )
 
-    @fully_cached_property
-    def _playoff_odds_actively_running_cache_key(self):
-        return "{}-ACTIVELY_RUNNING".format(self._playoff_odds_cache_key)
-
     def playoff_odds_cached(self):
-        return self._playoff_odds_cache_key in CACHE
+        return self.playoff_odds_cache_key in CACHE
 
-    def playoff_odds_actively_running(self):
-        return self._playoff_odds_actively_running_cache_key in CACHE
+    @classmethod
+    def playoff_odds_cache_key_to_season_object(cls, cache_key):
+        _static_str, year, week_max = cache_key.split('|')
+        return cls(int(year), week_max=int(week_max))
 
     @fully_cached_property
     def keepers(self):

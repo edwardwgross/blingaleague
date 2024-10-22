@@ -1,10 +1,17 @@
+import logging
+import threading
+import time
+
 from django.core.cache import caches
 
-from blingaleague.models import TeamSeason, Week
+from blingaleague.models import TeamSeason, Week, Season
 from blingaleague.utils import regular_season_weeks
 
 
 CACHE = caches['blingaleague']
+
+PLAYOFF_ODDS_QUEUE_CACHE_KEY = 'blingaleague_playoff_odds_queue'
+PLAYOFF_ODDS_ACTIVELY_RUNNING_CACHE_KEY = 'blingaleague_playoff_odds_actively_running'
 
 TOP_SEASONS_DEFAULT_NUM_FORMAT = '{:.2f}'
 
@@ -128,3 +135,45 @@ def build_belt_holder_list():
     })
 
     return sequence
+
+
+def run_playoff_odds_in_background(season):
+    logger = logging.getLogger('blingaleague')
+    logger.info("[{}] Requested playoff odds".format(season.playoff_odds_cache_key))
+
+    current_queue = CACHE.get(PLAYOFF_ODDS_QUEUE_CACHE_KEY, [])
+    if season.playoff_odds_cache_key not in current_queue:
+        # if it is queued up, just wait for it and do nothing
+        current_queue.append(season.playoff_odds_cache_key)
+        CACHE.set(PLAYOFF_ODDS_QUEUE_CACHE_KEY, current_queue)
+        logger.info("[{}] Added to playoff odds queue".format(season.playoff_odds_cache_key))
+
+    if not CACHE.get(PLAYOFF_ODDS_ACTIVELY_RUNNING_CACHE_KEY):
+        thread = threading.Thread(target=_run_next_queued_playoff_odds, daemon=True)
+        thread.start()
+
+
+def _run_next_queued_playoff_odds():
+    logger = logging.getLogger('blingaleague')
+
+    current_queue = CACHE.get(PLAYOFF_ODDS_QUEUE_CACHE_KEY, [])
+    if not current_queue:
+        return
+
+    season_key = current_queue[0]
+
+    logger.info("[{}] Running playoff odds".format(season_key))
+    CACHE.set(PLAYOFF_ODDS_ACTIVELY_RUNNING_CACHE_KEY, season_key)
+    CACHE.set(PLAYOFF_ODDS_QUEUE_CACHE_KEY, current_queue[1:])
+
+    season = Season.playoff_odds_cache_key_to_season_object(season_key)
+
+    t0 = time.time()
+    _odds = season.playoff_odds()
+    logger.info("[{}] Playoff odds finished after {:.1f} seconds".format(season_key, time.time() - t0))
+
+    CACHE.delete(PLAYOFF_ODDS_ACTIVELY_RUNNING_CACHE_KEY)
+
+    new_queue = CACHE.get(PLAYOFF_ODDS_QUEUE_CACHE_KEY, [])
+    if new_queue:
+        _run_next_queued_playoff_odds()

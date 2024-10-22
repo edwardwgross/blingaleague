@@ -64,12 +64,11 @@ urlpatterns = [
         ShortUrlView.as_view(),
         name='blingalytics.short_url',
     ),
-    # XXX bring this back someday?
-    #url(
-    #    r'playoff_odds/$',
-    #    PlayoffOddsView.as_view(),
-    #    name='blingalytics.playoff_odds',
-    #),
+    url(
+        r'playoff_odds/$',
+        PlayoffOddsView.as_view(),
+        name='blingalytics.playoff_odds',
+    ),
 
     # deprecated urls
     url(
