@@ -11,6 +11,8 @@
       <th>Team</th>
       <th>Record</th>
       <th>Place</th>
+      <th title="Expected Winning Percentage">Exp. %</th>
+      <th title="Remaining Strength of Schedule">SOS</th>
       <th>Playoffs</th>
       <th>Bye</th>
       {% for odds_dict in playoff_odds_table %}
@@ -23,8 +25,10 @@
           </td>
           <td sorttable_customkey="{{ odds_dict.team_season.win_pct }}" style="text-align:center">{{ odds_dict.team_season.record }}</td>
           <td sorttable_customkey="{{ odds_dict.team_season.place_numeric }}">{{ odds_dict.team_season.place }}</td>
-          <td>{{ odds_dict.playoff_odds|floatformat:0 }}%</td>
-          <td>{{ odds_dict.bye_odds|floatformat:0 }}%</td>
+          <td>{{ odds_dict.team_season.expected_win_pct|floatformat:3 }}</td>
+          <td>{{ odds_dict.team_season.future_strength_of_schedule_str }}</td>
+          <td style="font-weight:bold">{{ odds_dict.playoff_odds|floatformat:0 }}%</td>
+          <td style="font-weight:bold">{{ odds_dict.bye_odds|floatformat:0 }}%</td>
         </tr>
       {% endfor %}
     </table>
