@@ -2867,7 +2867,7 @@ class Season(ComparableObject):
 
         return simulated_total_wins
 
-    def playoff_odds(self, max_simulations=200, force_new_run=False):
+    def playoff_odds(self, max_simulations=500, force_new_run=False):
         if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.playoff_odds(force_new_run=force_new_run)
 
@@ -2897,7 +2897,8 @@ class Season(ComparableObject):
 
         finishes = dict(finishes)
 
-        CACHE.set(cache_key, finishes)
+        if finishes:
+            CACHE.set(cache_key, finishes)
 
         return finishes
 

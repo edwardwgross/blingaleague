@@ -1161,13 +1161,24 @@ class PlayoffOddsView(TemplateView):
                 bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)
 
                 # round to the nearest 5% to account for uncertainty and variance of simulations
-                playoffs_rounded = 5 * round(playoffs_pct / 5)
-                bye_rounded = 5 * round(bye_pct / 5)
+                rounding_base = 5
+                playoffs_pct = rounding_base * round(playoffs_pct / rounding_base)
+                bye_pct = rounding_base * round(bye_pct / rounding_base)
+
+                # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
+                if not team_season.eliminated_early:
+                    playoffs_pct = max(playoffs_pct, rounding_base)
+
+                if not team_season.clinched_playoffs:
+                    playoffs_pct = min(playoffs_pct, 100 - rounding_base)
+
+                if not team_season.clinched_bye:
+                    bye_pct = min(bye_pct, 100 - rounding_base)
 
                 playoff_odds_table.append({
                     'team_season': team_season,
-                    'playoff_odds': playoffs_rounded,
-                    'bye_odds': bye_rounded,
+                    'playoff_odds': playoffs_pct,
+                    'bye_odds': bye_pct,
                 })
 
             results_ready = True
