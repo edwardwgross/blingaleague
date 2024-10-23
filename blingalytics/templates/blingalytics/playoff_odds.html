@@ -7,6 +7,8 @@
 
 <div id="playoff_odds" class="blingalytics">
   {% if results_ready %}
+    <div class="blingalytics_table_note">Odds are calculated by simulating the remaining games using <a href="https://en.wikipedia.org/wiki/Log5">Log5</a> methodology and expected winning percentage.  They are then rounded to the nearest 5%.</div>
+
     <table class="blingalytics_table sortable">
       <th>Team</th>
       <th>Record</th>
@@ -32,8 +34,6 @@
         </tr>
       {% endfor %}
     </table>
-
-    <em>(remaining games simulated using <a href="https://en.wikipedia.org/wiki/Log5">Log5</a> methodology and expected winning percentage)</em>
   {% else %}
     <h3 class="no_results_message">Playoff odds are currently being run and are not yet ready.  Please try again in a few minutes.</h3>
   {% endif %}

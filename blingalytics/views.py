@@ -1151,11 +1151,18 @@ class PlayoffOddsView(TemplateView):
             playoff_odds = season.playoff_odds()
 
             for team_season in season.standings_table:
+                # multiply by 100 to convert to percentages, decimal formatting done in template
+                playoffs_raw = 100 * playoff_odds.get(team_season.team, {}).get('playoffs', 0)
+                bye_raw = 100 * playoff_odds.get(team_season.team, {}).get('bye', 0)
+
+                # round to the nearest 5% to account for uncertainty and variance of simulations
+                playoffs_rounded = 5 * round(playoffs_raw / 5)
+                bye_rounded = 5 * round(bye_raw / 5)
+
                 playoff_odds_table.append({
                     'team_season': team_season,
-                    # multiply by 100 to convert to percentages, decimal formatting done in template
-                    'playoff_odds': 100 * playoff_odds.get(team_season.team, {}).get('playoffs', 0),
-                    'bye_odds': 100 * playoff_odds.get(team_season.team, {}).get('bye', 0),
+                    'playoff_odds': playoffs_rounded,
+                    'bye_odds': bye_rounded,
                 })
 
             results_ready = True
