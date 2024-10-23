@@ -2908,8 +2908,8 @@ class Season(ComparableObject):
             self.weeks_with_games,
         )
 
-    def playoff_odds_cached(self):
-        return self.playoff_odds_cache_key in CACHE
+    def get_cached_playoff_odds(self):
+        return CACHE.get(self.playoff_odds_cache_key)
 
     @classmethod
     def playoff_odds_cache_key_to_season_object(cls, cache_key):

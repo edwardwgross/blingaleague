@@ -1151,17 +1151,18 @@ class PlayoffOddsView(TemplateView):
 
         playoff_odds_table = []
         results_ready = False
-        if season.playoff_odds_cached():
-            playoff_odds = season.playoff_odds()
 
+        cached_playoff_odds = season.get_cached_playoff_odds()
+        import logging; logging.getLogger('blingaleague').info("Cached odds - {} - {}".format(season.playoff_odds_cache_key, bool(cached_playoff_odds)))
+        if cached_playoff_odds:
             for team_season in season.standings_table:
                 # multiply by 100 to convert to percentages, decimal formatting done in template
-                playoffs_raw = 100 * playoff_odds.get(team_season.team, {}).get('playoffs', 0)
-                bye_raw = 100 * playoff_odds.get(team_season.team, {}).get('bye', 0)
+                playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)
+                bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)
 
                 # round to the nearest 5% to account for uncertainty and variance of simulations
-                playoffs_rounded = 5 * round(playoffs_raw / 5)
-                bye_rounded = 5 * round(bye_raw / 5)
+                playoffs_rounded = 5 * round(playoffs_pct / 5)
+                bye_rounded = 5 * round(bye_pct / 5)
 
                 playoff_odds_table.append({
                     'team_season': team_season,
