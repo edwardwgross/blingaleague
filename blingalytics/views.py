@@ -1139,7 +1139,11 @@ class PlayoffOddsView(TemplateView):
         if 'year' in request.GET or 'week_max' in request.GET:
             try:
                 year = int(request.GET.get('year', season.year))
-                week_max = int(request.GET.get('week_max', regular_season_weeks(year)))
+
+                week_max = request.GET.get('week_max', None)
+                if week_max is not None:
+                    week_max = int(week_max)
+
                 season = Season(year, week_max=week_max)
             except (ValueError, TypeError):
                 # ignore both if user passed in a non-int
