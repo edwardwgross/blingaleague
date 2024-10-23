@@ -1880,9 +1880,9 @@ class TeamSeason(ComparableObject):
 
         similarity_score = MAX_SIMILARITY_SCORE
         # formula = weight * adj_value_to_equalize * attribute_diff / 10
-        similarity_score -= 4 * 1000 * expected_win_pct_diff / 10
-        similarity_score -= 4 * 2 * average_score_diff / 10
-        similarity_score -= 2 * 2 * stdev_score_diff / 10
+        similarity_score -= decimal.Decimal(0.4) * 5000 * expected_win_pct_diff
+        similarity_score -= decimal.Decimal(0.4) * 10 * average_score_diff
+        similarity_score -= decimal.Decimal(0.2) * 10 * stdev_score_diff
 
         return max(similarity_score, 0)
 
