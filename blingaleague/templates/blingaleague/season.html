@@ -15,7 +15,7 @@
   {% endif %}
 </h1>
 
-{% if week_max %}<a href="{{ season.regular_season.href }}">Full season</a>{% endif %}
+{% if week_max %}<h3 class="level_up_link"><a href="{{ season.regular_season.href }}">{{ season.year }} full season</a></h3>{% endif %}
 
 <div id="season_details">
   {% for subheading in season.subheadings %}
