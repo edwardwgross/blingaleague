@@ -2863,7 +2863,7 @@ class Season(ComparableObject):
             # randomize the points added so that the teams with more points
             # don't always stay ahead; let it go negative, because teams
             # can win with bad scores, so even losers could gain ground there
-            simulated_total_wins[winner]['points'] += (decimal.Decimal(random.random()) * 80) - 20
+            simulated_total_wins[winner]['points'] += (decimal.Decimal(random.random()) * 100) - 40
 
         return simulated_total_wins
 
