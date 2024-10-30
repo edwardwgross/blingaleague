@@ -3279,12 +3279,41 @@ class Week(ComparableObject):
             "Slapped Heartbeat: {}".format(self.slapped_heartbeat),
         ]
 
+    def _attr_stat(cls, attr_name, stat_method):
+        values = []
+
+        for week in cls.regular_season_week_list():
+            values.append(getattr(week, attr_name))
+
+        return stat_method(values)
+
+    def _stat_zscore(self, stat_name):
+        stat_average = self._attr_stat(stat_name, statistics.mean)
+        stat_stdev = self._attr_stat(stat_name, statistics.pstdev)
+
+        return (getattr(self, stat_name) - stat_average) / stat_stdev
+
+    @fully_cached_property
+    def average_score_zscore(self):
+        return self._stat_zscore('average_score')
+
+    @fully_cached_property
+    def average_margin_zscore(self):
+        return self._stat_zscore('average_margin')
+
+    @fully_cached_property
+    def excitement(self):
+        # subtract average_margin_zscore, because weeks with closer
+        # margins will have a negative zscore
+        return self.average_score_zscore - self.average_margin_zscore
+
+    @classmethod
     @fully_cached_property
     def bracket_headline(self):
         return self.week_to_title(self.year, self.week)
 
     @classmethod
-    def week_to_title(self, year, week):
+    def week_to_title(cls, year, week):
         special_weeks = {
             quarterfinals_week(year): QUARTERFINALS_TITLE_BASE,
             semifinals_week(year): SEMIFINALS_TITLE_BASE,
