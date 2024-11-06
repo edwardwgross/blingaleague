@@ -14,6 +14,7 @@ ALLOWED_HOSTS = (
     '34.216.141.213',
     '54.185.247.21',
     '35.88.144.143',
+    '35.89.205.190',
 )
 
 ROOT_URLCONF = 'blingaleague.urls'
