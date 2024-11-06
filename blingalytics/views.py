@@ -1161,7 +1161,7 @@ class PlayoffOddsView(TemplateView):
                 bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)
 
                 # round to the nearest 5% to account for uncertainty and variance of simulations
-                rounding_base = 5
+                rounding_base = 1
                 playoffs_pct = rounding_base * round(playoffs_pct / rounding_base)
                 bye_pct = rounding_base * round(bye_pct / rounding_base)
 
