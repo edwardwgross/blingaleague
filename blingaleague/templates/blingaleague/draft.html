@@ -13,9 +13,9 @@
   {% endif %}
 
   {% if board_view %}
-    <a href="{{ draft.href }}" style="position:relative; top:12px">Pick List</a>
+    <a href="{{ draft.href }}" style="position:relative; top:12px">View as List</a>
   {% else %}
-    <a href="{{ draft.href }}?board_view" style="position:relative; top:12px">Draft Board</a>
+    <a href="{{ draft.href }}?board_view" style="position:relative; top:12px">View as Board</a>
   {% endif %}
 
   {% if draft.next %}
