@@ -3635,7 +3635,7 @@ class Trade(models.Model, ComparableObject):
 
         latest_week = Week.latest()
 
-        for trade in cls.objects.order_by('-year', '-week', '-date'):
+        for trade in cls.objects.order_by('-year', '-week', '-date', '-id'):
             if trade.week_object < latest_week:
                 break
             most_recent.append(trade)
