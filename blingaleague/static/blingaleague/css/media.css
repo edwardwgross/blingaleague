@@ -137,6 +137,12 @@
 }
 
 @media screen and (max-width: 1024px) {
+    li {
+        /* make sure list items are distinct from other text */
+        font-size: 90%;
+        margin-left: 16px;
+    }
+
     .nav li a, nav li a,
     .nav li a:visited, nav li a:visited,
     .nav li a:focus, nav li a:focus {
