@@ -137,12 +137,6 @@
 }
 
 @media screen and (max-width: 1024px) {
-    li {
-        /* make sure list items are distinct from other text */
-        font-size: 90%;
-        margin-left: 16px;
-    }
-
     .nav li a, nav li a,
     .nav li a:visited, nav li a:visited,
     .nav li a:focus, nav li a:focus {
@@ -152,6 +146,12 @@
     .navbar-collapse {
         height: 100% !important;
         max-height: 100% !important;
+    }
+
+    .main_inner li {
+        /* make sure list items are distinct from other text */
+        font-size: 90%;
+        margin-left: 16px;
     }
 
     #home_sidebar {
