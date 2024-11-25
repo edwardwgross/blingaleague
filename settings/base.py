@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = '/static/'
 
+DATA_DIR = BASE_DIR / 'data'
+
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'blingaleague.home'

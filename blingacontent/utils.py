@@ -4,8 +4,6 @@ from email.mime.text import MIMEText
 
 from httplib2 import Http
 
-from pathlib import Path
-
 from django.conf import settings
 
 from googleapiclient.discovery import build
@@ -27,11 +25,11 @@ SCOPES = [
 
 
 def get_gmail_service():
-    token_path = Path(settings.BASE_DIR) / 'data' / 'gmail_token.json'
+    token_path = settings.DATA_DIR / 'gmail_token.json'
     store = file.Storage(token_path)
     creds = store.get()
     if not creds or creds.invalid:
-        credentials_path = Path(settings.BASE_DIR) / 'data' / 'gmail_credentials.json'
+        credentials_path = settings.DATA_DIR / 'gmail_credentials.json'
         flow = client.flow_from_clientsecrets(credentials_path, SCOPES)
         flags = tools.argparser.parse_args(args=['--noauth_local_webserver'])
         creds = tools.run_flow(flow, store, flags=flags)
