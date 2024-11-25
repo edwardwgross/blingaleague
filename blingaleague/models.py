@@ -2867,7 +2867,7 @@ class Season(ComparableObject):
 
         return simulated_total_wins
 
-    def playoff_odds(self, max_simulations=500, force_new_run=False):
+    def playoff_odds(self, max_simulations=500, force_new_run=False, log_outcomes=False):
         if self.weeks_with_games > regular_season_weeks(self.year):
             return self.regular_season.playoff_odds(force_new_run=force_new_run)
 
@@ -2875,6 +2875,10 @@ class Season(ComparableObject):
 
         if cache_key in CACHE and not force_new_run:
             return CACHE.get(cache_key)
+
+        if log_outcomes:
+            fh = open(settings.DATA_DIR / 'playoff_odds_outcomes.csv', 'w')
+            fh.write('Run,Place,Team,Wins,Points')
 
         finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
         sim_run = 1
@@ -2887,11 +2891,20 @@ class Season(ComparableObject):
                 reverse=True,
             )
 
-            for place, (team, (win_count, points)) in enumerate(simulated_standings, 1):
+            for place, (team, wins_points) in enumerate(simulated_standings, 1):
                 if place <= PLAYOFF_TEAMS:
                     finishes[team]['playoffs'] += 1 / decimal.Decimal(max_simulations)
                     if place <= BYE_TEAMS:
                         finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
+
+                if log_outcomes:
+                    fh.write("\n{},{},{},{},{:.2f}".format(
+                        sim_run,
+                        place,
+                        team,
+                        wins_points['wins'],
+                        wins_points['points'],
+                    ))
 
             sim_run += 1
 
@@ -2899,6 +2912,9 @@ class Season(ComparableObject):
 
         if finishes:
             CACHE.set(cache_key, finishes)
+
+        if log_outcomes:
+            fh.close()
 
         return finishes
 
