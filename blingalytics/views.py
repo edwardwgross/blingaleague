@@ -1,3 +1,5 @@
+import logging
+
 from collections import defaultdict, Counter
 
 from django.core.cache import caches
@@ -1153,11 +1155,18 @@ class PlayoffOddsView(TemplateView):
         results_ready = False
 
         cached_playoff_odds = season.get_cached_playoff_odds()
-        import logging; logging.getLogger('blingaleague').info("Cached odds - {} - {}".format(season.playoff_odds_cache_key, bool(cached_playoff_odds)))
+
+        logging.getLogger('blingaleague').info(
+            "Cached odds - {} - {}".format(
+                season.playoff_odds_cache_key,
+                bool(cached_playoff_odds),
+            ),
+        )
+
         if cached_playoff_odds:
             for team_season in season.standings_table:
                 # multiply by 100 to convert to percentages, decimal formatting done in template
-                playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)
+                playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)  # noqa: E501
                 bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)
 
                 # round to the nearest 5% to account for uncertainty and variance of simulations

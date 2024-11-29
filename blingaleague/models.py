@@ -2823,7 +2823,8 @@ class Season(ComparableObject):
 
             yield win_counts
 
-    def _generate_future_winners(self):
+    def _generate_future_outcomes(self):
+        # yields a tuple of (winner, loser)
         for game in self._remaining_games:
             weeks_played = self.weeks_with_games
 
@@ -2846,11 +2847,11 @@ class Season(ComparableObject):
 
             random_value = random.random()
             if random_value <= adj_prob_1:
-                yield game.team_1
+                yield (game.team_1, game.team_2)
             else:
-                yield game.team_2
+                yield (game.team_2, game.team_1)
 
-    def _simulate_remaining_games(self):
+    def _simulate_remaining_games(self, forced_outcomes=None):
         simulated_total_wins = {}
         for team_season in self.standings_table:
             simulated_total_wins[team_season.team] = {
@@ -2858,22 +2859,32 @@ class Season(ComparableObject):
                 'points': team_season.points,
             }
 
-        for winner in self._generate_future_winners():
+        for (winner, loser) in self._generate_future_outcomes():
+            if forced_outcomes is not None and (loser, winner) in forced_outcomes:
+                winner, loser = loser, winner
+
             simulated_total_wins[winner]['wins'] += 1
+
             # randomize the points added so that the teams with more points
-            # don't always stay ahead; let it go negative, because teams
-            # can win with bad scores, so even losers could gain ground there
-            simulated_total_wins[winner]['points'] += (decimal.Decimal(random.random()) * 100) - 40
+            # don't always stay ahead; assume that winner always has 80-140 points
+            # and that the loser has 70-{winner_score} points
+            winner_points = 80 + (decimal.Decimal(random.random()) * 60)
+            loser_points = min(winner_points - 10, 70 + decimal.Decimal(random.random()) * 50)
+
+            simulated_total_wins[winner]['points'] += winner_points
+            simulated_total_wins[loser]['points'] += loser_points
 
         return simulated_total_wins
 
-    def playoff_odds(self, max_simulations=500, force_new_run=False, log_outcomes=False):
+    def playoff_odds(self, max_simulations=500, bypass_cache=False,
+                     log_outcomes=False, forced_outcomes=None):
+
         if self.weeks_with_games > regular_season_weeks(self.year):
-            return self.regular_season.playoff_odds(force_new_run=force_new_run)
+            return self.regular_season.playoff_odds(bypass_cache=bypass_cache)
 
         cache_key = self.playoff_odds_cache_key
 
-        if cache_key in CACHE and not force_new_run:
+        if cache_key in CACHE and not bypass_cache:
             return CACHE.get(cache_key)
 
         if log_outcomes:
@@ -2883,7 +2894,9 @@ class Season(ComparableObject):
         finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
         sim_run = 1
         while sim_run <= max_simulations:
-            simulated_games = self._simulate_remaining_games().items()
+            simulated_games = self._simulate_remaining_games(
+                forced_outcomes=forced_outcomes,
+            ).items()
 
             simulated_standings = sorted(
                 simulated_games,
@@ -2898,11 +2911,12 @@ class Season(ComparableObject):
                         finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
 
                 if log_outcomes:
-                    fh.write("\n{},{},{},{},{:.2f}".format(
+                    fh.write("\n{},{},{},{}-{},{:.2f}".format(
                         sim_run,
                         place,
                         team,
                         wins_points['wins'],
+                        regular_season_weeks(self.year) - wins_points['wins'],
                         wins_points['points'],
                     ))
 
@@ -2910,7 +2924,7 @@ class Season(ComparableObject):
 
         finishes = dict(finishes)
 
-        if finishes:
+        if finishes and not bypass_cache:
             CACHE.set(cache_key, finishes)
 
         if log_outcomes:

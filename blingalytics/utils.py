@@ -169,8 +169,11 @@ def _run_next_queued_playoff_odds():
     season = Season.playoff_odds_cache_key_to_season_object(season_key)
 
     t0 = time.time()
-    _odds = season.playoff_odds()
-    logger.info("[{}] Playoff odds finished after {:.1f} seconds".format(season_key, time.time() - t0))
+    _odds = season.playoff_odds()  # noqa: F841
+    logger.info("[{}] Playoff odds finished after {:.1f} seconds".format(
+        season_key,
+        time.time() - t0,
+    ))
 
     CACHE.delete(PLAYOFF_ODDS_ACTIVELY_RUNNING_CACHE_KEY)
 
