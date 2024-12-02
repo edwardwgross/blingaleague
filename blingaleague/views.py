@@ -13,7 +13,7 @@ from .models import Season, Game, Member, \
                     Trade, Draft, Player, \
                     PLAYOFF_TEAMS, \
                     OUTCOME_WIN, OUTCOME_LOSS, OUTCOME_TIE
-from .utils import basic_bar_graph_html, line_graph_html, box_graph_html, \
+from .utils import line_graph_html, box_graph_html, \
                    outcome_series_graph_html, rank_over_time_graph_html, \
                    regular_season_weeks, blingabowl_week
 
@@ -301,9 +301,21 @@ class TeamSeasonView(GamesView):
     games_sub_template = 'blingaleague/team_season_games.html'
 
     def _expected_win_distribution_graph(self, team_season):
-        expected_win_distribution = sorted(team_season.expected_win_distribution.items())
-        wins = list(map(lambda x: x[0], expected_win_distribution))
-        odds = list(map(lambda x: float(x[1]), expected_win_distribution))
+        if len(team_season.games) > regular_season_weeks(team_season.year):
+            team_season = team_season.regular_season
+
+        expected_win_distribution = team_season.expected_win_distribution
+        expected_win_distribution_list = sorted(expected_win_distribution.items())
+
+        wins = list(map(lambda x: x[0], expected_win_distribution_list))
+
+        actual_odds = [None] * len(wins)
+        other_odds = list(map(lambda x: float(x[1]), expected_win_distribution_list))
+
+        # 0 wins is a legitimate graph value, so this is a true 0-based list
+        actual_wins = team_season.win_count
+        actual_odds[actual_wins] = expected_win_distribution[actual_wins]
+        other_odds[actual_wins] = None
 
         custom_options = {
             'title': 'Expected Win Distribution',
@@ -313,9 +325,12 @@ class TeamSeasonView(GamesView):
             'value_formatter': lambda x: "{:.1f}%".format(100 * x),
         }
 
-        graph_html = basic_bar_graph_html(
+        graph_html = outcome_series_graph_html(
             wins,  # x_data
-            [('', odds)],  # y_series
+            [
+                ('', actual_odds),
+                ('', other_odds),
+            ],  # y_series
             **custom_options,
         )
 
