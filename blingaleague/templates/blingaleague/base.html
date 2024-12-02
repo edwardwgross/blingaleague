@@ -53,20 +53,25 @@
             <li><a href="{% url 'blingaleague.seasons' %}">Seasons</a></li>
             <li><a href="{% url 'blingacontent.gazette_list' %}">The Sanderson Gazette</a></li>
             <li class="dropdown">
-            <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Blingalytics <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="{% url 'blingalytics.team_vs_team' %}">Team vs. Team</a></li>
-                <li><a href="{% url 'blingalytics.weekly_scores' %}">Weekly Average Scores</a></li>
-                <li><a href="{% url 'blingalytics.expected_wins' %}">Expected Wins Calculator</a></li>
-                <li><a href="{% url 'blingalytics.top_seasons' %}">Top Seasons</a></li>
                 <li><a href="{% url 'blingalytics.belt_holders' %}">Belt Holders</a></li>
+                <li><a href="{% url 'blingalytics.expected_wins' %}">Expected Wins Calculator</a></li>
+                <li><a href="{% url 'blingaleague.glossary' %}">Glossary</a></li>
                 <li><a href="{% url 'blingalytics.playoff_odds' %}">Playoff Odds</a></li>
-                <li><a href="{% url 'blingalytics.game_finder' %}">Historical Game Finder</a></li>
-                <li><a href="{% url 'blingalytics.season_finder' %}">Historical Season Finder</a></li>
-                <li><a href="{% url 'blingalytics.trade_finder' %}">Historical Trade Finder</a></li>
-                <li><a href="{% url 'blingalytics.keeper_finder' %}">Historical Keeper Finder</a></li>
-                <li><a href="{% url 'blingalytics.draft_pick_finder' %}">Historical Draft Pick Finder</a></li>
+                <li><a href="{% url 'blingalytics.team_vs_team' %}">Team vs. Team</a></li>
+                <li><a href="{% url 'blingalytics.top_seasons' %}">Top Seasons</a></li>
+                <li><a href="{% url 'blingalytics.weekly_scores' %}">Weekly Average Scores</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Stat Finders <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{% url 'blingalytics.draft_pick_finder' %}">Draft Pick Finder</a></li>
+                <li><a href="{% url 'blingalytics.game_finder' %}">Game Finder</a></li>
+                <li><a href="{% url 'blingalytics.keeper_finder' %}">Keeper Finder</a></li>
+                <li><a href="{% url 'blingalytics.season_finder' %}">Season Finder</a></li>
+                <li><a href="{% url 'blingalytics.trade_finder' %}">Trade Finder</a></li>
               </ul>
             </li>
             {% comment %}
@@ -78,24 +83,26 @@
                 {% endfor %}
               </ul>
             </li>
-            {% endcomment %}
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Extras <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="{% url 'blingaleague.glossary' %}">Glossary</a></li>
                 {% if auth_member %}
-                  <li><a href="http://football.fantasysports.yahoo.com/league/blingaleague" target="_blank">Yahoo League Home</a></li>
-                  <li><a href="https://drive.google.com/drive/folders/0BzjwZZ1eHJfnQ0V2Q19rdWdiUTA" target="_blank">Google Drive</a></li>
                 {% endif %}
                 <li><a href="http://blingablog.wordpress.com" target="_blank">WojBloj</a></li>
               </ul>
             </li>
+            {% endcomment %}
             <li>
               {% if user.is_authenticated %}
                 {% if auth_member %}
-                  <a href="{% url 'blingaleague.team' auth_member.pk %}">
-                    My Franchise Index
-                  </a>
+                  <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Members <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <li><a href="{% url 'blingaleague.team' auth_member.pk %}">My Franchise Index</a></li>
+                      <li><a href="http://football.fantasysports.yahoo.com/league/blingaleague" target="_blank">Yahoo League Home</a></li>
+                      <li><a href="https://drive.google.com/drive/folders/0BzjwZZ1eHJfnQ0V2Q19rdWdiUTA" target="_blank">Google Drive</a></li>
+                    </ul>
+                  </li>
                 {% endif %}
               {% else %}
                 <a href="{% url 'social:begin' 'google-oauth2' %}">Log in</a>
