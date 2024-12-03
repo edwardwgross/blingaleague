@@ -1,4 +1,5 @@
 {% if base_object.games %}
   <h3>Average score: {{ base_object.average_score|floatformat:2 }}</h3>
   <h3>Average margin: {{ base_object.average_margin|floatformat:2 }}</h3>
+  <h3>Excitement index: {{ base_object.excitement|floatformat:2 }}</h3>
 {% endif %}

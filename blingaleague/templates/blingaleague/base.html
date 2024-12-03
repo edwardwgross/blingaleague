@@ -57,7 +57,6 @@
               <ul class="dropdown-menu">
                 <li><a href="{% url 'blingalytics.belt_holders' %}">Belt Holders</a></li>
                 <li><a href="{% url 'blingalytics.expected_wins' %}">Expected Wins Calculator</a></li>
-                <li><a href="{% url 'blingaleague.glossary' %}">Glossary</a></li>
                 <li><a href="{% url 'blingalytics.playoff_odds' %}">Playoff Odds</a></li>
                 <li><a href="{% url 'blingalytics.team_vs_team' %}">Team vs. Team</a></li>
                 <li><a href="{% url 'blingalytics.top_seasons' %}">Top Seasons</a></li>
@@ -74,7 +73,24 @@
                 <li><a href="{% url 'blingalytics.trade_finder' %}">Trade Finder</a></li>
               </ul>
             </li>
-            {% comment %}
+            <li><a href="{% url 'blingaleague.glossary' %}">Glossary</a></li>
+            <li>
+              {% if user.is_authenticated %}
+                {% if auth_member %}
+                  <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Members <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <li><a href="{% url 'blingaleague.team' auth_member.pk %}">My Franchise Index</a></li>
+                      <li><a href="http://football.fantasysports.yahoo.com/league/blingaleague" target="_blank">Yahoo League Home</a></li>
+                      <li><a href="https://drive.google.com/drive/folders/0BzjwZZ1eHJfnQ0V2Q19rdWdiUTA" target="_blank">Google Drive</a></li>
+                    </ul>
+                  </li>
+                {% endif %}
+              {% else %}
+                <a href="{% url 'social:begin' 'google-oauth2' %}">Log in</a>
+              {% endif %}
+            </li>
+            {% comment %} <!-- deprecated navmenu links -->
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Memes <span class="caret"></span></a>
               <ul class="dropdown-menu">
@@ -92,22 +108,6 @@
               </ul>
             </li>
             {% endcomment %}
-            <li>
-              {% if user.is_authenticated %}
-                {% if auth_member %}
-                  <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Members <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                      <li><a href="{% url 'blingaleague.team' auth_member.pk %}">My Franchise Index</a></li>
-                      <li><a href="http://football.fantasysports.yahoo.com/league/blingaleague" target="_blank">Yahoo League Home</a></li>
-                      <li><a href="https://drive.google.com/drive/folders/0BzjwZZ1eHJfnQ0V2Q19rdWdiUTA" target="_blank">Google Drive</a></li>
-                    </ul>
-                  </li>
-                {% endif %}
-              {% else %}
-                <a href="{% url 'social:begin' 'google-oauth2' %}">Log in</a>
-              {% endif %}
-            </li>
           </ul>
         </div>
       </div>

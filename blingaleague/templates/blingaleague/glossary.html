@@ -15,6 +15,11 @@
   D'Ernest D'oh is an award given out in <a href="{% url 'blingacontent.gazette_list' %}"><em>The Sanderson Gazette</em></a> to a team that makes an especially baffling transaction.  It is named after D'Ernest Johnson, who was Nick Chubb's backup in 2021 and had a few good games, yet was <a href="{% url 'blingacontent.gazette_detail' '2021-11-17-rock-bottom' %}">perpelexingly dropped by Richie and ignored by Babel</a> during a week when Chubb was out.
 </p>
 
+<h2 id="excitement_index">Excitement Index</h2>
+<p>
+  Excitement Index is a metric calculated for regular season weeks.  It is determined by taking the <a href="https://en.wikipedia.org/wiki/Standard_score">z-score</a> for a week's average score and subtracting the z-score for the week's average margin.  (The latter is subtracted because closer margins are more exciting, but have negative z-scores.)
+</p>
+
 <h2 id="expected_wins">Expected Wins</h2>
 <p>
   Expected wins uses <a href="{% url 'blingalytics.expected_wins' %}">historical game scores</a> to determine a team's odds of winning each game and sums that for all the team's games in a season.  The totals are then adjusted so that the sum of expected wins for all teams in a season equals the total number of games played for the season.
