@@ -13,6 +13,7 @@
       <th>Week</th>
       <th>Score</th>
       <th>Margin</th>
+      <th>Excitement</th>
     </tr>
     {% for week in weeks %}
       <tr>
@@ -20,6 +21,7 @@
         <td><a href="{{ week.href }}">{{ week.week }}</a></td>
         <td>{{ week.average_score|floatformat:2 }}</td>
         <td>{{ week.average_margin|floatformat:2 }}</td>
+        <td sorttable_customkey="{{ week.excitement }}">{{ week.excitement|floatformat:2 }}</td>
       </tr>
     {% endfor %}
   </table>
