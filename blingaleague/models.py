@@ -3579,6 +3579,19 @@ class Matchup(object):
         ).values_list('id', flat=True)
         return [cls(team1_id, team2_id) for team2_id in team2_id_list]
 
+    @classmethod
+    def all(cls):
+        all_matchups = []
+
+        team_id_list = Member.objects.all().order_by(
+            'defunct', 'nickname',
+        ).values_list('id', flat=True)
+
+        for team_id in team_id_list:
+            all_matchups.extend(cls.get_all_for_team(team_id))
+
+        return all_matchups
+
     def __str__(self):
         return "{} vs. {}".format(self.team1, self.team2)
 
