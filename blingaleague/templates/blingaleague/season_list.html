@@ -51,14 +51,20 @@
             <small>({{ season.most_points.place }} place)</small>
           {% endif %}
         </td>
-        <td class="value">{{ season.most_points.points|intcomma }}</td>
+        <td class="value">
+          {{ season.most_points.points|intcomma }}
+          <small>({{ season.most_points.average_score|floatformat:2|intcomma }})</small>
+        </td>
         <td class="team">
           <a href="{{ season.most_expected_wins.href }}">{{ season.most_expected_wins.team }}</a>
           {% if season.most_expected_wins != season.first_place %}
             <small>({{ season.most_expected_wins.place }} place)</small>
           {% endif %}
         </td>
-        <td class="value">{{ season.most_expected_wins.expected_wins|floatformat:2 }}</td>
+        <td class="value">
+          {{ season.most_expected_wins.expected_wins|floatformat:2 }}
+          <small>({{ season.most_expected_wins.expected_win_pct|floatformat:3 }})</small>
+        </td>
         <td class="team"><a href="{{ season.last_place.href }}">{{ season.last_place.team }}</a></td>
         <td class="value">{{ season.last_place.record }}</td>
       {% else %}
