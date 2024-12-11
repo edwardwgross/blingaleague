@@ -21,7 +21,13 @@
         {% ifequal matchup.team1 matchup.team2 %}
           <td class="empty"/>
         {% else %}
-          <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}><a href="{{ matchup.href }}">{{ matchup.record }}</a></td>
+          <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}>
+            {% if matchup.games %}
+              <a href="{{ matchup.href }}">{{ matchup.record }}</a>
+            {% else %}
+              0-0
+            {% endif %}
+          </td>
         {% endifequal %}
       {% endfor %}
     </tr>
@@ -45,7 +51,11 @@
           <td class="empty"/>
         {% else %}
           <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}>
-            <a href="{% url 'blingalytics.trade_finder' %}?receivers={{ matchup.team1.id }}&senders={{ matchup.team2.id }}">{{ matchup.trades|length }}</a>
+            {% if matchup.trades %}
+              <a href="{% url 'blingalytics.trade_finder' %}?receivers={{ matchup.team1.id }}&senders={{ matchup.team2.id }}">{{ matchup.trades|length }}</a>
+            {% else %}
+              0
+            {% endif %}
           </td>
         {% endifequal %}
       {% endfor %}
