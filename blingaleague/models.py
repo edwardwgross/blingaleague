@@ -3337,7 +3337,6 @@ class Week(ComparableObject):
         # margins will have a negative zscore
         return self.average_score_zscore - self.average_margin_zscore
 
-    @classmethod
     @fully_cached_property
     def bracket_headline(self):
         return self.week_to_title(self.year, self.week)
@@ -3555,14 +3554,21 @@ class Matchup(object):
                 "All-time series tied, {}-{}".format(self.team1_win_count, self.team2_win_count),
             ]
         else:
-            text = "{} leads all-time series, {}-{}"
+            lead_verb = 'leads'
+            if self.team1.defunct or self.team2.defunct:
+                # yes, this is the same as if the condition wasn't met, but it's still here
+                # in case I want to change it at some future date
+                lead_verb = 'leads'
+
+            text = "{} {} all-time series, {}-{}"
+
             if self.team1_win_count > self.team2_win_count:
                 return [
-                    text.format(self.team1.nickname, self.team1_win_count, self.team2_win_count),
+                    text.format(self.team1.nickname, lead_verb, self.team1_win_count, self.team2_win_count),
                 ]
             else:
                 return [
-                    text.format(self.team2.nickname, self.team2_win_count, self.team1_win_count),
+                    text.format(self.team2.nickname, lead_verb, self.team2_win_count, self.team1_win_count),
                 ]
 
     @fully_cached_property
