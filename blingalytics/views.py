@@ -1175,14 +1175,15 @@ class PlayoffOddsView(TemplateView):
                 bye_pct = rounding_base * round(bye_pct / rounding_base)
 
                 # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
-                if not team_season.eliminated_early:
-                    playoffs_pct = max(playoffs_pct, rounding_base)
+                if season.is_partial:
+                    if not team_season.eliminated_early:
+                        playoffs_pct = max(playoffs_pct, rounding_base)
 
-                if not team_season.clinched_playoffs:
-                    playoffs_pct = min(playoffs_pct, 100 - rounding_base)
+                    if not team_season.clinched_playoffs:
+                        playoffs_pct = min(playoffs_pct, 100 - rounding_base)
 
-                if not team_season.clinched_bye:
-                    bye_pct = min(bye_pct, 100 - rounding_base)
+                    if not team_season.clinched_bye:
+                        bye_pct = min(bye_pct, 100 - rounding_base)
 
                 playoff_odds_table.append({
                     'team_season': team_season,
