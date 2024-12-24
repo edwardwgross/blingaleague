@@ -2754,7 +2754,7 @@ class Season(ComparableObject):
 
                 # there's a chance we're looking at a historical season during the quarterfinals,
                 # in which case, we don't want to show who won the semifinals games
-                if last_week_winners and week <= (self.week_max + 1):
+                if last_week_winners and self.week_max == regular_season_weeks(self.year):
                     games = [
                         (
                             {
