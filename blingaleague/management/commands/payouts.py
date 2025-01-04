@@ -48,7 +48,7 @@ class Command(LabelCommand):
 
         for payout, team_season in sorted(payouts, key=lambda x: (-1 * x[0], x[1])):
             if payout > 0:
-                print("${:.0f}: {}".format(payout, team_season.team))
+                print("- {}: ${:.0f}".format(team_season.team, payout))
 
         print('')
         print("Total paid out: ${:.0f}".format(total_paid))
