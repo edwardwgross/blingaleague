@@ -33,9 +33,7 @@
     <tr>
       <th>Week</th>
       <th>Team</th>
-      <th>Score</th>
-      <th>{# - #}</th>
-      <th>OppScore</th>
+      <th colspan="3">Score</th>
       <th>Matches Defended</th>
     </tr>
     {% for belt_holder in belt_holder_list reversed %}
@@ -43,7 +41,7 @@
         <td style="text-align:left"><a href="{{ belt_holder.starting_game.week_object.href }}">{{ belt_holder.starting_game.week_object }}</a></td>
         <td style="text-align:left"><a href="{% url 'blingaleague.team_season' belt_holder.holder.id belt_holder.starting_game.year %}">{{ belt_holder.holder.nickname }}</a></td>
         <td>{{ belt_holder.starting_game.winner_score }}</td>
-        <td style="text-align:center">&ndash;</td>
+        <td style="text-align:center; padding:0">&ndash;</td>
         <td>{{ belt_holder.starting_game.loser_score }}</td>
         <td>{{ belt_holder.defense_count }}</td>
       </tr>
