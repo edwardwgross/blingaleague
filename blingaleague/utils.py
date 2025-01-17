@@ -224,6 +224,11 @@ def rank_over_time_graph_html(
     )
 
 
+def get_power_rankings(year):
+    power_ranking_model = apps.get_model('blingacontent', 'PowerRanking')
+    return power_ranking_model.objects.get(year=year)
+
+
 def get_gazette_issues(*tags):
     tagged_item_model = apps.get_model('tagging', 'TaggedItem')
     gazette_model = apps.get_model('blingacontent', 'Gazette')

@@ -30,6 +30,7 @@
       <th title="Team Blangums Awards">Blangums</th>
       <th title="Slapped Heartbeat Awards">SH</th>
       {% if team.playoff_seasons %}<th title="Playoff Finish">Playoffs</th>{% endif %}
+      <th title="Blingapower Ranking">Power Rank</th>
     </tr>
     {% for team_season in team.seasons reversed %}
       {% if team_season.games %}
@@ -47,6 +48,7 @@
           <td>{{ team_season.blangums_count }}</td>
           <td>{{ team_season.slapped_heartbeat_count }}</td>
           {% if team.playoff_seasons %}<td style="text-align:left">{{ team_season.playoff_finish }}</td>{% endif %}
+          <td sorttable_customkey="{{ team_season.power_ranking }}">{{ team_season.power_ranking|ordinal }}</td>
         </tr>
       {% endif %}
     {% endfor %}

@@ -19,7 +19,7 @@ from slugify import slugify
 
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties, value_by_pick, \
                    regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week, \
-                   get_gazette_issues, calculate_log5_probability
+                   get_power_rankings, get_gazette_issues, calculate_log5_probability
 
 
 CACHE = caches['blingaleague']
@@ -1139,6 +1139,10 @@ class TeamSeason(ComparableObject):
         if self.postseason is None:
             return False
         return self.team == self.postseason.place_1
+
+    @fully_cached_property
+    def power_ranking(self):
+        return self.season_object.team_to_power_rank(self.team)
 
     @fully_cached_property
     def game_scores(self):
@@ -2577,6 +2581,19 @@ class Season(ComparableObject):
         return sorted(team_seasons, key=lambda x: (x.win_pct, x.points), reverse=True)
 
     @fully_cached_property
+    def power_rankings(self):
+        power_rankings = []
+
+        power_ranking_obj = get_power_rankings(self.year)
+        if power_ranking_obj:
+            rank = 1
+            while rank <= len(self.active_teams):
+                power_rankings.append(getattr(power_ranking_obj, "ranking_{}".format(rank)))
+                rank += 1
+
+        return power_rankings
+
+    @fully_cached_property
     def active_teams(self):
         if self.is_upcoming_season:
             return Member.objects.filter(defunct=False).order_by('first_name', 'last_name')
@@ -3077,6 +3094,13 @@ class Season(ComparableObject):
         for place, team_season in enumerate(self.standings_table, 1):
             if team == team_season.team:
                 return place
+
+        return None
+
+    def team_to_power_rank(self, team):
+        for rank, ranked_team in enumerate(self.power_rankings, 1):
+            if team == ranked_team:
+                return rank
 
         return None
 

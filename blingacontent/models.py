@@ -11,6 +11,7 @@ from slugify import slugify
 from tagging.fields import TagField
 
 from blingaleague.models import Member, EXPANSION_SEASON
+from blingaleague.utils import clear_cached_properties
 
 from .utils import send_gazette_to_members, new_gazette_body_template
 
@@ -246,6 +247,10 @@ class PowerRanking(models.Model):
 
         if errors:
             raise ValidationError(errors)
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        clear_cached_properties()
 
     def __str__(self):
         return "{} Blingapower Rankings".format(self.year)
