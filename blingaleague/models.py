@@ -3564,11 +3564,21 @@ class Matchup(object):
 
             if self.team1_win_count > self.team2_win_count:
                 return [
-                    text.format(self.team1.nickname, lead_verb, self.team1_win_count, self.team2_win_count),
+                    text.format(
+                        self.team1.nickname,
+                        lead_verb,
+                        self.team1_win_count,
+                        self.team2_win_count,
+                    ),
                 ]
             else:
                 return [
-                    text.format(self.team2.nickname, lead_verb, self.team2_win_count, self.team1_win_count),
+                    text.format(
+                        self.team2.nickname,
+                        lead_verb,
+                        self.team2_win_count,
+                        self.team1_win_count,
+                    ),
                 ]
 
     @fully_cached_property
