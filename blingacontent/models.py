@@ -10,6 +10,8 @@ from slugify import slugify
 
 from tagging.fields import TagField
 
+from blingaleague.models import Member, EXPANSION_SEASON
+
 from .utils import send_gazette_to_members, new_gazette_body_template
 
 
@@ -178,3 +180,78 @@ class Gazette(models.Model):
 
     class Meta:
         ordering = ['publish_flag', '-published_date']
+
+
+def _ranking_field(rank):
+    return models.ForeignKey(
+        Member,
+        db_index=True,
+        blank=True,
+        null=True,
+        default=None,
+        related_name="power_ranking_{}_finishes".format(rank),
+    )
+
+
+class PowerRanking(models.Model):
+    year = models.IntegerField(primary_key=True)
+    ranking_1 = _ranking_field(1)
+    ranking_2 = _ranking_field(2)
+    ranking_3 = _ranking_field(3)
+    ranking_4 = _ranking_field(4)
+    ranking_5 = _ranking_field(5)
+    ranking_6 = _ranking_field(6)
+    ranking_7 = _ranking_field(7)
+    ranking_8 = _ranking_field(8)
+    ranking_9 = _ranking_field(9)
+    ranking_10 = _ranking_field(10)
+    ranking_11 = _ranking_field(11)
+    ranking_12 = _ranking_field(12)
+    ranking_13 = _ranking_field(13)
+    ranking_14 = _ranking_field(14)
+
+    def clean(self):
+        errors = {}
+
+        used_teams = set()
+        duplicate_teams = set()
+        ranking = 1
+        while ranking <= 14:
+            team = getattr(self, "ranking_{}".format(ranking))
+            if team is not None:
+                if team in used_teams:
+                    duplicate_teams.add(team)
+                else:
+                    used_teams.add(team)
+
+            ranking += 1
+
+        if duplicate_teams:
+            duplicate_team_str = ', '.join([str(team) for team in sorted(duplicate_teams)])
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message="Team(s) included multiple times: {}".format(duplicate_team_str),
+                    code='duplicate_teams',
+                ),
+            )
+
+        if self.year < EXPANSION_SEASON:
+            if self.ranking_13 is not None or self.ranking_14 is not None:
+                errors.setdefault(NON_FIELD_ERRORS, []).append(
+                    ValidationError(
+                        message="Seasons before {} did not have 14 teams".format(EXPANSION_SEASON),
+                        code='pre_expansion_error',
+                    ),
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
+    def __str__(self):
+        return "{} Blingapower Rankings".format(self.year)
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        ordering = ['-year']

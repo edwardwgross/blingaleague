@@ -4,7 +4,7 @@ from django.forms.widgets import Textarea
 
 from tagging.fields import TagField
 
-from .models import Meme, Gazette
+from .models import Meme, Gazette, PowerRanking
 
 
 class GazetteAdmin(admin.ModelAdmin):
@@ -22,3 +22,4 @@ class GazetteAdmin(admin.ModelAdmin):
 
 admin.site.register(Meme)
 admin.site.register(Gazette, GazetteAdmin)
+admin.site.register(PowerRanking)
