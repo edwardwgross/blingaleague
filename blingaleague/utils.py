@@ -123,11 +123,16 @@ def value_by_pick(overall_pick_number):
 
 
 def _graph_color_rotation_style(y_series, **custom_options):
+    # add one to make sure we don't repeat a color
+    color_step = len(y_series) + 1
+
+    # a minimum step of 4 produces the right spread of colors
+    # for graphs with less than 4 steps
+    color_step = max(color_step, 4)
+
     return pygal.style.RotateStyle(
         '#e4002b',
-        # a minimum step of 4 produces the right spread of colors
-        # for graphs with less than 4 series
-        step=max(len(y_series), 4),
+        step=color_step,
         **custom_options,
     )
 
@@ -213,9 +218,14 @@ def rank_over_time_graph_html(
 
     graph_options.update(custom_options)
 
+    def _invert_rank(rank):
+        if rank:
+           return total_teams - rank
+        return None
+
     rank_series = {}
     for name, values in raw_rank_series.items():
-        rank_series[name.title()] = [total_teams - value for value in values]
+        rank_series[name.title()] = [_invert_rank(value) for value in values]
 
     return line_graph_html(
         time_data,  # x_data
@@ -226,7 +236,7 @@ def rank_over_time_graph_html(
 
 def get_power_rankings(year):
     power_ranking_model = apps.get_model('blingacontent', 'PowerRanking')
-    return power_ranking_model.objects.get(year=year)
+    return power_ranking_model.objects.filter(year=year).first()
 
 
 def get_gazette_issues(*tags):

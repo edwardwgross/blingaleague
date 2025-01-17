@@ -509,6 +509,8 @@ class TeamDetailsView(TemplateView):
             for name, value in final_ranks.items():
                 rank_series[name].append(value)
 
+            rank_series['power rank'].append(team_season.power_ranking)
+
             team_count = len(Season(team_season.year).standings_table)
             if team_count > total_teams:
                 total_teams = team_count
