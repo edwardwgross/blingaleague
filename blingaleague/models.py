@@ -1142,6 +1142,8 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def power_ranking(self):
+        if self.is_partial:
+            return None
         return self.season_object.team_to_power_rank(self.team)
 
     @fully_cached_property
