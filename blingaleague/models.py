@@ -1767,11 +1767,12 @@ class TeamSeason(ComparableObject):
         if not self.games:
             return ['No games played']
 
-        subheadings = ["{}-{} ({:.3f}), {} points".format(
+        subheadings = ["{}-{} ({:.3f}), {} points ({:.2f} average)".format(
             self.headline_season.win_count,
             self.headline_season.loss_count,
             self.headline_season.win_pct,
             intcomma(self.headline_season.points),
+            self.headline_season.average_score,
         )]
 
         if self.playoff_finish and not self.is_partial:
