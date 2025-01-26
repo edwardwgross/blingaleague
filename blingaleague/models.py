@@ -93,7 +93,8 @@ def compare_two_scores(score1, score2):
     return OUTCOME_TIE
 
 
-def calculate_expected_wins(*game_scores, year_min=None, year_max=None, include_playoffs=False):
+# deprecated as of 2025-01-25 (to be deleted once we are happy with results)
+def _calculate_expected_wins_simple(*game_scores, year_min=None, year_max=None, include_playoffs=False):
     all_scores = Game.all_scores(
         year_min=year_min,
         year_max=year_max,
@@ -105,10 +106,45 @@ def calculate_expected_wins(*game_scores, year_min=None, year_max=None, include_
     def _win_expectancy(score):
         win_list = list(filter(lambda x: x < score, all_scores))
         tie_list = list(filter(lambda x: x == score, all_scores))
-        win_count = len(win_list) + 0.5 * len(tie_list)
+        win_count = len(win_list) + HALF * len(tie_list)
         return decimal.Decimal(win_count) / all_scores_count
 
     return sum(_win_expectancy(score) for score in game_scores)
+
+
+def calculate_expected_wins(*game_scores_with_year, base_year=None, include_playoffs=False):  # noqa: E501
+    all_scores_with_year = Game.all_scores_with_year(include_playoffs=include_playoffs)
+
+    def _smoothing_factor(given_year):
+        if base_year is None:
+            return 1
+
+        year_diff = abs(base_year - given_year)
+        return decimal.Decimal(1 / (2 ** year_diff))
+
+    all_scores_with_factor = []
+    total_denomator = 0
+    for (score, year) in all_scores_with_year:
+        factor = _smoothing_factor(year)
+        all_scores_with_factor.append((score, factor))
+        total_denomator += factor
+
+    def _win_expectancy(test_score):
+        win_sum = 0
+        tie_sum = 0
+        total_sum = 0
+
+        for score, factor in all_scores_with_factor:
+            if score < test_score:
+                win_sum += factor
+            elif score == test_score:
+                tie_sum += factor
+
+        total_numerator = win_sum + HALF * tie_sum
+
+        return total_numerator / total_denomator
+
+    return sum(_win_expectancy(score) for score in game_scores_with_year)
 
 
 class ComparableObject(object):
@@ -397,17 +433,17 @@ class Game(models.Model, AbstractGame):
         return (score - self.week_object.average_score) / self.week_object.stdev_score
 
     @classmethod
-    def all_scores(cls, year_min=None, year_max=None, include_playoffs=False):
-        cache_key = "blingaleague_game_all_scores|{}|{}|{}".format(
+    def all_scores_with_year(cls, year_min=None, year_max=None, include_playoffs=False):
+        cache_key = "blingaleague_game_all_scores_with_year|{}|{}|{}".format(
             year_min,
             year_max,
             include_playoffs,
         )
 
-        all_scores = CACHE.get(cache_key)
+        all_scores_with_year = CACHE.get(cache_key)
 
-        if all_scores is None:
-            all_scores = []
+        if all_scores_with_year is None:
+            all_scores_with_year = []
 
             games = cls.objects.all()
 
@@ -429,7 +465,27 @@ class Game(models.Model, AbstractGame):
                     if week > regular_season_weeks(year):
                         continue
 
-                all_scores.extend([winner_score, loser_score])
+                all_scores_with_year.extend([
+                    (winner_score, year),
+                    (loser_score, year),
+                ])
+
+            CACHE.set(cache_key, all_scores_with_year)
+
+        return all_scores_with_year
+
+    @classmethod
+    def all_scores(cls, year_min=None, year_max=None, include_playoffs=False):
+        cache_key = "blingaleague_game_all_scores|{}|{}|{}".format(
+            year_min,
+            year_max,
+            include_playoffs,
+        )
+
+        all_scores = CACHE.get(cache_key)
+
+        if all_scores is None:
+            all_scores = [score for (score, year) in cls.all_scores_with_year()]
 
             CACHE.set(cache_key, all_scores)
 
@@ -1185,51 +1241,11 @@ class TeamSeason(ComparableObject):
         return self.season_object.is_upcoming_season and not self.team.defunct
 
     @fully_cached_property
-    def era_year_range(self):
-        for start_year, end_year in ERAS:
-            after_start = start_year is None or self.year >= start_year
-            before_end = end_year is None or self.year <= end_year
-            if after_start and before_end:
-                return (start_year, end_year)
-
-        raise Exception(
-            "Team season {} doesn't fit in any defined era".format(
-                self,
-            )
-        )
-
-    @fully_cached_property
-    def _all_time_raw_expected_wins_by_game(self):
-        return list(map(
-            lambda x: calculate_expected_wins(x),
-            self.game_scores,
-        ))
-
-    @property
-    def _year_based_raw_expected_wins_by_game(self):
-        return list(map(
-            lambda x: calculate_expected_wins(
-                x,
-                year_min=self.year,
-                year_max=self.year,
-            ),
-            self.game_scores,
-        ))
-
-    @property
-    def _era_based_raw_expected_wins_by_game(self):
-        return list(map(
-            lambda x: calculate_expected_wins(
-                x,
-                year_min=self.era_year_range[0],
-                year_max=self.era_year_range[-1],
-            ),
-            self.game_scores,
-        ))
-
-    @fully_cached_property
     def raw_expected_wins_by_game(self):
-        return self._all_time_raw_expected_wins_by_game
+        return list(map(
+            lambda x: calculate_expected_wins(x, base_year=self.year),
+            self.game_scores,
+        ))
 
     @fully_cached_property
     def expected_wins_by_game(self):
@@ -1247,28 +1263,11 @@ class TeamSeason(ComparableObject):
         return sum(self.expected_wins_by_game)
 
     @fully_cached_property
-    def _all_time_raw_expected_wins_against(self):
-        return calculate_expected_wins(*self.game_scores_against)
-
-    @fully_cached_property
-    def _year_based_time_raw_expected_wins_against(self):
-        return calculate_expected_wins(
-            *self.game_scores_against,
-            year_min=self.year,
-            year_max=self.year,
-        )
-
-    @fully_cached_property
-    def _era_based_raw_expected_wins_against(self):
-        return calculate_expected_wins(
-            *self.game_scores_against,
-            year_min=self.era_year_range[0],
-            year_max=self.era_year_range[-1],
-        )
-
-    @fully_cached_property
     def raw_expected_wins_against(self):
-        return self._all_time_raw_expected_wins_against
+        return calculate_expected_wins(
+            *self.game_scores_against,
+            base_year=self.year,
+        )
 
     @fully_cached_property
     def expected_wins_against(self):
