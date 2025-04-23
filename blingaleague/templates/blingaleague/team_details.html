@@ -48,7 +48,9 @@
           <td>{{ team_season.blangums_count }}</td>
           <td>{{ team_season.slapped_heartbeat_count }}</td>
           {% if team.playoff_seasons %}<td style="text-align:left">{{ team_season.playoff_finish }}</td>{% endif %}
-          <td sorttable_customkey="{{ team_season.power_ranking }}">{{ team_season.power_ranking|ordinal }}</td>
+          <td sorttable_customkey="{{ team_season.power_ranking }}">
+            {% if team_season.power_ranking %}{{ team_season.power_ranking|ordinal }}{% endif %}
+          </td>
         </tr>
       {% endif %}
     {% endfor %}
