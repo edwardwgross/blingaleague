@@ -13,7 +13,7 @@
       {% if not draft.team_id %}
         <td sorttable_customkey="{{ draft_pick.team_sort_key }}">
           <a href="{% url 'blingaleague.team_season' draft_pick.team.id draft_pick.year %}">{{ draft_pick.team }}</a>
-          {% if draft_pick.original_team %}<span class="blinganote" title="pick traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">T</span>{% endif %}
+          {% if draft_pick.original_team %}<span class="blinganote" title="{% if draft_pick.is_keeper %}keeper{% else %}pick{% endif %} traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">T</span>{% endif %}
         </td>
       {% endif %}
       <td>

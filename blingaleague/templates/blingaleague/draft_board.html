@@ -13,7 +13,7 @@
       {% for draft_pick in round %}
         <td class="draft_pick_pos_{{ draft_pick.position|lower }}">
           {% if draft_pick.original_team %}
-            <p class="alternate_team" title="pick traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">{{ draft_pick.team }}</p>
+            <p class="alternate_team" title="{% if draft_pick.is_keeper %}keeper{% else %}pick{% endif %} traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">{{ draft_pick.team }}</p>
           {% endif %}
           <p><a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a></p>
           <p>{{ draft_pick.position }}</p>
