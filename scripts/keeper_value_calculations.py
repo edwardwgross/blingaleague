@@ -15,10 +15,12 @@ for line in sys.stdin:
 max_pick = 14 * 16
 kept_adps = set([rk[1] for rk in raw_keepers])
 
+# important to loop through in order of entry so that output
+# can be pasted back into the same document
 for raw_kept, raw_adp in raw_keepers:
-    print_flag = False
-    if False:  #raw_kept == 16:
-        print_flag = True
+    print_flag = False  #True
+    if print_flag:
+        print("Raw Kept: {} / Raw ADP: {}".format(raw_kept, raw_adp))
 
     live_pick = raw_kept - len(list(filter(lambda x: x[0] < raw_kept, raw_keepers)))
     if print_flag:
