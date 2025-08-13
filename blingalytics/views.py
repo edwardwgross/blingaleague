@@ -750,9 +750,7 @@ class TradeFinderView(LongUrlView):
         # assume trades is in the desired order
         for trade in trades:
             # sort it as we build, not at the end
-            traded_assets = trade.traded_assets.order_by(
-                'receiver', 'keeper_cost', 'name', 'sender',
-            )
+            traded_assets = sorted(trade.traded_assets.all())
 
             # user had the option to only show the assets that matched (vs. the full trades)
             if form_data['assets_display'] == CHOICE_MATCHING_ASSETS_ONLY:

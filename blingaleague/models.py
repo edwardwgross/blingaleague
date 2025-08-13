@@ -1959,7 +1959,7 @@ class TeamSeason(ComparableObject):
         assets_received = self.team.assets_received.filter(**filter_kwargs)
         assets_sent = self.team.assets_sent.filter(**filter_kwargs)
 
-        for asset in assets_received:
+        for asset in sorted(assets_received):
             if asset.trade.id not in trade_dict:
                 trade_dict[asset.trade.id] = {
                     'trade': asset.trade,
@@ -1969,7 +1969,7 @@ class TeamSeason(ComparableObject):
 
             trade_dict[asset.trade.id]['received'].append(asset)
 
-        for asset in assets_sent:
+        for asset in sorted(assets_sent):
             trade_dict[asset.trade.id]['sent'].append(asset)
 
         return sorted(
@@ -3843,7 +3843,8 @@ class TradedAsset(models.Model, ComparableObject):
             # all picks *should* be entered as "Pick X.Y"
             cutoff_char = len('Pick ')
             try:
-                return decimal.Decimal(self.name[cutoff_char:])
+                dec_val = decimal.Decimal(self.name[cutoff_char:])
+                return "{:05.2f}".format(dec_val)
             except decimal.InvalidOperation:
                 pass  # fall through to default logic, whatever it may be
 
