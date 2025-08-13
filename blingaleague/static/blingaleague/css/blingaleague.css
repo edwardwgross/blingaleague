@@ -186,6 +186,11 @@ td.draft_pick_pos_k {
     background-color: white;
 }
 
+#draft_board td a,
+#draft_board td a:visited {
+    color: #333333;
+}
+
 #main_outer {
     padding: 0 60px 60px 60px;
     margin-top: 60px;
