@@ -108,6 +108,14 @@ td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
     clear: both;
 }
 
+#draft_picks .blinganote {
+    font-weight: bold;
+    text-align: center;
+    padding: 0 4px;
+    border: 1px solid #333333;
+    border-radius: 4px;
+}
+
 td.draft_pick_pos_rb {
     background-color: #ffcccb;
 }
