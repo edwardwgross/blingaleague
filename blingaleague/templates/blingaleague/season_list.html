@@ -16,12 +16,12 @@
     <th colspan="2">Most Points</th>
     <th colspan="2">Most Expected Wins</th>
     <th colspan="2">Last Place</th>
+    <th>{# Draft #}</th>
   </tr>
   {% for season in season_list %}
     <tr {% if season.is_current_season or season.is_upcoming_season %}class="emphasize"{% endif %}>
       <td style="white-space:nowrap">
         <a href="{{ season.href }}">{{ season.year }}</a>
-        {% if season.draft %}<a href="{{ season.draft.href }}"><small>[draft]</small></a>{% endif %}
       </td>
       {% if season.weeks_with_games %}
         <td class="team">
@@ -67,6 +67,7 @@
         </td>
         <td class="team"><a href="{{ season.last_place.href }}">{{ season.last_place.team }}</a></td>
         <td class="value">{{ season.last_place.record }}</td>
+        <td class="team">{% if season.draft.draft_picks %}<a href="{{ season.draft.href }}"><small>{{ season.draft }}</small></a>{% endif %}</td>
       {% else %}
         <td/> {# Champion #}
         <td/> {# Runner-Up #}
@@ -74,6 +75,7 @@
         <td/><td/> {# Most Points #}
         <td/><td/> {# Most Expected Wins #}
         <td/><td/> {# Last Place #}
+        <td/> {# Draft #}
       {% endif %}
     </tr>
   {% endfor %}
