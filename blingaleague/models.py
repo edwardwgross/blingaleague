@@ -3828,6 +3828,24 @@ class TradedAsset(models.Model, ComparableObject):
         return ''
 
     @fully_cached_property
+    def picked_player(self):
+        if self.is_draft_pick:
+            try:
+                dec_val = self._parse_pick()
+                round = int(dec_val)
+                pick_in_round = 100 * (dec_val - round)
+
+                return DraftPick.objects.get(
+                    year=self.trade.year,
+                    round=round,
+                    pick_in_round=pick_in_round,
+                )
+            except Exception:
+                pass  # not an important enough failure to throw an error
+
+        return None
+
+    @fully_cached_property
     def asset_sort_key(self):
         return (
             self.trade,
@@ -3840,12 +3858,10 @@ class TradedAsset(models.Model, ComparableObject):
     @fully_cached_property
     def name_sort_key(self):
         if self.is_draft_pick:
-            # all picks *should* be entered as "Pick X.Y"
-            cutoff_char = len('Pick ')
             try:
-                dec_val = decimal.Decimal(self.name[cutoff_char:])
+                dec_val = self._parse_pick()
                 return "{:05.2f}".format(dec_val)
-            except decimal.InvalidOperation:
+            except Exception:
                 pass  # fall through to default logic, whatever it may be
 
         return self.name
@@ -3856,6 +3872,17 @@ class TradedAsset(models.Model, ComparableObject):
             return 0
 
         return self.keeper_cost
+
+    def _parse_pick(self):
+        if self.is_draft_pick:
+            # all picks *should* be entered as "Pick X.Y"
+            cutoff_char = len('Pick ')
+            try:
+                return decimal.Decimal(self.name[cutoff_char:])
+            except decimal.InvalidOperation:
+                pass  # don't outright fail, let it fall through the cracks
+
+        return None
 
     def save(self, **kwargs):
         super().save(**kwargs)

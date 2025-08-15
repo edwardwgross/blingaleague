@@ -1,7 +1,14 @@
 <ul>
   {% for asset in asset_list %}
     <li>
-      {% if asset.is_draft_pick %}{{ asset.name }}{% else %}<a href="{% url 'blingaleague.player' asset.name %}">{{ asset.name }}</a>{% endif %}
+      {% if asset.is_draft_pick %}
+        {{ asset.name }}
+        {% if asset.picked_player %}
+          <small>(<a href="{% url 'blingaleague.player' asset.picked_player.name %}">{{ asset.picked_player.name }}</a>)</small>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'blingaleague.player' asset.name %}">{{ asset.name }}</a>
+      {% endif %}
       <small>
         {% if is_sender_pov %}
           - to <a href="{% url 'blingaleague.team_season' asset.receiver.id asset.trade.year %}">{{ asset.receiver.nickname }}</a>
