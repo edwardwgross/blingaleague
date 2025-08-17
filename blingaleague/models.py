@@ -1336,7 +1336,7 @@ class TeamSeason(ComparableObject):
             return {}
 
         if len(self.games) == 0:
-            return {}
+            return {0: 1}
 
         expected_wins_by_game = self.expected_wins_by_game
         num_games = len(expected_wins_by_game)

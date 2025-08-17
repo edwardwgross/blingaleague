@@ -67,7 +67,6 @@
         </td>
         <td class="team"><a href="{{ season.last_place.href }}">{{ season.last_place.team }}</a></td>
         <td class="value">{{ season.last_place.record }}</td>
-        <td class="team">{% if season.draft.draft_picks %}<a href="{{ season.draft.href }}"><small>{{ season.draft }}</small></a>{% endif %}</td>
       {% else %}
         <td/> {# Champion #}
         <td/> {# Runner-Up #}
@@ -75,8 +74,8 @@
         <td/><td/> {# Most Points #}
         <td/><td/> {# Most Expected Wins #}
         <td/><td/> {# Last Place #}
-        <td/> {# Draft #}
       {% endif %}
+      <td class="team">{% if season.draft.draft_picks %}<a href="{{ season.draft.href }}"><small>{{ season.draft }}</small></a>{% endif %}</td>
     </tr>
   {% endfor %}
 </table>
