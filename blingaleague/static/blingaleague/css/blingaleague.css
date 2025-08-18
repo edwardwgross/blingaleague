@@ -183,7 +183,8 @@ td.draft_pick_pos_k {
 
 #draft_board td p.alternate_team {
     color: white;
-    background-color: #333333;
+    background-color: #555555;
+    font-weight: bold;
     display: inline-block;  /* needs this to get width to work */
     position: absolute;
     top: 0;
