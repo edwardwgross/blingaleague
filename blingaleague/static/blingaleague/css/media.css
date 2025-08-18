@@ -180,6 +180,10 @@
     #draft_board td .pick_offset {
         margin-top: 40px;
     }
+
+    #draft_board td p.keeper {
+        width: 80px;
+    }
 }
 
 @media screen and (max-width: 750px) {
