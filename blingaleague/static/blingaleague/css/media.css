@@ -172,6 +172,14 @@
     #top_seasons .table_links {
         column-count: 2;
     }
+
+    #draft_board td p.alternate_team {
+        height: 40px;
+    }
+
+    #draft_board td .pick_offset {
+        margin-top: 40px;
+    }
 }
 
 @media screen and (max-width: 750px) {

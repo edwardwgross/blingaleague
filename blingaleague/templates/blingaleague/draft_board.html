@@ -15,7 +15,7 @@
           {% if draft_pick.original_team %}
             <p class="alternate_team" title="{% if draft_pick.is_keeper %}keeper{% else %}pick{% endif %} traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">{{ draft_pick.team }}</p>
           {% endif %}
-          <p class="player" {% if draft_pick.original_team %}style="margin-top:20px"{% endif %}><a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a></p>
+          <p class="player {% if draft_pick.original_team %}pick_offset{% endif %}"><a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a></p>
           <p class="position">{{ draft_pick.position }}</p>
           {% if draft_pick.is_keeper %}<p class="keeper">KEEPER</p>{% endif %}
         </td>
