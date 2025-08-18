@@ -142,7 +142,7 @@ td.draft_pick_pos_k {
 
 #draft_board {
     clear: both;
-    border-collapse: separate;
+    border-collapse: collapse;
 }
 
 #draft_board th,
