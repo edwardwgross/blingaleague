@@ -22,4 +22,12 @@
       {% endfor %}
     </tr>
   {% endfor %}
+  <tr>
+    <th class="round_number"/>
+    {% for team in draft.original_team_order %}
+      <th>
+        <a href="{% url 'blingaleague.team_season' team.id draft.year %}">{{ forloop.counter }}. {{ team }}</a>
+      </th>
+    {% endfor %}
+  </tr>
 </table>

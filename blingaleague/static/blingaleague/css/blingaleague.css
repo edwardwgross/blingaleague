@@ -142,6 +142,7 @@ td.draft_pick_pos_k {
 
 #draft_board {
     clear: both;
+    border-collapse: separate;
 }
 
 #draft_board th,
@@ -154,6 +155,12 @@ td.draft_pick_pos_k {
     border-color: #333333;
     border-width: 0 1px 1px 0;
     padding: 3px 6px
+}
+
+#draft_board th {
+    position: sticky;
+    top: 54px;
+    z-index: 99;
 }
 
 #draft_board th,
