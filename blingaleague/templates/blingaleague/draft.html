@@ -12,10 +12,10 @@
     <a href="{{ draft.previous.href }}{% if board_view %}?board_view{% endif %}" class="link previous">{{ draft.previous|title }}</a>
   {% endif %}
 
-  {% if board_view %}
-    <a href="{{ draft.href }}" style="position:relative; top:12px">View as List</a>
-  {% else %}
+  {% if list_view %}
     <a href="{{ draft.href }}?board_view" style="position:relative; top:12px">View as Board</a>
+  {% else %}
+    <a href="{{ draft.href }}?list_view" style="position:relative; top:12px">View as List</a>
   {% endif %}
 
   {% if draft.next %}
@@ -23,9 +23,9 @@
   {% endif %}
 </div>
 
-{% if board_view %}
-  {% include "blingaleague/draft_board.html" %}
-{% else %}
+{% if list_view %}
   {% include "blingaleague/draft_picks.html" %}
+{% else %}
+  {% include "blingaleague/draft_board.html" %}
 {% endif %}
 {% endblock %}
