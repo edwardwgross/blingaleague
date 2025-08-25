@@ -1161,6 +1161,7 @@ class PlayoffOddsView(TemplateView):
 
         playoff_odds_table = []
         results_ready = False
+        no_results_message = 'Playoff odds are currently being run and are not yet ready.  Please try again in a few minutes.'
 
         cached_playoff_odds = season.get_cached_playoff_odds()
 
@@ -1171,7 +1172,9 @@ class PlayoffOddsView(TemplateView):
             ),
         )
 
-        if cached_playoff_odds:
+        if season.weeks_with_games < 1:
+            no_results_message = 'Playoff odds are not available until after week 1.'
+        elif cached_playoff_odds:
             for team_season in season.standings_table:
                 # multiply by 100 to convert to percentages, decimal formatting done in template
                 playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)  # noqa: E501
@@ -1208,4 +1211,5 @@ class PlayoffOddsView(TemplateView):
             'playoff_odds_table': playoff_odds_table,
             'week_max': week_max,
             'results_ready': results_ready,
+            'no_results_message': no_results_message,
         })
