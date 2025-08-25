@@ -135,6 +135,10 @@
         margin-right: 6px;
     }
 
+    #draft_board {
+        border-collapse: separate;
+    }
+
     #draft_board td p.alternate_team {
         height: 40px;
     }

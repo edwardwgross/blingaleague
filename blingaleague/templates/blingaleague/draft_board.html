@@ -9,7 +9,7 @@
   </tr>
   {% for round in draft.draft_board_picks %}
     <tr class="round">
-      <th class="round_number">{{ forloop.counter }}</th>
+      <td class="round_number">{{ forloop.counter }}</th>
       {% for draft_pick in round %}
         <td class="draft_pick_pos_{{ draft_pick.position|lower }}">
           {% if draft_pick.original_team %}

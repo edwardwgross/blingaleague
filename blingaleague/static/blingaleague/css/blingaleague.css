@@ -164,19 +164,22 @@ td.draft_pick_pos_k {
 }
 
 #draft_board th,
-#draft_board th a {
+#draft_board th a,
+#draft_board .round_number {
+    font-weight: bold;
+    color: white;
     background-color: #333333;
 }
 
-#draft_board tr.round:nth-of-type(even) th.round_number::after {
+#draft_board tr.round:nth-of-type(even) .round_number::after {
     content: " \2192";
 }
 
-#draft_board tr.round:nth-of-type(odd) th.round_number::before {
+#draft_board tr.round:nth-of-type(odd) .round_number::before {
     content: " \2190";
 }
 
-#draft_board th.round_number {
+#draft_board .round_number {
     width: 60px;
 }
 
