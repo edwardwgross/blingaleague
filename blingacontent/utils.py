@@ -260,8 +260,10 @@ def add_player_links_to_text(old_body):
             except IndexError:
                 name_3 = name_2
 
-            player_2 = Player(name_2)
-            player_3 = Player(name_3)
+            # key caching has length limit, so do *something* to prevent that
+            name_max_len = 100
+            player_2 = Player(name_2[:100])
+            player_3 = Player(name_3[:100])
 
             # test longest name first, in case in contains a shorter one
             if player_3.has_data:
