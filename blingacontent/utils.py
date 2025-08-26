@@ -11,7 +11,7 @@ from googleapiclient.discovery import build
 from oauth2client import file, client, tools
 
 from blingaleague.models import Week, Season, TeamSeason, PLAYOFF_TEAMS, \
-                                Member, FakeMember, \
+                                Member, FakeMember, Player, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
                                 BLINGABOWL_TITLE_BASE
 from blingaleague.utils import regular_season_weeks, blingabowl_week, semifinals_week
@@ -236,3 +236,48 @@ def print_current_playoff_odds(season=None):
         for team, team_odds in sorted(odds.items(), key=lambda x: x[1][type], reverse=True):
             print("{:.0%}: {}".format(team_odds[type], team))
         print('')
+
+
+def add_player_links_to_text(old_body):
+    newline_char = '\r\n'
+    old_lines = old_body.split(newline_char)
+    new_lines = []
+
+    for line in old_lines:
+        old_words = line.strip().split(' ')
+        new_words = []
+        index = 0
+        while index < len(old_words):
+            offset = 0
+
+            try:
+                name_2 = "{} {}".format(old_words[index], old_words[index + 1])
+            except IndexError:
+                name_2 = old_words[index]
+
+            try:
+                name_3 = "{} {}".format(name_2, old_words[index + 2])
+            except IndexError:
+                name_3 = name_2
+
+            player_2 = Player(name_2)
+            player_3 = Player(name_3)
+
+            # test longest name first, in case in contains a shorter one
+            if player_3.has_data:
+                new_word = "[{}]({})".format(name_3, player_3.gazette_link)
+                offset = 2
+            elif player_2.has_data:
+                new_word = "[{}]({})".format(name_2, player_2.gazette_link)
+                offset = 1
+            else:
+                new_word = old_words[index]
+                offset = 0
+
+            new_words.append(new_word)
+            index = index + 1 + offset
+
+        new_lines.append(' '.join(new_words))
+
+    return newline_char.join(new_lines)
+

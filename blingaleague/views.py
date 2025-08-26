@@ -564,7 +564,7 @@ class PlayerView(TemplateView):
     def get(self, request, player):
         player = Player(player)
 
-        if not player.transactions_list:
+        if not player.has_data:
             raise Http404("No history of player {}".format(player))
 
         context = {'player': player}

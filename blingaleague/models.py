@@ -4176,7 +4176,19 @@ class Player(ComparableObject):
     def __init__(self, name):
         self.name = name
 
-        self.cache_key = slugify(name)
+        self.cache_key = slugify(
+            name,
+            lowercase=False,  # different capitalization = different player
+            replacements=(
+                # edge case when the gazette might be trying to re-link a player name
+                ('[', 'bracket-'),
+                (']', '-bracket'),
+            ),
+        )
+
+    @fully_cached_property
+    def has_data(self):
+        return bool(self.transactions_by_year)
 
     @fully_cached_property
     def notes(self):
@@ -4389,6 +4401,16 @@ class Player(ComparableObject):
                 print(player_obj)
                 player_obj.name = new_name
                 player_obj.save()
+
+    @fully_cached_property
+    def gazette_link(self):
+        return "{}{}".format(
+            settings.FULL_SITE_URL,
+            urlresolvers.reverse_lazy(
+                'blingaleague.player',
+                args=(self.name,),
+            ),
+        )
 
     @classmethod
     def all(cls):

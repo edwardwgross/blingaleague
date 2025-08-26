@@ -13,7 +13,8 @@ from tagging.fields import TagField
 from blingaleague.models import Member, EXPANSION_SEASON
 from blingaleague.utils import clear_cached_properties
 
-from .utils import send_gazette_to_members, new_gazette_body_template
+from .utils import send_gazette_to_members, new_gazette_body_template, \
+                   add_player_links_to_text
 
 
 class Meme(models.Model):
@@ -106,6 +107,8 @@ class Gazette(models.Model):
         )
 
     def to_html(self, for_email=False, include_css=False):
+        self.body = add_player_links_to_text(self.body)
+
         html_str = render_to_string(
             'blingacontent/gazette_body.html',
             {
