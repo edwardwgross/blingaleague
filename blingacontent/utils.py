@@ -238,6 +238,46 @@ def print_current_playoff_odds(season=None):
         print('')
 
 
+def build_player_link(raw_name):
+    allowed_special_chars = ' -.,\'()'
+    lead_chars = ''
+    trail_chars = ''
+    clean_name = ''
+
+    for letter in raw_name:
+        if not (letter.isalnum() or letter in allowed_special_chars):
+            return None
+
+        if len(clean_name) >= 1 or letter.isalnum():
+            clean_name += letter
+        else:
+            lead_chars += letter
+
+    raw_name = clean_name
+    clean_name = ''
+    for letter in raw_name[::-1]:
+        if len(clean_name) >= 1 or letter.isalnum():
+            clean_name = letter + clean_name
+        elif letter == '.' and raw_name[-3:] in ('Jr.', 'Sr.'):
+            clean_name = letter + clean_name
+        else:
+            trail_chars = letter + trail_chars
+
+    if len(clean_name) >= 1:
+        # key caching has length limit, so do *something* to prevent that
+        name_max_len = 100
+        player_obj = Player(clean_name[:name_max_len])
+        if player_obj.has_data:
+            return "{}[{}]({}){}".format(
+                lead_chars,
+                clean_name,
+                player_obj.gazette_link,
+                trail_chars,
+            )
+
+    return None
+
+
 def add_player_links_to_text(old_body):
     newline_char = '\r\n'
     old_lines = old_body.split(newline_char)
@@ -250,8 +290,10 @@ def add_player_links_to_text(old_body):
         while index < len(old_words):
             offset = 0
 
+            name_1 = old_words[index]
+
             try:
-                name_2 = "{} {}".format(old_words[index], old_words[index + 1])
+                name_2 = "{} {}".format(name_1, old_words[index + 1])
             except IndexError:
                 name_2 = old_words[index]
 
@@ -260,20 +302,22 @@ def add_player_links_to_text(old_body):
             except IndexError:
                 name_3 = name_2
 
-            # key caching has length limit, so do *something* to prevent that
-            name_max_len = 100
-            player_2 = Player(name_2[:100])
-            player_3 = Player(name_3[:100])
+            player_1_link = build_player_link(name_1)
+            player_2_link = build_player_link(name_2)
+            player_3_link = build_player_link(name_3)
 
             # test longest name first, in case in contains a shorter one
-            if player_3.has_data:
-                new_word = "[{}]({})".format(name_3, player_3.gazette_link)
+            if player_3_link:
+                new_word = player_3_link
                 offset = 2
-            elif player_2.has_data:
-                new_word = "[{}]({})".format(name_2, player_2.gazette_link)
+            elif player_2_link:
+                new_word = player_2_link
                 offset = 1
+            elif player_1_link:
+                new_word = player_1_link
+                offset = 0
             else:
-                new_word = old_words[index]
+                new_word = name_1
                 offset = 0
 
             new_words.append(new_word)
