@@ -1775,10 +1775,15 @@ class TeamSeason(ComparableObject):
         )]
 
         if self.playoff_finish and not self.is_partial:
-            subheadings.extend([
+            subheadings.append(
                 "{} place (regular season)".format(self.headline_season.place),
-                "{} (playoffs)".format(self.playoff_finish),
-            ])
+            )
+
+            # for the Blingabowl champion, don't bother with '(playoffs)'
+            if self.playoff_finish_numeric > 1:
+                subheadings.append("{} (playoffs)".format(self.playoff_finish))
+            else:
+                subheadings.append(self.playoff_finish)
         else:
             subheadings.append("{} place".format(self.headline_season.place))
 
