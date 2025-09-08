@@ -130,6 +130,15 @@ def calculate_expected_wins(*game_scores_with_year, base_year=None, include_play
         total_denomator += factor
 
     def _win_expectancy(test_score):
+        cache_key = "blingaleague_score_win_expectancy|{:.2f}|{}|{}".format(
+            test_score,
+            base_year,
+            include_playoffs,
+        )
+        cached_value = CACHE.get(cache_key)
+        if cached_value:
+            return cached_value
+
         win_sum = 0
         tie_sum = 0
         total_sum = 0
@@ -142,9 +151,15 @@ def calculate_expected_wins(*game_scores_with_year, base_year=None, include_play
 
         total_numerator = win_sum + HALF * tie_sum
 
-        return total_numerator / total_denomator
+        win_expectancy_value = total_numerator / total_denomator
 
-    return sum(_win_expectancy(score) for score in game_scores_with_year)
+        CACHE.set(cache_key, win_expectancy_value)
+
+        return win_expectancy_value
+
+    expected_wins = sum(_win_expectancy(score) for score in game_scores_with_year)
+
+    return expected_wins
 
 
 class ComparableObject(object):
