@@ -130,15 +130,6 @@ def calculate_expected_wins(*game_scores_with_year, base_year=None, include_play
         total_denomator += factor
 
     def _win_expectancy(test_score):
-        cache_key = "blingaleague_score_win_expectancy|{:.2f}|{}|{}".format(
-            test_score,
-            base_year,
-            include_playoffs,
-        )
-        cached_value = CACHE.get(cache_key)
-        if cached_value:
-            return cached_value
-
         win_sum = 0
         tie_sum = 0
         total_sum = 0
@@ -152,8 +143,6 @@ def calculate_expected_wins(*game_scores_with_year, base_year=None, include_play
         total_numerator = win_sum + HALF * tie_sum
 
         win_expectancy_value = total_numerator / total_denomator
-
-        CACHE.set(cache_key, win_expectancy_value)
 
         return win_expectancy_value
 
@@ -4524,31 +4513,20 @@ class RingOfHonoree(models.Model, ComparableObject):
         ordering = ('team', 'name')
 
 
-def build_object_cache(obj):
-    print("{}: building cache for {}".format(datetime.datetime.now(), obj))
-    for attr in dir(obj):
-        # just getting the property will cache it if it isn't already
-        getattr(obj, attr)
+def pre_build_cache():
 
-
-def build_all_objects_cache():
+    logger = logging.getLogger('blingaleague')
 
     try:
-        all_game_years = Game.objects.order_by('year').values_list('year', flat=True)
-        min_year = all_game_years.first()
-        max_year = all_game_years.last()
+        for team_season in TeamSeason.all():
+            _wins = team_season.win_count
+            _losses = team_season.loss_count
+            _points = team_season.points
+            _expected_win_pct = team_season.expected_win_pct
+            _expected_win_pct_against = team_season.expected_win_pct_against
 
-        year_range = range(min_year, max_year + 1)
-
-        for member in Member.objects.all():
-            for year in year_range:
-                build_object_cache(TeamSeason(member.pk, year))
-
-            for other_member in Member.objects.all():
-                build_object_cache(Matchup(member.pk, other_member.pk))
-
-        for year in year_range:
-            build_object_cache(Season(year))
+            logger.info("Pre-built cache for {}".format(team_season))
+            print("Pre-built cache for {}".format(team_season))
 
     except Exception:
         # print if we're in the shell, but don't actually raise
@@ -4559,4 +4537,4 @@ def build_all_objects_cache():
 def rebuild_whole_cache():
     clear_cached_properties()
 
-    build_all_objects_cache()
+    pre_build_cache()
