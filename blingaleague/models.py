@@ -4513,10 +4513,13 @@ class RingOfHonoree(models.Model, ComparableObject):
         ordering = ('team', 'name')
 
 
-def pre_build_cache():
-
+def _print_and_log(message):
     logger = logging.getLogger('blingaleague')
+    logger.info(message)
+    print(message)
 
+
+def pre_build_cache():
     try:
         for team_season in TeamSeason.all():
             _wins = team_season.win_count
@@ -4525,8 +4528,16 @@ def pre_build_cache():
             _expected_win_pct = team_season.expected_win_pct
             _expected_win_pct_against = team_season.expected_win_pct_against
 
-            logger.info("Pre-built cache for {}".format(team_season))
-            print("Pre-built cache for {}".format(team_season))
+            _print_and_log("Pre-built cache for {}".format(team_season))
+
+        for season in Season.all():
+            _average = season.average_game_score
+            _first = season.first_place
+            _last = season.last_place
+            _points = season.most_points
+            _expected_wins = season.most_expected_wins
+
+            _print_and_log("Pre-built cache for {}".format(season))
 
     except Exception:
         # print if we're in the shell, but don't actually raise
