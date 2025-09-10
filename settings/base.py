@@ -2,6 +2,8 @@ from pathlib import Path
 
 #DEBUG = TEMPLATE_DEBUG = True
 
+#DJANGO_CPROFILE_MIDDLEWARE_REQUIRE_STAFF = False
+
 SECRET_KEY = 's4nders0n'
 
 INFO = False
@@ -10,11 +12,7 @@ TEMPLATE_INFO = INFO
 ALLOWED_HOSTS = (
     'www.blingaleague.com',
     'blingaleague.com',
-    '34.221.179.171',
-    '34.216.141.213',
-    '54.185.247.21',
-    '35.88.144.143',
-    '35.89.205.190',
+    '44.242.225.40',
 )
 
 ROOT_URLCONF = 'blingaleague.urls'
@@ -63,10 +61,11 @@ MIDDLEWARE_CLASSES = (
     # Django 1.7: 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     #'request.middleware.RequestMiddleware',  # 2019-10-02 request/models.py having issues with user model
     'django.contrib.messages.middleware.MessageMiddleware',
+    #'django_cprofile_middleware.middleware.ProfilerMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'blingacontent.context_processors.memes',
+    #'blingacontent.context_processors.memes',
     'blingaleague.context_processors.auth_member',
     'django.contrib.auth.context_processors.auth',
     'django.template.context_processors.request',
