@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from httplib2 import Http
 
 from django.conf import settings
+from django.core.cache import caches
 
 from googleapiclient.discovery import build
 
@@ -16,6 +17,8 @@ from blingaleague.models import Week, Season, TeamSeason, PLAYOFF_TEAMS, \
                                 BLINGABOWL_TITLE_BASE
 from blingaleague.utils import regular_season_weeks, blingabowl_week, semifinals_week
 
+
+CACHE = caches['blingaleague']
 
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
@@ -278,9 +281,13 @@ def build_player_link(raw_name):
     return None
 
 
-def add_player_links_to_text(old_body):
+def add_player_links_to_text(gazette):
+    cached_body = CACHE.get(gazette.body_cache_key)
+    if cached_body:
+        return cached_body
+
     newline_char = '\r\n'
-    old_lines = old_body.split(newline_char)
+    old_lines = gazette.body.split(newline_char)
     new_lines = []
 
     for line in old_lines:
@@ -325,5 +332,9 @@ def add_player_links_to_text(old_body):
 
         new_lines.append(' '.join(new_words))
 
-    return newline_char.join(new_lines)
+    new_body = newline_char.join(new_lines)
+
+    CACHE.set(gazette.body_cache_key, new_body)
+
+    return new_body
 

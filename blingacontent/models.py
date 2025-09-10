@@ -1,7 +1,10 @@
+import threading
+
 from pathlib import Path
 
 from django.conf import settings
 from django.core import urlresolvers
+from django.core.cache import caches
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
 from django.template.loader import render_to_string
@@ -10,11 +13,14 @@ from slugify import slugify
 
 from tagging.fields import TagField
 
-from blingaleague.models import Member, EXPANSION_SEASON
+from blingaleague.models import Member, EXPANSION_SEASON, pre_build_cache
 from blingaleague.utils import clear_cached_properties
 
 from .utils import send_gazette_to_members, new_gazette_body_template, \
                    add_player_links_to_text
+
+
+CACHE = caches['blingaleague']
 
 
 class Meme(models.Model):
@@ -48,6 +54,11 @@ class Gazette(models.Model):
             return 'not published'
 
         return self.published_date.strftime('%Y-%m-%d')
+
+    @property
+    def body_cache_key(self):
+        return "gazette_body_with_player_links|{}".format(self.pk)
+
 
     @property
     def previous(self):
@@ -107,7 +118,7 @@ class Gazette(models.Model):
         )
 
     def to_html(self, for_email=False, include_css=False):
-        self.body = add_player_links_to_text(self.body)
+        self.body = add_player_links_to_text(self)
 
         html_str = render_to_string(
             'blingacontent/gazette_body.html',
@@ -155,6 +166,8 @@ class Gazette(models.Model):
         super().clean()
 
     def save(self, *args, **kwargs):
+        CACHE.delete(self.body_cache_key)
+
         self.slug = slugify(
             "{}-{}".format(
                 self.published_date_str,
@@ -165,6 +178,10 @@ class Gazette(models.Model):
         if self.publish_flag and not self.email_sent:
             self.send()
             self.email_sent = True
+
+            # prep the site for incoming traffic
+            thread = threading.Thread(target=pre_build_cache, daemon=True)
+            thread.start()
 
         super().save(*args, **kwargs)
 
