@@ -266,6 +266,10 @@ def build_player_link(raw_name):
         else:
             trail_chars = letter + trail_chars
 
+    if clean_name.endswith('\'s'):
+        clean_name = clean_name[:-2]
+        trail_chars = '\'s' + trail_chars
+
     if len(clean_name) >= 1:
         # key caching has length limit, so do *something* to prevent that
         name_max_len = 100
