@@ -12,7 +12,7 @@ TEMPLATE_INFO = INFO
 ALLOWED_HOSTS = (
     'www.blingaleague.com',
     'blingaleague.com',
-    '44.242.225.40',
+    '54.213.236.115',
 )
 
 ROOT_URLCONF = 'blingaleague.urls'
