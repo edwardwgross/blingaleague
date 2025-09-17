@@ -4195,22 +4195,22 @@ class Player(ComparableObject):
             ),
         )
 
-    @fully_cached_property
+    @property
     def has_data(self):
         return bool(self.transactions_by_year)
 
-    @fully_cached_property
+    @property
     def notes(self):
         try:
             return PlayerNotes.objects.get(pk=self.name)
         except PlayerNotes.DoesNotExist:
             return None
 
-    @fully_cached_property
+    @property
     def drafted(self):
         return self._drafted()
 
-    @fully_cached_property
+    @property
     def drafted_live(self):
         return self._drafted(live_picks_only=True)
 
@@ -4225,7 +4225,7 @@ class Player(ComparableObject):
 
         return drafted
 
-    @fully_cached_property
+    @property
     def kept(self):
         kept = defaultdict(list)
 
@@ -4234,7 +4234,7 @@ class Player(ComparableObject):
 
         return kept
 
-    @fully_cached_property
+    @property
     def traded(self):
         traded = defaultdict(list)
 
@@ -4243,7 +4243,7 @@ class Player(ComparableObject):
 
         return traded
 
-    @fully_cached_property
+    @property
     def transactions_by_year(self):
         if not self.drafted and not self.kept and not self.traded:
             return {}
@@ -4264,7 +4264,7 @@ class Player(ComparableObject):
 
         return transactions
 
-    @fully_cached_property
+    @property
     def transactions_list(self):
         transactions_list = []
 
@@ -4274,7 +4274,7 @@ class Player(ComparableObject):
 
         return transactions_list
 
-    @fully_cached_property
+    @property
     def teams_rostered_by(self):
         teams = set()
 
@@ -4286,7 +4286,7 @@ class Player(ComparableObject):
 
         return teams
 
-    @fully_cached_property
+    @property
     def final_team_rostered_by(self):
         final_teams = {}
 
@@ -4311,7 +4311,7 @@ class Player(ComparableObject):
 
         return final_teams
 
-    @fully_cached_property
+    @property
     def championships(self):
         championships = 0
 
@@ -4321,7 +4321,7 @@ class Player(ComparableObject):
 
         return championships
 
-    @fully_cached_property
+    @property
     def positions(self):
         positions = set()
 
@@ -4331,7 +4331,7 @@ class Player(ComparableObject):
 
         return positions
 
-    @fully_cached_property
+    @property
     def average_draft_slot(self):
         overall_pick_slots = []
 
@@ -4392,7 +4392,7 @@ class Player(ComparableObject):
 
         return legacy_teams
 
-    @fully_cached_property
+    @property
     def rings_of_honor(self):
         return RingOfHonoree.objects.filter(name=self.name)
 
@@ -4411,7 +4411,7 @@ class Player(ComparableObject):
                 player_obj.name = new_name
                 player_obj.save()
 
-    @fully_cached_property
+    @property
     def gazette_link(self):
         return "{}{}".format(
             settings.FULL_SITE_URL,
@@ -4459,7 +4459,7 @@ class PlayerNotes(models.Model, ComparableObject):
     def cache_key(self):
         return slugify(self.pk)
 
-    @fully_cached_property
+    @property
     def player(self):
         return Player(self.name)
 
@@ -4491,11 +4491,11 @@ class RingOfHonoree(models.Model, ComparableObject):
     def cache_key(self):
         return self.pk
 
-    @fully_cached_property
+    @property
     def name_team(self):
         return "{}|{}".format(self.name, self.team)
 
-    @fully_cached_property
+    @property
     def player(self):
         return Player(self.name)
 
