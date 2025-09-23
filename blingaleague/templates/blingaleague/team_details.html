@@ -40,11 +40,11 @@
           <td>{{ team_season.win_count }}</td>
           <td>{{ team_season.loss_count }}</td>
           <td>{{ team_season.points|intcomma }}</td>
-          <td>{{ team_season.average_score|floatformat:2 }}</td>
-          <td>{{ team_season.expected_wins|floatformat:2 }}</td>
-          <td>{{ team_season.expected_win_pct|floatformat:3 }}</td>
-          <td>{{ team_season.strength_of_schedule_str }}</td>
-          <td>{{ team_season.all_play_win_pct|floatformat:3 }}</td>
+          <td sorttable_customkey="{{ team_season.average_score }}">{{ team_season.average_score|floatformat:2 }}</td>
+          <td sorttable_customkey="{{ team_season.expected_wins }}">{{ team_season.expected_wins|floatformat:2 }}</td>
+          <td sorttable_customkey="{{ team_season.expected_win_pct }}">{{ team_season.expected_win_pct|floatformat:3 }}</td>
+          <td sorttable_customkey="{{ team_season.strength_of_schedule }}">{{ team_season.strength_of_schedule_str }}</td>
+          <td sorttable_customkey="{{ team_season.all_play_win_pct }}">{{ team_season.all_play_win_pct|floatformat:3 }}</td>
           <td>{{ team_season.blangums_count }}</td>
           <td>{{ team_season.slapped_heartbeat_count }}</td>
           {% if team.playoff_seasons %}<td style="text-align:left">{{ team_season.playoff_finish }}</td>{% endif %}
