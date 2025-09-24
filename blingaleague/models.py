@@ -3529,11 +3529,16 @@ class Week(ComparableObject):
 
 class Matchup(object):
 
-    def __init__(self, team1_id, team2_id):
+    def __init__(self, team1_id, team2_id, year_min=None):
         self.team1 = Member.objects.get(id=team1_id)
         self.team2 = Member.objects.get(id=team2_id)
 
-        self.cache_key = "{}|{}".format(team1_id, team2_id)
+        if year_min is None:
+            year_min = Season.min().year
+
+        self.year_min = year_min
+
+        self.cache_key = "{}|{}|{}".format(team1_id, team2_id, year_min)
 
     @fully_cached_property
     def games(self):
@@ -3542,11 +3547,19 @@ class Matchup(object):
 
     @fully_cached_property
     def team1_wins(self):
-        return list(Game.objects.filter(winner=self.team1, loser=self.team2))
+        return list(Game.objects.filter(
+            winner=self.team1,
+            loser=self.team2,
+            year__gte=self.year_min,
+        ))
 
     @fully_cached_property
     def team2_wins(self):
-        return list(Game.objects.filter(winner=self.team2, loser=self.team1))
+        return list(Game.objects.filter(
+            winner=self.team2,
+            loser=self.team1,
+            year__gte=self.year_min,
+        ))
 
     @fully_cached_property
     def team1_win_count(self):
@@ -3564,7 +3577,11 @@ class Matchup(object):
     def trades(self):
         trades = set()
 
-        for asset in TradedAsset.objects.filter(receiver=self.team1):
+        traded_assets = TradedAsset.objects.filter(
+            receiver=self.team1,
+            trade__year__gte=self.year_min,
+        )
+        for asset in traded_assets:
             if self.team2.id in asset.trade.team_ids:
                 trades.add(asset.trade)
 
@@ -3624,11 +3641,11 @@ class Matchup(object):
         )
 
     @classmethod
-    def get_all_for_team(cls, team1_id):
+    def get_all_for_team(cls, team1_id, year_min=None):
         team2_id_list = Member.objects.all().order_by(
             'defunct', 'nickname',
         ).values_list('id', flat=True)
-        return [cls(team1_id, team2_id) for team2_id in team2_id_list]
+        return [cls(team1_id, team2_id, year_min=year_min) for team2_id in team2_id_list]
 
     @classmethod
     def all(cls):

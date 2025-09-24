@@ -5,7 +5,7 @@
 {% block content %}
 <h1>Team vs. Team</h1>
 
-<h2>Records</h2>
+<h2>Records {% if year_min %}({{ year_min }}-present){% endif %}</h2>
 
 <table class="team_vs_team_grid blingalytics">
   <tr>
@@ -34,7 +34,7 @@
   {% endfor %}
 </table>
 
-<h2>Trades</h2>
+<h2>Trades {% if year_min %}({{ year_min }}-present){% endif %}</h2>
 
 <table class="team_vs_team_grid blingalytics">
   <tr>

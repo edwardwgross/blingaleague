@@ -1092,11 +1092,26 @@ class TeamVsTeamView(TemplateView):
     template_name = 'blingalytics/team_vs_team.html'
 
     def get(self, request):
+        year_min_arg = None
+        try:
+            year_min_arg = int(request.GET.get('year_min', None))
+
+            if not (Season.min().year <= year_min_arg <= Season.max().year):
+                year_min_arg = None
+        except (ValueError, TypeError):
+            year_min_arg = None
+
         teams = Member.objects.all().order_by('defunct', 'nickname')
 
-        grid = [{'team': team, 'matchups': Matchup.get_all_for_team(team.id)} for team in teams]
+        grid = [{
+            'team': team,
+            'matchups': Matchup.get_all_for_team(
+                team.id,
+                year_min=year_min_arg,
+            ),
+        } for team in teams]
 
-        context = {'grid': grid, 'teams': teams}
+        context = {'grid': grid, 'teams': teams, 'year_min': year_min_arg}
 
         return self.render_to_response(context)
 
