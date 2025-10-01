@@ -1509,35 +1509,40 @@ class TeamSeason(ComparableObject):
         return self._vs_score_list(opponent_season.game_scores_against)
 
     @fully_cached_property
+    def points_rank(self):
+        return self.rank_by_stat('points')
+
+    @fully_cached_property
+    def expected_wins_rank(self):
+        return self.rank_by_stat('expected_wins')
+
+    def rank_by_stat(self, stat):
+        sorted_table = sorted(
+            Season(self.year, week_max=len(self.games)).standings_table,
+            key=lambda x: getattr(x, stat),
+            reverse=True,
+        )
+
+        for rank, team_season in enumerate(sorted_table, 1):
+            if team_season.team == self.team:
+                return rank
+
+        return None
+
+    @fully_cached_property
     def rank_by_week(self):
         rank_by_week = {}
-
-        stats_to_rank = [
-            {'attr': 'points', 'name': 'points'},
-            {'attr': 'expected_wins', 'name': 'expected wins'},
-        ]
 
         week_max = min(len(self.games), regular_season_weeks(self.year))
         week = 1
         while week <= week_max:
             ts_week = TeamSeason(self.team.id, self.year, week_max=week)
-            week_ranks = {
+
+            rank_by_week[week] = {
                 'place': ts_week.place_numeric,
+                'points': ts_week.points_rank,
+                'expected wins': ts_week.expected_wins_rank,
             }
-
-            for stat in stats_to_rank:
-                sorted_table = sorted(
-                    Season(self.year, week_max=week).standings_table,
-                    key=lambda x: getattr(x, stat['attr']),
-                    reverse=True,
-                )
-
-                for rank, ts in enumerate(sorted_table, 1):
-                    if ts.team == self.team:
-                        week_ranks[stat['name']] = rank
-                        break
-
-            rank_by_week[week] = week_ranks
 
             week += 1
 
