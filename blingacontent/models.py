@@ -59,7 +59,6 @@ class Gazette(models.Model):
     def body_cache_key(self):
         return "gazette_body_with_player_links|{}".format(self.pk)
 
-
     @property
     def previous(self):
         if not self.publish_flag:

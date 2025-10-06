@@ -341,4 +341,3 @@ def add_player_links_to_text(gazette):
     CACHE.set(gazette.body_cache_key, new_body)
 
     return new_body
-

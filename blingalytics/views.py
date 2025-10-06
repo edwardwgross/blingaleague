@@ -1175,7 +1175,7 @@ class PlayoffOddsView(TemplateView):
 
         playoff_odds_table = []
         results_ready = False
-        no_results_message = 'Playoff odds are currently being run and are not yet ready.  Please try again in a few minutes.'
+        no_results_message = 'Playoff odds are currently being run and are not yet ready.  Please try again in a few minutes.'  # noqa: E501
 
         cached_playoff_odds = season.get_cached_playoff_odds()
 

@@ -94,7 +94,7 @@ def compare_two_scores(score1, score2):
 
 
 # deprecated as of 2025-01-25 (to be deleted once we are happy with results)
-def _calculate_expected_wins_simple(*game_scores, year_min=None, year_max=None, include_playoffs=False):
+def _calculate_expected_wins_simple(*game_scores, year_min=None, year_max=None, include_playoffs=False):  # noqa: E501
     all_scores = Game.all_scores(
         year_min=year_min,
         year_max=year_max,
@@ -112,7 +112,7 @@ def _calculate_expected_wins_simple(*game_scores, year_min=None, year_max=None, 
     return sum(_win_expectancy(score) for score in game_scores)
 
 
-def calculate_expected_wins(*game_scores_with_year, base_year=None, include_playoffs=False):  # noqa: E501
+def calculate_expected_wins(*game_scores, base_year=None, include_playoffs=False):  # noqa: E501
     all_scores_with_year = Game.all_scores_with_year(include_playoffs=include_playoffs)
 
     def _smoothing_factor(given_year):
@@ -132,7 +132,6 @@ def calculate_expected_wins(*game_scores_with_year, base_year=None, include_play
     def _win_expectancy(test_score):
         win_sum = 0
         tie_sum = 0
-        total_sum = 0
 
         for score, factor in all_scores_with_factor:
             if score < test_score:
@@ -146,7 +145,7 @@ def calculate_expected_wins(*game_scores_with_year, base_year=None, include_play
 
         return win_expectancy_value
 
-    expected_wins = sum(_win_expectancy(score) for score in game_scores_with_year)
+    expected_wins = sum(_win_expectancy(score) for score in game_scores)
 
     return expected_wins
 
@@ -4544,20 +4543,20 @@ def _print_and_log(message):
 def pre_build_cache():
     try:
         for team_season in TeamSeason.all():
-            _wins = team_season.win_count
-            _losses = team_season.loss_count
-            _points = team_season.points
-            _expected_win_pct = team_season.expected_win_pct
-            _expected_win_pct_against = team_season.expected_win_pct_against
+            _wins = team_season.win_count  # noqa: F841
+            _losses = team_season.loss_count  # noqa: F841
+            _points = team_season.points  # noqa: F841
+            _expected_win_pct = team_season.expected_win_pct  # noqa: F841
+            _expected_win_pct_against = team_season.expected_win_pct_against  # noqa: F841
 
             _print_and_log("Pre-built cache for {}".format(team_season))
 
         for season in Season.all():
-            _average = season.average_game_score
-            _first = season.first_place
-            _last = season.last_place
-            _points = season.most_points
-            _expected_wins = season.most_expected_wins
+            _average = season.average_game_score  # noqa: F841
+            _first = season.first_place  # noqa: F841
+            _last = season.last_place  # noqa: F841
+            _points = season.most_points  # noqa: F841
+            _expected_wins = season.most_expected_wins  # noqa: F841
 
             _print_and_log("Pre-built cache for {}".format(season))
 

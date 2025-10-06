@@ -220,7 +220,7 @@ def rank_over_time_graph_html(
 
     def _invert_rank(rank):
         if rank:
-           return total_teams - rank
+            return total_teams - rank
         return None
 
     rank_series = {}

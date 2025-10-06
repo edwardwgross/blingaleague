@@ -1,5 +1,3 @@
-import logging
-
 from django.core.management.base import BaseCommand
 
 from blingalytics.utils import CACHE, PLAYOFF_ODDS_QUEUE_CACHE_KEY, \
