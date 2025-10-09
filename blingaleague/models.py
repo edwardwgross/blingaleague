@@ -3660,7 +3660,7 @@ class Matchup(object):
         ).values_list('id', flat=True)
 
         for team_id in team_id_list:
-            all_matchups.extend(cls.get_all_for_team(team_id, year_min=None))
+            all_matchups.extend(cls.get_all_for_team(team_id, year_min=year_min))
 
         return all_matchups
 
