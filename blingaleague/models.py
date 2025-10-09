@@ -3652,7 +3652,7 @@ class Matchup(object):
         return [cls(team1_id, team2_id, year_min=year_min) for team2_id in team2_id_list]
 
     @classmethod
-    def all(cls):
+    def all(cls, year_min=None):
         all_matchups = []
 
         team_id_list = Member.objects.all().order_by(
@@ -3660,7 +3660,7 @@ class Matchup(object):
         ).values_list('id', flat=True)
 
         for team_id in team_id_list:
-            all_matchups.extend(cls.get_all_for_team(team_id))
+            all_matchups.extend(cls.get_all_for_team(team_id, year_min=None))
 
         return all_matchups
 
