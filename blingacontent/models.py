@@ -117,7 +117,9 @@ class Gazette(models.Model):
         )
 
     def to_html(self, for_email=False, include_css=False):
-        self.body = add_player_links_to_text(self)
+        # XXX removed 2025-10-15 to speed up loading; bring this back
+        # once there's a better caching method
+        #self.body = add_player_links_to_text(self)
 
         html_str = render_to_string(
             'blingacontent/gazette_body.html',
