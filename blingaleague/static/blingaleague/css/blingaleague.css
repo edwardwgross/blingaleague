@@ -26,7 +26,6 @@
 .center {
     clear: both;
     text-align: center;
-    max-width: 600px;
 }
 
 .level_up_link {
@@ -339,7 +338,7 @@ table#team_list td {
 }
 
 svg.pygal-chart {
-    width: 600px;
+    width: 800px;
 }
 
 .wide_graph {
@@ -370,7 +369,7 @@ svg.pygal-chart {
     padding: 12px 24px;
     text-align: center;
     border-bottom: 1px solid #41b6e6;
-    width: 600px;
+    width: 800px;
 }
 
 #games .game:last-of-type,

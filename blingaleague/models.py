@@ -3737,9 +3737,18 @@ class Trade(models.Model, ComparableObject):
 
         grouped_assets = []
         for team in sorted(self.teams):
+            assets_received = assets_by_receiver[team]
+
+            value_received = 0
+            for asset in assets_received:
+                player = Player(asset.name)
+                if player.drafted[self.year]:
+                    value_received += player.drafted[self.year][0].pick_value
+
             grouped_assets.append({
                 'team': team,
-                'assets_received': assets_by_receiver[team],
+                'assets_received': assets_received,
+                'value_received': value_received,
             })
 
         return grouped_assets

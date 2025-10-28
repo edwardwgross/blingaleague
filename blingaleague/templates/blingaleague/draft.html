@@ -7,7 +7,7 @@
 
 <h3><a href="{{ draft.season.href }}">{{ draft.season }}</a></h3>
 
-<div class="center">
+<div class="center" {% if list_view %}style="width:800px"{% endif %}>
   {% if draft.previous %}
     <a href="{{ draft.previous.href }}{% if board_view %}?board_view{% endif %}" class="link previous">{{ draft.previous|title }}</a>
   {% endif %}

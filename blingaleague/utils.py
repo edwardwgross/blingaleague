@@ -13,7 +13,7 @@ CACHE = caches['blingaleague']
 MEMCACHE_KEY_LENGTH_LIMIT = 250
 
 GRAPH_DEFAULT_OPTIONS = {
-    'width': 600,
+    'width': 800,
     'height': 400,
     'margin': 12,
     'max_scale': 6,
