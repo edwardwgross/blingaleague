@@ -9,7 +9,7 @@
 
 <div class="center" {% if list_view %}style="width:800px"{% endif %}>
   {% if draft.previous %}
-    <a href="{{ draft.previous.href }}{% if board_view %}?board_view{% endif %}" class="link previous">{{ draft.previous|title }}</a>
+    <a href="{{ draft.previous.href }}{% if list_view %}?list_view{% endif %}" class="link previous">{{ draft.previous|title }}</a>
   {% endif %}
 
   {% if list_view %}
@@ -19,7 +19,7 @@
   {% endif %}
 
   {% if draft.next %}
-    <a href="{{ draft.next.href }}{% if board_view %}?board_view{% endif %}" class="link next">{{ draft.next|title }}</a>
+    <a href="{{ draft.next.href }}{% if list_view %}?list_view{% endif %}" class="link next">{{ draft.next|title }}</a>
   {% endif %}
 </div>
 
