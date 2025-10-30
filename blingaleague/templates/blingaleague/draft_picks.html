@@ -19,7 +19,7 @@
       <td>
         <a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a>
         {% if draft_pick.is_keeper %}<span class="blinganote" title="keeper">K</span>{% endif %}
-        {% if draft_pick.original_team %}<span class="blinganote" title="{% if draft_pick.is_keeper %}keeper{% else %}pick{% endif %} traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">T</span>{% endif %}
+        {% if draft.team_id and draft_pick.original_team %}<span class="blinganote" title="{% if draft_pick.is_keeper %}keeper{% else %}pick{% endif %} traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">T</span>{% endif %}
       </td>
       <td sorttable_customkey="{{ draft_pick.position_sort_key }}" class="draft_pick_pos_{{ draft_pick.position|lower }}">{{ draft_pick.position }}</td>
     </tr>
