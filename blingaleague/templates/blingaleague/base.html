@@ -87,7 +87,7 @@
                   </li>
                 {% endif %}
               {% else %}
-                <a href="{% url 'social:begin' 'google-oauth2' %}">Log in</a>
+                <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Log in</a>
               {% endif %}
             </li>
             {% comment %} <!-- deprecated navmenu links -->
