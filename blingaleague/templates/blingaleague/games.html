@@ -6,7 +6,7 @@
 <h1>{{ base_object }}</h1>
 
 {% for level_up_link in base_object.level_up_links %}
-  <h3 class="level_up_link"><a href="{{ level_up_link.href }}">[{{ level_up_link.description }}]</a></h3>
+  <h3 class="level_up_link"><a href="{{ level_up_link.href }}">{{ level_up_link.description }}</a></h3>
 {% endfor %}
 
 {% for subheading in base_object.subheadings %}

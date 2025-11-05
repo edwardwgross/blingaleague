@@ -33,6 +33,16 @@
     margin-right: 12px;
 }
 
+.level_up_link::before {
+    content: "[";
+    color: #a0a0a0;
+}
+
+.level_up_link::after {
+    content: "]";
+    color: #a0a0a0;
+}
+
 .table_footer {
     font-style: italic;
     font-size: 80%;
