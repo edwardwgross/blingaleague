@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth.views import login, logout
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 
 from .views import HomeView, TeamDetailsView, TeamListView,\
                    SeasonListView, SingleSeasonView,\
@@ -159,5 +159,21 @@ urlpatterns = [
     url(
         r'^admin/',
         include(admin.site.urls),
+    ),
+
+    # faux-static files
+    url(
+        r'robots.txt',
+        TemplateView.as_view(
+            template_name='robots.txt',
+            content_type='text/plain',
+        ),
+    ),
+    url(
+        r'ads.txt',
+        TemplateView.as_view(
+            template_name='ads.txt',
+            content_type='text/plain',
+        ),
     ),
 ]
