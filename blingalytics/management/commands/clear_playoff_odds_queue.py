@@ -11,3 +11,5 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         CACHE.delete(PLAYOFF_ODDS_QUEUE_CACHE_KEY)
         CACHE.delete(PLAYOFF_ODDS_ACTIVELY_RUNNING_CACHE_KEY)
+
+        print('Playoff odds queue cleared')
