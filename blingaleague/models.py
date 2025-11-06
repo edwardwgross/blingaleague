@@ -566,6 +566,14 @@ class Game(models.Model, AbstractGame):
     def team_2(self):
         return self.loser
 
+    @fully_cached_property
+    def team_1_season(self):
+        return TeamSeason(self.team_1.id, self.year)
+
+    @fully_cached_property
+    def team_2_season(self):
+        return TeamSeason(self.team_2.id, self.year)
+
     @property
     def win_probabilities(self):
         if self.week <= 1:

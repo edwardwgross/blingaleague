@@ -17,6 +17,7 @@
           <td>{{ game.winner_score }}</td>
           <td>{{ game.loser_score }}</td>
           <td style="text-align:left">
+            {% if game.is_playoffs %}#{{ game.loser_team_season.place_numeric }}{% endif %}
             <a href="{% url 'blingaleague.team_season' game.loser.id game.year %}">{{ game.loser }}</a>
           </td>
           <td>{{ game.margin }}</td>
@@ -32,6 +33,7 @@
           <td>{{ game.loser_score }}</td>
           <td>{{ game.winner_score }}</td>
           <td style="text-align:left">
+            {% if game.is_playoffs %}#{{ game.winner_team_season.place_numeric }}{% endif %}
             <a href="{% url 'blingaleague.team_season' game.winner.id game.year %}">{{ game.winner }}</a>
           </td>
           <td>-{{ game.margin }}</td>
@@ -53,8 +55,10 @@
         <td/> {# PA #}
         <td style="text-align:left">
           {% if base_object.team == game.team_1 %}
+            {% if game.is_playoffs %}#{{ game.team_2_season.place_numeric }}{% endif %}
             <a href="{% url 'blingaleague.team_season' game.team_2.id game.year %}">{{ game.team_2 }}</a>
           {% else %}
+            {% if game.is_playoffs %}#{{ game.team_1_season.place_numeric }}{% endif %}
             <a href="{% url 'blingaleague.team_season' game.team_1.id game.year %}">{{ game.team_1 }}</a>
           {% endif %}
         </td>
