@@ -16,6 +16,11 @@
     max-width: 900px;
 }
 
+#gazette_list li {
+    padding-left: 120px;
+    text-indent: -120px;
+}
+
 #gazette_body,
 #gazette_footer {
     width: 85%;
