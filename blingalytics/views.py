@@ -65,12 +65,12 @@ TOP_SEASONS_STATS = [
         'require_full_season': True,
     },
     {
-        'title': 'Highest Average Score',
+        'title': 'Most Points Per Game',
         'attr': 'average_score',
         'sort_desc': True,
     },
     {
-        'title': 'Lowest Average Score',
+        'title': 'Fewest Points Per Game',
         'attr': 'average_score',
     },
     {
@@ -107,12 +107,12 @@ TOP_SEASONS_STATS = [
         'require_full_season': True,
     },
     {
-        'title': 'Highest Average Score Against',
+        'title': 'Most Points Per Game Against',
         'attr': 'average_score_against',
         'sort_desc': True,
     },
     {
-        'title': 'Lowest Average Score Against',
+        'title': 'Fewest Points Per Game Against',
         'attr': 'average_score_against',
     },
     {
