@@ -1778,6 +1778,42 @@ class TeamSeason(ComparableObject):
         return None
 
     @fully_cached_property
+    def best_record(self):  # by games over .500, up to this point
+        most_over = None
+        most_over_ts = None
+
+        week = 1
+        while week <= len(self.games):
+            ts_week = TeamSeason(self.team.id, self.year, week_max=week)
+
+            over = ts_week.win_count - ts_week.loss_count
+            if most_over is None or over > most_over:
+                most_over = over
+                most_over_ts = ts_week
+
+            week += 1
+
+        return (most_over, most_over_ts)
+
+    @full_cached_property
+    def worst_record(self):  # by games under .500, up to this point
+        most_under = None
+        most_under_ts = None
+
+        week = 1
+        while week <= len(self.games):
+            ts_week = TeamSeason(self.team.id, self.year, week_max=week)
+
+            under = ts_week.win_count - ts_week.loss_count
+            if most_under is None or under < most_under:
+                most_under = under
+                most_under_ts = ts_week
+
+            week += 1
+
+        return (most_under, most_under_ts)
+
+    @fully_cached_property
     def subheadings(self):
         if not self.games:
             return ['No games played']
