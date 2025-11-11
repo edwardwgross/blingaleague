@@ -1795,7 +1795,7 @@ class TeamSeason(ComparableObject):
 
         return (most_over, most_over_ts)
 
-    @full_cached_property
+    @fully_cached_property
     def worst_record(self):  # by games under .500, up to this point
         most_under = None
         most_under_ts = None
