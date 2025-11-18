@@ -13,6 +13,7 @@ ALLOWED_HOSTS = (
     'www.blingaleague.com',
     'blingaleague.com',
     '44.242.219.75',
+    'ec2-44-242-219-75.us-west-2.compute.amazonaws.com',
 )
 
 ROOT_URLCONF = 'blingaleague.urls'
