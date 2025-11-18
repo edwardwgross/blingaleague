@@ -1516,6 +1516,42 @@ class TeamSeason(ComparableObject):
         return self._vs_score_list(opponent_season.game_scores_against)
 
     @fully_cached_property
+    def _vs_weekly_median_record(self):
+        median_scores = []
+
+        for game in self.games:
+            if game.week_object.is_playoffs:
+                break
+
+            median_scores.append(game.week_object.median_score)
+
+        return self._vs_score_list(median_scores)
+
+    @fully_cached_property
+    def vs_weekly_median_wins(self):
+        return self._vs_weekly_median_record[OUTCOME_WIN]
+
+    @fully_cached_property
+    def vs_weekly_median_losses(self):
+        return self._vs_weekly_median_record[OUTCOME_LOSS]
+
+    @fully_cached_property
+    def vs_weekly_median_ties(self):
+        return self._vs_weekly_median_record[OUTCOME_TIE]
+
+    @fully_cached_property
+    def vs_weekly_median_win_pct(self):
+        wins = decimal.Decimal(self.vs_weekly_median_wins)
+        losses = decimal.Decimal(self.vs_weekly_median_losses)
+        ties = decimal.Decimal(self.vs_weekly_median_ties)
+
+        total = wins + losses + ties
+        if total == 0:
+            return 0
+
+        return (wins + HALF * ties) / total
+
+    @fully_cached_property
     def points_rank(self):
         return self.rank_by_stat('points')
 
@@ -3295,6 +3331,10 @@ class Week(ComparableObject):
     @fully_cached_property
     def average_margin(self):
         return statistics.mean([g.margin for g in self.games])
+
+    @fully_cached_property
+    def median_score(self):
+        return statistics.median([s['score'] for s in self.team_scores])
 
     @fully_cached_property
     def stdev_score(self):
