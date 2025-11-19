@@ -19,7 +19,8 @@ from slugify import slugify
 
 from .utils import int_to_roman, fully_cached_property, clear_cached_properties, value_by_pick, \
                    regular_season_weeks, quarterfinals_week, semifinals_week, blingabowl_week, \
-                   get_power_rankings, get_gazette_issues, calculate_log5_probability
+                   get_power_rankings, get_gazette_issues, calculate_log5_probability, \
+                   possible_outcomes_for_games
 
 
 CACHE = caches['blingaleague']
@@ -1737,28 +1738,6 @@ class TeamSeason(ComparableObject):
 
         return self.bye
 
-    @fully_cached_property
-    def eliminated_early(self):
-        if self.is_partial:
-            if self.eliminated_simple:
-                return True
-
-            possible_outcomes = self.season_object.possible_final_outcomes()
-            outcome_count = 0  # need this, as possible_outcomes is a generator
-            for outcome in possible_outcomes:
-                outcome_count += 1
-                team_wins = outcome[self.team]
-                sorted_wins = sorted(outcome.values(), reverse=True)
-
-                if team_wins >= sorted_wins[PLAYOFF_TEAMS - 1]:
-                    return False
-
-            if outcome_count:
-                return True
-
-        # if it's a complete season, it's not an early elimination
-        return False
-
     def clinched(self, target_place):
         standings_table = self.season_object.standings_table
 
@@ -1766,41 +1745,96 @@ class TeamSeason(ComparableObject):
             # no matter what, every team has clinched at least last place
             return True
 
-        if self.clinched_simple(target_place):
+        if self.place_numeric > target_place:
+            return False
+
+        # don't subtract one because we actually want to measure the place
+        # after the target; i.e. to make the playoffs, we need to have more
+        # wins than the 7th place team can get
+        target_current_wins = standings_table[target_place].win_count
+        max_target_wins = target_current_wins + self.weeks_remaining
+
+        if self.win_count > max_target_wins:
             return True
+        elif self.win_count == max_target_wins:
+            teams_that_can_tie = [ts for ts in standings_table if ts.win_count == target_current_wins]
 
-        possible_outcomes = self.season_object.possible_final_outcomes()
-        outcome_count = 0  # need this, as possible_outcomes is a generator
-        for outcome in possible_outcomes:
-            outcome_count += 1
-            team_wins = outcome[self.team]
-            sorted_wins = sorted(outcome.values(), reverse=True)
+            worst_tie_place = max([ts.place_numeric for ts in teams_that_can_tie])
+            teams_needed_to_lose = worst_tie_place - target_place
 
-            # don't subtract one because we actually want to measure the place
-            # after the target; i.e. to make the playoffs, we need to have more
-            # wins than the 7th place team
-            if team_wins <= sorted_wins[target_place]:
-                return False
+            # assume every team tied with (target_place+1)th place beats any team that
+            # isn't among those tied; call those "free_wins" for this scenario
+            free_wins = dict([(ts.team, target_current_wins) for ts in teams_that_can_tie])
+            games_between_tied = []
+            for team_season in teams_that_can_tie:
+                other_tie_teams = set(
+                    [ts.team for ts in teams_that_can_tie if ts != team_season]
+                )
 
-        if outcome_count:
+                for opponent in team_season.yet_to_play:
+                    if opponent not in other_tie_teams:
+                        free_wins[team_season.team] += 1
+                    elif opponent > team_season.team:
+                        games_between_tied.append((team_season.team, opponent))
+
+            possible_outcomes = possible_outcomes_for_games(games_between_tied, free_wins)
+            for win_counts in possible_outcomes:
+                teams_short_of_target = 0
+                for team, wins in win_counts.items():
+                    if wins < self.win_count:
+                        teams_short_of_target += 1
+
+                if teams_short_of_target < teams_needed_to_lose:
+                    return False
+
             return True
 
         return False
 
-    def clinched_simple(self, target_place):
-        # don't subtract one because we actually want to measure the place
-        # after the target; i.e. to make the playoffs, we need to have more
-        # wins than the 7th place team
-        target_current_wins = self.season_object.standings_table[target_place].win_count
-        max_target_wins = target_current_wins + self.weeks_remaining
-
-        return self.win_count > max_target_wins
-
     @fully_cached_property
-    def eliminated_simple(self):
-        max_wins = self.win_count + self.weeks_remaining
-        last_playoff_team_wins = self.season_object.standings_table[PLAYOFF_TEAMS - 1].win_count
-        return max_wins < last_playoff_team_wins
+    def eliminated_early(self):
+        if self.is_partial:
+            standings_table = self.season_object.standings_table
+
+            target_wins = standings_table[PLAYOFF_TEAMS - 1].win_count
+            max_wins = self.win_count + self.weeks_remaining
+
+            if max_wins < target_wins:
+                return True
+            elif max_wins == target_wins:
+                teams_that_can_tie = [ts for ts in standings_table if ts.win_count == target_wins]
+
+                best_tie_place = min([ts.place_numeric for ts in teams_that_can_tie])
+
+                teams_needed_to_win = 1 + PLAYOFF_TEAMS - best_tie_place
+
+                games_between_tied = []
+                for team_season in teams_that_can_tie:
+                    other_tie_teams = set(
+                        [ts.team for ts in teams_that_can_tie if ts != team_season]
+                    )
+
+                    for opponent in team_season.yet_to_play:
+                        if opponent in other_tie_teams and opponent > team_season.team:
+                            games_between_tied.append((team_season.team, opponent))
+
+                current_wins = dict([(ts.team, target_wins) for ts in teams_that_can_tie])
+                possible_outcomes = possible_outcomes_for_games(games_between_tied, current_wins)
+                for win_counts in possible_outcomes:
+                    teams_above_target = 0
+                    for team, wins in win_counts.items():
+                        if wins > max_wins:
+                            teams_above_target += 1
+
+                    if teams_above_target < teams_needed_to_win:
+                        return False
+
+                return True
+
+            return False
+
+        # if it's a complete season, it's not an early elimination
+        return False
 
     @fully_cached_property
     def standings_note(self):
@@ -2909,31 +2943,6 @@ class Season(ComparableObject):
             unplayed_week += 1
 
         return remaining_games
-
-    def possible_final_outcomes(self, max_weeks_to_run=MAX_WEEKS_TO_RUN_POSSIBLE_OUTCOMES):
-        if self.is_upcoming_season:
-            return []
-
-        current_win_counts = dict((ts.team, ts.win_count) for ts in self.standings_table)
-
-        remaining_pairs = [sorted((g.team_1, g.team_2)) for g in self._remaining_games]
-
-        num_games = len(remaining_pairs)
-
-        max_games_to_run = max_weeks_to_run * len(self.standings_table) / 2
-
-        if num_games > max_games_to_run:
-            return []
-
-        outcome_combos = itertools.product([0, 1], repeat=num_games)
-
-        for outcome_combo in outcome_combos:
-            win_counts = current_win_counts.copy()
-            for i, outcome in enumerate(outcome_combo):
-                winner = remaining_pairs[i][outcome]
-                win_counts[winner] += 1
-
-            yield win_counts
 
     def _generate_future_outcomes(self):
         # yields a tuple of (winner, loser)
@@ -4521,7 +4530,7 @@ class Player(ComparableObject):
 
         for db_model in db_models:
             for player_obj in db_model.objects.filter(name=self.name):
-                print(player_obj)
+                _print_and_log(player_obj)
                 player_obj.name = new_name
                 player_obj.save()
 

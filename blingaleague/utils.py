@@ -1,4 +1,5 @@
 import decimal
+import itertools
 import logging
 import math
 import pygal
@@ -280,3 +281,18 @@ def calculate_log5_probability(team_season_1, team_season_2):
     xw_pct_2 = _adjust_expected_win_pct(team_season_2)
 
     return (xw_pct_1 - xw_pct_1 * xw_pct_2) / (xw_pct_1 + xw_pct_2 - 2 * xw_pct_1 * xw_pct_2)
+
+
+def possible_outcomes_for_games(games, prior_win_counts):
+    outcomes = []
+
+    outcome_combos = itertools.product([0, 1], repeat=len(games))
+    for outcome_combo in outcome_combos:
+        win_counts = prior_win_counts.copy()
+        for i, outcome in enumerate(outcome_combo):
+            winner = games[i][outcome]
+            win_counts[winner] += 1
+
+        outcomes.append(win_counts)
+
+    return outcomes
