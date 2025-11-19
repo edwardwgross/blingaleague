@@ -1751,20 +1751,20 @@ class TeamSeason(ComparableObject):
         # don't subtract one because we actually want to measure the place
         # after the target; i.e. to make the playoffs, we need to have more
         # wins than the 7th place team can get
-        target_current_wins = standings_table[target_place].win_count
-        max_target_wins = target_current_wins + self.weeks_remaining
+        cur_target_wins = standings_table[target_place].win_count
+        max_target_wins = cur_target_wins + self.weeks_remaining
 
         if self.win_count > max_target_wins:
             return True
         elif self.win_count == max_target_wins:
-            teams_that_can_tie = [ts for ts in standings_table if ts.win_count == target_current_wins]
+            teams_that_can_tie = [ts for ts in standings_table if ts.win_count == cur_target_wins]
 
             worst_tie_place = max([ts.place_numeric for ts in teams_that_can_tie])
             teams_needed_to_lose = worst_tie_place - target_place
 
             # assume every team tied with (target_place+1)th place beats any team that
             # isn't among those tied; call those "free_wins" for this scenario
-            free_wins = dict([(ts.team, target_current_wins) for ts in teams_that_can_tie])
+            free_wins = dict([(ts.team, cur_target_wins) for ts in teams_that_can_tie])
             games_between_tied = []
             for team_season in teams_that_can_tie:
                 other_tie_teams = set(

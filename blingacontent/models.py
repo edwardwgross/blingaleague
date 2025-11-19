@@ -17,7 +17,7 @@ from blingaleague.models import Member, EXPANSION_SEASON, pre_build_cache
 from blingaleague.utils import clear_cached_properties
 
 from .utils import send_gazette_to_members, new_gazette_body_template, \
-                   add_player_links_to_text
+                   add_player_links_to_text  # noqa: F401
 
 
 CACHE = caches['blingaleague']
@@ -119,7 +119,7 @@ class Gazette(models.Model):
     def to_html(self, for_email=False, include_css=False):
         # XXX removed 2025-10-15 to speed up loading; bring this back
         # once there's a better caching method
-        #self.body = add_player_links_to_text(self)
+        # self.body = add_player_links_to_text(self)
 
         html_str = render_to_string(
             'blingacontent/gazette_body.html',
