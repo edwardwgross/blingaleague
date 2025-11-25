@@ -29,8 +29,8 @@
           <td sorttable_customkey="{{ odds_dict.team_season.place_numeric }}">{{ odds_dict.team_season.place }}</td>
           <td>{{ odds_dict.team_season.expected_win_pct|floatformat:3 }}</td>
           <td>{{ odds_dict.team_season.future_strength_of_schedule_str }}</td>
-          <td style="font-weight:bold">{{ odds_dict.playoff_odds|floatformat:0 }}%</td>
-          <td style="font-weight:bold">{{ odds_dict.bye_odds|floatformat:0 }}%</td>
+          <td style="font-weight:bold" sorttable_customkey="{{ odds_dict.playoff_pct_exact }}">{{ odds_dict.playoff_pct_display }}%</td>
+          <td style="font-weight:bold" sorttable_customkey="{{ odds_dict.playoff_pct_exact }}">{{ odds_dict.bye_pct_display }}%</td>
         </tr>
       {% endfor %}
     </table>

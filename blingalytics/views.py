@@ -1192,28 +1192,29 @@ class PlayoffOddsView(TemplateView):
             for team_season in season.standings_table:
                 # multiply by 100 to convert to percentages, decimal formatting done in template
                 playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)  # noqa: E501
-                bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)
+                bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)  # noqa: E501
 
-                # round to the nearest 5% to account for uncertainty and variance of simulations
                 rounding_base = 1
-                playoffs_pct = rounding_base * round(playoffs_pct / rounding_base)
-                bye_pct = rounding_base * round(bye_pct / rounding_base)
+                playoffs_pct_display = int("{:.0f}".format(round(playoffs_pct, rounding_base)))
+                bye_pct_display = int("{:.0f}".format(round(bye_pct, rounding_base)))
 
                 # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
                 if season.is_partial:
-                    if not team_season.eliminated_early:
-                        playoffs_pct = max(playoffs_pct, rounding_base)
+                    if playoffs_pct_display == 0 and not team_season.eliminated_early:
+                        playoffs_pct_display = "<{}".format(rounding_base)
 
-                    if not team_season.clinched_playoffs:
-                        playoffs_pct = min(playoffs_pct, 100 - rounding_base)
+                    if playoffs_pct_display == 100 and not team_season.clinched_playoffs:
+                        playoffs_pct_display = ">{}".format(100 - rounding_base)
 
-                    if not team_season.clinched_bye:
-                        bye_pct = min(bye_pct, 100 - rounding_base)
+                    if bye_pct_display == 100 and not team_season.clinched_bye:
+                        bye_pct_display = ">{}".format(100 - rounding_base)
 
                 playoff_odds_table.append({
                     'team_season': team_season,
-                    'playoff_odds': playoffs_pct,
-                    'bye_odds': bye_pct,
+                    'playoff_pct_exact': playoffs_pct,
+                    'playoff_pct_display': playoffs_pct_display,
+                    'bye_pct_exact': bye_pct,
+                    'bye_pct_display': bye_pct_display,
                 })
 
             results_ready = True
