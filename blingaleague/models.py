@@ -1793,10 +1793,17 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def eliminated_early(self):
+        return self.eliminated_from_place(PLAYOFF_TEAMS)
+
+    @fully_cached_property
+    def eliminated_bye_early(self):
+        return self.eliminated_from_place(BYE_TEAMS)
+
+    def eliminated_from_place(self, target_place):
         if self.is_partial:
             standings_table = self.season_object.standings_table
 
-            target_wins = standings_table[PLAYOFF_TEAMS - 1].win_count
+            target_wins = standings_table[target_place - 1].win_count
             max_wins = self.win_count + self.weeks_remaining
 
             if max_wins < target_wins:
@@ -1806,7 +1813,7 @@ class TeamSeason(ComparableObject):
 
                 best_tie_place = min([ts.place_numeric for ts in teams_that_can_tie])
 
-                teams_needed_to_win = 1 + PLAYOFF_TEAMS - best_tie_place
+                teams_needed_to_win = 1 + target_place - best_tie_place
 
                 games_between_tied = []
                 for team_season in teams_that_can_tie:

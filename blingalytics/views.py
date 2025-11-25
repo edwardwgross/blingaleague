@@ -1206,6 +1206,9 @@ class PlayoffOddsView(TemplateView):
                     if playoffs_pct_display == 100 and not team_season.clinched_playoffs:
                         playoffs_pct_display = ">{}".format(100 - rounding_base)
 
+                    if bye_pct_display == 0 and not team_season.eliminated_bye_early:
+                        bye_pct_display = "<{}".format(rounding_base)
+
                     if bye_pct_display == 100 and not team_season.clinched_bye:
                         bye_pct_display = ">{}".format(100 - rounding_base)
 
