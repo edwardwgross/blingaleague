@@ -650,7 +650,7 @@ class SeasonFinderView(LongUrlView):
                     continue
                 elif clinched == CHOICE_CLINCHED_PLAYOFFS and not team_season.clinched_playoffs:
                     continue
-                elif clinched == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_early:
+                elif clinched == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_playoffs_early:
                     continue
 
                 if form_data['bye'] and not team_season.bye:
@@ -1194,23 +1194,22 @@ class PlayoffOddsView(TemplateView):
                 playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)  # noqa: E501
                 bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)  # noqa: E501
 
-                rounding_base = 1
-                playoffs_pct_display = int("{:.0f}".format(round(playoffs_pct, rounding_base)))
-                bye_pct_display = int("{:.0f}".format(round(bye_pct, rounding_base)))
+                playoffs_pct_display = round(playoffs_pct)
+                bye_pct_display = round(bye_pct)
 
                 # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
                 if season.is_partial:
-                    if playoffs_pct_display == 0 and not team_season.eliminated_early:
-                        playoffs_pct_display = "<{}".format(rounding_base)
+                    if playoffs_pct_display == 0 and not team_season.eliminated_playoffs_early:
+                        playoffs_pct_display = '<1'
 
                     if playoffs_pct_display == 100 and not team_season.clinched_playoffs:
-                        playoffs_pct_display = ">{}".format(100 - rounding_base)
+                        playoffs_pct_display = '>99'
 
                     if bye_pct_display == 0 and not team_season.eliminated_bye_early:
-                        bye_pct_display = "<{}".format(rounding_base)
+                        bye_pct_display = '<1'
 
                     if bye_pct_display == 100 and not team_season.clinched_bye:
-                        bye_pct_display = ">{}".format(100 - rounding_base)
+                        bye_pct_display = '>99'
 
                 playoff_odds_table.append({
                     'team_season': team_season,

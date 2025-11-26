@@ -1383,6 +1383,26 @@ class TeamSeason(ComparableObject):
         return dict(win_distribution)
 
     @fully_cached_property
+    def odds_of_more_wins(self):
+        total_odds = 0
+
+        for win_count, odds in self.expected_win_distribution.items():
+            if win_count > self.win_count:
+                total_odds += odds
+
+        return total_odds
+
+    @fully_cached_property
+    def odds_of_fewer_wins(self):
+        total_odds = 0
+
+        for win_count, odds in self.expected_win_distribution.items():
+            if win_count < self.win_count:
+                total_odds += odds
+
+        return total_odds
+
+    @fully_cached_property
     def predicted_future_wins(self):
         if not self.is_partial or not self.future_games:
             return 0
@@ -1792,14 +1812,14 @@ class TeamSeason(ComparableObject):
         return False
 
     @fully_cached_property
-    def eliminated_early(self):
-        return self.eliminated_from_place(PLAYOFF_TEAMS)
+    def eliminated_playoffs_early(self):
+        return self.eliminated_early_from_place(PLAYOFF_TEAMS)
 
     @fully_cached_property
     def eliminated_bye_early(self):
-        return self.eliminated_from_place(BYE_TEAMS)
+        return self.eliminated_early_from_place(BYE_TEAMS)
 
-    def eliminated_from_place(self, target_place):
+    def eliminated_early_from_place(self, target_place):
         if self.is_partial:
             standings_table = self.season_object.standings_table
 
@@ -1849,7 +1869,7 @@ class TeamSeason(ComparableObject):
             return ('b', 'clinched bye')
         elif self.clinched_playoffs:
             return ('x', 'clinched playoff berth')
-        elif self.eliminated_early:
+        elif self.eliminated_playoffs_early:
             return ('e', 'eliminated from playoff contention')
 
         return None
@@ -2413,8 +2433,12 @@ class TeamMultiSeasons(TeamSeason):
         return self._any_season_true('clinched_bye')
 
     @fully_cached_property
-    def eliminated_early(self):
-        return self._any_season_true('eliminate_early')
+    def eliminated_playoffs_early(self):
+        return self._any_season_true('eliminated_playoffs_early')
+
+    @fully_cached_property
+    def eliminated_bye_early(self):
+        return self._any_season_true('eliminated_bye_early')
 
     @fully_cached_property
     def trades(self):
