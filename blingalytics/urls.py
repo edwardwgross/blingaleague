@@ -3,8 +3,8 @@ from django.views.generic import RedirectView
 
 from .views import WeeklyScoresView, ExpectedWinsView, \
                    GameFinderView, SeasonFinderView, \
-                   TopSeasonsView, TeamVsTeamView, \
-                   BeltHolderView, TradeFinderView, \
+                   TopSeasonsView, TopSeasonsSingleStatView, \
+                   TeamVsTeamView, BeltHolderView, TradeFinderView, \
                    KeeperFinderView, DraftPickFinderView, \
                    ShortUrlView, PlayoffOddsView
 
@@ -53,6 +53,11 @@ urlpatterns = [
         r'top_seasons/$',
         TopSeasonsView.as_view(),
         name='blingalytics.top_seasons',
+    ),
+    url(
+        r'top_seasons/(?P<single_stat>[-\w]+)/$',
+        TopSeasonsSingleStatView.as_view(),
+        name='blingalytics.top_seasons_single_stat',
     ),
     url(
         r'belt_holders/$',

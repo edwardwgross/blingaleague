@@ -1,7 +1,7 @@
 {% extends "blingaleague/base.html" %}
 
 {% block title %}
-  Top Seasons
+  Top Seasons: {{ top_seasons_table.title }}
   {% if week_max %}
     (through week {{ week_max }})
   {% endif %}
@@ -9,7 +9,7 @@
 
 {% block content %}
 <h1>
-  Top Seasons
+  Top Seasons: {{ top_seasons_table.title }}
   {% if week_max %}
     (through week {{ week_max }})
   {% endif %}
@@ -18,17 +18,10 @@
 
 <div id="top_seasons" class="blingalytics">
   <div class="table_links">
-    <ul>
-      {% for table in top_seasons_tables %}
-        <li><a href="#{{ table.title|slugify }}"><small>{{ table.title }}</small></a></li>
-      {% endfor %}
-    </ul>
+    [<a href="{% url 'blingalytics.top_seasons' %}{% if week_max %}?week_max={{ week_max }}{% endif %}">All Top Seasons</a>]
   </div>
 
-  {% for top_seasons_table in top_seasons_tables %}
-    {% with True as include_link_to_all %}
-      {% include "blingalytics/top_seasons_table.html" %}
-    {% endwith %}
-  {% endfor %}
+  {% include "blingalytics/top_seasons_table.html" %}
 </div>
 {% endblock content %}
+

@@ -1,0 +1,34 @@
+{% load humanize %}
+
+<table id="{{ top_seasons_table.title|slugify }}" class="blingalytics_table">
+  <tr>
+    <th colspan="100%">{{ top_seasons_table.title }}</th>
+  </tr>
+  {% for row in top_seasons_table.rows %}
+    <tr>
+      <td>{{ row.rank }}</td>
+      <td {% if row.team_season.is_current_season %}class="emphasize"{% endif %} style="text-align:left; width: auto">
+        <a href="{{ row.team_season.season_object.href }}">{{ row.team_season.year }}</a>
+        <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
+        {% if row.team_season.is_partial %}
+          <small>{{ row.team_season.games|length }} game{{ row.team_season.games|pluralize }}</small>
+        {% endif %}
+      </td>
+      <td>{{ row.value|intcomma }}</td>
+    </tr>
+  {% endfor %}
+  {% if top_seasons_table.tied_group %}
+    <tr>
+      <td>{{ top_seasons_table.tied_group.rank }}</td>
+      <td class="emphasize" style="text-align:center; width:auto">{{ top_seasons_table.tied_group.count }} tied</td>
+      <td>{{ top_seasons_table.tied_group.value|intcomma }}</td>
+    </tr>
+  {% endif %}
+  {% if include_link_to_all %}
+    <tr>
+      <td colspan="100%" style="text-align:center">
+        [<a href="{% url 'blingalytics.top_seasons_single_stat' top_seasons_table.title|slugify %}{% if week_max %}?week_max={{ week_max }}{% endif %}">see all seasons</a>]
+      </td>
+    </tr>
+  {% endif %}
+</table>

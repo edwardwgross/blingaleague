@@ -7,6 +7,8 @@ from django.db.models import F, ExpressionWrapper, DecimalField
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, RedirectView
 
+from slugify import slugify
+
 from blingaleague.models import Game, Week, Member, TeamSeason, TeamMultiSeasons, \
                                 Season, Matchup, Trade, Keeper, DraftPick, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
@@ -1082,6 +1084,69 @@ class TopSeasonsView(TemplateView):
 
         context = {
             'top_seasons_tables': top_seasons_tables,
+            'week_max': week_max,
+        }
+
+        return self.render_to_response(context)
+
+
+class TopSeasonsSingleStatView(TemplateView):
+    template_name = 'blingalytics/top_seasons_single_stat.html'
+
+    def generate_top_seasons_table(self, single_stat, week_max):
+        for stat_dict in TOP_SEASONS_STATS:
+            title = stat_dict['title']
+
+            if slugify(title) == single_stat:
+                attr = stat_dict['attr']
+                sort_desc = stat_dict.get('sort_desc', False)
+                require_full_season = stat_dict.get('require_full_season', False)
+                min_games = stat_dict.get('min_games', TOP_SEASONS_GAME_THRESHOLD)
+                display_attr = stat_dict.get('display_attr', None)
+                num_format = stat_dict.get('num_format', TOP_SEASONS_DEFAULT_NUM_FORMAT)
+
+                table_rows = sorted_seasons_by_attr(
+                    attr,
+                    sort_desc=sort_desc,
+                    require_full_season=require_full_season,
+                    min_games=min_games,
+                    display_attr=display_attr,
+                    num_format=num_format,
+                    week_max=week_max,
+                )
+
+                return {
+                    'title': title,
+                    'rows': table_rows,
+                    'tied_group': {},
+                }
+
+        return {}
+
+    def get(self, request, single_stat):
+        week_max = None
+        try:
+            week_max = int(request.GET.get('week_max', None))
+            if week_max < 1:
+                week_max = None
+        except (ValueError, TypeError):
+            # ignore if user passed in a non-int
+            pass
+
+        cache_key = "blingalytics_top_seasons_single_stat|{}|{}".format(
+            single_stat,
+            week_max,
+        )
+
+        if cache_key in CACHE:
+            top_seasons_table = CACHE.get(cache_key)
+        else:
+            top_seasons_table = self.generate_top_seasons_table(single_stat, week_max)
+            CACHE.set(cache_key, top_seasons_table)
+
+        context = {
+            'single_stat': single_stat,
+            'top_seasons_table': top_seasons_table,
             'week_max': week_max,
         }
 
