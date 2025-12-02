@@ -2,7 +2,15 @@
 
 <table id="{{ top_seasons_table.title|slugify }}" class="blingalytics_table">
   <tr>
-    <th colspan="100%">{{ top_seasons_table.title }}</th>
+    <th colspan="100%">
+      {% if single_stat %}
+        {{ top_seasons_table.title }}
+      {% else %}
+        <a href="{% url 'blingalytics.top_seasons_single_stat' top_seasons_table.title|slugify %}{% if week_max %}?week_max={{ week_max }}{% endif %}">
+          {{ top_seasons_table.title }}
+        </a>
+      {% endif %}
+    </th>
   </tr>
   {% for row in top_seasons_table.rows %}
     <tr>
@@ -22,13 +30,6 @@
       <td>{{ top_seasons_table.tied_group.rank }}</td>
       <td class="emphasize" style="text-align:center; width:auto">{{ top_seasons_table.tied_group.count }} tied</td>
       <td>{{ top_seasons_table.tied_group.value|intcomma }}</td>
-    </tr>
-  {% endif %}
-  {% if include_link_to_all %}
-    <tr>
-      <td colspan="100%" style="text-align:center">
-        [<a href="{% url 'blingalytics.top_seasons_single_stat' top_seasons_table.title|slugify %}{% if week_max %}?week_max={{ week_max }}{% endif %}">see all seasons</a>]
-      </td>
     </tr>
   {% endif %}
 </table>

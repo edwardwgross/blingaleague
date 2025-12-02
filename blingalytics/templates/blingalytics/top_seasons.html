@@ -26,9 +26,7 @@
   </div>
 
   {% for top_seasons_table in top_seasons_tables %}
-    {% with True as include_link_to_all %}
-      {% include "blingalytics/top_seasons_table.html" %}
-    {% endwith %}
+    {% include "blingalytics/top_seasons_table.html" %}
   {% endfor %}
 </div>
 {% endblock content %}
