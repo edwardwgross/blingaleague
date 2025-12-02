@@ -46,7 +46,7 @@ table.blingalytics_table.sortable tbody tr::before {
     display: inline-block;
     vertical-align: top;
     margin-right: 50px;
-    padding-top: 20px;
+    padding-top: 60px;  /* account for navbar when a specific table is linked to */
 }
 
 #top_seasons table.blingalytics_table th {
