@@ -17,6 +17,7 @@
       <th title="Remaining Strength of Schedule">Future SOS</th>
       <th style="min-width:60px">Playoffs</th>
       <th style="min-width:60px">Bye</th>
+      <th style="min-width:60px">Champion</th>
       {% for odds_dict in playoff_odds_table %}
         <tr>
           <td style="text-align:left">
@@ -30,7 +31,8 @@
           <td>{{ odds_dict.team_season.expected_win_pct|floatformat:3 }}</td>
           <td>{{ odds_dict.team_season.future_strength_of_schedule_str }}</td>
           <td style="font-weight:bold" sorttable_customkey="{{ odds_dict.playoff_pct_exact }}">{{ odds_dict.playoff_pct_display }}%</td>
-          <td style="font-weight:bold" sorttable_customkey="{{ odds_dict.playoff_pct_exact }}">{{ odds_dict.bye_pct_display }}%</td>
+          <td style="font-weight:bold" sorttable_customkey="{{ odds_dict.bye_pct_exact }}">{{ odds_dict.bye_pct_display }}%</td>
+          <td style="font-weight:bold" sorttable_customkey="{{ odds_dict.champion_pct_exact }}">{{ odds_dict.champion_pct_display }}%</td>
         </tr>
       {% endfor %}
     </table>

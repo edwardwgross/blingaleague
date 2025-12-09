@@ -1258,9 +1258,11 @@ class PlayoffOddsView(TemplateView):
                 # multiply by 100 to convert to percentages, decimal formatting done in template
                 playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)  # noqa: E501
                 bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)  # noqa: E501
+                champion_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('champion', 0)  # noqa: E501
 
                 playoffs_pct_display = round(playoffs_pct)
                 bye_pct_display = round(bye_pct)
+                champion_pct_display = round(champion_pct)
 
                 # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
                 if season.is_partial:
@@ -1276,12 +1278,25 @@ class PlayoffOddsView(TemplateView):
                     if bye_pct_display == 100 and not team_season.clinched_bye:
                         bye_pct_display = '>99'
 
+                    can_be_champion = True
+                    if team_season.eliminated_playoffs_early or \
+                        (team_season.playoff_finish and not team_season.champion):
+                        can_be_champion = False
+
+                    if champion_pct_display == 0 and can_be_champion:
+                        champion_pct_display = '<1'
+
+                    if champion_pct_display == 100 and not team_season.champion:
+                        champion_pct_display = '>99'
+
                 playoff_odds_table.append({
                     'team_season': team_season,
                     'playoff_pct_exact': playoffs_pct,
                     'playoff_pct_display': playoffs_pct_display,
                     'bye_pct_exact': bye_pct,
                     'bye_pct_display': bye_pct_display,
+                    'champion_pct_exact': champion_pct,
+                    'champion_pct_display': champion_pct_display,
                 })
 
             results_ready = True

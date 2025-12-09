@@ -2528,6 +2528,7 @@ class Season(ComparableObject):
         self.year = int(year)
         self.include_playoffs = include_playoffs
 
+        self._given_week_max = week_max
         self.week_max = week_max
         if self.week_max is None and not self.include_playoffs:
             # only time we don't want a week_max is if
@@ -3030,11 +3031,43 @@ class Season(ComparableObject):
 
     def playoff_odds(self, max_simulations=500, bypass_cache=False,
                      log_outcomes=False, forced_outcomes=None):
-
-        if self.weeks_with_games > regular_season_weeks(self.year):
-            return self.regular_season.playoff_odds(bypass_cache=bypass_cache)
-
         cache_key = self.playoff_odds_cache_key
+
+        finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0, 'champion': 0})
+
+        if not self.is_partial:
+            # we can short-circuit the playoff odds, and we need to do
+            # special handling for championship odds
+            bracket_odds = self.playoff_bracket_odds(
+                max_simulations=max_simulations,
+                bypass_cache=bypass_cache,
+            )
+
+            for team_season in self.standings_table:
+                team = team_season.team
+                if team_season.made_playoffs:
+                    finishes[team]['playoffs'] = 1
+
+                    if team_season.bye:
+                        finishes[team]['bye'] = 1
+                    else:
+                        finishes[team]['bye'] = 0
+
+                    if team in bracket_odds:
+                        finishes[team]['champion'] = bracket_odds[team][1]
+                    else:
+                        finishes[team]['champion'] = 0
+                else:
+                    finishes[team]['playoffs'] = 0
+                    finishes[team]['bye'] = 0
+                    finishes[team]['champion'] = 0
+
+            finishes = dict(finishes)
+
+            if not bypass_cache:
+                CACHE.set(cache_key, finishes)
+
+            return finishes
 
         if cache_key in CACHE and not bypass_cache:
             return CACHE.get(cache_key)
@@ -3043,7 +3076,6 @@ class Season(ComparableObject):
             fh = open(settings.DATA_DIR / 'playoff_odds_outcomes.csv', 'w')
             fh.write('Run,Place,Team,Wins,Points')
 
-        finishes = defaultdict(lambda: {'playoffs': 0, 'bye': 0})
         sim_run = 1
         while sim_run <= max_simulations:
             simulated_games = self._simulate_remaining_games(
@@ -3056,11 +3088,20 @@ class Season(ComparableObject):
                 reverse=True,
             )
 
+            playoff_teams = []
+            for i, entry in enumerate(simulated_standings[:PLAYOFF_TEAMS], 1):
+                playoff_teams.append((i, TeamSeason(entry[0].id, self.year)))
+
+            simulated_playoff_bracket = self._simulate_single_playoff_bracket(playoff_teams)
+
             for place, (team, wins_points) in enumerate(simulated_standings, 1):
                 if place <= PLAYOFF_TEAMS:
                     finishes[team]['playoffs'] += 1 / decimal.Decimal(max_simulations)
                     if place <= BYE_TEAMS:
                         finishes[team]['bye'] += 1 / decimal.Decimal(max_simulations)
+
+                    if team == simulated_playoff_bracket[1].team:
+                        finishes[team]['champion'] += 1 / decimal.Decimal(max_simulations)
 
                 if log_outcomes:
                     fh.write("\n{},{},{},{}-{},{:.2f}".format(
@@ -3084,20 +3125,157 @@ class Season(ComparableObject):
 
         return finishes
 
-    @fully_cached_property
+    @property
     def playoff_odds_cache_key(self):
         return "blingaleague_playoff_odds|{}|{}".format(
             self.year,
-            self.weeks_with_games,
+            self._given_week_max,
         )
 
     def get_cached_playoff_odds(self):
+        logging.getLogger('blingaleague').info(self.playoff_odds_cache_key)
         return CACHE.get(self.playoff_odds_cache_key)
 
     @classmethod
     def playoff_odds_cache_key_to_season_object(cls, cache_key):
         _static_str, year, week_max = cache_key.split('|')
-        return cls(int(year), week_max=int(week_max))
+
+        try:
+            week_max = int(week_max)
+        except ValueError:
+            week_max = None
+
+        return cls(int(year), week_max=week_max)
+
+    def playoff_bracket_odds(self, max_simulations=500, bypass_cache=False):
+        if self.is_partial:
+            return {}
+
+        playoff_teams = [(ts.place_numeric, ts) for ts in self.standings_table[:PLAYOFF_TEAMS]]
+
+        # if we're partway through the playoffs, we need to account for that
+        forced_outcomes = []
+        playoff_games_played = []
+        playoff_weeks = [
+            quarterfinals_week(self.year), semifinals_week(self.year), blingabowl_week(self.year),
+        ]
+        for week in playoff_weeks:
+            # if we're explicitly setting a max_week,
+            # ignore any real results from that point on
+            if week <= self.week_max or self._given_week_max is None:
+                week_object = Week(self.year, week)
+                for game in week_object.games:
+                    forced_outcomes.append((game.winner, game.loser))
+
+        if len(forced_outcomes) == 0:
+            forced_outcomes = None
+
+        cache_key = self.playoff_bracket_odds_cache_key
+
+        if cache_key in CACHE and not bypass_cache:
+            return CACHE.get(cache_key)
+
+        finishes_by_place = self._simulate_playoff_bracket_results(
+            playoff_teams,
+            max_simulations,
+            forced_outcomes=forced_outcomes,
+        )
+
+        if finishes_by_place and not bypass_cache:
+            CACHE.set(cache_key, finishes_by_place)
+
+        return finishes_by_place
+
+    def _simulate_playoff_bracket_results(self, playoff_teams, max_simulations, forced_outcomes=None):
+        # since there is no 5th place game, don't bother with 5 or 6 as keys
+        finishes_by_place = defaultdict(lambda: {1: 0, 2: 0, 3: 0, 4: 0})
+        sim_run = 1
+        while sim_run <= max_simulations:
+            bracket_outcome = self._simulate_single_playoff_bracket(playoff_teams, forced_outcomes=forced_outcomes)
+            for place, team_season in bracket_outcome.items():
+                finishes_by_place[team_season.team][place] += 1 / decimal.Decimal(max_simulations)
+
+            sim_run += 1
+
+        return dict(finishes_by_place)
+
+    def _simulate_single_playoff_bracket(self, playoff_teams, forced_outcomes=None):
+        # playoff_teams is a list of tuples containing (place, team_season)
+        seed_to_team_season = dict(playoff_teams)
+        team_to_seed = dict((team_season.team, seed) for (seed, team_season) in playoff_teams)
+
+        quarterfinals_games = [
+            (seed_to_team_season[3], seed_to_team_season[6]),
+            (seed_to_team_season[4], seed_to_team_season[5]),
+        ]
+
+        quarterfinals_results = self._simulate_single_playoff_round(
+            quarterfinals_games,
+            forced_outcomes=forced_outcomes,
+        )
+
+        # sort winners by seed so we can easily determine round 2 matchups
+        quarterfinals_winners = sorted(
+            [result[0] for result in quarterfinals_results],
+            key=lambda x: team_to_seed[x.team],
+        )
+
+        semifinals_games = [
+            (seed_to_team_season[1], quarterfinals_winners[-1]),
+            (seed_to_team_season[2], quarterfinals_winners[0]),
+        ]
+
+        semifinals_results = self._simulate_single_playoff_round(
+            semifinals_games,
+            forced_outcomes=forced_outcomes,
+        )
+
+        semifinals_winners = [result[0] for result in semifinals_results]
+        semifinals_losers = [result[1] for result in semifinals_results]
+
+        championship_results = self._simulate_single_playoff_round(
+            [semifinals_winners],
+            forced_outcomes=forced_outcomes,
+        )[0]
+
+        third_place_results = self._simulate_single_playoff_round(
+            [semifinals_losers],
+            forced_outcomes=forced_outcomes,
+        )[0]
+
+        return {
+            1: championship_results[0],
+            2: championship_results[1],
+            3: third_place_results[0],
+            4: third_place_results[1],
+        }
+
+
+    def _simulate_single_playoff_round(self, games, forced_outcomes=None):
+        results = []
+
+        for team_season_1, team_season_2 in games:
+            raw_prob_1 = calculate_log5_probability(team_season_1, team_season_2)
+
+            random_value = random.random()
+            if random_value <= raw_prob_1:
+                result = (team_season_1, team_season_2)
+            else:
+                result = (team_season_2, team_season_1)
+
+            if forced_outcomes and (result[1].team, result[0].team) in forced_outcomes:
+                result = (result[1], result[0])
+
+            results.append(result)
+
+        return results
+
+    @property
+    def playoff_bracket_odds_cache_key(self):
+        return "blingaleague_playoff_bracket_odds|{}|{}".format(
+            self.year,
+            self._given_week_max,
+        )
 
     @fully_cached_property
     def keepers(self):
