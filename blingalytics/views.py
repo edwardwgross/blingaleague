@@ -1242,66 +1242,69 @@ class PlayoffOddsView(TemplateView):
         results_ready = False
         no_results_message = 'Playoff odds are currently being run and are not yet ready.  Please try again in a few minutes.'  # noqa: E501
 
-        cached_playoff_odds = season.get_cached_playoff_odds()
+        MIN_WEEK_TO_RUN_ODDS = 7
 
-        logging.getLogger('blingaleague').info(
-            "Cached odds - {} - {}".format(
-                season.playoff_odds_cache_key,
-                bool(cached_playoff_odds),
-            ),
-        )
-
-        if season.weeks_with_games < 1:
-            no_results_message = 'Playoff odds are not available until after week 1.'
-        elif cached_playoff_odds:
-            for team_season in season.standings_table:
-                # multiply by 100 to convert to percentages, decimal formatting done in template
-                playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)  # noqa: E501
-                bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)  # noqa: E501
-                champion_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('champion', 0)  # noqa: E501
-
-                playoffs_pct_display = round(playoffs_pct)
-                bye_pct_display = round(bye_pct)
-                champion_pct_display = round(champion_pct)
-
-                # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
-                if season.is_partial:
-                    if playoffs_pct_display == 0 and not team_season.eliminated_playoffs_early:
-                        playoffs_pct_display = '<1'
-
-                    if playoffs_pct_display == 100 and not team_season.clinched_playoffs:
-                        playoffs_pct_display = '>99'
-
-                    if bye_pct_display == 0 and not team_season.eliminated_bye_early:
-                        bye_pct_display = '<1'
-
-                    if bye_pct_display == 100 and not team_season.clinched_bye:
-                        bye_pct_display = '>99'
-
-                    can_be_champion = True
-                    if team_season.eliminated_playoffs_early or \
-                        (team_season.playoff_finish and not team_season.champion):
-                        can_be_champion = False
-
-                    if champion_pct_display == 0 and can_be_champion:
-                        champion_pct_display = '<1'
-
-                    if champion_pct_display == 100 and not team_season.champion:
-                        champion_pct_display = '>99'
-
-                playoff_odds_table.append({
-                    'team_season': team_season,
-                    'playoff_pct_exact': playoffs_pct,
-                    'playoff_pct_display': playoffs_pct_display,
-                    'bye_pct_exact': bye_pct,
-                    'bye_pct_display': bye_pct_display,
-                    'champion_pct_exact': champion_pct,
-                    'champion_pct_display': champion_pct_display,
-                })
-
-            results_ready = True
+        if season.weeks_with_games < MIN_WEEK_TO_RUN_ODDS:
+            no_results_message = "Playoff odds are not available until after week {}.".format(MIN_WEEK_TO_RUN_ODDS)
         else:
-            run_playoff_odds_in_background(season)
+            cached_playoff_odds = season.get_cached_playoff_odds()
+
+            logging.getLogger('blingaleague').info(
+                "Cached odds - {} - {}".format(
+                    season.playoff_odds_cache_key,
+                    bool(cached_playoff_odds),
+                ),
+            )
+
+            if cached_playoff_odds:
+                for team_season in season.standings_table:
+                    # multiply by 100 to convert to percentages, decimal formatting done in template
+                    playoffs_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('playoffs', 0)  # noqa: E501
+                    bye_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('bye', 0)  # noqa: E501
+                    champion_pct = 100 * cached_playoff_odds.get(team_season.team, {}).get('champion', 0)  # noqa: E501
+
+                    playoffs_pct_display = round(playoffs_pct)
+                    bye_pct_display = round(bye_pct)
+                    champion_pct_display = round(champion_pct)
+
+                    # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
+                    if season.is_partial:
+                        if playoffs_pct_display == 0 and not team_season.eliminated_playoffs_early:
+                            playoffs_pct_display = '<1'
+
+                        if playoffs_pct_display == 100 and not team_season.clinched_playoffs:
+                            playoffs_pct_display = '>99'
+
+                        if bye_pct_display == 0 and not team_season.eliminated_bye_early:
+                            bye_pct_display = '<1'
+
+                        if bye_pct_display == 100 and not team_season.clinched_bye:
+                            bye_pct_display = '>99'
+
+                        can_be_champion = True
+                        if team_season.eliminated_playoffs_early or \
+                            (team_season.playoff_finish and not team_season.champion):
+                            can_be_champion = False
+
+                        if champion_pct_display == 0 and can_be_champion:
+                            champion_pct_display = '<1'
+
+                        if champion_pct_display == 100 and not team_season.champion:
+                            champion_pct_display = '>99'
+
+                    playoff_odds_table.append({
+                        'team_season': team_season,
+                        'playoff_pct_exact': playoffs_pct,
+                        'playoff_pct_display': playoffs_pct_display,
+                        'bye_pct_exact': bye_pct,
+                        'bye_pct_display': bye_pct_display,
+                        'champion_pct_exact': champion_pct,
+                        'champion_pct_display': champion_pct_display,
+                    })
+
+                results_ready = True
+            else:
+                run_playoff_odds_in_background(season)
 
         return self.render_to_response({
             'season': season,
