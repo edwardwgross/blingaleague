@@ -3147,7 +3147,7 @@ class Season(ComparableObject):
 
         return cls(int(year), week_max=week_max)
 
-    def playoff_bracket_odds(self, max_simulations=500, bypass_cache=False):
+    def playoff_bracket_odds(self, max_simulations=1000, bypass_cache=False):
         if self.is_partial:
             return {}
 
