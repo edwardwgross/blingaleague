@@ -676,6 +676,14 @@ class FutureGame(models.Model, AbstractGame):
     team_2 = models.ForeignKey(Member, db_index=True, related_name='future_games_team_2')
 
     @fully_cached_property
+    def team_1_season(self):
+        return TeamSeason(self.team_1.id, self.year)
+
+    @fully_cached_property
+    def team_2_season(self):
+        return TeamSeason(self.team_2.id, self.year)
+
+    @fully_cached_property
     def title(self):
         return "Week {}, {}".format(self.week, self.year)
 
