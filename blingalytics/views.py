@@ -652,7 +652,7 @@ class SeasonFinderView(LongUrlView):
                     continue
                 elif clinched == CHOICE_CLINCHED_PLAYOFFS and not team_season.clinched_playoffs:
                     continue
-                elif clinched == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_playoffs_early:
+                elif clinched == CHOICE_ELIMINATED_EARLY and not team_season.eliminated_playoffs_early:  # noqa: E501
                     continue
 
                 if form_data['bye'] and not team_season.bye:
@@ -1245,7 +1245,9 @@ class PlayoffOddsView(TemplateView):
         MIN_WEEK_TO_RUN_ODDS = 7
 
         if season.weeks_with_games < MIN_WEEK_TO_RUN_ODDS:
-            no_results_message = "Playoff odds are not available until after week {}.".format(MIN_WEEK_TO_RUN_ODDS)
+            no_results_message = "Playoff odds are not available until after week {}.".format(
+                MIN_WEEK_TO_RUN_ODDS,
+            )
         else:
             cached_playoff_odds = season.get_cached_playoff_odds()
 
@@ -1267,7 +1269,8 @@ class PlayoffOddsView(TemplateView):
                     bye_pct_display = round(bye_pct)
                     champion_pct_display = round(champion_pct)
 
-                    # don't ever display 0 or 100 unless a team has actually been eliminated or clinched
+                    # don't ever display 0 or 100 unless a team has actually
+                    # been eliminated or clinched
                     if season.is_partial:
                         if playoffs_pct_display == 0 and not team_season.eliminated_playoffs_early:
                             playoffs_pct_display = '<1'
@@ -1282,8 +1285,7 @@ class PlayoffOddsView(TemplateView):
                             bye_pct_display = '>99'
 
                         can_be_champion = True
-                        if team_season.eliminated_playoffs_early or \
-                            (team_season.playoff_finish and not team_season.champion):
+                        if team_season.eliminated_playoffs_early or (team_season.playoff_finish and not team_season.champion):  #noqa: E501
                             can_be_champion = False
 
                         if champion_pct_display == 0 and can_be_champion:

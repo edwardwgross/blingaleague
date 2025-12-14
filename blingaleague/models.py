@@ -3155,7 +3155,7 @@ class Season(ComparableObject):
 
         return cls(int(year), week_max=week_max)
 
-    def playoff_bracket_odds(self, max_simulations=1000, bypass_cache=False):
+    def playoff_bracket_odds(self, max_simulations=2000, bypass_cache=False):
         if self.is_partial:
             return {}
 
@@ -3163,7 +3163,6 @@ class Season(ComparableObject):
 
         # if we're partway through the playoffs, we need to account for that
         forced_outcomes = []
-        playoff_games_played = []
         playoff_weeks = [
             quarterfinals_week(self.year), semifinals_week(self.year), blingabowl_week(self.year),
         ]
@@ -3194,12 +3193,16 @@ class Season(ComparableObject):
 
         return finishes_by_place
 
-    def _simulate_playoff_bracket_results(self, playoff_teams, max_simulations, forced_outcomes=None):
+    def _simulate_playoff_bracket_results(self, playoff_teams,
+                                          max_simulations, forced_outcomes=None):
         # since there is no 5th place game, don't bother with 5 or 6 as keys
         finishes_by_place = defaultdict(lambda: {1: 0, 2: 0, 3: 0, 4: 0})
         sim_run = 1
         while sim_run <= max_simulations:
-            bracket_outcome = self._simulate_single_playoff_bracket(playoff_teams, forced_outcomes=forced_outcomes)
+            bracket_outcome = self._simulate_single_playoff_bracket(
+                playoff_teams,
+                forced_outcomes=forced_outcomes,
+            )
             for place, team_season in bracket_outcome.items():
                 finishes_by_place[team_season.team][place] += 1 / decimal.Decimal(max_simulations)
 
@@ -3257,7 +3260,6 @@ class Season(ComparableObject):
             3: third_place_results[0],
             4: third_place_results[1],
         }
-
 
     def _simulate_single_playoff_round(self, games, forced_outcomes=None):
         results = []
