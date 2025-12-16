@@ -336,19 +336,19 @@ class Game(models.Model, AbstractGame):
 
     @fully_cached_property
     def winner_team_season_before_game(self):
-        return TeamSeason(self.winner.id, self.year, week_max=self.week - 1)
+        return TeamSeason(self.winner.id, self.year, week_max=self.week - 1, include_playoffs=True)
 
     @fully_cached_property
     def loser_team_season_before_game(self):
-        return TeamSeason(self.loser.id, self.year, week_max=self.week - 1)
+        return TeamSeason(self.loser.id, self.year, week_max=self.week - 1, include_playoffs=True)
 
     @fully_cached_property
     def winner_team_season_after_game(self):
-        return TeamSeason(self.winner.id, self.year, week_max=self.week)
+        return TeamSeason(self.winner.id, self.year, week_max=self.week, include_playoffs=True)
 
     @fully_cached_property
     def loser_team_season_after_game(self):
-        return TeamSeason(self.loser.id, self.year, week_max=self.week)
+        return TeamSeason(self.loser.id, self.year, week_max=self.week, include_playoffs=True)
 
     @fully_cached_property
     def winner_weekly_rank(self):
@@ -684,6 +684,22 @@ class FutureGame(models.Model, AbstractGame):
         return TeamSeason(self.team_2.id, self.year)
 
     @fully_cached_property
+    def team_1_season_before_game(self):
+        return TeamSeason(self.team_1.id, self.year, week_max=self.week - 1, include_playoffs=True)
+
+    @fully_cached_property
+    def team_2_season_before_game(self):
+        return TeamSeason(self.team_2.id, self.year, week_max=self.week - 1, include_playoffs=True)
+
+    @fully_cached_property
+    def team_1_season_after_game(self):
+        return TeamSeason(self.team_1.id, self.year, week_max=self.week, include_playoffs=True)
+
+    @fully_cached_property
+    def team_2_season_after_game(self):
+        return TeamSeason(self.team_2.id, self.year, week_max=self.week, include_playoffs=True)
+
+    @fully_cached_property
     def title(self):
         return "Week {}, {}".format(self.week, self.year)
 
@@ -698,7 +714,10 @@ class FutureGame(models.Model, AbstractGame):
         team_season_1 = TeamSeason(self.team_1.id, self.year, week_max=self.week - 1)
         team_season_2 = TeamSeason(self.team_2.id, self.year, week_max=self.week - 1)
 
-        prob_1 = calculate_log5_probability(team_season_1, team_season_2)
+        prob_1 = calculate_log5_probability(
+            self.team_1_season_before_game,
+            self.team_2_season_before_game,
+        )
 
         return {
             self.team_1: prob_1,

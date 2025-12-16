@@ -1233,7 +1233,7 @@ class PlayoffOddsView(TemplateView):
                 if week_max is not None:
                     week_max = int(week_max)
 
-                season = Season(year, week_max=week_max)
+                season = Season(year, week_max=week_max, include_playoffs=True)
             except (ValueError, TypeError):
                 # ignore both if user passed in a non-int
                 pass
@@ -1285,7 +1285,7 @@ class PlayoffOddsView(TemplateView):
                             bye_pct_display = '>99'
 
                         can_be_champion = True
-                        if team_season.eliminated_playoffs_early or (team_season.playoff_finish and not team_season.champion):  #noqa: E501
+                        if team_season.eliminated_playoffs_early or (team_season.playoff_finish and not team_season.champion):  # noqa: E501
                             can_be_champion = False
 
                         if champion_pct_display == 0 and can_be_champion:
