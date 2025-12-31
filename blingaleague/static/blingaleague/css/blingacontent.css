@@ -75,6 +75,7 @@
     font-weight: bold;
     font-family: "Anonymous Pro", "Courier New", Courier, monospace;
     font-size: 120%;
+    text-decoration: 1px underline;
 }
 
 #gazette_detail p,
