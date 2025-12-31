@@ -214,13 +214,7 @@ def blingapower_rankings_section(season):
     )
 
     for i, (ts_1, ts_3, ts_all) in enumerate(ordered_teams):
-        rankings_lines.extend([
-            "### {}. [{}]({}) (last year: {})".format(
-                len(ordered_teams) - i,
-                ts_all,
-                ts_all.gazette_link,
-                ordinal(ts_1.previous.power_ranking),
-            ),
+        statlines = [
             " - [{}]({}): {}, {:.2f} points per game, {:.3f} expected winning percentage".format(  # noqa: E501
                 ts_1.year,
                 ts_1.gazette_link,
@@ -239,6 +233,16 @@ def blingapower_rankings_section(season):
                 ts_all.seasons.average_score,
                 ts_all.seasons.expected_win_pct,
             ),
+        ]
+
+        rankings_lines.extend([
+            "### {}. [{}]({}) (last year: {})".format(
+                len(ordered_teams) - i,
+                ts_all,
+                ts_all.gazette_link,
+                ordinal(ts_1.previous.power_ranking),
+            ),
+            '\n'.join(statlines),
             '',
         ])
 
