@@ -5,16 +5,17 @@ from email.mime.text import MIMEText
 from httplib2 import Http
 
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core.cache import caches
 
 from googleapiclient.discovery import build
 
 from oauth2client import file, client, tools
 
-from blingaleague.models import Week, Season, TeamSeason, PLAYOFF_TEAMS, \
+from blingaleague.models import Week, Season, TeamSeason, TeamMultiSeasons, \
                                 Member, FakeMember, Player, \
                                 SEMIFINALS_TITLE_BASE, QUARTERFINALS_TITLE_BASE, \
-                                BLINGABOWL_TITLE_BASE
+                                BLINGABOWL_TITLE_BASE, PLAYOFF_TEAMS
 from blingaleague.utils import regular_season_weeks, blingabowl_week, semifinals_week
 
 
@@ -133,7 +134,8 @@ def new_gazette_body_template():
         sections.append(postmortems_section(last_week, current_season))
 
     if last_week.week == blingabowl_week(last_week.year) and last_week.year == current_season.year:
-        sections.append(['# Blingapower Rankings'])
+        sections.append(blingapower_rankings_section(current_season))
+
         sections.append(['# Draft Lottery'])
     else:
         if last_week.week == semifinals_week(last_week.year) and current_season.trades:
@@ -185,6 +187,62 @@ def postmortems_section(week_obj, season):
         postmortems_lines.append(team_season.gazette_postmortem_str)
 
     return postmortems_lines
+
+
+def blingapower_rankings_section(season):
+    rankings_lines = ['# Blingapower Rankings']
+
+    all_team_info = []
+    for team_season in season.standings_table:
+        all_team_info.append((
+            team_season,
+            TeamMultiSeasons(
+                team_season.team.id,
+                year_min=season.year - 2,
+                year_max=season.year,
+            ),
+            team_season.team,
+        ))
+
+    ordered_teams = sorted(
+        all_team_info,
+        key=lambda x: (
+            -1 * x[0].previous.power_ranking,
+            x[1].win_count,
+            x[1].points,
+        ),
+    )
+
+    for i, (ts_1, ts_3, ts_all) in enumerate(ordered_teams):
+        rankings_lines.extend([
+            "### {}. [{}]({}) (last year: {})".format(
+                len(ordered_teams) - i,
+                ts_all,
+                ts_all.gazette_link,
+                ordinal(ts_1.previous.power_ranking),
+            ),
+            " - [{}]({}): {}, {:.2f} points per game, {:.3f} expected winning percentage".format(  # noqa: E501
+                ts_1.year,
+                ts_1.gazette_link,
+                ts_1.record,
+                ts_1.average_score,
+                ts_1.expected_win_pct,
+            ),
+            " - [Last three years](XXXXXX): {}, {:.2f} points per game, {:.3f} expected winning percentage".format(  # noqa: E501
+                ts_3.record,
+                ts_3.average_score,
+                ts_3.expected_win_pct,
+            ),
+            " - [All-time]({}): {}, {:.2f} points per game, {:.3f} expected winning percentage".format(  # noqa: E501
+                ts_all.gazette_link,
+                ts_all.seasons.record,
+                ts_all.seasons.average_score,
+                ts_all.seasons.expected_win_pct,
+            ),
+            '',
+        ])
+
+    return rankings_lines
 
 
 def year_in_trades_section(season):
