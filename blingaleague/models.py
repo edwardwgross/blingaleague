@@ -711,9 +711,6 @@ class FutureGame(models.Model, AbstractGame):
         if self.week <= 1:
             return {self.team_1: TIE_VALUE, self.team_2: TIE_VALUE}
 
-        team_season_1 = TeamSeason(self.team_1.id, self.year, week_max=self.week - 1)
-        team_season_2 = TeamSeason(self.team_2.id, self.year, week_max=self.week - 1)
-
         prob_1 = calculate_log5_probability(
             self.team_1_season_before_game,
             self.team_2_season_before_game,
