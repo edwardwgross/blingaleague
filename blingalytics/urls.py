@@ -6,7 +6,7 @@ from .views import WeeklyScoresView, ExpectedWinsView, \
                    TopSeasonsView, TopSeasonsSingleStatView, \
                    TeamVsTeamView, BeltHolderView, TradeFinderView, \
                    KeeperFinderView, DraftPickFinderView, \
-                   ShortUrlView, PlayoffOddsView
+                   ShortUrlView, PlayoffOddsView, PlayerSearchView
 
 urlpatterns = [
     url(
@@ -73,6 +73,11 @@ urlpatterns = [
         r'playoff_odds/$',
         PlayoffOddsView.as_view(),
         name='blingalytics.playoff_odds',
+    ),
+    url(
+        r'players/$',
+        PlayerSearchView.as_view(),
+        name='blingalytics.player_search',
     ),
 
     # deprecated urls

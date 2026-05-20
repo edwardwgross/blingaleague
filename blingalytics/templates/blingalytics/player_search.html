@@ -1,0 +1,27 @@
+{% extends "blingaleague/base.html" %}
+
+{% block title %}Player Search{% endblock %}
+
+{% block content %}
+<h1>Player Search</h1>
+
+<div id="player_search" class="blingalytics">
+  <form method="get" style="margin-bottom:20px">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit"/>
+  </form>
+
+  {% if search_term %}
+    {% if player_list %}
+      <ul>
+        {% for player in player_list %}
+          <li><a href="{% url 'blingaleague.player' player.name %}">{{ player.full_description }}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <h3 class="no_results_message">No players found</h3>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock content %}

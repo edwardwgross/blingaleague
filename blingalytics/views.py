@@ -10,7 +10,7 @@ from django.views.generic import TemplateView, RedirectView
 from slugify import slugify
 
 from blingaleague.models import Game, Week, Member, TeamSeason, TeamMultiSeasons, \
-                                Season, Matchup, Trade, Keeper, DraftPick, \
+                                Season, Matchup, Trade, Keeper, DraftPick, Player, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
                                 position_sort_key, calculate_expected_wins
 from blingaleague.utils import scatter_graph_html, regular_season_weeks
@@ -25,7 +25,7 @@ from .forms import CHOICE_YES, CHOICE_NO, \
                    CHOICE_MATCHING_ASSETS_ONLY, \
                    GameFinderForm, SeasonFinderForm, \
                    TradeFinderForm, KeeperFinderForm, DraftPickFinderForm, \
-                   ExpectedWinsCalculatorForm
+                   ExpectedWinsCalculatorForm, PlayerSearchForm
 from .models import ShortUrl
 from .utils import sorted_seasons_by_attr, \
                    build_belt_holder_list, \
@@ -1314,4 +1314,27 @@ class PlayoffOddsView(TemplateView):
             'week_max': week_max,
             'results_ready': results_ready,
             'no_results_message': no_results_message,
+        })
+
+
+class PlayerSearchView(TemplateView):
+    template_name = 'blingalytics/player_search.html'
+
+    def get(self, request):
+        search_term = None
+        player_list = []
+
+        player_search_form = PlayerSearchForm(request.GET)
+        if player_search_form.is_valid():
+            form_data = player_search_form.cleaned_data
+            player_name = form_data['player_name']
+
+            if player_name:
+                search_term = player_name
+                player_list = Player.find(player_name)
+
+        return self.render_to_response({
+            'form': player_search_form,
+            'search_term': search_term,
+            'player_list': player_list,
         })

@@ -309,3 +309,7 @@ class DraftPickFinderForm(BaseFinderForm):
     player = forms.CharField(required=False, label='Player Name')
 
     filter_threshold = 1
+
+
+class PlayerSearchForm(forms.Form):
+    player_name = forms.CharField(required=False, label='Player Name')

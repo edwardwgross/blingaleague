@@ -4755,15 +4755,7 @@ class Player(ComparableObject):
         return RingOfHonoree.objects.filter(name=self.name)
 
     def change_name(self, new_name):
-        db_models = (
-            DraftPick,
-            Keeper,
-            TradedAsset,
-            PlayerNotes,
-            RingOfHonoree,
-        )
-
-        for db_model in db_models:
+        for db_model in _player_db_models():
             for player_obj in db_model.objects.filter(name=self.name):
                 _print_and_log(player_obj)
                 player_obj.name = new_name
@@ -4778,6 +4770,30 @@ class Player(ComparableObject):
                 args=(self.name,),
             ),
         )
+
+    @property
+    def full_description(self):
+        return "{} ({}, {}-{})".format(
+            self.name,
+            ' / '.join(sorted(self.positions)),
+            min(self.transactions_by_year.keys()),
+            max(self.transactions_by_year.keys()),
+        )
+
+    @classmethod
+    def find(cls, name_str):
+        name_str = name_str.strip()
+
+        if not name_str:
+            return []
+
+        names_found = set()
+
+        for db_model in _player_db_models():
+            for player_object in db_model.objects.filter(name__icontains=name_str):
+                names_found.add(player_object.name)
+
+        return sorted([Player(name) for name in names_found])
 
     @classmethod
     def all(cls):
@@ -4804,6 +4820,16 @@ class Player(ComparableObject):
 
     def __repr__(self):
         return str(self)
+
+
+def _player_db_models():
+    return (
+        DraftPick,
+        Keeper,
+        TradedAsset,
+        PlayerNotes,
+        RingOfHonoree,
+    )
 
 
 class PlayerNotes(models.Model, ComparableObject):
