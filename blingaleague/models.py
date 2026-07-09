@@ -4389,7 +4389,7 @@ class DraftPick(models.Model, ComparableObject):
     def pick_value(self):
         return value_by_pick(self.overall_pick)
 
-    @property
+    @fully_cached_property
     def times_kept(self):
         times_kept = 0
 
