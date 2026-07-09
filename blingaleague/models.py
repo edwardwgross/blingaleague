@@ -4389,6 +4389,19 @@ class DraftPick(models.Model, ComparableObject):
     def pick_value(self):
         return value_by_pick(self.overall_pick)
 
+    @property
+    def times_kept(self):
+        times_kept = 0
+
+        player = Player(self.name)
+
+        if player.kept[self.year]:
+            times_kept =1
+            if player.kept[self.year - 1]:
+                times_kept = 2
+
+        return times_kept
+
     def clean(self):
         errors = {}
 
@@ -4405,6 +4418,22 @@ class DraftPick(models.Model, ComparableObject):
                 ValidationError(
                     message='Round is greater than 16',
                     code='round_too_high',
+                ),
+            )
+
+        if self.times_kept > 0 and not self.is_keeper:
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message='Player was kept but is not marked as a keeper',
+                    code='is_keeper_false',
+                ),
+            )
+
+        if self.is_keeper and self.times_kept < 1:
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message='Player was not kept but is marked as a keeper',
+                    code='is_keeper_true',
                 ),
             )
 
@@ -4427,7 +4456,10 @@ class DraftPick(models.Model, ComparableObject):
         )
 
         if self.is_keeper:
-            pick_str = "{} (keeper)".format(pick_str)
+            pick_str = "{} (keeper x{})".format(
+                pick_str,
+                self.times_kept,
+            )
 
         return pick_str
 

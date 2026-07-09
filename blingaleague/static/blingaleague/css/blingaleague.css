@@ -213,7 +213,7 @@ td.draft_pick_pos_k {
     padding: 0;
 }
 
-#draft_board td p.alternate_team[title] {
+#draft_board td p[title] {
     cursor: help;
 }
 

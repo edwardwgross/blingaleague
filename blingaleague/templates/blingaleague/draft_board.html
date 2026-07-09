@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <table id="draft_board">
   <tr>
     <th class="round_number"/>
@@ -13,11 +15,11 @@
       {% for draft_pick in round %}
         <td class="draft_pick_pos_{{ draft_pick.position|lower }}">
           {% if draft_pick.original_team %}
-            <p class="alternate_team" title="{% if draft_pick.is_keeper %}keeper{% else %}pick{% endif %} traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">{{ draft_pick.team }}</p>
+            <p class="alternate_team" title="{% if draft_pick.is_keeper %}keeper x {{ draft_pick.times_kept }}{% else %}pick{% endif %} traded from {{ draft_pick.original_team }} to {{ draft_pick.team }}">{{ draft_pick.team }}</p>
           {% endif %}
           <p class="player {% if draft_pick.original_team %}pick_offset{% endif %}"><a href="{% url 'blingaleague.player' draft_pick.name %}">{{ draft_pick.name }}</a></p>
           <p class="position">{{ draft_pick.position }}</p>
-          {% if draft_pick.is_keeper %}<p class="keeper">KEEPER</p>{% endif %}
+          {% if draft_pick.is_keeper %}<p class="keeper" title="kept for the {{ draft_pick.times_kept|ordinal }} time">KEEPER x {{ draft_pick.times_kept }}</p>{% endif %}
         </td>
       {% endfor %}
     </tr>
