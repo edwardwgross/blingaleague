@@ -427,16 +427,27 @@ table.game_table {
     padding: 12px 24px;
     width: 600px;
 }
+
 table.game_table tr.playoffs {
     background-color: #f4f4f4;
 }
+
 table.game_table th {
     white-space: nowrap;
     text-align: center;
 }
+
 table.game_table td {
     white-space: nowrap;
     text-align: right;  /* by default, since these are mostly numbers */
+}
+
+table.game_table td.week {
+    text-align: center;
+}
+
+table.game_table tr.playoffs td.week {
+    font-size: smaller;
 }
 
 .playoff_bracket {
