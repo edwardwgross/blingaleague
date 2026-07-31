@@ -49,7 +49,11 @@
     {% endfor %}
     {% for game in base_object.future_games %}
       <tr {% if game.is_playoffs %}class="playoffs"{% endif %}>
-        <td><a href="{{ game.week_object.href }}">{{ game.week }}</a></td>
+        <td sorttable_customkey="{{ game.week }}" class="week">
+          <a href="{{ game.week_object.href }}">
+            {% if game.is_playoffs %}{{ game.playoff_title_base }}{% else %}{{ game.week }}{% endif %}
+          </a>
+        </td>
         <td/> {# W/L #}
         <td/> {# PF #}
         <td/> {# PA #}
