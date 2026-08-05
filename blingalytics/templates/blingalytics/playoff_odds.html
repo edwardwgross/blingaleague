@@ -13,6 +13,7 @@
       <th>Team</th>
       <th>Record</th>
       <th>Place</th>
+      <th>Points</th>
       <th title="Expected Winning Percentage">Exp. %</th>
       <th title="Remaining Strength of Schedule">Future SOS</th>
       <th style="min-width:60px">Playoffs</th>
@@ -28,6 +29,7 @@
           </td>
           <td sorttable_customkey="{{ odds_dict.team_season.win_pct }}" style="text-align:center">{{ odds_dict.team_season.record }}</td>
           <td sorttable_customkey="{{ odds_dict.team_season.place_numeric }}">{{ odds_dict.team_season.place }}</td>
+          <td>{{ odds_dict.team_season.points|floatformat:2 }}</td>
           <td>{{ odds_dict.team_season.expected_win_pct|floatformat:3 }}</td>
           <td>{{ odds_dict.team_season.future_strength_of_schedule_str }}</td>
           <td style="font-weight:bold" sorttable_customkey="{{ odds_dict.playoff_pct_exact }}">{{ odds_dict.playoff_pct_display }}%</td>

@@ -4,7 +4,8 @@ from django.forms.widgets import NumberInput
 
 from .models import Member, Game, Postseason, FakeMember, \
                     Trade, TradedAsset, Keeper, DraftPick, \
-                    PlayerNotes, RingOfHonoree, FutureGame
+                    PlayerNotes, RingOfHonoree, FutureGame, \
+                    DraftOrder
 
 
 class GameAdmin(admin.ModelAdmin):
@@ -26,3 +27,4 @@ admin.site.register(DraftPick)
 admin.site.register(PlayerNotes)
 admin.site.register(RingOfHonoree)
 admin.site.register(FutureGame)
+admin.site.register(DraftOrder)

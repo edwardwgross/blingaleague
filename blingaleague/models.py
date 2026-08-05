@@ -78,6 +78,8 @@ POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 HALF = decimal.Decimal(0.5)
 TIE_VALUE = HALF
 
+MAX_DRAFT_ROUND = 16
+
 
 def position_sort_key(position):
     try:
@@ -149,6 +151,13 @@ def calculate_expected_wins(*game_scores, base_year=None, include_playoffs=False
     expected_wins = sum(_win_expectancy(score) for score in game_scores)
 
     return expected_wins
+
+
+def overall_pick_with_reversal(round, pick_in_round, picks_per_round):
+    if round % 2 == 0:
+        pick_in_round = picks_per_round + 1 - pick_in_round
+
+    return (round - 1) * picks_per_round + pick_in_round
 
 
 class ComparableObject(object):
@@ -4302,10 +4311,11 @@ class Keeper(models.Model, ComparableObject):
         if draft.draft_picks.count() > 0:
             pick_in_round = draft.team_to_original_order(self.team)
 
-        if self.round % 2 == 0:
-            pick_in_round = picks_per_round + 1 - pick_in_round
-
-        return (self.round - 1) * picks_per_round + pick_in_round
+        return overall_pick_with_reversal(
+            self.round,
+            pick_in_round,
+            picks_per_round,
+        )
 
     @fully_cached_property
     def value_spent(self):
@@ -4396,7 +4406,7 @@ class DraftPick(models.Model, ComparableObject):
         player = Player(self.name)
 
         if player.kept[self.year]:
-            times_kept =1
+            times_kept = 1
             if player.kept[self.year - 1]:
                 times_kept = 2
 
@@ -4413,10 +4423,12 @@ class DraftPick(models.Model, ComparableObject):
                 ),
             )
 
-        if self.round > 16:
+        if self.round > MAX_DRAFT_ROUND:
             errors.setdefault(NON_FIELD_ERRORS, []).append(
                 ValidationError(
-                    message='Round is greater than 16',
+                    message="Round is greater than {}".format(
+                        MAX_DRAFT_ROUND,
+                    ),
                     code='round_too_high',
                 ),
             )
@@ -4444,7 +4456,7 @@ class DraftPick(models.Model, ComparableObject):
 
     def save(self, **kwargs):
         super().save(**kwargs)
-        clear_cached_properties
+        clear_cached_properties()
 
     def __str__(self):
         pick_str = "{}, {}: {} - {} - {}".format(
@@ -4469,6 +4481,56 @@ class DraftPick(models.Model, ComparableObject):
     class Meta:
         # unique_together = ('year', 'round', 'pick_in_round')
         ordering = ['year', 'round', 'pick_in_round']
+
+
+class DraftOrder(models.Model, ComparableObject):
+    year = models.IntegerField(db_index=True)
+    pick = models.IntegerField(db_index=True)
+    team = models.ForeignKey(Member, db_index=True, related_name='draft_order')
+
+    _comparison_attr = 'year_pick'
+
+    @property
+    def cache_key(self):
+        return str(self.pk)
+
+    @fully_cached_property
+    def year_pick(self):
+        return (self.year, self.pick)
+
+    def clean(self):
+        errors = {}
+
+        if self.pick > len(Season(self.year).active_teams):
+            errors.setdefault(NON_FIELD_ERRORS, []).append(
+                ValidationError(
+                    message='Pick is greater than number of teams',
+                    code='pick_too_high',
+                ),
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
+        super().clean()
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        clear_cached_properties()
+
+    def __str__(self):
+        return "{}, {}: {}".format(
+            self.year,
+            self.pick,
+            self.team,
+        )
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        unique_together = ('year', 'pick')
+        ordering = ['year', 'pick']
 
 
 class Draft(ComparableObject):
@@ -4498,20 +4560,80 @@ class Draft(ComparableObject):
         return picks.order_by('round', 'pick_in_round')
 
     @fully_cached_property
+    def draft_slots(self):
+        slots = []
+
+        team_count = len(Season(self.year).active_teams)
+
+        for _round in range(MAX_DRAFT_ROUND):
+            slots.append(team_count * [None])
+
+        return slots
+
+    @fully_cached_property
     def draft_board_picks(self):
-        all_rounds_dict = defaultdict(list)
+        board = []
+
+        team_count = len(Season(self.year).active_teams)
+
+        for round in range(1, MAX_DRAFT_ROUND + 1):
+            round_list = []
+            for pick in range(1, team_count + 1):
+                round_list.append({
+                    'round': round,
+                    'pick': pick,
+                    'overall': overall_pick_with_reversal(
+                        round,
+                        pick,
+                        team_count,
+                    ),
+                    'selection': None,
+                })
+
+            board.append(round_list)
 
         for pick in self.draft_picks:
-            all_rounds_dict[pick.round].append(pick)
+            round_index = pick.round - 1
+            pick_in_round = pick.pick_in_round
 
-        all_rounds_list = []
-        for round, picks in sorted(all_rounds_dict.items()):
-            if round % 2:
-                all_rounds_list.append(picks)
+            if pick.round % 2:
+                board[round_index][pick_in_round - 1]['selection'] = pick  # noqa: E501
             else:
-                all_rounds_list.append(picks[::-1])
+                board[round_index][team_count - pick_in_round]['selection'] = pick  # noqa: E501
 
-        return all_rounds_list
+        return board
+
+    @fully_cached_property
+    def draft_list_picks(self):
+        picks_list = []
+
+        team_count = len(Season(self.year).active_teams)
+
+        overall_pick = 0
+        for round in range(1, MAX_DRAFT_ROUND + 1):
+            for pick in range(1, team_count + 1):
+                overall_pick += 1
+
+                if round % 2:
+                    team = self.original_team_order[pick - 1]
+                else:
+                    team = self.original_team_order[team_count - pick]
+
+                picks_list.append({
+                    'round_and_pick': "{}.{:02}".format(
+                        round,
+                        pick,
+                    ),
+                    'overall': overall_pick,
+                    'team': team,
+                    'team_sort_key': self.original_team_order.index(team),
+                    'selection': None,
+                })
+
+        for pick in self.draft_picks:
+            picks_list[pick.overall_pick - 1]['selection'] = pick
+
+        return picks_list
 
     @fully_cached_property
     def season(self):
@@ -4519,15 +4641,13 @@ class Draft(ComparableObject):
 
     @fully_cached_property
     def original_team_order(self):
-        original_order = []
-
-        for pick in self.draft_picks.filter(round=1):
-            if pick.original_team:
-                original_order.append(pick.original_team)
-            else:
-                original_order.append(pick.team)
-
-        return original_order
+        return [
+            order.team for order in DraftOrder.objects.filter(
+                year=self.year,
+            ).order_by(
+                'pick',
+            )
+        ]
 
     def team_to_original_order(self, team):
         try:
