@@ -234,6 +234,10 @@ td.draft_pick_pos_k {
     color: #333333;
 }
 
+#draft_board td.draft_pick_empty {
+    color: #a0a0a0;
+}
+
 #main_outer {
     padding: 0 60px 60px 60px;
     margin-top: 60px;
