@@ -236,6 +236,7 @@ td.draft_pick_pos_k {
 
 #draft_board td.draft_pick_empty {
     color: #a0a0a0;
+    height: 40px;
 }
 
 #main_outer {
