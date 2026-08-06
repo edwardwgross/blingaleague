@@ -1,6 +1,6 @@
 {% extends "blingaleague/base.html" %}
 
-{% block title %}{{ draft|title }}{% endblock %}
+{% block title %}{{ draft|title }} {% if list_view %}Listing{% else %}Board{% endif %}{% endblock %}
 
 {% block content %}
 <h1>{{ draft|title }}</h1>

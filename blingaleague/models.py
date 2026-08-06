@@ -4551,24 +4551,7 @@ class Draft(ComparableObject):
             year=self.year,
         )
 
-        if self.round_max:
-            picks = picks.filter(round__lte=self.round_max)
-
-        if self.team_id:
-            picks = picks.filter(team_id=self.team_id)
-
         return picks.order_by('round', 'pick_in_round')
-
-    @fully_cached_property
-    def draft_slots(self):
-        slots = []
-
-        team_count = len(Season(self.year).active_teams)
-
-        for _round in range(MAX_DRAFT_ROUND):
-            slots.append(team_count * [None])
-
-        return slots
 
     @fully_cached_property
     def draft_board_picks(self):
@@ -4597,9 +4580,9 @@ class Draft(ComparableObject):
             pick_in_round = pick.pick_in_round
 
             if pick.round % 2:
-                board[round_index][pick_in_round - 1]['selection'] = pick  # noqa: E501
+                board[round_index][pick_in_round - 1]['selection'] = pick
             else:
-                board[round_index][team_count - pick_in_round]['selection'] = pick  # noqa: E501
+                board[round_index][team_count - pick_in_round]['selection'] = pick
 
         return board
 
@@ -4613,6 +4596,9 @@ class Draft(ComparableObject):
         for round in range(1, MAX_DRAFT_ROUND + 1):
             for pick in range(1, team_count + 1):
                 overall_pick += 1
+
+                if self.round_max and round > self.round_max:
+                    break
 
                 if round % 2:
                     team = self.original_team_order[pick - 1]
@@ -4631,7 +4617,23 @@ class Draft(ComparableObject):
                 })
 
         for pick in self.draft_picks:
+            if self.round_max and pick.round > self.round_max:
+                continue
+
             picks_list[pick.overall_pick - 1]['selection'] = pick
+
+        if self.team_id:
+            team_picks_list = []
+
+            for pick in picks_list:
+                if pick['selection']:
+                    if pick['selection'].team.id == self.team_id:
+                        team_picks_list.append(pick)
+                else:
+                    if pick['team'].id == self.team_id:
+                        team_picks_list.append(pick)
+
+            picks_list = team_picks_list
 
         return picks_list
 
