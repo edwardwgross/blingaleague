@@ -3503,7 +3503,7 @@ class Season(ComparableObject):
     def __str__(self):
         text = "{} Season".format(self.year)
 
-        if self.include_playoffs:
+        if self.include_playoffs and self.weeks_with_games > regular_season_weeks(self.year):
             text = "{} (including playoffs)".format(text)
 
         return text
