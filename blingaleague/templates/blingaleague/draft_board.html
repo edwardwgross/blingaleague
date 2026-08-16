@@ -20,7 +20,7 @@
             {% endif %}
             <p class="player {% if draft_pick.selection.original_team %}pick_offset{% endif %}"><a href="{% url 'blingaleague.player' draft_pick.selection.name %}">{{ draft_pick.selection.name }}</a></p>
             <p class="position">{{ draft_pick.selection.position }}</p>
-            {% if draft_pick.selection.is_keeper %}<p class="keeper" title="{{ draft_pick.selection.times_kept|ordinal }} year being kept">KEEPER{% if draft_pick.selection.times_kept > 1 %} x {{ draft_pick.selection.times_kept }}{% endif %}</p>{% endif %}
+            {% if draft_pick.selection.is_keeper %}<p class="keeper" title="{{ draft_pick.selection.times_kept|ordinal }} year being kept">KEEPER{% if draft_pick.selection.times_kept > 1 %} x{{ draft_pick.selection.times_kept }}{% endif %}</p>{% endif %}
           </td>
         {% else %}
           <td class="draft_pick_empty">{{ draft_pick.overall }}</td>
