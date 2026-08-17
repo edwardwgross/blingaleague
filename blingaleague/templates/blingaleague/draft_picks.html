@@ -21,7 +21,7 @@
         {% endif %}
         <td>
           <a href="{% url 'blingaleague.player' draft_pick.selection.name %}">{{ draft_pick.selection.name }}</a>
-          {% if draft_pick.selection.is_keeper %}<span class="blinganote" title="{{ draft_pick.selection.times_kept|ordinal }} year being kept">K{% if draft_pick.selection.times_kept > 1 %}x{{ draft_pick.selection.times_kept }}{% endif %}</span>{% endif %}
+          {% if draft_pick.selection.is_keeper %}<span class="blinganote" title="{{ draft_pick.selection.times_kept|ordinal }} year being kept">K{% if draft_pick.selection.times_kept > 1 %}&#215;{{ draft_pick.selection.times_kept }}{% endif %}</span>{% endif %}
           {% if draft.selection.team_id and draft_pick.selection.original_team %}<span class="blinganote" title="{% if draft_pick.selection.is_keeper %}keeper{% else %}pick{% endif %} traded from {{ draft_pick.selection.original_team }} to {{ draft_pick.selection.team }}">T</span>{% endif %}
         </td>
         <td sorttable_customkey="{{ draft_pick.selection.position_sort_key }}" class="draft_pick_pos_{{ draft_pick.selection.position|lower }}">{{ draft_pick.selection.position }}</td>
