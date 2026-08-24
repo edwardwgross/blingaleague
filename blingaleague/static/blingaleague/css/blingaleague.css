@@ -126,27 +126,33 @@ td.defunct a, td.defunct a:hover, td.defunct a:visited, td.defunct a:focus {
 }
 
 td.draft_pick_pos_rb {
-    background-color: #ffcccb;
+    /*background-color: #ffcccb;*/
+    background-color: #e6b8af;
 }
 
 td.draft_pick_pos_wr {
-    background-color: #add8e6;
+    /*background-color: #b0e0e6;*/
+    background-color: #c9daf8;
 }
 
 td.draft_pick_pos_qb {
-    background-color: #ffffe0;
+    /*background-color: #ffffe0;*/
+    background-color: #ffff00;
 }
 
 td.draft_pick_pos_te {
-    background-color: #90ee90;
+    /*background-color: #90ee90;*/
+    background-color: #b6d7a8;
 }
 
 td.draft_pick_pos_def {
-    background-color: #fed8b1;
+    /*background-color: #fed8b1;*/
+    background-color: #fce5cd;
 }
 
 td.draft_pick_pos_k {
-    background-color: #e6e6fa;
+    /*background-color: #e6e6fa;*/
+    background-color: #b4a7d6;
 }
 
 #draft_board {
