@@ -2174,7 +2174,10 @@ class TeamSeason(ComparableObject):
 
     @fully_cached_property
     def live_picks(self):
-        return self.draft.draft_picks.filter(is_keeper=False)
+        return self.draft.draft_picks.filter(
+            team__id=self.team.id,
+            is_keeper=False,
+        )
 
     @fully_cached_property
     def draft_position(self):
@@ -4244,6 +4247,9 @@ class TradedAsset(models.Model, ComparableObject):
 
     @fully_cached_property
     def keeper_cost_sort_key(self):
+        if self.is_draft_pick:
+            return int(self._parse_pick())
+
         if self.keeper_cost is None:
             return 0
 
@@ -5069,11 +5075,12 @@ def pre_build_cache():
             _print_and_log("Pre-built cache for {}".format(team_season))
 
         for season in Season.all():
-            _average = season.average_game_score  # noqa: F841
-            _first = season.first_place  # noqa: F841
-            _last = season.last_place  # noqa: F841
-            _points = season.most_points  # noqa: F841
-            _expected_wins = season.most_expected_wins  # noqa: F841
+            if len(season.all_game_scores):
+                _average = season.average_game_score  # noqa: F841
+                _first = season.first_place  # noqa: F841
+                _last = season.last_place  # noqa: F841
+                _points = season.most_points  # noqa: F841
+                _expected_wins = season.most_expected_wins  # noqa: F841
 
             _print_and_log("Pre-built cache for {}".format(season))
 
