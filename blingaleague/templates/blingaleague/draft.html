@@ -7,25 +7,27 @@
 
 <h3><a href="{{ draft.season.href }}">{{ draft.season }}</a></h3>
 
-<div class="center" {% if list_view %}style="width:800px"{% endif %}>
-  {% if draft.previous %}
-    <a href="{{ draft.previous.href }}{% if list_view %}?list_view{% endif %}" class="link previous">{{ draft.previous|title }}</a>
-  {% endif %}
+<div id="draft_container">
+  <div class="center">
+    {% if draft.previous %}
+      <a href="{{ draft.previous.href }}{% if list_view %}?list_view{% endif %}" class="link previous">{{ draft.previous|title }}</a>
+    {% endif %}
+
+    {% if list_view %}
+      <a href="{{ draft.href }}?board_view" style="position:relative; top:12px">View as Board</a>
+    {% else %}
+      <a href="{{ draft.href }}?list_view" style="position:relative; top:12px">View as List</a>
+    {% endif %}
+
+    {% if draft.next %}
+      <a href="{{ draft.next.href }}{% if list_view %}?list_view{% endif %}" class="link next">{{ draft.next|title }}</a>
+    {% endif %}
+  </div>
 
   {% if list_view %}
-    <a href="{{ draft.href }}?board_view" style="position:relative; top:12px">View as Board</a>
+    {% include "blingaleague/draft_picks.html" %}
   {% else %}
-    <a href="{{ draft.href }}?list_view" style="position:relative; top:12px">View as List</a>
-  {% endif %}
-
-  {% if draft.next %}
-    <a href="{{ draft.next.href }}{% if list_view %}?list_view{% endif %}" class="link next">{{ draft.next|title }}</a>
+    {% include "blingaleague/draft_board.html" %}
   {% endif %}
 </div>
-
-{% if list_view %}
-  {% include "blingaleague/draft_picks.html" %}
-{% else %}
-  {% include "blingaleague/draft_board.html" %}
-{% endif %}
 {% endblock %}
