@@ -12,8 +12,8 @@ TEMPLATE_INFO = INFO
 ALLOWED_HOSTS = (
     'www.blingaleague.com',
     'blingaleague.com',
-    '44.242.219.75',
-    'ec2-44-242-219-75.us-west-2.compute.amazonaws.com',
+    'ec2-34-222-57-34.us-west-2.compute.amazonaws.com',
+    '34.222.57.34',
 )
 
 ROOT_URLCONF = 'blingaleague.urls'
