@@ -5,7 +5,7 @@
 {% block content %}
 <h1>Team vs. Team</h1>
 
-<h2>Records {% if year_min %}({{ year_min }}-present){% endif %}</h2>
+<h2>Records {% if year_range_str %}({{ year_range_str }}){% endif %}</h2>
 
 <table class="team_vs_team_grid blingalytics">
   <tr>
@@ -34,7 +34,7 @@
   {% endfor %}
 </table>
 
-<h2>Trades {% if year_min %}({{ year_min }}-present){% endif %}</h2>
+<h2>Trades {% if year_range_str %}({{ year_range_str }}){% endif %}</h2>
 
 <table class="team_vs_team_grid blingalytics">
   <tr>
@@ -52,7 +52,7 @@
         {% else %}
           <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}>
             {% if matchup.trades %}
-              <a href="{% url 'blingalytics.trade_finder' %}?receivers={{ matchup.team1.id }}&senders={{ matchup.team2.id }}">{{ matchup.trades|length }}</a>
+              <a href="{% url 'blingalytics.trade_finder' %}?receivers={{ matchup.team1.id }}&senders={{ matchup.team2.id }}&year_min={{ year_min }}&year_max={{ year_max }}">{{ matchup.trades|length }}</a>
             {% else %}
               0
             {% endif %}

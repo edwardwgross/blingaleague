@@ -160,6 +160,23 @@ def overall_pick_with_reversal(round, pick_in_round, picks_per_round):
     return (round - 1) * picks_per_round + pick_in_round
 
 
+def format_year_range(year_min, year_max):
+    if year_min is not None and year_min < Season.min().year:
+        year_min = None
+
+    if year_max is not None and year_max > Season.max().year:
+        year_max = None
+
+    if year_min and year_max:
+        return "{}-{}".format(year_min, year_max)
+    elif year_min:
+        return "{}-present".format(year_min)
+    elif year_max:
+        return "through {}".format(year_max)
+    else:
+        return None
+
+
 class ComparableObject(object):
 
     @property
@@ -3873,16 +3890,19 @@ class Week(ComparableObject):
 
 class Matchup(object):
 
-    def __init__(self, team1_id, team2_id, year_min=None):
+    def __init__(self, team1_id, team2_id, year_min=None, year_max=None):
         self.team1 = Member.objects.get(id=team1_id)
         self.team2 = Member.objects.get(id=team2_id)
 
-        if year_min is None:
-            year_min = Season.min().year
-
         self.year_min = year_min
+        if self.year_min is not None and self.year_min < Season.min().year:
+            self.year_min = None
 
-        self.cache_key = "{}|{}|{}".format(team1_id, team2_id, year_min)
+        self.year_max = year_max
+        if self.year_max is not None and self.year_max > Season.max().year:
+            self.year_max = None
+
+        self.cache_key = "{}|{}|{}|{}".format(team1_id, team2_id, year_min, year_max)
 
     @fully_cached_property
     def games(self):
@@ -3891,19 +3911,33 @@ class Matchup(object):
 
     @fully_cached_property
     def team1_wins(self):
-        return list(Game.objects.filter(
+        games = Game.objects.filter(
             winner=self.team1,
             loser=self.team2,
-            year__gte=self.year_min,
-        ))
+        )
+
+        if self.year_min:
+            games = games.filter(year__gte=self.year_min)
+
+        if self.year_max:
+            games = games.filter(year__lte=self.year_max)
+
+        return list(games)
 
     @fully_cached_property
     def team2_wins(self):
-        return list(Game.objects.filter(
+        games = Game.objects.filter(
             winner=self.team2,
             loser=self.team1,
-            year__gte=self.year_min,
-        ))
+        )
+
+        if self.year_min:
+            games = games.filter(year__gte=self.year_min)
+
+        if self.year_max:
+            games = games.filter(year__lte=self.year_max)
+
+        return list(games)
 
     @fully_cached_property
     def team1_win_count(self):
@@ -3921,10 +3955,14 @@ class Matchup(object):
     def trades(self):
         trades = set()
 
-        traded_assets = TradedAsset.objects.filter(
-            receiver=self.team1,
-            trade__year__gte=self.year_min,
-        )
+        traded_assets = TradedAsset.objects.filter(receiver=self.team1)
+
+        if self.year_min:
+            traded_assets = traded_assets.filter(trade__year__gte=self.year_min)
+
+        if self.year_max:
+            traded_assets = traded_assets.filter(trade__year__lte=self.year_max)
+
         for asset in traded_assets:
             if self.team2.id in asset.trade.team_ids:
                 trades.add(asset.trade)
@@ -3979,17 +4017,33 @@ class Matchup(object):
 
     @fully_cached_property
     def href(self):
-        return urlresolvers.reverse_lazy(
+        matchup_href = urlresolvers.reverse_lazy(
             'blingaleague.matchup',
             args=(self.team1.id, self.team2.id),
         )
 
+        year_kwargs = []
+
+        if self.year_min:
+            year_kwargs.append("year_min={}".format(self.year_min))
+
+        if self.year_max:
+            year_kwargs.append("year_max={}".format(self.year_max))
+
+        if year_kwargs:
+            matchup_href = "{}?{}".format(
+                matchup_href,
+                '&'.join(year_kwargs),
+            )
+
+        return matchup_href
+
     @classmethod
-    def get_all_for_team(cls, team1_id, year_min=None):
+    def get_all_for_team(cls, team1_id, year_min=None, year_max=None):
         team2_id_list = Member.objects.all().order_by(
             'defunct', 'nickname',
         ).values_list('id', flat=True)
-        return [cls(team1_id, team2_id, year_min=year_min) for team2_id in team2_id_list]
+        return [cls(team1_id, team2_id, year_min=year_min, year_max=year_max) for team2_id in team2_id_list]
 
     @classmethod
     def all(cls, year_min=None):
@@ -4005,7 +4059,13 @@ class Matchup(object):
         return all_matchups
 
     def __str__(self):
-        return "{} vs. {}".format(self.team1, self.team2)
+        matchup_str = "{} vs. {}".format(self.team1, self.team2)
+
+        year_range_str = format_year_range(self.year_min, self.year_max)
+        if year_range_str:
+            matchup_str = "{} ({})".format(matchup_str, year_range_str)
+
+        return matchup_str
 
     def __repr__(self):
         return str(self)

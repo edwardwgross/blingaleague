@@ -12,7 +12,8 @@ from slugify import slugify
 from blingaleague.models import Game, Week, Member, TeamSeason, TeamMultiSeasons, \
                                 Season, Matchup, Trade, Keeper, DraftPick, Player, \
                                 OUTCOME_WIN, OUTCOME_LOSS, \
-                                position_sort_key, calculate_expected_wins
+                                position_sort_key, calculate_expected_wins, \
+                                format_year_range
 from blingaleague.utils import scatter_graph_html, regular_season_weeks
 
 from .forms import CHOICE_YES, CHOICE_NO, \
@@ -1166,6 +1167,15 @@ class TeamVsTeamView(TemplateView):
         except (ValueError, TypeError):
             year_min_arg = None
 
+        year_max_arg = None
+        try:
+            year_max_arg = int(request.GET.get('year_max', None))
+
+            if not (Season.min().year <= year_max_arg <= Season.max().year):
+                year_max_arg = None
+        except (ValueError, TypeError):
+            year_max_arg = None
+
         teams = Member.objects.all().order_by('defunct', 'nickname')
 
         grid = [{
@@ -1173,10 +1183,17 @@ class TeamVsTeamView(TemplateView):
             'matchups': Matchup.get_all_for_team(
                 team.id,
                 year_min=year_min_arg,
+                year_max=year_max_arg,
             ),
         } for team in teams]
 
-        context = {'grid': grid, 'teams': teams, 'year_min': year_min_arg}
+        context = {
+            'grid': grid,
+            'teams': teams,
+            'year_min': year_min_arg,
+            'year_max': year_max_arg,
+            'year_range_str': format_year_range(year_min_arg, year_max_arg),
+        }
 
         return self.render_to_response(context)
 

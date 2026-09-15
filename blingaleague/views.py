@@ -191,7 +191,33 @@ class MatchupView(GamesView):
     )
 
     def get(self, request, team1, team2):
-        context = self._context(Matchup(team1, team2))
+        year_min_arg = None
+        try:
+            year_min_arg = int(request.GET.get('year_min', None))
+
+            if not (Season.min().year <= year_min_arg <= Season.max().year):
+                year_min_arg = None
+        except (ValueError, TypeError):
+            year_min_arg = None
+
+        year_max_arg = None
+        try:
+            year_max_arg = int(request.GET.get('year_max', None))
+
+            if not (Season.min().year <= year_max_arg <= Season.max().year):
+                year_max_arg = None
+        except (ValueError, TypeError):
+            year_max_arg = None
+
+        context = self._context(
+            Matchup(
+                team1,
+                team2,
+                year_min=year_min_arg,
+                year_max=year_max_arg,
+            ),
+        )
+
         return self.render_to_response(context)
 
 
