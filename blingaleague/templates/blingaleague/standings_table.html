@@ -1,6 +1,6 @@
 <table class="standings_table sortable">
   <tr>{% include "blingaleague/standings_table_header.html" %}</tr>
   {% for team_season in season.standings_table %}
-    <tr>{% include "blingaleague/standings_table_row.html" %}</tr>
+    <tr {% if team_season.champion and not week_max %}class="champion"{% endif %}>{% include "blingaleague/standings_table_row.html" %}</tr>
   {% endfor %}
 </table>

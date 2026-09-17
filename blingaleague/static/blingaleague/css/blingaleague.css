@@ -296,6 +296,10 @@ table.standings_table td {
     text-align: right;  /* by default, since these are mostly numbers */
 }
 
+table.standings_table tr.champion {
+    font-weight: bold;
+}
+
 .transactions td {
     white-space: nowrap;
     vertical-align: top;
