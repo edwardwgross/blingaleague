@@ -280,10 +280,11 @@ def blingalytics_ratings_section(season):
     ratings_rows = []
     for i, team_season in enumerate(expected_wins_ranking, 1):
         ratings_rows.append(
-            "{}. {}, {:.0f}".format(
+            "{}. {}, {:.0f} ({})".format(
                 i,
                 team_season.team.nickname,
                 1000 * team_season.expected_win_pct,
+                team_season.record,
             ),
         )
 
