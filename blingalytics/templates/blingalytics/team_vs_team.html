@@ -52,7 +52,7 @@
         {% else %}
           <td {% if matchup.team1.defunct or matchup.team2.defunct %}class="defunct"{% endif %}>
             {% if matchup.trades %}
-              <a href="{% url 'blingalytics.trade_finder' %}?receivers={{ matchup.team1.id }}&senders={{ matchup.team2.id }}&year_min={{ year_min }}&year_max={{ year_max }}">{{ matchup.trades|length }}</a>
+              <a href="{% url 'blingalytics.trade_finder' %}?receivers={{ matchup.team1.id }}&senders={{ matchup.team2.id }}{% if year_min %}&year_min={{ year_min }}{% endif %}{% if year_max %}&year_max={{ year_max }}{% endif %}">{{ matchup.trades|length }}</a>
             {% else %}
               0
             {% endif %}
