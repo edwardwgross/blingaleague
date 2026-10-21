@@ -9,7 +9,12 @@
       <h2>{{ subheading }}</h2>
     {% endfor %}
   {% else %}
-    <h2><a href="{{ season.href }}">{{ season.year}} Season</a></h2>
+    <h2>
+      <a href="{{ season.href }}">{{ season.year}} Season</a>
+      {% if season.weeks_with_games %}
+        <a style="font-style:italic; font-size:60%" href="{{ season.draft.href }}">[Draft]</a>
+      {% endif %}
+    </h2>
   {% endif %}
 
   {% if season.playoff_bracket %}
