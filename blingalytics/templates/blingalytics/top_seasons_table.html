@@ -15,7 +15,7 @@
   {% for row in top_seasons_table.rows %}
     <tr>
       <td>{{ row.rank }}</td>
-      <td {% if row.team_season.is_current_season %}class="emphasize"{% endif %} style="text-align:left; width: auto">
+      <td {% if row.team_season.is_current_season %}class="current_season"{% endif %} style="text-align:left; width: auto">
         <a href="{{ row.team_season.season_object.href }}">{{ row.team_season.year }}</a>
         <a href="{{ row.team_season.href }}">{{ row.team_season.team.nickname }}</a>
         {% if row.team_season.is_partial %}

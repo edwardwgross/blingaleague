@@ -58,8 +58,12 @@ table.blingalytics_table.sortable tbody tr::before {
     width: 50px;
 }
 
-#top_seasons .emphasize small {
-    font-style: normal;
+#top_seasons .current_season {
+    font-weight: bold;
+}
+
+#top_seasons .current_season small {
+    font-weight: normal;
 }
 
 .blingalytics th,
