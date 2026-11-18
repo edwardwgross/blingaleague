@@ -1058,9 +1058,18 @@ class TeamSeason(ComparableObject):
 
         return outcome_sequence
 
-    def week_outcome(self, week):
+    def week_outcome(self, week, year=None):
+        if year is not None and year != self.year:
+            raise ValueError(
+                "Year given ({}) does not match TeamSeason year ({})".format(
+                    year,
+                    self.year,
+                ),
+            )
+
         if week < 1 or week > len(self.games):
             return None
+
         return self.outcome_sequence[week - 1]
 
     @fully_cached_property
@@ -1096,7 +1105,7 @@ class TeamSeason(ComparableObject):
         longest_streak = 0
         running_streak = 0
         for game in self.games:
-            outcome = self.week_outcome(game.week)
+            outcome = self.week_outcome(game.week, year=game.year)
             if outcome == outcome_to_match:
                 running_streak += 1
             else:
@@ -2492,6 +2501,13 @@ class TeamMultiSeasons(TeamSeason):
     @fully_cached_property
     def eliminated_bye_early(self):
         return self._any_season_true('eliminated_bye_early')
+
+    def week_outcome(self, week, year=None):
+        for team_season in self:
+            if team_season.year == year:
+                return team_season.week_outcome(week)
+
+        return None
 
     @fully_cached_property
     def trades(self):
